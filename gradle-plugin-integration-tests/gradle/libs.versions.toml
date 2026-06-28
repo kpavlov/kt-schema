@@ -3,7 +3,7 @@ dokka = "2.1.0"
 jackson = "2.18.5" # pin it
 junit = "6.1.0"
 kotest = "6.1.11"
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 kotlinxSerialization = "1.11.0"
 slf4j = "2.0.17"
 
