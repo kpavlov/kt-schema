@@ -4,13 +4,15 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(17)
+
     compilerOptions {
         freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
 }
 
 dependencies {
-    implementation(project(":kotlinx-schema-annotations"))
+    implementation(project(":kt-schema-annotations"))
     implementation(libs.kotlinx.serialization.json)
 
     // Third-party annotation libraries for testing description extraction
@@ -22,10 +24,10 @@ dependencies {
     testImplementation(libs.junit.pioneer)
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.kotest.assertions.json)
-    testImplementation(project(":kotlinx-schema-generator-json"))
+    testImplementation(project(":kt-schema-ksp-json"))
 
     // KSP processor
-    ksp(project(":kotlinx-schema-ksp"))
+    ksp(project(":kt-schema-ksp-processor"))
 }
 
 ksp {
