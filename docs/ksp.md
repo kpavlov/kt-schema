@@ -68,7 +68,7 @@ plugins {
 
 dependencies {
     ksp("me.kpavlov.kt.schemakt-schema-ksp:<version>")
-    implementation("me.kpavlov.kt.schemakt-schema-annotations:<version>")
+    implementation("me.kpavlov.kt.schema:kt-schema-annotations:<version>")
 }
 
 sourceSets.main.kotlin.srcDir("build/generated/ksp/main/kotlin")

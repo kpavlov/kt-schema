@@ -65,5 +65,5 @@ ksp {
 
 // Add KSP processor for common target
 dependencies {
-    add("kspCommonMainMetadata", "me.kpavlov.kt.schemakt-schema-ksp:$ktSchemaVersion")
+    add("kspCommonMainMetadata", "me.kpavlov.kt.schema:kt-schema-ksp:$ktSchemaVersion")
 }

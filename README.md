@@ -211,8 +211,8 @@ plugins {
 }
 
 dependencies {
-    add("kspCommonMainMetadata", "me.kpavlov.kt.schemakt-schema-ksp:<version>")
-    implementation("me.kpavlov.kt.schemakt-schema-annotations:<version>")
+    add("kspCommonMainMetadata", "me.kpavlov.kt.schema:kt-schema-ksp:<version>")
+    implementation("me.kpavlov.kt.schema:kt-schema-annotations:<version>")
 }
 
 kotlin {
@@ -273,7 +273,7 @@ val schemaString: String = generator.generateSchemaString(User::class)
 
 <!--- KNIT example-knit-readme-02.kt -->
 
-**Add dependency**: `me.kpavlov.kt.schemakt-schema-ksp-json:<version>`
+**Add dependency**: `me.kpavlov.kt.schema:kt-schema-ksp-json:<version>`
 
 ## What Gets Generated
 

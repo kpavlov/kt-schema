@@ -139,7 +139,7 @@ ksp {
 }
 
 dependencies {
-    add("kspCommonMainMetadata", "me.kpavlov.kt.schemakt-schema-ksp:$version")
+    add("kspCommonMainMetadata", "me.kpavlov.kt.schema:kt-schema-ksp:$version")
 }
 ```
 
