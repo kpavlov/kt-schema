@@ -1,6 +1,6 @@
-# Kotlinx-schema Examples
+# kt-schema Examples
 
-This directory contains example projects demonstrating various use cases of **kotlinx-schema**.
+This directory contains example projects demonstrating various use cases of **kt-schema**.
 
 - **[gradle-google-ksp](gradle-google-ksp):**  Generate JSON schema from Kotlin classes 
     using [Kotlin Symbol Processing (KSP)](https://kotlinlang.org/docs/ksp-overview.html) 

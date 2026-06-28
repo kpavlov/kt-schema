@@ -1,4 +1,4 @@
-# Module kotlinx-schema-annotations
+# Module kt-schema-annotations
 
 Core annotations for marking classes and functions for schema generation.
 
@@ -6,9 +6,9 @@ Core annotations for marking classes and functions for schema generation.
 
 ## Annotations
 
-- [@Schema][kotlinx.schema.Schema] - marks declarations for schema generation. Recognized by compile-time KSP generator.
-- [@Description][kotlinx.schema.Description] - adds human-readable descriptions to schemas
-- [@SchemaIgnore][kotlinx.schema.SchemaIgnore] - excludes a class (e.g., sealed subtype) from schema generation
+- [@Schema][me.kpavlov.kt.schema.Schema] - marks declarations for schema generation. Recognized by compile-time KSP generator.
+- [@Description][me.kpavlov.kt.schema.Description] - adds human-readable descriptions to schemas
+- [@SchemaIgnore][me.kpavlov.kt.schema.SchemaIgnore] - excludes a class (e.g., sealed subtype) from schema generation
 
 ## Example
 
@@ -21,6 +21,6 @@ data class User(
 )
 ```
 
-# Package kotlinx.schema
+# Package me.kpavlov.kt.schema
 
 Core annotations for JSON Schema generation.

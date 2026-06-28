@@ -12,7 +12,7 @@ import kotlin.jvm.JvmStatic
  * for descriptions, ignore markers, and name overrides.
  *
  * This object provides a configurable mechanism for recognizing annotations from
- * multiple frameworks (kotlinx-schema, Jackson, LangChain4j, Koog, kotlinx.serialization, etc.)
+ * multiple frameworks (kt-schema, Jackson, LangChain4j, Koog, kotlinx.serialization, etc.)
  * Configuration is loaded from `kt-schema.properties` on the classpath.
  *
  * ## Annotation name matching

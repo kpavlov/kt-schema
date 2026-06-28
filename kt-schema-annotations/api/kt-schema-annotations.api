@@ -1,0 +1,12 @@
+public abstract interface annotation class me/kpavlov/kt/schema/Description : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public abstract interface annotation class me/kpavlov/kt/schema/Schema : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
+	public abstract fun withSchemaObject ()Z
+}
+
+public abstract interface annotation class me/kpavlov/kt/schema/SchemaIgnore : java/lang/annotation/Annotation {
+}
+

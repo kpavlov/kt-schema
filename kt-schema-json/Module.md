@@ -1,4 +1,4 @@
-# Module kotlinx-schema-json
+# Module kt-schema-json
 
 Type-safe JSON Schema models and DSL compliant with [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/schema).
 
@@ -8,8 +8,8 @@ Provides Kotlin models for programmatic JSON Schema construction with full kotli
 
 ## Key Classes
 
-- [JsonSchema][kotlinx.schema.json.JsonSchema] - root schema model with type-safe property definitions
-- [FunctionCallingSchema][kotlinx.schema.json.FunctionCallingSchema] - OpenAI/Anthropic function calling format
+- [JsonSchema][me.kpavlov.kt.schema.json.JsonSchema] - root schema model with type-safe property definitions
+- [FunctionCallingSchema][me.kpavlov.kt.schema.json.FunctionCallingSchema] - OpenAI/Anthropic function calling format
 - DSL builders - fluent API for schema construction
 
 ## Example
@@ -46,10 +46,10 @@ val schema = jsonSchema {
 - [OpenAI Function Calling](https://platform.openai.com/docs/guides/function-calling)
 - [Anthropic Structured Outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
 
-# Package kotlinx.schema.json
+# Package me.kpavlov.kt.schema.json
 
 JSON Schema models, DSL builders, and function calling schema support.
 
-# Package kotlinx.schema.json.serializers
+# Package me.kpavlov.kt.schema.json.serializers
 
 Kotlinx-serialization serializers for JSON Schema types.

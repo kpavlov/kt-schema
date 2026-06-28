@@ -64,7 +64,7 @@ internal actual object Config {
      * Ordered list of lowercase annotation simple names recognized as description providers.
      *
      * Annotations are matched case-insensitively by their simple name only (not fully qualified name).
-     * This allows recognition of description annotations from multiple frameworks (kotlinx-schema,
+     * This allows recognition of description annotations from multiple frameworks (kt-schema,
      * Jackson, LangChain4j, Koog, etc.) without requiring specific imports.
      *
      * Loaded lazily from the `introspector.annotations.description.names` property in

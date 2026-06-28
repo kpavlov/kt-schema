@@ -1,4 +1,4 @@
-# kotlinx-schema-json
+# kt-schema-json
 
 **Table of contents:**
 <!--- TOC -->
@@ -38,24 +38,24 @@ Type-safe Kotlin models and DSL for [JSON Schema Draft 2020-12](https://json-sch
 
 ## Installation
 
-For JVM-only projects use [kotlinx-schema-json-jvm](https://central.sonatype.com/artifact/org.jetbrains.kotlinx/kotlinx-schema-json-jvm).
+For JVM-only projects use the JVM artifact.
 <details>
 <summary>Gradle dependency</summary>
 
 ```kotlin
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-schema-json:$version")
+    implementation("me.kpavlov:kt-schema-json:$version")
 }
 ```
 </details>
 
-For Multiplatform projects use [kotlinx-schema-json](https://central.sonatype.com/artifact/org.jetbrains.kotlinx/kotlinx-schema-json).
+For Multiplatform projects use [kt-schema-json](https://central.sonatype.com/search?q=me.kpavlov%2Fkt-schema-json).
 
 Define schemas with Kotlin DSL:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.json.*
+import me.kpavlov.kt.schema.json.*
 import kotlinx.serialization.json.Json
 
 fun main() {
@@ -93,7 +93,7 @@ This example demonstrates all major DSL features:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.json.*
+import me.kpavlov.kt.schema.json.*
 import kotlinx.serialization.json.Json
 
 fun main() {
@@ -403,7 +403,7 @@ Serialization result:
 
 </details>
 
-Check [kotlinx-schema-json API Reference](https://kotlin.github.io/kotlinx-schema/kotlinx-schema-json/) for details.
+Check the API documentation for details.
 
 ## Function Calling Schema for LLM APIs
 
@@ -411,7 +411,7 @@ For LLM function calling (OpenAI, Anthropic), use `FunctionCallingSchema`:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.json.*
+import me.kpavlov.kt.schema.json.*
 import kotlinx.serialization.json.Json
 
 fun main() {
@@ -481,18 +481,18 @@ Produces function schema serializable as JSON:
 - `additionalProperties = false` by default
 - `strict = true` enables [OpenAI Strict Mode](https://platform.openai.com/docs/guides/function-calling#strict-mode)
 
-**Tests:** [FunctionCallingSchemaTest](src/commonTest/kotlin/kotlinx/schema/json/FunctionCallingSchemaTest.kt)
+**Tests:** [FunctionCallingSchemaTest](src/commonTest/kotlin/me/kpavlov/kt/schema/json/FunctionCallingSchemaTest.kt)
 
 ### Runtime Generation from Functions
 
-For runtime schema generation from Kotlin functions, use `ReflectionFunctionCallingSchemaGenerator` from the `kotlinx-schema-generator-json` module:
+For runtime schema generation from Kotlin functions, use `ReflectionFunctionCallingSchemaGenerator` from the `kt-schema-ksp-json` module:
 
 <!--- CLEAR -->
 <!--- INCLUDE
 import kotlinx.serialization.json.Json
-import kotlinx.schema.Description
-import kotlinx.schema.generator.json.ReflectionFunctionCallingSchemaGenerator
+import me.kpavlov.kt.schema.Description
 
+import me.kpavlov.kt.schema.generator.json.ReflectionFunctionCallingSchemaGenerator
 data class User(val name: String)
 -->
 ```kotlin
@@ -548,7 +548,7 @@ Produces function schema serializable as JSON:
 
 ## Conformance Testing
 
-kotlinx-schema-json aims for full conformance with JSON Schema Draft 2020-12. 
+kt-schema-json aims for full conformance with JSON Schema Draft 2020-12.
 We run tests against the official [JSON Schema Test Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite).
 
-**See:** [JsonSchemaConformanceTest](src/commonTest/kotlin/kotlinx/schema/json/conformance/JsonSchemaConformanceTest.kt)
+**See:** [JsonSchemaConformanceTest](src/commonTest/kotlin/me/kpavlov/kt/schema/json/conformance/JsonSchemaConformanceTest.kt)

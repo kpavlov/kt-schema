@@ -1452,12 +1452,20 @@ sure you read and adhere to it.
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-### Attribution
-
-kt-schema is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema) by JetBrains s.r.o.,
-licensed under the Apache License 2.0. This project includes modified and unmodified portions of the
-original work; notably, the package and Maven coordinates have been renamed from `kotlinx.schema` to
-`me.kpavlov.kt.schema` / `me.kpavlov`. See the [NOTICE](NOTICE) file for required attribution notices.
-
-kt-schema is an independent project and is not affiliated with, endorsed by, or sponsored by JetBrains.
-"Kotlin" and "JetBrains" are trademarks of their respective owners.
+> [!NOTICE]
+>
+> ### Attribution
+>
+> 
+> **kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema), , originally developed by JetBrains s.r.o. and contributors, 
+> and is licensed under the Apache License, Version 2.0.
+> 
+> This project contains modified and unmodified portions of the original work. 
+> Notable changes include renaming the Kotlin packages from `kotlinx.schema` to `me.kpavlov.kt.schema`, 
+> renaming Maven coordinates from `org.jetbrains.kotlinx` to `me.kpavlov`, and further independent development.
+> 
+> See the [LICENSE](LICENSE) and [NOTICE]() files for licensing and attribution information.
+>
+> **kt-schema** is an independent project and is not affiliated with, endorsed by, or sponsored by JetBrains.
+> "Kotlin" and "JetBrains" are trademarks of their respective owners.
+>
