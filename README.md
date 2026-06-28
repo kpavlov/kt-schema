@@ -7,7 +7,6 @@
 [![Kotlin](https://img.shields.io/badge/kotlin-2.2+-blueviolet.svg?logo=kotlin)](http://kotlinlang.org)
 [![Kotlin Multiplatform](https://img.shields.io/badge/Platforms-%20JVM%20%7C%20Wasm%2FJS%20%7C%20Native%20-blueviolet?logo=kotlin)](https://kotlinlang.org/docs/multiplatform.html)
 [![JVM](https://img.shields.io/badge/JVM-17+-red.svg?logo=jvm)](http://java.com)
-[![License](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](LICENSE)
 
 **Table of contents:**
 <!--- TOC -->
@@ -212,8 +211,8 @@ plugins {
 }
 
 dependencies {
-    add("kspCommonMainMetadata", "me.kpavlov:kt-schema-ksp:<version>")
-    implementation("me.kpavlov:kt-schema-annotations:<version>")
+    add("kspCommonMainMetadata", "me.kpavlov.kt.schemakt-schema-ksp:<version>")
+    implementation("me.kpavlov.kt.schemakt-schema-annotations:<version>")
 }
 
 kotlin {
@@ -274,7 +273,7 @@ val schemaString: String = generator.generateSchemaString(User::class)
 
 <!--- KNIT example-knit-readme-02.kt -->
 
-**Add dependency**: `me.kpavlov:kt-schema-ksp-json:<version>`
+**Add dependency**: `me.kpavlov.kt.schemakt-schema-ksp-json:<version>`
 
 ## What Gets Generated
 
@@ -1365,7 +1364,7 @@ and a DSL for building JSON Schema definitions programmatically, with full kotli
 
 ```kotlin
 dependencies {
-    implementation("me.kpavlov:kt-schema-json:<version>")
+    implementation("me.kpavlov.kt.schemakt-schema-json:<version>")
 }
 ```
 
@@ -1452,12 +1451,19 @@ sure you read and adhere to it.
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-### Attribution
-
-kt-schema is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema) by JetBrains s.r.o.,
-licensed under the Apache License 2.0. This project includes modified and unmodified portions of the
-original work; notably, the package and Maven coordinates have been renamed from `kotlinx.schema` to
-`me.kpavlov.kt.schema` / `me.kpavlov`. See the [NOTICE](NOTICE) file for required attribution notices.
-
-kt-schema is an independent project and is not affiliated with, endorsed by, or sponsored by JetBrains.
-"Kotlin" and "JetBrains" are trademarks of their respective owners.
+> [!NOTE]
+>
+> ### Attribution
+> 
+> **kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema), , originally developed by JetBrains s.r.o. and contributors, 
+> and is licensed under the Apache License, Version 2.0.
+> 
+> This project contains modified and unmodified portions of the original work. 
+> Notable changes include renaming the Kotlin packages from `kotlinx.schema` to `me.kpavlov.kt.schema`, 
+> renaming Maven coordinates from `org.jetbrains.kotlinx` to `me.kpavlov`, and further independent development.
+> 
+> See the [LICENSE](LICENSE) and [NOTICE]() files for licensing and attribution information.
+>
+> **kt-schema** is an independent project and is not affiliated with, endorsed by, or sponsored by JetBrains.
+> "Kotlin" and "JetBrains" are trademarks of their respective owners.
+>

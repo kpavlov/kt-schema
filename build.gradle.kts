@@ -9,7 +9,7 @@ plugins {
 
 dependencies {
     kover(project(":kt-schema-annotations"))
-    kover(project(":kt-schema-ksp"))
+    "kover"(project(":kt-schema-generator-core"))
     kover(project(":kt-schema-ksp-json"))
     kover(project(":kt-schema-json"))
 }

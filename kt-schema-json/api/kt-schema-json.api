@@ -1,0 +1,2064 @@
+public abstract interface class me/kpavlov/kt/schema/json/AdditionalPropertiesConstraint {
+	public static final field Companion Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint$Companion;
+}
+
+public final class me/kpavlov/kt/schema/json/AdditionalPropertiesConstraint$Companion {
+	public final fun allow ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public final fun deny ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public final fun schema (Lme/kpavlov/kt/schema/json/PropertyDefinition;)Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/AdditionalPropertiesSchema : me/kpavlov/kt/schema/json/AdditionalPropertiesConstraint {
+	public static final field Companion Lme/kpavlov/kt/schema/json/AdditionalPropertiesSchema$Companion;
+	public fun <init> (Lme/kpavlov/kt/schema/json/PropertyDefinition;)V
+	public final fun component1 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun copy (Lme/kpavlov/kt/schema/json/PropertyDefinition;)Lme/kpavlov/kt/schema/json/AdditionalPropertiesSchema;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/AdditionalPropertiesSchema;Lme/kpavlov/kt/schema/json/PropertyDefinition;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/AdditionalPropertiesSchema;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/AdditionalPropertiesSchema$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/AdditionalPropertiesSchema$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/AdditionalPropertiesSchema;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/AdditionalPropertiesSchema;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/AdditionalPropertiesSchema$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/AllOfPropertyBuilder : me/kpavlov/kt/schema/json/PolymorphicOptionsCollector {
+	public fun addOption (Lme/kpavlov/kt/schema/json/PropertyDefinition;)V
+	public final fun build ()Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun setDescription (Ljava/lang/String;)V
+}
+
+public final class me/kpavlov/kt/schema/json/AllOfPropertyDefinition : me/kpavlov/kt/schema/json/ApplicatorContainer, me/kpavlov/kt/schema/json/CommonSchemaAttributes, me/kpavlov/kt/schema/json/GeneralConstraints, me/kpavlov/kt/schema/json/PropertyDefinition {
+	public static final field Companion Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition$Companion;
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun allOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public fun anyOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public fun arrayProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public fun booleanProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public fun booleanSchemaProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;
+	public final fun component1 ()Ljava/util/List;
+	public final fun component10 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component11 ()Ljava/util/List;
+	public final fun component12 ()Ljava/util/Map;
+	public final fun component13 ()Ljava/lang/Boolean;
+	public final fun component14 ()Ljava/lang/Boolean;
+	public final fun component15 ()Ljava/lang/Boolean;
+	public final fun component16 ()Ljava/util/List;
+	public final fun component17 ()Ljava/util/List;
+	public final fun component18 ()Ljava/util/List;
+	public final fun component19 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component21 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component22 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component23 ()Ljava/util/List;
+	public final fun component24 ()Ljava/lang/Integer;
+	public final fun component25 ()Ljava/lang/Integer;
+	public final fun component26 ()Ljava/lang/String;
+	public final fun component27 ()Ljava/lang/String;
+	public final fun component28 ()Ljava/lang/String;
+	public final fun component29 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component30 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component31 ()Ljava/lang/Double;
+	public final fun component32 ()Ljava/lang/Double;
+	public final fun component33 ()Ljava/lang/Double;
+	public final fun component34 ()Ljava/lang/Double;
+	public final fun component35 ()Ljava/lang/Double;
+	public final fun component36 ()Ljava/util/Map;
+	public final fun component37 ()Ljava/util/Map;
+	public final fun component38 ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public final fun component39 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component40 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component41 ()Ljava/util/List;
+	public final fun component42 ()Ljava/util/Map;
+	public final fun component43 ()Ljava/util/Map;
+	public final fun component44 ()Ljava/lang/Integer;
+	public final fun component45 ()Ljava/lang/Integer;
+	public final fun component46 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component47 ()Ljava/util/List;
+	public final fun component48 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component49 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component50 ()Ljava/lang/Integer;
+	public final fun component51 ()Ljava/lang/Integer;
+	public final fun component52 ()Ljava/lang/Integer;
+	public final fun component53 ()Ljava/lang/Integer;
+	public final fun component54 ()Ljava/lang/Boolean;
+	public final fun component55 ()Ljava/lang/String;
+	public final fun component56 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/Boolean;
+	public final fun component9 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;IILjava/lang/Object;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAdditionalProperties ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public fun getAllOf ()Ljava/util/List;
+	public fun getAnchor ()Ljava/lang/String;
+	public fun getAnyOf ()Ljava/util/List;
+	public fun getComment ()Ljava/lang/String;
+	public fun getConstValue ()Lkotlinx/serialization/json/JsonElement;
+	public fun getContains ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getContentEncoding ()Ljava/lang/String;
+	public fun getContentMediaType ()Ljava/lang/String;
+	public fun getContentSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getDefault ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefs ()Ljava/util/Map;
+	public fun getDependentRequired ()Ljava/util/Map;
+	public fun getDependentSchemas ()Ljava/util/Map;
+	public fun getDeprecated ()Ljava/lang/Boolean;
+	public fun getDescription ()Ljava/lang/String;
+	public fun getDynamicAnchor ()Ljava/lang/String;
+	public fun getDynamicRef ()Ljava/lang/String;
+	public fun getElseSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun getEnum ()Ljava/util/List;
+	public fun getExamples ()Ljava/util/List;
+	public fun getExclusiveMaximum ()Ljava/lang/Double;
+	public fun getExclusiveMinimum ()Ljava/lang/Double;
+	public fun getFormat ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
+	public fun getIfSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getMaxContains ()Ljava/lang/Integer;
+	public fun getMaxItems ()Ljava/lang/Integer;
+	public fun getMaxLength ()Ljava/lang/Integer;
+	public fun getMaxProperties ()Ljava/lang/Integer;
+	public fun getMaximum ()Ljava/lang/Double;
+	public fun getMinContains ()Ljava/lang/Integer;
+	public fun getMinItems ()Ljava/lang/Integer;
+	public fun getMinLength ()Ljava/lang/Integer;
+	public fun getMinProperties ()Ljava/lang/Integer;
+	public fun getMinimum ()Ljava/lang/Double;
+	public fun getMultipleOf ()Ljava/lang/Double;
+	public fun getNot ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getNullable ()Ljava/lang/Boolean;
+	public fun getOneOf ()Ljava/util/List;
+	public fun getPattern ()Ljava/lang/String;
+	public fun getPatternProperties ()Ljava/util/Map;
+	public fun getPrefixItems ()Ljava/util/List;
+	public fun getProperties ()Ljava/util/Map;
+	public fun getPropertyNames ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getReadOnly ()Ljava/lang/Boolean;
+	public fun getRef ()Ljava/lang/String;
+	public fun getRequired ()Ljava/util/List;
+	public fun getThenSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getTitle ()Ljava/lang/String;
+	public fun getType ()Ljava/util/List;
+	public fun getUnevaluatedItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getUnevaluatedProperties ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getUniqueItems ()Ljava/lang/Boolean;
+	public fun getWriteOnly ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun numericProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public fun objectProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public fun oneOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public fun referenceProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public fun stringProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/AllOfPropertyDefinition$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/AllOfPropertyDefinition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/AllowAdditionalProperties : me/kpavlov/kt/schema/json/AdditionalPropertiesConstraint {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/AllowAdditionalProperties;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/json/AnyOfPropertyBuilder : me/kpavlov/kt/schema/json/PolymorphicOptionsCollector {
+	public fun addOption (Lme/kpavlov/kt/schema/json/PropertyDefinition;)V
+	public final fun build ()Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun setDescription (Ljava/lang/String;)V
+}
+
+public final class me/kpavlov/kt/schema/json/AnyOfPropertyDefinition : me/kpavlov/kt/schema/json/ApplicatorContainer, me/kpavlov/kt/schema/json/CommonSchemaAttributes, me/kpavlov/kt/schema/json/GeneralConstraints, me/kpavlov/kt/schema/json/PropertyDefinition {
+	public static final field Companion Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition$Companion;
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun allOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public fun anyOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public fun arrayProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public fun booleanProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public fun booleanSchemaProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;
+	public final fun component1 ()Ljava/util/List;
+	public final fun component10 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component11 ()Ljava/util/List;
+	public final fun component12 ()Ljava/util/Map;
+	public final fun component13 ()Ljava/lang/Boolean;
+	public final fun component14 ()Ljava/lang/Boolean;
+	public final fun component15 ()Ljava/lang/Boolean;
+	public final fun component16 ()Ljava/util/List;
+	public final fun component17 ()Ljava/util/List;
+	public final fun component18 ()Ljava/util/List;
+	public final fun component19 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component21 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component22 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component23 ()Ljava/util/List;
+	public final fun component24 ()Ljava/lang/Integer;
+	public final fun component25 ()Ljava/lang/Integer;
+	public final fun component26 ()Ljava/lang/String;
+	public final fun component27 ()Ljava/lang/String;
+	public final fun component28 ()Ljava/lang/String;
+	public final fun component29 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component30 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component31 ()Ljava/lang/Double;
+	public final fun component32 ()Ljava/lang/Double;
+	public final fun component33 ()Ljava/lang/Double;
+	public final fun component34 ()Ljava/lang/Double;
+	public final fun component35 ()Ljava/lang/Double;
+	public final fun component36 ()Ljava/util/Map;
+	public final fun component37 ()Ljava/util/Map;
+	public final fun component38 ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public final fun component39 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component40 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component41 ()Ljava/util/List;
+	public final fun component42 ()Ljava/util/Map;
+	public final fun component43 ()Ljava/util/Map;
+	public final fun component44 ()Ljava/lang/Integer;
+	public final fun component45 ()Ljava/lang/Integer;
+	public final fun component46 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component47 ()Ljava/util/List;
+	public final fun component48 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component49 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component50 ()Ljava/lang/Integer;
+	public final fun component51 ()Ljava/lang/Integer;
+	public final fun component52 ()Ljava/lang/Integer;
+	public final fun component53 ()Ljava/lang/Integer;
+	public final fun component54 ()Ljava/lang/Boolean;
+	public final fun component55 ()Ljava/lang/String;
+	public final fun component56 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/Boolean;
+	public final fun component9 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;IILjava/lang/Object;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAdditionalProperties ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public fun getAllOf ()Ljava/util/List;
+	public fun getAnchor ()Ljava/lang/String;
+	public fun getAnyOf ()Ljava/util/List;
+	public fun getComment ()Ljava/lang/String;
+	public fun getConstValue ()Lkotlinx/serialization/json/JsonElement;
+	public fun getContains ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getContentEncoding ()Ljava/lang/String;
+	public fun getContentMediaType ()Ljava/lang/String;
+	public fun getContentSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getDefault ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefs ()Ljava/util/Map;
+	public fun getDependentRequired ()Ljava/util/Map;
+	public fun getDependentSchemas ()Ljava/util/Map;
+	public fun getDeprecated ()Ljava/lang/Boolean;
+	public fun getDescription ()Ljava/lang/String;
+	public fun getDynamicAnchor ()Ljava/lang/String;
+	public fun getDynamicRef ()Ljava/lang/String;
+	public fun getElseSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun getEnum ()Ljava/util/List;
+	public fun getExamples ()Ljava/util/List;
+	public fun getExclusiveMaximum ()Ljava/lang/Double;
+	public fun getExclusiveMinimum ()Ljava/lang/Double;
+	public fun getFormat ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
+	public fun getIfSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getMaxContains ()Ljava/lang/Integer;
+	public fun getMaxItems ()Ljava/lang/Integer;
+	public fun getMaxLength ()Ljava/lang/Integer;
+	public fun getMaxProperties ()Ljava/lang/Integer;
+	public fun getMaximum ()Ljava/lang/Double;
+	public fun getMinContains ()Ljava/lang/Integer;
+	public fun getMinItems ()Ljava/lang/Integer;
+	public fun getMinLength ()Ljava/lang/Integer;
+	public fun getMinProperties ()Ljava/lang/Integer;
+	public fun getMinimum ()Ljava/lang/Double;
+	public fun getMultipleOf ()Ljava/lang/Double;
+	public fun getNot ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getNullable ()Ljava/lang/Boolean;
+	public fun getOneOf ()Ljava/util/List;
+	public fun getPattern ()Ljava/lang/String;
+	public fun getPatternProperties ()Ljava/util/Map;
+	public fun getPrefixItems ()Ljava/util/List;
+	public fun getProperties ()Ljava/util/Map;
+	public fun getPropertyNames ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getReadOnly ()Ljava/lang/Boolean;
+	public fun getRef ()Ljava/lang/String;
+	public fun getRequired ()Ljava/util/List;
+	public fun getThenSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getTitle ()Ljava/lang/String;
+	public fun getType ()Ljava/util/List;
+	public fun getUnevaluatedItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getUnevaluatedProperties ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getUniqueItems ()Ljava/lang/Boolean;
+	public fun getWriteOnly ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun numericProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public fun objectProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public fun oneOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public fun referenceProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public fun stringProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/AnyOfPropertyDefinition$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/AnyOfPropertyDefinition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract interface class me/kpavlov/kt/schema/json/ApplicatorContainer {
+	public abstract fun getAllOf ()Ljava/util/List;
+	public abstract fun getAnyOf ()Ljava/util/List;
+	public abstract fun getElseSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public abstract fun getIfSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public abstract fun getNot ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public abstract fun getOneOf ()Ljava/util/List;
+	public abstract fun getThenSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+}
+
+public abstract interface class me/kpavlov/kt/schema/json/ArrayContainer {
+	public abstract fun getContains ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public abstract fun getItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public abstract fun getMaxContains ()Ljava/lang/Integer;
+	public abstract fun getMaxItems ()Ljava/lang/Integer;
+	public abstract fun getMinContains ()Ljava/lang/Integer;
+	public abstract fun getMinItems ()Ljava/lang/Integer;
+	public abstract fun getPrefixItems ()Ljava/util/List;
+	public abstract fun getUnevaluatedItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public abstract fun getUniqueItems ()Ljava/lang/Boolean;
+}
+
+public final class me/kpavlov/kt/schema/json/ArrayPropertyBuilder {
+	public final fun build ()Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public final fun getDefault ()Ljava/lang/Object;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getEnum ()Ljava/lang/Object;
+	public final fun getMaxItems ()Ljava/lang/Integer;
+	public final fun getMinItems ()Ljava/lang/Integer;
+	public final fun getNullable ()Ljava/lang/Boolean;
+	public final fun getType ()Ljava/util/List;
+	public final fun items (Lkotlin/jvm/functions/Function1;)V
+	public final fun ofArray (Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun ofArray$default (Lme/kpavlov/kt/schema/json/ArrayPropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun ofBoolean (Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun ofBoolean$default (Lme/kpavlov/kt/schema/json/ArrayPropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun ofInteger (Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun ofInteger$default (Lme/kpavlov/kt/schema/json/ArrayPropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun ofNumber (Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun ofNumber$default (Lme/kpavlov/kt/schema/json/ArrayPropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun ofObject (Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun ofObject$default (Lme/kpavlov/kt/schema/json/ArrayPropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun ofReference (Ljava/lang/String;)V
+	public final fun ofString (Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun ofString$default (Lme/kpavlov/kt/schema/json/ArrayPropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun setDefault (Ljava/lang/Object;)V
+	public final fun setDescription (Ljava/lang/String;)V
+	public final fun setEnum (Ljava/lang/Object;)V
+	public final fun setMaxItems (Ljava/lang/Integer;)V
+	public final fun setMinItems (Ljava/lang/Integer;)V
+	public final fun setNullable (Ljava/lang/Boolean;)V
+	public final fun setType (Ljava/util/List;)V
+}
+
+public final class me/kpavlov/kt/schema/json/ArrayPropertyDefinition : me/kpavlov/kt/schema/json/ArrayContainer, me/kpavlov/kt/schema/json/ValuePropertyDefinition {
+	public static final field Companion Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component10 ()Ljava/lang/Boolean;
+	public final fun component11 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component12 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component13 ()Ljava/util/Map;
+	public final fun component14 ()Ljava/lang/Boolean;
+	public final fun component15 ()Ljava/lang/Boolean;
+	public final fun component16 ()Ljava/lang/Boolean;
+	public final fun component17 ()Ljava/util/List;
+	public final fun component18 ()Ljava/util/List;
+	public final fun component19 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Ljava/util/List;
+	public final fun component21 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component22 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component23 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component24 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component25 ()Ljava/util/List;
+	public final fun component26 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component27 ()Ljava/util/List;
+	public final fun component28 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component29 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component30 ()Ljava/lang/Integer;
+	public final fun component31 ()Ljava/lang/Integer;
+	public final fun component32 ()Ljava/lang/Integer;
+	public final fun component33 ()Ljava/lang/Integer;
+	public final fun component34 ()Ljava/lang/Boolean;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;IILjava/lang/Object;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAllOf ()Ljava/util/List;
+	public fun getAnchor ()Ljava/lang/String;
+	public fun getAnyOf ()Ljava/util/List;
+	public fun getComment ()Ljava/lang/String;
+	public fun getConstValue ()Lkotlinx/serialization/json/JsonElement;
+	public fun getContains ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getDefault ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefs ()Ljava/util/Map;
+	public fun getDeprecated ()Ljava/lang/Boolean;
+	public fun getDescription ()Ljava/lang/String;
+	public fun getDynamicAnchor ()Ljava/lang/String;
+	public fun getDynamicRef ()Ljava/lang/String;
+	public fun getElseSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun getEnum ()Ljava/util/List;
+	public fun getExamples ()Ljava/util/List;
+	public fun getId ()Ljava/lang/String;
+	public fun getIfSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getMaxContains ()Ljava/lang/Integer;
+	public fun getMaxItems ()Ljava/lang/Integer;
+	public fun getMinContains ()Ljava/lang/Integer;
+	public fun getMinItems ()Ljava/lang/Integer;
+	public fun getNot ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getNullable ()Ljava/lang/Boolean;
+	public fun getOneOf ()Ljava/util/List;
+	public fun getPrefixItems ()Ljava/util/List;
+	public fun getReadOnly ()Ljava/lang/Boolean;
+	public fun getRef ()Ljava/lang/String;
+	public fun getThenSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getTitle ()Ljava/lang/String;
+	public fun getType ()Ljava/util/List;
+	public synthetic fun getTypedConst ()Ljava/lang/Object;
+	public fun getTypedConst ()Lkotlinx/serialization/json/JsonArray;
+	public synthetic fun getTypedDefault ()Ljava/lang/Object;
+	public fun getTypedDefault ()Lkotlinx/serialization/json/JsonArray;
+	public fun getUnevaluatedItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getUniqueItems ()Ljava/lang/Boolean;
+	public fun getWriteOnly ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/ArrayPropertyDefinition$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/ArrayPropertyDefinition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/BooleanPropertyBuilder {
+	public final fun build ()Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public final fun getConstValue ()Ljava/lang/Object;
+	public final fun getDefault ()Ljava/lang/Object;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getEnum ()Ljava/lang/Object;
+	public final fun getNullable ()Ljava/lang/Boolean;
+	public final fun getType ()Ljava/util/List;
+	public final fun setConstValue (Ljava/lang/Object;)V
+	public final fun setDefault (Ljava/lang/Object;)V
+	public final fun setDescription (Ljava/lang/String;)V
+	public final fun setEnum (Ljava/lang/Object;)V
+	public final fun setNullable (Ljava/lang/Boolean;)V
+	public final fun setType (Ljava/util/List;)V
+}
+
+public final class me/kpavlov/kt/schema/json/BooleanPropertyDefinition : me/kpavlov/kt/schema/json/ValuePropertyDefinition {
+	public static final field Companion Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component10 ()Ljava/lang/Boolean;
+	public final fun component11 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component12 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component13 ()Ljava/util/Map;
+	public final fun component14 ()Ljava/lang/Boolean;
+	public final fun component15 ()Ljava/lang/Boolean;
+	public final fun component16 ()Ljava/lang/Boolean;
+	public final fun component17 ()Ljava/util/List;
+	public final fun component18 ()Ljava/util/List;
+	public final fun component19 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Ljava/util/List;
+	public final fun component21 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component22 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component23 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component24 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component25 ()Ljava/util/List;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAllOf ()Ljava/util/List;
+	public fun getAnchor ()Ljava/lang/String;
+	public fun getAnyOf ()Ljava/util/List;
+	public fun getComment ()Ljava/lang/String;
+	public fun getConstValue ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefault ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefs ()Ljava/util/Map;
+	public fun getDeprecated ()Ljava/lang/Boolean;
+	public fun getDescription ()Ljava/lang/String;
+	public fun getDynamicAnchor ()Ljava/lang/String;
+	public fun getDynamicRef ()Ljava/lang/String;
+	public fun getElseSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun getEnum ()Ljava/util/List;
+	public fun getExamples ()Ljava/util/List;
+	public fun getId ()Ljava/lang/String;
+	public fun getIfSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getNot ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getNullable ()Ljava/lang/Boolean;
+	public fun getOneOf ()Ljava/util/List;
+	public fun getReadOnly ()Ljava/lang/Boolean;
+	public fun getRef ()Ljava/lang/String;
+	public fun getThenSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getTitle ()Ljava/lang/String;
+	public fun getType ()Ljava/util/List;
+	public fun getTypedConst ()Ljava/lang/Boolean;
+	public synthetic fun getTypedConst ()Ljava/lang/Object;
+	public fun getTypedDefault ()Ljava/lang/Boolean;
+	public synthetic fun getTypedDefault ()Ljava/lang/Object;
+	public fun getWriteOnly ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/BooleanPropertyDefinition$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/BooleanPropertyDefinition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/BooleanSchemaDefinition : me/kpavlov/kt/schema/json/PropertyDefinition {
+	public static final field Companion Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition$Companion;
+	public fun <init> (Z)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;ZILjava/lang/Object;)Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/BooleanSchemaDefinition$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/BooleanSchemaDefinition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract interface class me/kpavlov/kt/schema/json/CommonSchemaAttributes {
+	public abstract fun getAnchor ()Ljava/lang/String;
+	public abstract fun getComment ()Ljava/lang/String;
+	public abstract fun getConstValue ()Lkotlinx/serialization/json/JsonElement;
+	public abstract fun getDefault ()Lkotlinx/serialization/json/JsonElement;
+	public abstract fun getDefs ()Ljava/util/Map;
+	public abstract fun getDeprecated ()Ljava/lang/Boolean;
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun getDynamicAnchor ()Ljava/lang/String;
+	public abstract fun getDynamicRef ()Ljava/lang/String;
+	public abstract fun getExamples ()Ljava/util/List;
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun getNullable ()Ljava/lang/Boolean;
+	public abstract fun getReadOnly ()Ljava/lang/Boolean;
+	public abstract fun getRef ()Ljava/lang/String;
+	public abstract fun getTitle ()Ljava/lang/String;
+	public abstract fun getType ()Ljava/util/List;
+	public abstract fun getWriteOnly ()Ljava/lang/Boolean;
+}
+
+public final class me/kpavlov/kt/schema/json/DenyAdditionalProperties : me/kpavlov/kt/schema/json/AdditionalPropertiesConstraint {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/DenyAdditionalProperties;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/json/Discriminator {
+	public static final field Companion Lme/kpavlov/kt/schema/json/Discriminator$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Ljava/util/Map;)Lme/kpavlov/kt/schema/json/Discriminator;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/Discriminator;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/Discriminator;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMapping ()Ljava/util/Map;
+	public final fun getPropertyName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/Discriminator$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/Discriminator$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/Discriminator;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/Discriminator;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/Discriminator$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/DiscriminatorBuilder {
+	public final fun mappedTo (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun mappedTo (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class me/kpavlov/kt/schema/json/FunctionCallingSchema {
+	public static final field Companion Lme/kpavlov/kt/schema/json/FunctionCallingSchema$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/Boolean;
+	public final fun component6 ()Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;)Lme/kpavlov/kt/schema/json/FunctionCallingSchema;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/FunctionCallingSchema;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/FunctionCallingSchema;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getParameters ()Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public final fun getStrict ()Ljava/lang/Boolean;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/FunctionCallingSchema$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/FunctionCallingSchema$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/FunctionCallingSchema;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/FunctionCallingSchema;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/FunctionCallingSchema$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/FunctionCallingSchemaKt {
+	public static final fun encodeToJsonObject (Lme/kpavlov/kt/schema/json/FunctionCallingSchema;Lkotlinx/serialization/json/Json;)Lkotlinx/serialization/json/JsonObject;
+	public static synthetic fun encodeToJsonObject$default (Lme/kpavlov/kt/schema/json/FunctionCallingSchema;Lkotlinx/serialization/json/Json;ILjava/lang/Object;)Lkotlinx/serialization/json/JsonObject;
+	public static final fun encodeToString (Lme/kpavlov/kt/schema/json/FunctionCallingSchema;Lkotlinx/serialization/json/Json;)Ljava/lang/String;
+	public static synthetic fun encodeToString$default (Lme/kpavlov/kt/schema/json/FunctionCallingSchema;Lkotlinx/serialization/json/Json;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public abstract interface class me/kpavlov/kt/schema/json/GeneralConstraints : me/kpavlov/kt/schema/json/ArrayContainer, me/kpavlov/kt/schema/json/NumericConstraints, me/kpavlov/kt/schema/json/PropertiesContainer, me/kpavlov/kt/schema/json/StringConstraints {
+}
+
+public final class me/kpavlov/kt/schema/json/GeneralConstraints$DefaultImpls {
+	public static fun allOfProperty (Lme/kpavlov/kt/schema/json/GeneralConstraints;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public static fun anyOfProperty (Lme/kpavlov/kt/schema/json/GeneralConstraints;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public static fun arrayProperty (Lme/kpavlov/kt/schema/json/GeneralConstraints;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public static fun booleanProperty (Lme/kpavlov/kt/schema/json/GeneralConstraints;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public static fun booleanSchemaProperty (Lme/kpavlov/kt/schema/json/GeneralConstraints;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;
+	public static fun numericProperty (Lme/kpavlov/kt/schema/json/GeneralConstraints;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public static fun objectProperty (Lme/kpavlov/kt/schema/json/GeneralConstraints;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public static fun oneOfProperty (Lme/kpavlov/kt/schema/json/GeneralConstraints;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public static fun referenceProperty (Lme/kpavlov/kt/schema/json/GeneralConstraints;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public static fun stringProperty (Lme/kpavlov/kt/schema/json/GeneralConstraints;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+}
+
+public final class me/kpavlov/kt/schema/json/GenericPropertyBuilder {
+	public final fun build ()Lme/kpavlov/kt/schema/json/GenericPropertyDefinition;
+	public final fun getConstValue ()Ljava/lang/Object;
+	public final fun getDefault ()Ljava/lang/Object;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getEnum ()Ljava/lang/Object;
+	public final fun getNullable ()Ljava/lang/Boolean;
+	public final fun getType ()Ljava/util/List;
+	public final fun setConstValue (Ljava/lang/Object;)V
+	public final fun setDefault (Ljava/lang/Object;)V
+	public final fun setDescription (Ljava/lang/String;)V
+	public final fun setEnum (Ljava/lang/Object;)V
+	public final fun setNullable (Ljava/lang/Boolean;)V
+	public final fun setType (Ljava/util/List;)V
+}
+
+public final class me/kpavlov/kt/schema/json/GenericPropertyDefinition : me/kpavlov/kt/schema/json/GeneralConstraints, me/kpavlov/kt/schema/json/ValuePropertyDefinition {
+	public static final field Companion Lme/kpavlov/kt/schema/json/GenericPropertyDefinition$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun allOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public fun anyOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public fun arrayProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public fun booleanProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public fun booleanSchemaProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;
+	public final fun component1 ()Ljava/util/List;
+	public final fun component10 ()Ljava/lang/Boolean;
+	public final fun component11 ()Ljava/util/List;
+	public final fun component12 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component13 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component14 ()Ljava/util/Map;
+	public final fun component15 ()Ljava/lang/Boolean;
+	public final fun component16 ()Ljava/lang/Boolean;
+	public final fun component17 ()Ljava/lang/Boolean;
+	public final fun component18 ()Ljava/util/List;
+	public final fun component19 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Ljava/util/List;
+	public final fun component21 ()Ljava/util/List;
+	public final fun component22 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component23 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component24 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component25 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component26 ()Ljava/util/Map;
+	public final fun component27 ()Ljava/util/Map;
+	public final fun component28 ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public final fun component29 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component30 ()Ljava/util/List;
+	public final fun component31 ()Ljava/util/Map;
+	public final fun component32 ()Ljava/util/Map;
+	public final fun component33 ()Ljava/util/Map;
+	public final fun component34 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component35 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component36 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component37 ()Ljava/util/List;
+	public final fun component38 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component39 ()Ljava/lang/Integer;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component40 ()Ljava/lang/Integer;
+	public final fun component41 ()Ljava/lang/Integer;
+	public final fun component42 ()Ljava/lang/Integer;
+	public final fun component43 ()Ljava/lang/String;
+	public final fun component44 ()Ljava/lang/String;
+	public final fun component45 ()Ljava/lang/String;
+	public final fun component46 ()Ljava/lang/String;
+	public final fun component47 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component48 ()Ljava/lang/Double;
+	public final fun component49 ()Ljava/lang/Double;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component50 ()Ljava/lang/Double;
+	public final fun component51 ()Ljava/lang/Double;
+	public final fun component52 ()Ljava/lang/Double;
+	public final fun component53 ()Ljava/lang/Integer;
+	public final fun component54 ()Ljava/lang/Integer;
+	public final fun component55 ()Ljava/lang/Boolean;
+	public final fun component56 ()Ljava/lang/Integer;
+	public final fun component57 ()Ljava/lang/Integer;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;)Lme/kpavlov/kt/schema/json/GenericPropertyDefinition;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/GenericPropertyDefinition;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;IILjava/lang/Object;)Lme/kpavlov/kt/schema/json/GenericPropertyDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAdditionalProperties ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public fun getAllOf ()Ljava/util/List;
+	public fun getAnchor ()Ljava/lang/String;
+	public fun getAnyOf ()Ljava/util/List;
+	public fun getComment ()Ljava/lang/String;
+	public fun getConstValue ()Lkotlinx/serialization/json/JsonElement;
+	public fun getContains ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getContentEncoding ()Ljava/lang/String;
+	public fun getContentMediaType ()Ljava/lang/String;
+	public fun getContentSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getDefault ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefs ()Ljava/util/Map;
+	public final fun getDependencies ()Ljava/util/Map;
+	public fun getDependentRequired ()Ljava/util/Map;
+	public fun getDependentSchemas ()Ljava/util/Map;
+	public fun getDeprecated ()Ljava/lang/Boolean;
+	public fun getDescription ()Ljava/lang/String;
+	public fun getDynamicAnchor ()Ljava/lang/String;
+	public fun getDynamicRef ()Ljava/lang/String;
+	public fun getElseSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun getEnum ()Ljava/util/List;
+	public fun getExamples ()Ljava/util/List;
+	public fun getExclusiveMaximum ()Ljava/lang/Double;
+	public fun getExclusiveMinimum ()Ljava/lang/Double;
+	public fun getFormat ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
+	public fun getIfSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getMaxContains ()Ljava/lang/Integer;
+	public fun getMaxItems ()Ljava/lang/Integer;
+	public fun getMaxLength ()Ljava/lang/Integer;
+	public fun getMaxProperties ()Ljava/lang/Integer;
+	public fun getMaximum ()Ljava/lang/Double;
+	public fun getMinContains ()Ljava/lang/Integer;
+	public fun getMinItems ()Ljava/lang/Integer;
+	public fun getMinLength ()Ljava/lang/Integer;
+	public fun getMinProperties ()Ljava/lang/Integer;
+	public fun getMinimum ()Ljava/lang/Double;
+	public fun getMultipleOf ()Ljava/lang/Double;
+	public fun getNot ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getNullable ()Ljava/lang/Boolean;
+	public fun getOneOf ()Ljava/util/List;
+	public fun getPattern ()Ljava/lang/String;
+	public fun getPatternProperties ()Ljava/util/Map;
+	public fun getPrefixItems ()Ljava/util/List;
+	public fun getProperties ()Ljava/util/Map;
+	public fun getPropertyNames ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getReadOnly ()Ljava/lang/Boolean;
+	public fun getRef ()Ljava/lang/String;
+	public fun getRequired ()Ljava/util/List;
+	public fun getThenSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getTitle ()Ljava/lang/String;
+	public fun getType ()Ljava/util/List;
+	public synthetic fun getTypedConst ()Ljava/lang/Object;
+	public fun getTypedConst ()Lkotlinx/serialization/json/JsonElement;
+	public synthetic fun getTypedDefault ()Ljava/lang/Object;
+	public fun getTypedDefault ()Lkotlinx/serialization/json/JsonElement;
+	public fun getUnevaluatedItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getUnevaluatedProperties ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getUniqueItems ()Ljava/lang/Boolean;
+	public fun getWriteOnly ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun numericProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public fun objectProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public fun oneOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public fun referenceProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public fun stringProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/GenericPropertyDefinition$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/GenericPropertyDefinition$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/GenericPropertyDefinition;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/GenericPropertyDefinition;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/GenericPropertyDefinition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/JsonSchema : me/kpavlov/kt/schema/json/ApplicatorContainer, me/kpavlov/kt/schema/json/CommonSchemaAttributes, me/kpavlov/kt/schema/json/GeneralConstraints, me/kpavlov/kt/schema/json/PropertyDefinition {
+	public static final field Companion Lme/kpavlov/kt/schema/json/JsonSchema$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/Discriminator;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/lang/Boolean;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/Discriminator;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/lang/Boolean;Ljava/util/Map;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun allOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public fun anyOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public fun arrayProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public fun booleanProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public fun booleanSchemaProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/util/List;
+	public final fun component11 ()Ljava/util/List;
+	public final fun component12 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component13 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component14 ()Ljava/util/Map;
+	public final fun component15 ()Ljava/util/Map;
+	public final fun component16 ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public final fun component17 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component18 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component19 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Ljava/util/Map;
+	public final fun component21 ()Ljava/util/Map;
+	public final fun component22 ()Ljava/util/Map;
+	public final fun component23 ()Ljava/lang/Integer;
+	public final fun component24 ()Ljava/lang/Integer;
+	public final fun component25 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component26 ()Ljava/util/List;
+	public final fun component27 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component28 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component29 ()Ljava/lang/Integer;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component30 ()Ljava/lang/Integer;
+	public final fun component31 ()Ljava/lang/Integer;
+	public final fun component32 ()Ljava/lang/Integer;
+	public final fun component33 ()Ljava/lang/Boolean;
+	public final fun component34 ()Ljava/lang/Integer;
+	public final fun component35 ()Ljava/lang/Integer;
+	public final fun component36 ()Ljava/lang/String;
+	public final fun component37 ()Ljava/lang/String;
+	public final fun component38 ()Ljava/lang/String;
+	public final fun component39 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component40 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component41 ()Ljava/lang/Double;
+	public final fun component42 ()Ljava/lang/Double;
+	public final fun component43 ()Ljava/lang/Double;
+	public final fun component44 ()Ljava/lang/Double;
+	public final fun component45 ()Ljava/lang/Double;
+	public final fun component46 ()Ljava/util/List;
+	public final fun component47 ()Ljava/util/List;
+	public final fun component48 ()Ljava/util/List;
+	public final fun component49 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component50 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component51 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component52 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component53 ()Lme/kpavlov/kt/schema/json/Discriminator;
+	public final fun component54 ()Ljava/lang/Boolean;
+	public final fun component55 ()Ljava/lang/Boolean;
+	public final fun component56 ()Ljava/lang/Boolean;
+	public final fun component57 ()Ljava/util/List;
+	public final fun component58 ()Ljava/lang/Boolean;
+	public final fun component59 ()Ljava/util/Map;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/Discriminator;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/lang/Boolean;Ljava/util/Map;)Lme/kpavlov/kt/schema/json/JsonSchema;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/JsonSchema;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/Discriminator;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/lang/Boolean;Ljava/util/Map;IILjava/lang/Object;)Lme/kpavlov/kt/schema/json/JsonSchema;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAdditionalProperties ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public fun getAllOf ()Ljava/util/List;
+	public fun getAnchor ()Ljava/lang/String;
+	public fun getAnyOf ()Ljava/util/List;
+	public fun getComment ()Ljava/lang/String;
+	public fun getConstValue ()Lkotlinx/serialization/json/JsonElement;
+	public fun getContains ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getContentEncoding ()Ljava/lang/String;
+	public fun getContentMediaType ()Ljava/lang/String;
+	public fun getContentSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getDefault ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefs ()Ljava/util/Map;
+	public final fun getDependencies ()Ljava/util/Map;
+	public fun getDependentRequired ()Ljava/util/Map;
+	public fun getDependentSchemas ()Ljava/util/Map;
+	public fun getDeprecated ()Ljava/lang/Boolean;
+	public fun getDescription ()Ljava/lang/String;
+	public final fun getDiscriminator ()Lme/kpavlov/kt/schema/json/Discriminator;
+	public fun getDynamicAnchor ()Ljava/lang/String;
+	public fun getDynamicRef ()Ljava/lang/String;
+	public fun getElseSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun getEnum ()Ljava/util/List;
+	public fun getExamples ()Ljava/util/List;
+	public fun getExclusiveMaximum ()Ljava/lang/Double;
+	public fun getExclusiveMinimum ()Ljava/lang/Double;
+	public fun getFormat ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
+	public fun getIfSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getMaxContains ()Ljava/lang/Integer;
+	public fun getMaxItems ()Ljava/lang/Integer;
+	public fun getMaxLength ()Ljava/lang/Integer;
+	public fun getMaxProperties ()Ljava/lang/Integer;
+	public fun getMaximum ()Ljava/lang/Double;
+	public fun getMinContains ()Ljava/lang/Integer;
+	public fun getMinItems ()Ljava/lang/Integer;
+	public fun getMinLength ()Ljava/lang/Integer;
+	public fun getMinProperties ()Ljava/lang/Integer;
+	public fun getMinimum ()Ljava/lang/Double;
+	public fun getMultipleOf ()Ljava/lang/Double;
+	public fun getNot ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getNullable ()Ljava/lang/Boolean;
+	public fun getOneOf ()Ljava/util/List;
+	public fun getPattern ()Ljava/lang/String;
+	public fun getPatternProperties ()Ljava/util/Map;
+	public fun getPrefixItems ()Ljava/util/List;
+	public fun getProperties ()Ljava/util/Map;
+	public fun getPropertyNames ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getReadOnly ()Ljava/lang/Boolean;
+	public fun getRef ()Ljava/lang/String;
+	public fun getRequired ()Ljava/util/List;
+	public final fun getSchema ()Ljava/lang/String;
+	public fun getThenSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getTitle ()Ljava/lang/String;
+	public fun getType ()Ljava/util/List;
+	public fun getUnevaluatedItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getUnevaluatedProperties ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getUniqueItems ()Ljava/lang/Boolean;
+	public fun getWriteOnly ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun numericProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public fun objectProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public fun oneOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public fun referenceProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public fun stringProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/JsonSchema$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/JsonSchema$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/JsonSchema;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/JsonSchema;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/JsonSchema$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/JsonSchemaBuilder {
+	public fun <init> ()V
+	public final fun build ()Lme/kpavlov/kt/schema/json/JsonSchema;
+	public final fun getAdditionalProperties ()Ljava/lang/Object;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getItems ()Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public final fun getSchema ()Ljava/lang/String;
+	public final fun property (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun setAdditionalProperties (Ljava/lang/Object;)V
+	public final fun setDescription (Ljava/lang/String;)V
+	public final fun setId (Ljava/lang/String;)V
+	public final fun setItems (Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;)V
+	public final fun setSchema (Ljava/lang/String;)V
+}
+
+public final class me/kpavlov/kt/schema/json/JsonSchemaConstants {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/JsonSchemaConstants;
+	public static final field JSON_SCHEMA_ID_DRAFT202012 Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/json/JsonSchemaConstants$Keys {
+	public static final field ADDITIONAL_PROPERTIES Ljava/lang/String;
+	public static final field ALL_OF Ljava/lang/String;
+	public static final field ANCHOR Ljava/lang/String;
+	public static final field ANY_OF Ljava/lang/String;
+	public static final field COMMENT Ljava/lang/String;
+	public static final field CONST Ljava/lang/String;
+	public static final field CONTAINS Ljava/lang/String;
+	public static final field CONTENT_ENCODING Ljava/lang/String;
+	public static final field CONTENT_MEDIA_TYPE Ljava/lang/String;
+	public static final field CONTENT_SCHEMA Ljava/lang/String;
+	public static final field DEFAULT Ljava/lang/String;
+	public static final field DEFS Ljava/lang/String;
+	public static final field DEPENDENCIES Ljava/lang/String;
+	public static final field DEPENDENT_REQUIRED Ljava/lang/String;
+	public static final field DEPENDENT_SCHEMAS Ljava/lang/String;
+	public static final field DEPRECATED Ljava/lang/String;
+	public static final field DESCRIPTION Ljava/lang/String;
+	public static final field DYNAMIC_ANCHOR Ljava/lang/String;
+	public static final field DYNAMIC_REF Ljava/lang/String;
+	public static final field ELSE Ljava/lang/String;
+	public static final field ENUM Ljava/lang/String;
+	public static final field EXAMPLES Ljava/lang/String;
+	public static final field EXCLUSIVE_MAXIMUM Ljava/lang/String;
+	public static final field EXCLUSIVE_MINIMUM Ljava/lang/String;
+	public static final field FORMAT Ljava/lang/String;
+	public static final field ID Ljava/lang/String;
+	public static final field IF Ljava/lang/String;
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/JsonSchemaConstants$Keys;
+	public static final field ITEMS Ljava/lang/String;
+	public static final field MAXIMUM Ljava/lang/String;
+	public static final field MAX_CONTAINS Ljava/lang/String;
+	public static final field MAX_ITEMS Ljava/lang/String;
+	public static final field MAX_LENGTH Ljava/lang/String;
+	public static final field MAX_PROPERTIES Ljava/lang/String;
+	public static final field MINIMUM Ljava/lang/String;
+	public static final field MIN_CONTAINS Ljava/lang/String;
+	public static final field MIN_ITEMS Ljava/lang/String;
+	public static final field MIN_LENGTH Ljava/lang/String;
+	public static final field MIN_PROPERTIES Ljava/lang/String;
+	public static final field MULTIPLE_OF Ljava/lang/String;
+	public static final field NOT Ljava/lang/String;
+	public static final field NULLABLE Ljava/lang/String;
+	public static final field ONE_OF Ljava/lang/String;
+	public static final field PATTERN Ljava/lang/String;
+	public static final field PATTERN_PROPERTIES Ljava/lang/String;
+	public static final field PREFIX_ITEMS Ljava/lang/String;
+	public static final field PROPERTIES Ljava/lang/String;
+	public static final field PROPERTY_NAMES Ljava/lang/String;
+	public static final field READ_ONLY Ljava/lang/String;
+	public static final field REF Ljava/lang/String;
+	public static final field REF_PREFIX Ljava/lang/String;
+	public static final field REQUIRED Ljava/lang/String;
+	public static final field SCHEMA Ljava/lang/String;
+	public static final field THEN Ljava/lang/String;
+	public static final field TITLE Ljava/lang/String;
+	public static final field TYPE Ljava/lang/String;
+	public static final field UNEVALUATED_ITEMS Ljava/lang/String;
+	public static final field UNEVALUATED_PROPERTIES Ljava/lang/String;
+	public static final field UNIQUE_ITEMS Ljava/lang/String;
+	public static final field WRITE_ONLY Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/json/JsonSchemaConstants$Types {
+	public static final field ANY Ljava/lang/String;
+	public static final field ARRAY Ljava/lang/String;
+	public static final field BOOLEAN Ljava/lang/String;
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/JsonSchemaConstants$Types;
+	public static final field INTEGER Ljava/lang/String;
+	public static final field NULL Ljava/lang/String;
+	public static final field NUMBER Ljava/lang/String;
+	public static final field OBJECT Ljava/lang/String;
+	public static final field STRING Ljava/lang/String;
+	public final fun getARRAY_OR_NULL_TYPE ()Ljava/util/List;
+	public final fun getARRAY_TYPE ()Ljava/util/List;
+	public final fun getBOOLEAN_OR_NULL_TYPE ()Ljava/util/List;
+	public final fun getBOOLEAN_TYPE ()Ljava/util/List;
+	public final fun getINTEGER_OR_NULL_TYPE ()Ljava/util/List;
+	public final fun getINTEGER_TYPE ()Ljava/util/List;
+	public final fun getNULL_TYPE ()Ljava/util/List;
+	public final fun getNUMBER_OR_NULL_TYPE ()Ljava/util/List;
+	public final fun getNUMBER_TYPE ()Ljava/util/List;
+	public final fun getOBJECT_OR_NULL_TYPE ()Ljava/util/List;
+	public final fun getOBJECT_TYPE ()Ljava/util/List;
+	public final fun getSTRING_OR_NULL_TYPE ()Ljava/util/List;
+	public final fun getSTRING_TYPE ()Ljava/util/List;
+}
+
+public abstract interface annotation class me/kpavlov/kt/schema/json/JsonSchemaDsl : java/lang/annotation/Annotation {
+}
+
+public final class me/kpavlov/kt/schema/json/JsonSchemaKt {
+	public static final fun encodeToJsonObject (Lme/kpavlov/kt/schema/json/JsonSchema;Lkotlinx/serialization/json/Json;)Lkotlinx/serialization/json/JsonObject;
+	public static synthetic fun encodeToJsonObject$default (Lme/kpavlov/kt/schema/json/JsonSchema;Lkotlinx/serialization/json/Json;ILjava/lang/Object;)Lkotlinx/serialization/json/JsonObject;
+	public static final fun encodeToString (Lme/kpavlov/kt/schema/json/JsonSchema;Lkotlinx/serialization/json/Json;)Ljava/lang/String;
+	public static synthetic fun encodeToString$default (Lme/kpavlov/kt/schema/json/JsonSchema;Lkotlinx/serialization/json/Json;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/json/JsonSchema_dslKt {
+	public static final fun allOf (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun allOf$default (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun anyOf (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun anyOf$default (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun array (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun array$default (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun boolean (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun boolean$default (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun integer (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun integer$default (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun jsonSchema (Lkotlin/jvm/functions/Function1;)Lme/kpavlov/kt/schema/json/JsonSchema;
+	public static final fun number (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun number$default (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun obj (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun obj$default (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun oneOf (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun oneOf$default (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static final fun reference (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Ljava/lang/String;)V
+	public static final fun string (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun string$default (Lme/kpavlov/kt/schema/json/PolymorphicOptionsCollector;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+}
+
+public abstract interface class me/kpavlov/kt/schema/json/NumericConstraints {
+	public abstract fun getExclusiveMaximum ()Ljava/lang/Double;
+	public abstract fun getExclusiveMinimum ()Ljava/lang/Double;
+	public abstract fun getMaximum ()Ljava/lang/Double;
+	public abstract fun getMinimum ()Ljava/lang/Double;
+	public abstract fun getMultipleOf ()Ljava/lang/Double;
+}
+
+public final class me/kpavlov/kt/schema/json/NumericPropertyBuilder {
+	public fun <init> ()V
+	public final fun build ()Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public final fun getConstValue ()Ljava/lang/Object;
+	public final fun getDefault ()Ljava/lang/Object;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getEnum ()Ljava/lang/Object;
+	public final fun getExclusiveMaximum ()Ljava/lang/Double;
+	public final fun getExclusiveMinimum ()Ljava/lang/Double;
+	public final fun getMaximum ()Ljava/lang/Double;
+	public final fun getMinimum ()Ljava/lang/Double;
+	public final fun getMultipleOf ()Ljava/lang/Double;
+	public final fun getNullable ()Ljava/lang/Boolean;
+	public final fun getType ()Ljava/util/List;
+	public final fun setConstValue (Ljava/lang/Object;)V
+	public final fun setDefault (Ljava/lang/Object;)V
+	public final fun setDescription (Ljava/lang/String;)V
+	public final fun setEnum (Ljava/lang/Object;)V
+	public final fun setExclusiveMaximum (Ljava/lang/Double;)V
+	public final fun setExclusiveMinimum (Ljava/lang/Double;)V
+	public final fun setMaximum (Ljava/lang/Double;)V
+	public final fun setMinimum (Ljava/lang/Double;)V
+	public final fun setMultipleOf (Ljava/lang/Double;)V
+	public final fun setNullable (Ljava/lang/Boolean;)V
+	public final fun setType (Ljava/util/List;)V
+}
+
+public final class me/kpavlov/kt/schema/json/NumericPropertyDefinition : me/kpavlov/kt/schema/json/NumericConstraints, me/kpavlov/kt/schema/json/ValuePropertyDefinition {
+	public static final field Companion Lme/kpavlov/kt/schema/json/NumericPropertyDefinition$Companion;
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component10 ()Ljava/lang/Boolean;
+	public final fun component11 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component12 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component13 ()Ljava/util/Map;
+	public final fun component14 ()Ljava/lang/Boolean;
+	public final fun component15 ()Ljava/lang/Boolean;
+	public final fun component16 ()Ljava/lang/Boolean;
+	public final fun component17 ()Ljava/util/List;
+	public final fun component18 ()Ljava/util/List;
+	public final fun component19 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Ljava/util/List;
+	public final fun component21 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component22 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component23 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component24 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component25 ()Ljava/util/List;
+	public final fun component26 ()Ljava/lang/Double;
+	public final fun component27 ()Ljava/lang/Double;
+	public final fun component28 ()Ljava/lang/Double;
+	public final fun component29 ()Ljava/lang/Double;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component30 ()Ljava/lang/Double;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAllOf ()Ljava/util/List;
+	public fun getAnchor ()Ljava/lang/String;
+	public fun getAnyOf ()Ljava/util/List;
+	public fun getComment ()Ljava/lang/String;
+	public fun getConstValue ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefault ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefs ()Ljava/util/Map;
+	public fun getDeprecated ()Ljava/lang/Boolean;
+	public fun getDescription ()Ljava/lang/String;
+	public fun getDynamicAnchor ()Ljava/lang/String;
+	public fun getDynamicRef ()Ljava/lang/String;
+	public fun getElseSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun getEnum ()Ljava/util/List;
+	public fun getExamples ()Ljava/util/List;
+	public fun getExclusiveMaximum ()Ljava/lang/Double;
+	public fun getExclusiveMinimum ()Ljava/lang/Double;
+	public fun getId ()Ljava/lang/String;
+	public fun getIfSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getMaximum ()Ljava/lang/Double;
+	public fun getMinimum ()Ljava/lang/Double;
+	public fun getMultipleOf ()Ljava/lang/Double;
+	public fun getNot ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getNullable ()Ljava/lang/Boolean;
+	public fun getOneOf ()Ljava/util/List;
+	public fun getReadOnly ()Ljava/lang/Boolean;
+	public fun getRef ()Ljava/lang/String;
+	public fun getThenSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getTitle ()Ljava/lang/String;
+	public fun getType ()Ljava/util/List;
+	public fun getTypedConst ()Ljava/lang/Double;
+	public synthetic fun getTypedConst ()Ljava/lang/Object;
+	public fun getTypedDefault ()Ljava/lang/Double;
+	public synthetic fun getTypedDefault ()Ljava/lang/Object;
+	public fun getWriteOnly ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/NumericPropertyDefinition$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/NumericPropertyDefinition$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/NumericPropertyDefinition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/ObjectPropertyBuilder {
+	public final fun build ()Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public final fun getAdditionalProperties ()Ljava/lang/Object;
+	public final fun getDefault ()Ljava/lang/Object;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getEnum ()Ljava/lang/Object;
+	public final fun getNullable ()Ljava/lang/Boolean;
+	public final fun getType ()Ljava/util/List;
+	public final fun property (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun setAdditionalProperties (Ljava/lang/Object;)V
+	public final fun setDefault (Ljava/lang/Object;)V
+	public final fun setDescription (Ljava/lang/String;)V
+	public final fun setEnum (Ljava/lang/Object;)V
+	public final fun setNullable (Ljava/lang/Boolean;)V
+	public final fun setType (Ljava/util/List;)V
+}
+
+public final class me/kpavlov/kt/schema/json/ObjectPropertyDefinition : me/kpavlov/kt/schema/json/PropertiesContainer, me/kpavlov/kt/schema/json/ValuePropertyDefinition {
+	public static final field Companion Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun allOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public fun anyOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public fun arrayProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public fun booleanProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public fun booleanSchemaProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;
+	public final fun component1 ()Ljava/util/List;
+	public final fun component10 ()Ljava/lang/Boolean;
+	public final fun component11 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component12 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component13 ()Ljava/util/Map;
+	public final fun component14 ()Ljava/lang/Boolean;
+	public final fun component15 ()Ljava/lang/Boolean;
+	public final fun component16 ()Ljava/lang/Boolean;
+	public final fun component17 ()Ljava/util/List;
+	public final fun component18 ()Ljava/util/List;
+	public final fun component19 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Ljava/util/List;
+	public final fun component21 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component22 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component23 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component24 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component25 ()Ljava/util/List;
+	public final fun component26 ()Ljava/util/Map;
+	public final fun component27 ()Ljava/util/Map;
+	public final fun component28 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component29 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component30 ()Ljava/util/List;
+	public final fun component31 ()Ljava/util/Map;
+	public final fun component32 ()Ljava/util/Map;
+	public final fun component33 ()Ljava/util/Map;
+	public final fun component34 ()Ljava/lang/Integer;
+	public final fun component35 ()Ljava/lang/Integer;
+	public final fun component36 ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;IILjava/lang/Object;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAdditionalProperties ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public fun getAllOf ()Ljava/util/List;
+	public fun getAnchor ()Ljava/lang/String;
+	public fun getAnyOf ()Ljava/util/List;
+	public fun getComment ()Ljava/lang/String;
+	public fun getConstValue ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefault ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefs ()Ljava/util/Map;
+	public final fun getDependencies ()Ljava/util/Map;
+	public fun getDependentRequired ()Ljava/util/Map;
+	public fun getDependentSchemas ()Ljava/util/Map;
+	public fun getDeprecated ()Ljava/lang/Boolean;
+	public fun getDescription ()Ljava/lang/String;
+	public fun getDynamicAnchor ()Ljava/lang/String;
+	public fun getDynamicRef ()Ljava/lang/String;
+	public fun getElseSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun getEnum ()Ljava/util/List;
+	public fun getExamples ()Ljava/util/List;
+	public fun getId ()Ljava/lang/String;
+	public fun getIfSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getMaxProperties ()Ljava/lang/Integer;
+	public fun getMinProperties ()Ljava/lang/Integer;
+	public fun getNot ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getNullable ()Ljava/lang/Boolean;
+	public fun getOneOf ()Ljava/util/List;
+	public fun getPatternProperties ()Ljava/util/Map;
+	public fun getProperties ()Ljava/util/Map;
+	public fun getPropertyNames ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getReadOnly ()Ljava/lang/Boolean;
+	public fun getRef ()Ljava/lang/String;
+	public fun getRequired ()Ljava/util/List;
+	public fun getThenSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getTitle ()Ljava/lang/String;
+	public fun getType ()Ljava/util/List;
+	public synthetic fun getTypedConst ()Ljava/lang/Object;
+	public fun getTypedConst ()Lkotlinx/serialization/json/JsonObject;
+	public synthetic fun getTypedDefault ()Ljava/lang/Object;
+	public fun getTypedDefault ()Lkotlinx/serialization/json/JsonObject;
+	public fun getUnevaluatedProperties ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getWriteOnly ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun numericProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public fun objectProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public fun oneOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public fun referenceProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public fun stringProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/ObjectPropertyDefinition$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/ObjectPropertyDefinition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/OneOfPropertyBuilder : me/kpavlov/kt/schema/json/PolymorphicOptionsCollector {
+	public fun addOption (Lme/kpavlov/kt/schema/json/PropertyDefinition;)V
+	public final fun build ()Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public final fun discriminator (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun discriminator$default (Lme/kpavlov/kt/schema/json/OneOfPropertyBuilder;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun setDescription (Ljava/lang/String;)V
+}
+
+public final class me/kpavlov/kt/schema/json/OneOfPropertyDefinition : me/kpavlov/kt/schema/json/ApplicatorContainer, me/kpavlov/kt/schema/json/CommonSchemaAttributes, me/kpavlov/kt/schema/json/GeneralConstraints, me/kpavlov/kt/schema/json/PropertyDefinition {
+	public static final field Companion Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition$Companion;
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Lme/kpavlov/kt/schema/json/Discriminator;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Lme/kpavlov/kt/schema/json/Discriminator;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun allOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public fun anyOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public fun arrayProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public fun booleanProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public fun booleanSchemaProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;
+	public final fun component1 ()Ljava/util/List;
+	public final fun component10 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component11 ()Ljava/util/List;
+	public final fun component12 ()Ljava/util/Map;
+	public final fun component13 ()Ljava/lang/Boolean;
+	public final fun component14 ()Ljava/lang/Boolean;
+	public final fun component15 ()Ljava/lang/Boolean;
+	public final fun component16 ()Ljava/util/List;
+	public final fun component17 ()Ljava/util/List;
+	public final fun component18 ()Ljava/util/List;
+	public final fun component19 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component21 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component22 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component23 ()Ljava/util/List;
+	public final fun component24 ()Ljava/lang/Integer;
+	public final fun component25 ()Ljava/lang/Integer;
+	public final fun component26 ()Ljava/lang/String;
+	public final fun component27 ()Ljava/lang/String;
+	public final fun component28 ()Ljava/lang/String;
+	public final fun component29 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component30 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component31 ()Ljava/lang/Double;
+	public final fun component32 ()Ljava/lang/Double;
+	public final fun component33 ()Ljava/lang/Double;
+	public final fun component34 ()Ljava/lang/Double;
+	public final fun component35 ()Ljava/lang/Double;
+	public final fun component36 ()Lme/kpavlov/kt/schema/json/Discriminator;
+	public final fun component37 ()Ljava/util/Map;
+	public final fun component38 ()Ljava/util/Map;
+	public final fun component39 ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component40 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component41 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component42 ()Ljava/util/List;
+	public final fun component43 ()Ljava/util/Map;
+	public final fun component44 ()Ljava/util/Map;
+	public final fun component45 ()Ljava/lang/Integer;
+	public final fun component46 ()Ljava/lang/Integer;
+	public final fun component47 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component48 ()Ljava/util/List;
+	public final fun component49 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component50 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component51 ()Ljava/lang/Integer;
+	public final fun component52 ()Ljava/lang/Integer;
+	public final fun component53 ()Ljava/lang/Integer;
+	public final fun component54 ()Ljava/lang/Integer;
+	public final fun component55 ()Ljava/lang/Boolean;
+	public final fun component56 ()Ljava/lang/String;
+	public final fun component57 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/Boolean;
+	public final fun component9 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Lme/kpavlov/kt/schema/json/Discriminator;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Lme/kpavlov/kt/schema/json/Discriminator;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/String;IILjava/lang/Object;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAdditionalProperties ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public fun getAllOf ()Ljava/util/List;
+	public fun getAnchor ()Ljava/lang/String;
+	public fun getAnyOf ()Ljava/util/List;
+	public fun getComment ()Ljava/lang/String;
+	public fun getConstValue ()Lkotlinx/serialization/json/JsonElement;
+	public fun getContains ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getContentEncoding ()Ljava/lang/String;
+	public fun getContentMediaType ()Ljava/lang/String;
+	public fun getContentSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getDefault ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefs ()Ljava/util/Map;
+	public fun getDependentRequired ()Ljava/util/Map;
+	public fun getDependentSchemas ()Ljava/util/Map;
+	public fun getDeprecated ()Ljava/lang/Boolean;
+	public fun getDescription ()Ljava/lang/String;
+	public final fun getDiscriminator ()Lme/kpavlov/kt/schema/json/Discriminator;
+	public fun getDynamicAnchor ()Ljava/lang/String;
+	public fun getDynamicRef ()Ljava/lang/String;
+	public fun getElseSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun getEnum ()Ljava/util/List;
+	public fun getExamples ()Ljava/util/List;
+	public fun getExclusiveMaximum ()Ljava/lang/Double;
+	public fun getExclusiveMinimum ()Ljava/lang/Double;
+	public fun getFormat ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
+	public fun getIfSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getMaxContains ()Ljava/lang/Integer;
+	public fun getMaxItems ()Ljava/lang/Integer;
+	public fun getMaxLength ()Ljava/lang/Integer;
+	public fun getMaxProperties ()Ljava/lang/Integer;
+	public fun getMaximum ()Ljava/lang/Double;
+	public fun getMinContains ()Ljava/lang/Integer;
+	public fun getMinItems ()Ljava/lang/Integer;
+	public fun getMinLength ()Ljava/lang/Integer;
+	public fun getMinProperties ()Ljava/lang/Integer;
+	public fun getMinimum ()Ljava/lang/Double;
+	public fun getMultipleOf ()Ljava/lang/Double;
+	public fun getNot ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getNullable ()Ljava/lang/Boolean;
+	public fun getOneOf ()Ljava/util/List;
+	public fun getPattern ()Ljava/lang/String;
+	public fun getPatternProperties ()Ljava/util/Map;
+	public fun getPrefixItems ()Ljava/util/List;
+	public fun getProperties ()Ljava/util/Map;
+	public fun getPropertyNames ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getReadOnly ()Ljava/lang/Boolean;
+	public fun getRef ()Ljava/lang/String;
+	public fun getRequired ()Ljava/util/List;
+	public fun getThenSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getTitle ()Ljava/lang/String;
+	public fun getType ()Ljava/util/List;
+	public fun getUnevaluatedItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getUnevaluatedProperties ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getUniqueItems ()Ljava/lang/Boolean;
+	public fun getWriteOnly ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun numericProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public fun objectProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public fun oneOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public fun referenceProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public fun stringProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/OneOfPropertyDefinition$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/OneOfPropertyDefinition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract interface class me/kpavlov/kt/schema/json/PolymorphicOptionsCollector {
+	public abstract fun addOption (Lme/kpavlov/kt/schema/json/PropertyDefinition;)V
+}
+
+public abstract interface class me/kpavlov/kt/schema/json/PropertiesContainer {
+	public fun allOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public fun anyOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public fun arrayProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public fun booleanProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public fun booleanSchemaProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;
+	public abstract fun getAdditionalProperties ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public abstract fun getDependentRequired ()Ljava/util/Map;
+	public abstract fun getDependentSchemas ()Ljava/util/Map;
+	public abstract fun getMaxProperties ()Ljava/lang/Integer;
+	public abstract fun getMinProperties ()Ljava/lang/Integer;
+	public abstract fun getPatternProperties ()Ljava/util/Map;
+	public abstract fun getProperties ()Ljava/util/Map;
+	public abstract fun getPropertyNames ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public abstract fun getRequired ()Ljava/util/List;
+	public abstract fun getUnevaluatedProperties ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun numericProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public fun objectProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public fun oneOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public fun referenceProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public fun stringProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+}
+
+public final class me/kpavlov/kt/schema/json/PropertiesContainer$DefaultImpls {
+	public static fun allOfProperty (Lme/kpavlov/kt/schema/json/PropertiesContainer;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public static fun anyOfProperty (Lme/kpavlov/kt/schema/json/PropertiesContainer;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public static fun arrayProperty (Lme/kpavlov/kt/schema/json/PropertiesContainer;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public static fun booleanProperty (Lme/kpavlov/kt/schema/json/PropertiesContainer;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public static fun booleanSchemaProperty (Lme/kpavlov/kt/schema/json/PropertiesContainer;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;
+	public static fun numericProperty (Lme/kpavlov/kt/schema/json/PropertiesContainer;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public static fun objectProperty (Lme/kpavlov/kt/schema/json/PropertiesContainer;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public static fun oneOfProperty (Lme/kpavlov/kt/schema/json/PropertiesContainer;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public static fun referenceProperty (Lme/kpavlov/kt/schema/json/PropertiesContainer;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public static fun stringProperty (Lme/kpavlov/kt/schema/json/PropertiesContainer;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+}
+
+public final class me/kpavlov/kt/schema/json/PropertyBuilder {
+	public fun <init> ()V
+	public final fun allOf (Lkotlin/jvm/functions/Function1;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public static synthetic fun allOf$default (Lme/kpavlov/kt/schema/json/PropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public final fun anyOf (Lkotlin/jvm/functions/Function1;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public static synthetic fun anyOf$default (Lme/kpavlov/kt/schema/json/PropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public final fun array (Lkotlin/jvm/functions/Function1;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public static synthetic fun array$default (Lme/kpavlov/kt/schema/json/PropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public final fun boolean (Lkotlin/jvm/functions/Function1;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public static synthetic fun boolean$default (Lme/kpavlov/kt/schema/json/PropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public final fun generic (Lkotlin/jvm/functions/Function1;)Lme/kpavlov/kt/schema/json/GenericPropertyDefinition;
+	public static synthetic fun generic$default (Lme/kpavlov/kt/schema/json/PropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/GenericPropertyDefinition;
+	public final fun getRequired ()Z
+	public final fun integer (Lkotlin/jvm/functions/Function1;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public static synthetic fun integer$default (Lme/kpavlov/kt/schema/json/PropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public final fun number (Lkotlin/jvm/functions/Function1;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public static synthetic fun number$default (Lme/kpavlov/kt/schema/json/PropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public final fun obj (Lkotlin/jvm/functions/Function1;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public static synthetic fun obj$default (Lme/kpavlov/kt/schema/json/PropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public final fun oneOf (Lkotlin/jvm/functions/Function1;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public static synthetic fun oneOf$default (Lme/kpavlov/kt/schema/json/PropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public final fun reference (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public final fun setRequired (Z)V
+	public final fun string (Lkotlin/jvm/functions/Function1;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+	public static synthetic fun string$default (Lme/kpavlov/kt/schema/json/PropertyBuilder;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+}
+
+public abstract interface class me/kpavlov/kt/schema/json/PropertyDefinition {
+	public static final field Companion Lme/kpavlov/kt/schema/json/PropertyDefinition$Companion;
+}
+
+public final class me/kpavlov/kt/schema/json/PropertyDefinition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/ReferencePropertyDefinition : me/kpavlov/kt/schema/json/ApplicatorContainer, me/kpavlov/kt/schema/json/CommonSchemaAttributes, me/kpavlov/kt/schema/json/GeneralConstraints, me/kpavlov/kt/schema/json/PropertyDefinition {
+	public static final field Companion Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun allOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AllOfPropertyDefinition;
+	public fun anyOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/AnyOfPropertyDefinition;
+	public fun arrayProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ArrayPropertyDefinition;
+	public fun booleanProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanPropertyDefinition;
+	public fun booleanSchemaProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/BooleanSchemaDefinition;
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component11 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component12 ()Ljava/util/List;
+	public final fun component13 ()Ljava/util/Map;
+	public final fun component14 ()Ljava/lang/Boolean;
+	public final fun component15 ()Ljava/lang/Boolean;
+	public final fun component16 ()Ljava/lang/Boolean;
+	public final fun component17 ()Ljava/util/List;
+	public final fun component18 ()Ljava/util/List;
+	public final fun component19 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Ljava/util/List;
+	public final fun component21 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component22 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component23 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component24 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component25 ()Ljava/util/List;
+	public final fun component26 ()Ljava/lang/Integer;
+	public final fun component27 ()Ljava/lang/Integer;
+	public final fun component28 ()Ljava/lang/String;
+	public final fun component29 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component30 ()Ljava/lang/String;
+	public final fun component31 ()Ljava/lang/String;
+	public final fun component32 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component33 ()Ljava/lang/Double;
+	public final fun component34 ()Ljava/lang/Double;
+	public final fun component35 ()Ljava/lang/Double;
+	public final fun component36 ()Ljava/lang/Double;
+	public final fun component37 ()Ljava/lang/Double;
+	public final fun component38 ()Ljava/util/Map;
+	public final fun component39 ()Ljava/util/Map;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component40 ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public final fun component41 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component42 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component43 ()Ljava/util/List;
+	public final fun component44 ()Ljava/util/Map;
+	public final fun component45 ()Ljava/util/Map;
+	public final fun component46 ()Ljava/lang/Integer;
+	public final fun component47 ()Ljava/lang/Integer;
+	public final fun component48 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component49 ()Ljava/util/List;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component50 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component51 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component52 ()Ljava/lang/Integer;
+	public final fun component53 ()Ljava/lang/Integer;
+	public final fun component54 ()Ljava/lang/Integer;
+	public final fun component55 ()Ljava/lang/Integer;
+	public final fun component56 ()Ljava/lang/Boolean;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/Boolean;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/List;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/util/Map;Ljava/util/Map;Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Integer;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Boolean;IILjava/lang/Object;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAdditionalProperties ()Lme/kpavlov/kt/schema/json/AdditionalPropertiesConstraint;
+	public fun getAllOf ()Ljava/util/List;
+	public fun getAnchor ()Ljava/lang/String;
+	public fun getAnyOf ()Ljava/util/List;
+	public fun getComment ()Ljava/lang/String;
+	public fun getConstValue ()Lkotlinx/serialization/json/JsonElement;
+	public fun getContains ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getContentEncoding ()Ljava/lang/String;
+	public fun getContentMediaType ()Ljava/lang/String;
+	public fun getContentSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getDefault ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefs ()Ljava/util/Map;
+	public fun getDependentRequired ()Ljava/util/Map;
+	public fun getDependentSchemas ()Ljava/util/Map;
+	public fun getDeprecated ()Ljava/lang/Boolean;
+	public fun getDescription ()Ljava/lang/String;
+	public fun getDynamicAnchor ()Ljava/lang/String;
+	public fun getDynamicRef ()Ljava/lang/String;
+	public fun getElseSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun getEnum ()Ljava/util/List;
+	public fun getExamples ()Ljava/util/List;
+	public fun getExclusiveMaximum ()Ljava/lang/Double;
+	public fun getExclusiveMinimum ()Ljava/lang/Double;
+	public fun getFormat ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
+	public fun getIfSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getMaxContains ()Ljava/lang/Integer;
+	public fun getMaxItems ()Ljava/lang/Integer;
+	public fun getMaxLength ()Ljava/lang/Integer;
+	public fun getMaxProperties ()Ljava/lang/Integer;
+	public fun getMaximum ()Ljava/lang/Double;
+	public fun getMinContains ()Ljava/lang/Integer;
+	public fun getMinItems ()Ljava/lang/Integer;
+	public fun getMinLength ()Ljava/lang/Integer;
+	public fun getMinProperties ()Ljava/lang/Integer;
+	public fun getMinimum ()Ljava/lang/Double;
+	public fun getMultipleOf ()Ljava/lang/Double;
+	public fun getNot ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getNullable ()Ljava/lang/Boolean;
+	public fun getOneOf ()Ljava/util/List;
+	public fun getPattern ()Ljava/lang/String;
+	public fun getPatternProperties ()Ljava/util/Map;
+	public fun getPrefixItems ()Ljava/util/List;
+	public fun getProperties ()Ljava/util/Map;
+	public fun getPropertyNames ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getReadOnly ()Ljava/lang/Boolean;
+	public fun getRef ()Ljava/lang/String;
+	public fun getRequired ()Ljava/util/List;
+	public fun getThenSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getTitle ()Ljava/lang/String;
+	public fun getType ()Ljava/util/List;
+	public fun getUnevaluatedItems ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getUnevaluatedProperties ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getUniqueItems ()Ljava/lang/Boolean;
+	public fun getWriteOnly ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun numericProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/NumericPropertyDefinition;
+	public fun objectProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ObjectPropertyDefinition;
+	public fun oneOfProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/OneOfPropertyDefinition;
+	public fun referenceProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public fun stringProperty (Ljava/lang/String;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/ReferencePropertyDefinition$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/ReferencePropertyDefinition;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/ReferencePropertyDefinition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract interface class me/kpavlov/kt/schema/json/StringConstraints {
+	public abstract fun getContentEncoding ()Ljava/lang/String;
+	public abstract fun getContentMediaType ()Ljava/lang/String;
+	public abstract fun getContentSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public abstract fun getFormat ()Ljava/lang/String;
+	public abstract fun getMaxLength ()Ljava/lang/Integer;
+	public abstract fun getMinLength ()Ljava/lang/Integer;
+	public abstract fun getPattern ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/json/StringPropertyBuilder {
+	public final fun build ()Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+	public final fun getConstValue ()Ljava/lang/Object;
+	public final fun getDefault ()Ljava/lang/Object;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getEnum ()Ljava/lang/Object;
+	public final fun getFormat ()Ljava/lang/String;
+	public final fun getMaxLength ()Ljava/lang/Integer;
+	public final fun getMinLength ()Ljava/lang/Integer;
+	public final fun getNullable ()Ljava/lang/Boolean;
+	public final fun getPattern ()Ljava/lang/String;
+	public final fun getType ()Ljava/util/List;
+	public final fun mixedEnum ([Ljava/lang/Object;)V
+	public final fun setConstValue (Ljava/lang/Object;)V
+	public final fun setDefault (Ljava/lang/Object;)V
+	public final fun setDescription (Ljava/lang/String;)V
+	public final fun setEnum (Ljava/lang/Object;)V
+	public final fun setFormat (Ljava/lang/String;)V
+	public final fun setMaxLength (Ljava/lang/Integer;)V
+	public final fun setMinLength (Ljava/lang/Integer;)V
+	public final fun setNullable (Ljava/lang/Boolean;)V
+	public final fun setPattern (Ljava/lang/String;)V
+	public final fun setType (Ljava/util/List;)V
+	public final fun stringEnum ([Ljava/lang/String;)V
+}
+
+public final class me/kpavlov/kt/schema/json/StringPropertyDefinition : me/kpavlov/kt/schema/json/StringConstraints, me/kpavlov/kt/schema/json/ValuePropertyDefinition {
+	public static final field Companion Lme/kpavlov/kt/schema/json/StringPropertyDefinition$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component10 ()Ljava/lang/Boolean;
+	public final fun component11 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component12 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component13 ()Ljava/util/Map;
+	public final fun component14 ()Ljava/lang/Boolean;
+	public final fun component15 ()Ljava/lang/Boolean;
+	public final fun component16 ()Ljava/lang/Boolean;
+	public final fun component17 ()Ljava/util/List;
+	public final fun component18 ()Ljava/util/List;
+	public final fun component19 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component20 ()Ljava/util/List;
+	public final fun component21 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component22 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component23 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component24 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component25 ()Ljava/lang/String;
+	public final fun component26 ()Ljava/lang/String;
+	public final fun component27 ()Ljava/lang/String;
+	public final fun component28 ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun component29 ()Ljava/util/List;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component30 ()Ljava/lang/Integer;
+	public final fun component31 ()Ljava/lang/Integer;
+	public final fun component32 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/json/StringPropertyDefinition;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lkotlinx/serialization/json/JsonElement;Lkotlinx/serialization/json/JsonElement;Ljava/util/Map;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lme/kpavlov/kt/schema/json/PropertyDefinition;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;ILjava/lang/Object;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAllOf ()Ljava/util/List;
+	public fun getAnchor ()Ljava/lang/String;
+	public fun getAnyOf ()Ljava/util/List;
+	public fun getComment ()Ljava/lang/String;
+	public fun getConstValue ()Lkotlinx/serialization/json/JsonElement;
+	public fun getContentEncoding ()Ljava/lang/String;
+	public fun getContentMediaType ()Ljava/lang/String;
+	public fun getContentSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getDefault ()Lkotlinx/serialization/json/JsonElement;
+	public fun getDefs ()Ljava/util/Map;
+	public fun getDeprecated ()Ljava/lang/Boolean;
+	public fun getDescription ()Ljava/lang/String;
+	public fun getDynamicAnchor ()Ljava/lang/String;
+	public fun getDynamicRef ()Ljava/lang/String;
+	public fun getElseSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public final fun getEnum ()Ljava/util/List;
+	public fun getExamples ()Ljava/util/List;
+	public fun getFormat ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
+	public fun getIfSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getMaxLength ()Ljava/lang/Integer;
+	public fun getMinLength ()Ljava/lang/Integer;
+	public fun getNot ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getNullable ()Ljava/lang/Boolean;
+	public fun getOneOf ()Ljava/util/List;
+	public fun getPattern ()Ljava/lang/String;
+	public fun getReadOnly ()Ljava/lang/Boolean;
+	public fun getRef ()Ljava/lang/String;
+	public fun getThenSchema ()Lme/kpavlov/kt/schema/json/PropertyDefinition;
+	public fun getTitle ()Ljava/lang/String;
+	public fun getType ()Ljava/util/List;
+	public synthetic fun getTypedConst ()Ljava/lang/Object;
+	public fun getTypedConst ()Ljava/lang/String;
+	public synthetic fun getTypedDefault ()Ljava/lang/Object;
+	public fun getTypedDefault ()Ljava/lang/String;
+	public fun getWriteOnly ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/json/StringPropertyDefinition$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/json/StringPropertyDefinition$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lme/kpavlov/kt/schema/json/StringPropertyDefinition;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lme/kpavlov/kt/schema/json/StringPropertyDefinition;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class me/kpavlov/kt/schema/json/StringPropertyDefinition$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract interface class me/kpavlov/kt/schema/json/ValuePropertyDefinition : me/kpavlov/kt/schema/json/ApplicatorContainer, me/kpavlov/kt/schema/json/CommonSchemaAttributes, me/kpavlov/kt/schema/json/PropertyDefinition {
+	public abstract fun getConstValue ()Lkotlinx/serialization/json/JsonElement;
+	public abstract fun getDefault ()Lkotlinx/serialization/json/JsonElement;
+	public abstract fun getNullable ()Ljava/lang/Boolean;
+	public abstract fun getType ()Ljava/util/List;
+	public abstract fun getTypedConst ()Ljava/lang/Object;
+	public abstract fun getTypedDefault ()Ljava/lang/Object;
+}
+
+public final class me/kpavlov/kt/schema/json/serializers/ArrayEnumSerializer : kotlinx/serialization/KSerializer {
+	public fun <init> ()V
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/util/List;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/util/List;)V
+}
+
+public final class me/kpavlov/kt/schema/json/serializers/BooleanEnumSerializer : kotlinx/serialization/KSerializer {
+	public fun <init> ()V
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/util/List;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/util/List;)V
+}
+
+public final class me/kpavlov/kt/schema/json/serializers/NumericEnumSerializer : kotlinx/serialization/KSerializer {
+	public fun <init> ()V
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/util/List;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/util/List;)V
+}
+
+public final class me/kpavlov/kt/schema/json/serializers/ObjectEnumSerializer : kotlinx/serialization/KSerializer {
+	public fun <init> ()V
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/util/List;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/util/List;)V
+}
+
+public final class me/kpavlov/kt/schema/json/serializers/PolymorphicEnumSerializerKt {
+	public static final fun booleanListToJsonElements (Ljava/util/List;)Ljava/util/List;
+	public static final fun numberListToJsonElements (Ljava/util/List;)Ljava/util/List;
+	public static final fun stringListToJsonElements (Ljava/util/List;)Ljava/util/List;
+}
+
+public final class me/kpavlov/kt/schema/json/serializers/StringEnumSerializer : kotlinx/serialization/KSerializer {
+	public fun <init> ()V
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/util/List;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/util/List;)V
+}
+
+public final class me/kpavlov/kt/schema/json/serializers/StringOrListSerializer : kotlinx/serialization/KSerializer {
+	public fun <init> ()V
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/util/List;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/util/List;)V
+}
+

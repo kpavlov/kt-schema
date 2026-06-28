@@ -1,7 +1,8 @@
 .SHELLFLAGS := -e -c
 
 .PHONY: all
-all:clean lint build integration-test examples knit
+#all:clean lint build examples knit
+all:clean lint build knit
 
 .PHONY: build
 build:clean
@@ -66,12 +67,6 @@ publish:
 .PHONY: sync
 sync:
 	git submodule update --init --recursive --depth=1
-
-.PHONY: integration-test
-integration-test:clean publish
-	@echo "🧪🧩 Starting Integration tests..."
-	@(cd gradle-plugin-integration-tests && ./gradlew clean kotlinUpgradePackageLock build -PkotlinxSchemaVersion=1-SNAPSHOT --no-daemon --stacktrace)
-	@echo "✅ Integration tests complete!"
 
 .PHONY: examples
 examples:

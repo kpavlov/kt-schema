@@ -1,0 +1,318 @@
+public abstract class me/kpavlov/kt/schema/generator/core/AbstractSchemaGenerator : me/kpavlov/kt/schema/generator/core/SchemaGenerator {
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/SchemaIntrospector;Lme/kpavlov/kt/schema/generator/core/ir/TypeGraphTransformer;)V
+	public fun generateSchema (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun generateSchemaString (Ljava/lang/Object;)Ljava/lang/String;
+	protected final fun getIntrospector ()Lme/kpavlov/kt/schema/generator/core/ir/SchemaIntrospector;
+	protected abstract fun getRootName (Ljava/lang/Object;)Ljava/lang/String;
+	protected final fun getTypeGraphTransformer ()Lme/kpavlov/kt/schema/generator/core/ir/TypeGraphTransformer;
+}
+
+public abstract interface annotation class me/kpavlov/kt/schema/generator/core/InternalSchemaGeneratorApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface class me/kpavlov/kt/schema/generator/core/SchemaGenerator {
+	public abstract fun encodeToString (Ljava/lang/Object;)Ljava/lang/String;
+	public abstract fun generateSchema (Ljava/lang/Object;)Ljava/lang/Object;
+	public abstract fun generateSchemaString (Ljava/lang/Object;)Ljava/lang/String;
+	public abstract fun schemaType ()Lkotlin/reflect/KClass;
+	public abstract fun targetType ()Lkotlin/reflect/KClass;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/SchemaGeneratorService {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/generator/core/SchemaGeneratorService;
+	public final fun getGenerator (Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;)Lme/kpavlov/kt/schema/generator/core/SchemaGenerator;
+	public static synthetic fun getGenerator$default (Lme/kpavlov/kt/schema/generator/core/SchemaGeneratorService;Lkotlin/reflect/KClass;Lkotlin/reflect/KClass;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/SchemaGenerator;
+	public final fun registeredGenerators ()Ljava/util/Collection;
+}
+
+public abstract class me/kpavlov/kt/schema/generator/core/ir/AbstractTypeGraphTransformer : me/kpavlov/kt/schema/generator/core/ir/TypeGraphTransformer {
+	public fun <init> (Ljava/lang/Object;)V
+	public fun getConfig ()Ljava/lang/Object;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/AnyNode : me/kpavlov/kt/schema/generator/core/ir/TypeNode {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lme/kpavlov/kt/schema/generator/core/ir/AnyNode;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/AnyNode;Ljava/lang/String;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/AnyNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getDescription ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class me/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionContext {
+	public fun <init> ()V
+	public final fun getNodes ()Ljava/util/Map;
+	protected final fun getTypeRefCache ()Ljava/util/Map;
+	protected final fun getVisitingTypes ()Ljava/util/Set;
+	public abstract fun toRef (Ljava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+	protected final fun withCycleDetection (Ljava/lang/Object;Lme/kpavlov/kt/schema/generator/core/ir/TypeId;Lkotlin/jvm/functions/Function0;)Z
+}
+
+public abstract interface class me/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor {
+	public abstract fun extract (Ljava/util/List;)Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/Discriminator {
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Ljava/util/Map;)Lme/kpavlov/kt/schema/generator/core/ir/Discriminator;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/Discriminator;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/Discriminator;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMapping ()Ljava/util/Map;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/EnumNode : me/kpavlov/kt/schema/generator/core/ir/TypeNode {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)Lme/kpavlov/kt/schema/generator/core/ir/EnumNode;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/EnumNode;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/EnumNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getDescription ()Ljava/lang/String;
+	public final fun getEntries ()Ljava/util/List;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/Introspections {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/generator/core/ir/Introspections;
+	public static final fun getDescriptionFromAnnotation (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
+	public static final fun getNameOverride (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
+	public static final fun isIgnoreAnnotation (Ljava/lang/String;Ljava/lang/String;)Z
+	public static synthetic fun isIgnoreAnnotation$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Z
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/ListNode : me/kpavlov/kt/schema/generator/core/ir/TypeNode {
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;)Lme/kpavlov/kt/schema/generator/core/ir/ListNode;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/ListNode;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/ListNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getDescription ()Ljava/lang/String;
+	public final fun getElement ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/MapNode : me/kpavlov/kt/schema/generator/core/ir/TypeNode {
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+	public final fun component2 ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;)Lme/kpavlov/kt/schema/generator/core/ir/MapNode;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/MapNode;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/MapNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getDescription ()Ljava/lang/String;
+	public final fun getKey ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+	public final fun getValue ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/ObjectNode : me/kpavlov/kt/schema/generator/core/ir/TypeNode {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/Set;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;)Lme/kpavlov/kt/schema/generator/core/ir/ObjectNode;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/ObjectNode;Ljava/lang/String;Ljava/util/List;Ljava/util/Set;Ljava/lang/String;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/ObjectNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getProperties ()Ljava/util/List;
+	public final fun getRequired ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/PolymorphicNode : me/kpavlov/kt/schema/generator/core/ir/TypeNode {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Lme/kpavlov/kt/schema/generator/core/ir/Discriminator;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Lme/kpavlov/kt/schema/generator/core/ir/Discriminator;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Lme/kpavlov/kt/schema/generator/core/ir/Discriminator;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Lme/kpavlov/kt/schema/generator/core/ir/Discriminator;Ljava/lang/String;)Lme/kpavlov/kt/schema/generator/core/ir/PolymorphicNode;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/PolymorphicNode;Ljava/lang/String;Ljava/util/List;Lme/kpavlov/kt/schema/generator/core/ir/Discriminator;Ljava/lang/String;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/PolymorphicNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBaseName ()Ljava/lang/String;
+	public fun getDescription ()Ljava/lang/String;
+	public final fun getDiscriminator ()Lme/kpavlov/kt/schema/generator/core/ir/Discriminator;
+	public final fun getSubtypes ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/PrimitiveKind : java/lang/Enum {
+	public static final field BOOLEAN Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;
+	public static final field DOUBLE Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;
+	public static final field FLOAT Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;
+	public static final field INT Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;
+	public static final field LONG Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;
+	public static final field STRING Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;
+	public static fun values ()[Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/PrimitiveNode : me/kpavlov/kt/schema/generator/core/ir/TypeNode {
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;Ljava/lang/String;)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;Ljava/lang/String;)Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveNode;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveNode;Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;Ljava/lang/String;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveNode;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getDescription ()Ljava/lang/String;
+	public final fun getKind ()Lme/kpavlov/kt/schema/generator/core/ir/PrimitiveKind;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/Property {
+	public fun <init> (Ljava/lang/String;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ZZLjava/lang/Object;ZLjava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ZZLjava/lang/Object;ZLjava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun component5 ()Z
+	public final fun component6 ()Ljava/lang/Object;
+	public final fun component7 ()Z
+	public final fun component8 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ZZLjava/lang/Object;ZLjava/util/Map;)Lme/kpavlov/kt/schema/generator/core/ir/Property;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/Property;Ljava/lang/String;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ZZLjava/lang/Object;ZLjava/util/Map;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/Property;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnnotations ()Ljava/util/Map;
+	public final fun getDefaultValue ()Ljava/lang/Object;
+	public final fun getDeprecated ()Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getHasDefaultValue ()Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getType ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+	public fun hashCode ()I
+	public final fun isConstant ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class me/kpavlov/kt/schema/generator/core/ir/SchemaIntrospector {
+	public abstract fun getConfig ()Ljava/lang/Object;
+	public abstract fun introspect (Ljava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/SubtypeRef {
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeId;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeId;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lme/kpavlov/kt/schema/generator/core/ir/TypeId;
+	public final fun component2 ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;
+	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/TypeId;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;)Lme/kpavlov/kt/schema/generator/core/ir/SubtypeRef;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/SubtypeRef;Lme/kpavlov/kt/schema/generator/core/ir/TypeId;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/SubtypeRef;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Lme/kpavlov/kt/schema/generator/core/ir/TypeId;
+	public final fun getRef ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/TypeGraph {
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/util/Map;)V
+	public final fun component1 ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/util/Map;)Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/util/Map;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNodes ()Ljava/util/Map;
+	public final fun getRoot ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class me/kpavlov/kt/schema/generator/core/ir/TypeGraphTransformer {
+	public abstract fun getConfig ()Ljava/lang/Object;
+	public abstract fun transform (Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;Ljava/lang/String;)Ljava/lang/Object;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/TypeId {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lme/kpavlov/kt/schema/generator/core/ir/TypeId;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/TypeId;Ljava/lang/String;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeId;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class me/kpavlov/kt/schema/generator/core/ir/TypeNode {
+	public abstract fun getDescription ()Ljava/lang/String;
+}
+
+public abstract interface class me/kpavlov/kt/schema/generator/core/ir/TypeRef {
+	public abstract fun getNullable ()Z
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/TypeRef$Inline : me/kpavlov/kt/schema/generator/core/ir/TypeRef {
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;Z)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;
+	public final fun component2 ()Z
+	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;Z)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Inline;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Inline;Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;ZILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Inline;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNode ()Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;
+	public fun getNullable ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref : me/kpavlov/kt/schema/generator/core/ir/TypeRef {
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeId;Z)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeId;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lme/kpavlov/kt/schema/generator/core/ir/TypeId;
+	public final fun component2 ()Z
+	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/TypeId;Z)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;Lme/kpavlov/kt/schema/generator/core/ir/TypeId;ZILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Lme/kpavlov/kt/schema/generator/core/ir/TypeId;
+	public fun getNullable ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/reflect/ReflectionClassIntrospector : me/kpavlov/kt/schema/generator/core/ir/SchemaIntrospector {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/generator/reflect/ReflectionClassIntrospector;
+	public synthetic fun getConfig ()Ljava/lang/Object;
+	public fun getConfig ()Lkotlin/Unit;
+	public synthetic fun introspect (Ljava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;
+	public fun introspect (Lkotlin/reflect/KClass;)Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;
+}
+
+public final class me/kpavlov/kt/schema/generator/reflect/ReflectionFunctionIntrospector : me/kpavlov/kt/schema/generator/core/ir/SchemaIntrospector {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/generator/reflect/ReflectionFunctionIntrospector;
+	public synthetic fun getConfig ()Ljava/lang/Object;
+	public fun getConfig ()Lkotlin/Unit;
+	public synthetic fun introspect (Ljava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;
+	public fun introspect (Lkotlin/reflect/KCallable;)Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;
+}
+
+public final class me/kpavlov/kt/schema/generator/reflect/ReflectionUtilsKt {
+	public static final fun extractNameOverride (Ljava/util/List;)Ljava/lang/String;
+}
+

@@ -6,7 +6,6 @@ updates:
   - package-ecosystem: "gradle"
     directories: 
     - "/"
-    - "/gradle-plugin-integration-tests"
     - "/examples/gradle-google-ksp"
     schedule:
       interval: "daily"
