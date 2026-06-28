@@ -31,8 +31,8 @@ dependencies {
 }
 
 ksp {
-    arg("kotlinx.schema.withSchemaObject", "true")
-    arg("kotlinx.schema.visibility", "")
+    arg("me.kpavlov.kt.schema.withSchemaObject", "true")
+    arg("me.kpavlov.kt.schema.visibility", "")
 }
 
 // KSP generates sources to build/generated/ksp/main/kotlin

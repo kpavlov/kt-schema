@@ -1,7 +1,7 @@
 package com.example.shapes
 
-import kotlinx.schema.Description
-import kotlinx.schema.Schema
+import me.kpavlov.kt.schema.Description
+import me.kpavlov.kt.schema.Schema
 
 /**
  * A geometric shape. This sealed class demonstrates polymorphic schema generation.

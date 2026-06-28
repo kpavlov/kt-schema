@@ -1,4 +1,4 @@
-kotlinx.schema.generator.json.ReflectionClassJsonObjectSchemaGenerator
-kotlinx.schema.generator.json.ReflectionClassJsonSchemaGenerator
-kotlinx.schema.generator.json.ReflectionFunctionCallingSchemaGenerator
-kotlinx.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
+me.kpavlov.kt.schema.generator.json.ReflectionClassJsonObjectSchemaGenerator
+me.kpavlov.kt.schema.generator.json.ReflectionClassJsonSchemaGenerator
+me.kpavlov.kt.schema.generator.json.ReflectionFunctionCallingSchemaGenerator
+me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator

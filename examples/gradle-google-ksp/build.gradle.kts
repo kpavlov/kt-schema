@@ -59,8 +59,8 @@ tasks.named("compileKotlinJs") {
 
 // Configure KSP arguments
 ksp {
-    arg("kotlinx.schema.withSchemaObject", "true")
-    arg("kotlinx.schema.visibility", "internal")
+    arg("me.kpavlov.kt.schema.withSchemaObject", "true")
+    arg("me.kpavlov.kt.schema.visibility", "internal")
 }
 
 // Add KSP processor for common target

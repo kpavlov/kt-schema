@@ -1,1 +1,1 @@
-kotlinx.schema.ksp.generator.UnifiedKspSchemaGenerator
+me.kpavlov.kt.schema.ksp.generator.UnifiedKspSchemaGenerator

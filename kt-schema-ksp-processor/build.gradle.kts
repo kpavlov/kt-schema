@@ -13,7 +13,7 @@ kotlin {
     compilerOptions {
         optIn.set(
             listOf(
-                "kotlinx.schema.generator.core.InternalSchemaGeneratorApi",
+                "me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi",
             ),
         )
     }

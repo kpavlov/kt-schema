@@ -30,8 +30,8 @@ subprojects {
 kover {
     reports {
         filters {
-            includes.classes("kotlinx.schema.*")
-            excludes.classes("kotlinx.schema.ksp.ir.*", "*Test") // tested indirectly
+            includes.classes("me.kpavlov.kt.schema.*")
+            excludes.classes("me.kpavlov.kt.schema.ksp.ir.*", "*Test") // tested indirectly
         }
         total {
             xml {}

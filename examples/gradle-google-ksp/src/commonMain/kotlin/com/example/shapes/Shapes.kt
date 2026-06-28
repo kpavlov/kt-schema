@@ -2,8 +2,8 @@
 
 package com.example.shapes
 
-import kotlinx.schema.Description
-import kotlinx.schema.Schema
+import me.kpavlov.kt.schema.Description
+import me.kpavlov.kt.schema.Schema
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
