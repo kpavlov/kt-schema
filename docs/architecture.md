@@ -129,7 +129,7 @@ Top-level modules you might interact with:
 
 - **kt-schema-annotations** — runtime annotations: @Schema and @Description
 - **kt-schema-json** — type-safe models and DSL for building JSON Schema definitions programmatically
-- **kt-schema-ksp** — core abstractions, intermediate representation (IR) for schema descriptions, introspection utils,
+- **kt-schema-generator-core** — core abstractions, intermediate representation (IR) for schema descriptions, introspection utils,
   generator interfaces
 - **kt-schema-ksp-json** — JSON Schema transformer from the IR, kotlinx-serialization schema generator
 - **kt-schema-ksp-processor** — KSP processor that scans your code and generates the extension properties:
