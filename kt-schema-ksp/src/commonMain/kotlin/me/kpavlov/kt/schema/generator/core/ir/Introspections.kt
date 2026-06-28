@@ -13,7 +13,7 @@ import kotlin.jvm.JvmStatic
  *
  * This object provides a configurable mechanism for recognizing annotations from
  * multiple frameworks (kotlinx-schema, Jackson, LangChain4j, Koog, kotlinx.serialization, etc.)
- * Configuration is loaded from `kotlinx-schema.properties` on the classpath.
+ * Configuration is loaded from `kt-schema.properties` on the classpath.
  *
  * ## Annotation name matching
  *
@@ -27,7 +27,7 @@ import kotlin.jvm.JvmStatic
  *
  * ## Configuration
  *
- * The annotation detection behavior is controlled by properties in `kotlinx-schema.properties`:
+ * The annotation detection behavior is controlled by properties in `kt-schema.properties`:
  *
  * - `introspector.annotations.description.names`: Comma-separated list of annotation names
  *   to recognize as description providers (e.g., "Description,LLMDescription,P")
@@ -42,7 +42,7 @@ import kotlin.jvm.JvmStatic
  *
  * ## Customizing Configuration
  *
- * To add support for custom annotations, create `kotlinx-schema.properties` in your project's
+ * To add support for custom annotations, create `kt-schema.properties` in your project's
  * `src/main/resources/` directory (or `src/commonMain/resources/` for multiplatform projects):
  *
  * ```properties

@@ -107,12 +107,12 @@ internal class SchemaExtensionProcessor(
         )
 
     override fun finish() {
-        logger.info("[kotlinx-schema] ✅ Done!")
+        logger.info("[kt-schema] ✅ Done!")
     }
 
     override fun onError() {
         logger.error(
-            "[kotlinx-schema] 💥 Error! KSP Processor Options: ${
+            "[kt-schema] 💥 Error! KSP Processor Options: ${
                 options.entries.joinToString(
                     prefix = "[",
                     separator = ", ",
@@ -125,10 +125,10 @@ internal class SchemaExtensionProcessor(
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val enabled = options[OPTION_ENABLED]?.trim()?.takeIf { it.isNotEmpty() } != "false"
 
-        logger.info("[kotlinx-schema] Options: ${options.entries.joinToString()}")
+        logger.info("[kt-schema] Options: ${options.entries.joinToString()}")
 
         if (!enabled) {
-            logger.info("[kotlinx-schema] Plugin is disabled")
+            logger.info("[kt-schema] Plugin is disabled")
             return emptyList()
         }
 

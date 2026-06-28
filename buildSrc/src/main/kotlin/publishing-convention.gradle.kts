@@ -33,7 +33,7 @@ mavenPublishing {
         url =
             providers
                 .gradleProperty("POM_URL")
-                .orElse("https://github.com/Kotlin/kotlinx-schema")
+                .orElse("https://github.com/kpavlov/kt-schema")
                 .get()
 
         licenses {
@@ -45,8 +45,8 @@ mavenPublishing {
         }
 
         organization {
-            name = "JetBrains"
-            url = "https://www.jetbrains.com"
+            name = "kpavlov"
+            url = "https://github.com/kpavlov"
         }
 
         developers {
@@ -54,15 +54,15 @@ mavenPublishing {
                 id = "kpavlov"
                 name = "Konstantin Pavlov"
                 email = "k.pavlov@jetbrains.com"
-                organization = "JetBrains"
-                organizationUrl = "https://jetbrains.com/"
+                organization = "kpavlov"
+                organizationUrl = "https://github.com/kpavlov"
             }
         }
 
         scm {
-            url = "https://github.com/Kotlin/kotlinx-schema"
-            connection = "scm:git:https://github.com/Kotlin/kotlinx-schema.git"
-            developerConnection = "scm:git:ssh://git@github.com/Kotlin/kotlinx-schema.git"
+            url = "https://github.com/kpavlov/kt-schema"
+            connection = "scm:git:https://github.com/kpavlov/kt-schema.git"
+            developerConnection = "scm:git:ssh://git@github.com/kpavlov/kt-schema.git"
         }
     }
 }

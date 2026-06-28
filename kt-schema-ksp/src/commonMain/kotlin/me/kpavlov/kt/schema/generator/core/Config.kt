@@ -6,7 +6,7 @@ package me.kpavlov.kt.schema.generator.core
  * This object encapsulates the configuration that controls which annotations are recognized
  * as description providers and which annotation parameters contain description text.
  *
- * Configuration is loaded lazily from `kotlinx-schema.properties` on the classpath.
+ * Configuration is loaded lazily from `kt-schema.properties` on the classpath.
  * If loading fails, the system falls back to built-in default values and continues to operate.
  *
  * ## Configuration Properties
@@ -31,7 +31,7 @@ internal expect object Config {
      * Jackson, LangChain4j, Koog, etc.) without requiring specific imports.
      *
      * Loaded lazily from the `introspector.annotations.description.names` property in
-     * `kotlinx-schema.properties`. If loading fails, falls back to built-in defaults.
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
      *
      * Default value: Description, LLMDescription, JsonPropertyDescription, JsonClassDescription, P
      */
@@ -46,7 +46,7 @@ internal expect object Config {
      * take precedence.
      *
      * Loaded lazily from the `introspector.annotations.description.attributes` property in
-     * `kotlinx-schema.properties`. If loading fails, falls back to built-in defaults.
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
      *
      * Default value: "value", "description"
      *
@@ -63,7 +63,7 @@ internal expect object Config {
      * (e.g., sealed subtypes omitted from polymorphic `oneOf` schemas).
      *
      * Loaded lazily from the `introspector.annotations.ignore.names` property in
-     * `kotlinx-schema.properties`. If loading fails, falls back to built-in defaults.
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
      *
      * Default value: SchemaIgnore, SerialSchemaIgnore, JsonIgnoreType
      */
@@ -77,7 +77,7 @@ internal expect object Config {
      * are matched **case-insensitively** against the annotation's simple name.
      *
      * Loaded lazily from the `introspector.annotations.name.names` property in
-     * `kotlinx-schema.properties`. If loading fails, falls back to built-in defaults.
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
      *
      * Default value: kotlinx.serialization.SerialName
      */
@@ -91,7 +91,7 @@ internal expect object Config {
      * priority — earlier entries take precedence.
      *
      * Loaded lazily from the `introspector.annotations.name.attributes` property in
-     * `kotlinx-schema.properties`. If loading fails, falls back to built-in defaults.
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
      *
      * Default value: "value"
      */

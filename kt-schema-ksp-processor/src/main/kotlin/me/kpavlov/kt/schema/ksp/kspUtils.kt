@@ -24,7 +24,7 @@ internal fun filterByRootPackage(
         val inRoot = pkg == rootPackage || pkg.startsWith("$rootPackage.")
         if (!inRoot) {
             logger.info(
-                "[kotlinx-schema] Skipping ${declaration.qualifiedName?.asString()} " +
+                "[kt-schema] Skipping ${declaration.qualifiedName?.asString()} " +
                     "as it is outside rootPackage '$rootPackage'",
             )
             return false

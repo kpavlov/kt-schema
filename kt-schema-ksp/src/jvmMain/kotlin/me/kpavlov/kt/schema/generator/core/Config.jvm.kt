@@ -5,7 +5,7 @@ import java.util.Properties
 import kotlin.io.bufferedReader
 import kotlin.use
 
-private const val CONFIG_FILE_NAME = "kotlinx-schema.properties"
+private const val CONFIG_FILE_NAME = "kt-schema.properties"
 private const val DESCRIPTION_NAMES_KEY = "introspector.annotations.description.names"
 private const val DESCRIPTION_ATTRIBUTES_KEY = "introspector.annotations.description.attributes"
 private const val IGNORE_NAMES_KEY = "introspector.annotations.ignore.names"
@@ -68,7 +68,7 @@ internal actual object Config {
      * Jackson, LangChain4j, Koog, etc.) without requiring specific imports.
      *
      * Loaded lazily from the `introspector.annotations.description.names` property in
-     * `kotlinx-schema.properties`. If loading fails, falls back to built-in defaults.
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
      *
      * Default value: Description, LLMDescription, JsonPropertyDescription, JsonClassDescription, P
      */
@@ -86,7 +86,7 @@ internal actual object Config {
      * with a non-null String value is returned.
      *
      * Loaded lazily from the `introspector.annotations.description.attributes` property in
-     * `kotlinx-schema.properties`. If loading fails, falls back to built-in defaults.
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
      *
      * Default value: "value", "description"
      *

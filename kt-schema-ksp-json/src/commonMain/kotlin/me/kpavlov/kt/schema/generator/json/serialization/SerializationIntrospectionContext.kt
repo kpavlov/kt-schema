@@ -466,7 +466,7 @@ internal class SerializationIntrospectionContext(
      * Checks whether the descriptor's class-level annotations include a recognized ignore marker.
      *
      * Note: Only recognizes [SerialSchemaIgnore] directly. Custom ignore annotations
-     * registered via `kotlinx-schema.properties` are not checked here because
+     * registered via `kt-schema.properties` are not checked here because
      * `Annotation::class.simpleName` is unreliable in Kotlin common code.
      */
     private fun SerialDescriptor.isSchemaIgnored(): Boolean = annotations.any { it is SerialSchemaIgnore }

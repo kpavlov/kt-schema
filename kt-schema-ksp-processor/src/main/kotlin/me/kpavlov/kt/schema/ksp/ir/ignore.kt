@@ -8,7 +8,7 @@ import me.kpavlov.kt.schema.generator.core.ir.Introspections
  * (e.g., `@SchemaIgnore`, `@SerialSchemaIgnore`, `@JsonIgnoreType`).
  *
  * Recognition is delegated to [Introspections.isIgnoreAnnotation], which performs
- * matching against a configurable set loaded from `kotlinx-schema.properties`.
+ * matching against a configurable set loaded from `kt-schema.properties`.
  * Simple names are matched case-insensitively; fully qualified names are matched
  * case-sensitively.
  *
