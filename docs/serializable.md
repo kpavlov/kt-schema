@@ -45,7 +45,7 @@ Add the `kt-schema-ksp-json` dependency to your project:
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("me.kpavlov:kt-schema-ksp-json:<version>")
+    implementation("me.kpavlov.kt.schemakt-schema-ksp-json:<version>")
 }
 ```
 

@@ -1,4 +1,4 @@
-# Module kotlinx-schema-generator-json
+# Module kt-schema-ksp-json
 
 Runtime JSON Schema generation from Kotlin classes and functions.
 
@@ -12,12 +12,12 @@ Concrete implementations of schema generators using Kotlin reflection (JVM) and 
 
 ### Reflection-Based (JVM Only)
 
-- [ReflectionClassJsonSchemaGenerator][kotlinx.schema.generator.json.ReflectionClassJsonSchemaGenerator] - generates schemas from any KClass via reflection
-- [ReflectionFunctionCallingSchemaGenerator][kotlinx.schema.generator.json.ReflectionFunctionCallingSchemaGenerator] - generates function calling schemas from KCallable
+- [ReflectionClassJsonSchemaGenerator][me.kpavlov.kt.schema.generator.json.ReflectionClassJsonSchemaGenerator] - generates schemas from any KClass via reflection
+- [ReflectionFunctionCallingSchemaGenerator][me.kpavlov.kt.schema.generator.json.ReflectionFunctionCallingSchemaGenerator] - generates function calling schemas from KCallable
 
 ### Serialization-Based (Multiplatform)
 
-- [SerializationClassJsonSchemaGenerator][kotlinx.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator] - generates schemas from @Serializable classes (works on JVM, Native, JS, Wasm)
+- [SerializationClassJsonSchemaGenerator][me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator] - generates schemas from @Serializable classes (works on JVM, Native, JS, Wasm)
 
 ## Examples
 
@@ -37,7 +37,7 @@ val funcSchema = funcGenerator.generateSchema(::myFunction)
 
 ```kotlin
 import kotlinx.serialization.Serializable
-import kotlinx.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
+import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
 
 @Serializable
 data class User(val name: String, val email: String? = null)
@@ -58,7 +58,7 @@ val schema = generator.generateSchema(User.serializer().descriptor)
 **Serialization Generators (Multiplatform):**
 - Works on all kotlinx-serialization targets (JVM, Native, JS, Wasm)
 - Consistent with kotlinx-serialization behavior
-- [`@SerialSchemaIgnore`][kotlinx.schema.generator.json.SerialSchemaIgnore] to exclude sealed subtypes from generated schemas
+- [`@SerialSchemaIgnore`][me.kpavlov.kt.schema.generator.json.SerialSchemaIgnore] to exclude sealed subtypes from generated schemas
 
 ## Limitations
 
@@ -69,15 +69,15 @@ val schema = generator.generateSchema(User.serializer().descriptor)
 **Serialization Generators:**
 - Requires [`@Serializable`][kotlinx.serialization.Serializable] annotation
 - Cannot extract actual default values (only detects presence)
-- [`@Description`][kotlinx.schema.Description] is not visible in
+- [`@Description`][me.kpavlov.kt.schema.Description] is not visible in
   [`SerialDescriptor`][kotlinx.serialization.descriptors.SerialDescriptor] (it lacks `@SerialInfo`).
-  Use [`@SerialDescription`][kotlinx.schema.generator.json.SerialDescription] instead,
+  Use [`@SerialDescription`][me.kpavlov.kt.schema.generator.json.SerialDescription] instead,
   which is recognized automatically without any extra configuration.
 
-# Package kotlinx.schema.generator.json
+# Package me.kpavlov.kt.schema.generator.json
 
 Reflection-based JSON Schema generators and configuration.
 
-# Package kotlinx.schema.generator.json.serialization
+# Package me.kpavlov.kt.schema.generator.json.serialization
 
 Schema generation from kotlinx-serialization descriptors.

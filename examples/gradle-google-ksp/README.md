@@ -134,12 +134,12 @@ with [MCP inspector](https://modelcontextprotocol.io/docs/tools/inspector):
 
 ```kotlin
 ksp {
-    arg("kotlinx.schema.withSchemaObject", "true")  // Generate JsonObject accessor
-    arg("kotlinx.schema.visibility", "internal")     // Control generated code visibility
+    arg("me.kpavlov.kt.schema.withSchemaObject", "true")  // Generate JsonObject accessor
+    arg("me.kpavlov.kt.schema.visibility", "internal")     // Control generated code visibility
 }
 
 dependencies {
-    add("kspCommonMainMetadata", "org.jetbrains.kotlinx:kotlinx-schema-ksp:$version")
+    add("kspCommonMainMetadata", "me.kpavlov.kt.schemakt-schema-ksp:$version")
 }
 ```
 

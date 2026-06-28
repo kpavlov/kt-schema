@@ -1,0 +1,27 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, macosX64, mingwX64, tvosArm64, tvosSimulatorArm64, tvosX64, wasmJs, watchosArm32, watchosArm64, watchosSimulatorArm64, watchosX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <me.kpavlov.kt.schema:kt-schema-annotations>
+open annotation class me.kpavlov.kt.schema/Description : kotlin/Annotation { // me.kpavlov.kt.schema/Description|null[0]
+    constructor <init>(kotlin/String) // me.kpavlov.kt.schema/Description.<init>|<init>(kotlin.String){}[0]
+
+    final val value // me.kpavlov.kt.schema/Description.value|{}value[0]
+        final fun <get-value>(): kotlin/String // me.kpavlov.kt.schema/Description.value.<get-value>|<get-value>(){}[0]
+}
+
+open annotation class me.kpavlov.kt.schema/Schema : kotlin/Annotation { // me.kpavlov.kt.schema/Schema|null[0]
+    constructor <init>(kotlin/String = ..., kotlin/Boolean = ...) // me.kpavlov.kt.schema/Schema.<init>|<init>(kotlin.String;kotlin.Boolean){}[0]
+
+    final val value // me.kpavlov.kt.schema/Schema.value|{}value[0]
+        final fun <get-value>(): kotlin/String // me.kpavlov.kt.schema/Schema.value.<get-value>|<get-value>(){}[0]
+    final val withSchemaObject // me.kpavlov.kt.schema/Schema.withSchemaObject|{}withSchemaObject[0]
+        final fun <get-withSchemaObject>(): kotlin/Boolean // me.kpavlov.kt.schema/Schema.withSchemaObject.<get-withSchemaObject>|<get-withSchemaObject>(){}[0]
+}
+
+open annotation class me.kpavlov.kt.schema/SchemaIgnore : kotlin/Annotation { // me.kpavlov.kt.schema/SchemaIgnore|null[0]
+    constructor <init>() // me.kpavlov.kt.schema/SchemaIgnore.<init>|<init>(){}[0]
+}

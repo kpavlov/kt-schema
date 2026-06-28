@@ -1,0 +1,181 @@
+public final class me/kpavlov/kt/schema/generator/json/FunctionCallingSchemaConfig : me/kpavlov/kt/schema/generator/json/JsonSchemaConfig {
+	public static final field Companion Lme/kpavlov/kt/schema/generator/json/FunctionCallingSchemaConfig$Companion;
+	public fun <init> ()V
+	public fun <init> (ZZZZZZ)V
+	public synthetic fun <init> (ZZZZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getStrictMode ()Z
+}
+
+public final class me/kpavlov/kt/schema/generator/json/FunctionCallingSchemaConfig$Companion {
+	public final fun getDefault ()Lme/kpavlov/kt/schema/generator/json/FunctionCallingSchemaConfig;
+	public final fun getSimple ()Lme/kpavlov/kt/schema/generator/json/FunctionCallingSchemaConfig;
+	public final fun getStrict ()Lme/kpavlov/kt/schema/generator/json/FunctionCallingSchemaConfig;
+}
+
+public class me/kpavlov/kt/schema/generator/json/JsonSchemaConfig {
+	public static final field Companion Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig$Companion;
+	public fun <init> ()V
+	public fun <init> (ZZZZZZ)V
+	public synthetic fun <init> (ZZZZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIncludeOpenAPIPolymorphicDiscriminator ()Z
+	public final fun getIncludePolymorphicDiscriminator ()Z
+	public final fun getRequireNullableFields ()Z
+	public final fun getRespectDefaultPresence ()Z
+	public final fun getUseNullableField ()Z
+	public final fun getUseUnionTypes ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/JsonSchemaConfig$Companion {
+	public final fun getDefault ()Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;
+	public final fun getOpenAPI ()Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;
+	public final fun getStrict ()Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;
+}
+
+public abstract interface class me/kpavlov/kt/schema/generator/json/JsonSchemaGenerator : me/kpavlov/kt/schema/generator/core/SchemaGenerator {
+	public synthetic fun encodeToString (Ljava/lang/Object;)Ljava/lang/String;
+	public fun encodeToString (Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+	public abstract fun generateSchema (Ljava/lang/Object;)Lkotlinx/serialization/json/JsonObject;
+	public fun generateSchemaString (Ljava/lang/Object;)Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/JsonSchemaGenerator$DefaultImpls {
+	public static fun encodeToString (Lme/kpavlov/kt/schema/generator/json/JsonSchemaGenerator;Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+	public static fun generateSchemaString (Lme/kpavlov/kt/schema/generator/json/JsonSchemaGenerator;Ljava/lang/Object;)Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/ReflectionClassJsonObjectSchemaGenerator : me/kpavlov/kt/schema/generator/core/AbstractSchemaGenerator {
+	public static final field Companion Lme/kpavlov/kt/schema/generator/json/ReflectionClassJsonObjectSchemaGenerator$Companion;
+	public fun <init> ()V
+	public fun <init> (Lkotlinx/serialization/json/Json;Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;)V
+	public synthetic fun encodeToString (Ljava/lang/Object;)Ljava/lang/String;
+	public fun encodeToString (Lkotlinx/serialization/json/JsonObject;)Ljava/lang/String;
+	public synthetic fun getRootName (Ljava/lang/Object;)Ljava/lang/String;
+	public fun schemaType ()Lkotlin/reflect/KClass;
+	public fun targetType ()Lkotlin/reflect/KClass;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/ReflectionClassJsonObjectSchemaGenerator$Companion {
+	public final fun getDefault ()Lme/kpavlov/kt/schema/generator/json/ReflectionClassJsonObjectSchemaGenerator;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/ReflectionClassJsonSchemaGenerator : me/kpavlov/kt/schema/generator/core/AbstractSchemaGenerator {
+	public static final field Companion Lme/kpavlov/kt/schema/generator/json/ReflectionClassJsonSchemaGenerator$Companion;
+	public fun <init> ()V
+	public fun <init> (Lkotlinx/serialization/json/Json;Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;)V
+	public synthetic fun encodeToString (Ljava/lang/Object;)Ljava/lang/String;
+	public fun encodeToString (Lme/kpavlov/kt/schema/json/JsonSchema;)Ljava/lang/String;
+	public synthetic fun getRootName (Ljava/lang/Object;)Ljava/lang/String;
+	public fun schemaType ()Lkotlin/reflect/KClass;
+	public fun targetType ()Lkotlin/reflect/KClass;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/ReflectionClassJsonSchemaGenerator$Companion {
+	public final fun getDefault ()Lme/kpavlov/kt/schema/generator/json/ReflectionClassJsonSchemaGenerator;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/ReflectionFunctionCallingSchemaGenerator : me/kpavlov/kt/schema/generator/core/AbstractSchemaGenerator {
+	public static final field Companion Lme/kpavlov/kt/schema/generator/json/ReflectionFunctionCallingSchemaGenerator$Companion;
+	public fun <init> ()V
+	public fun <init> (Lkotlinx/serialization/json/Json;Lme/kpavlov/kt/schema/generator/json/FunctionCallingSchemaConfig;)V
+	public synthetic fun encodeToString (Ljava/lang/Object;)Ljava/lang/String;
+	public fun encodeToString (Lme/kpavlov/kt/schema/json/FunctionCallingSchema;)Ljava/lang/String;
+	public synthetic fun getRootName (Ljava/lang/Object;)Ljava/lang/String;
+	public fun schemaType ()Lkotlin/reflect/KClass;
+	public fun targetType ()Lkotlin/reflect/KClass;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/ReflectionFunctionCallingSchemaGenerator$Companion {
+	public final fun getDefault ()Lme/kpavlov/kt/schema/generator/json/ReflectionFunctionCallingSchemaGenerator;
+}
+
+public abstract interface annotation class me/kpavlov/kt/schema/generator/json/SerialDescription : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public final synthetic class me/kpavlov/kt/schema/generator/json/SerialDescription$Impl : me/kpavlov/kt/schema/generator/json/SerialDescription {
+	public fun <init> (Ljava/lang/String;)V
+	public final synthetic fun value ()Ljava/lang/String;
+}
+
+public abstract interface annotation class me/kpavlov/kt/schema/generator/json/SerialSchemaIgnore : java/lang/annotation/Annotation {
+}
+
+public final synthetic class me/kpavlov/kt/schema/generator/json/SerialSchemaIgnore$Impl : me/kpavlov/kt/schema/generator/json/SerialSchemaIgnore {
+	public fun <init> ()V
+}
+
+public final class me/kpavlov/kt/schema/generator/json/TypeGraphToFunctionCallingSchemaTransformer : me/kpavlov/kt/schema/generator/core/ir/AbstractTypeGraphTransformer {
+	public fun <init> ()V
+	public fun <init> (Lme/kpavlov/kt/schema/generator/json/FunctionCallingSchemaConfig;)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/json/FunctionCallingSchemaConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun getConfig ()Ljava/lang/Object;
+	public fun getConfig ()Lme/kpavlov/kt/schema/generator/json/FunctionCallingSchemaConfig;
+	public synthetic fun transform (Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;Ljava/lang/String;)Ljava/lang/Object;
+	public fun transform (Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/FunctionCallingSchema;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/TypeGraphToJsonObjectSchemaTransformer : me/kpavlov/kt/schema/generator/core/ir/AbstractTypeGraphTransformer {
+	public fun <init> ()V
+	public fun <init> (Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;)V
+	public fun <init> (Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;Lkotlinx/serialization/json/Json;)V
+	public fun <init> (Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;Lkotlinx/serialization/json/Json;Lme/kpavlov/kt/schema/generator/json/TypeGraphToJsonSchemaTransformer;)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;Lkotlinx/serialization/json/Json;Lme/kpavlov/kt/schema/generator/json/TypeGraphToJsonSchemaTransformer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun getConfig ()Ljava/lang/Object;
+	public fun getConfig ()Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;
+	public synthetic fun transform (Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;Ljava/lang/String;)Ljava/lang/Object;
+	public fun transform (Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;Ljava/lang/String;)Lkotlinx/serialization/json/JsonObject;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/TypeGraphToJsonSchemaTransformer : me/kpavlov/kt/schema/generator/core/ir/AbstractTypeGraphTransformer {
+	public fun <init> (Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;)V
+	public fun <init> (Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;Lkotlinx/serialization/json/Json;)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;Lkotlinx/serialization/json/Json;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun getConfig ()Ljava/lang/Object;
+	public fun getConfig ()Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;
+	public final fun getJson ()Lkotlinx/serialization/json/Json;
+	public synthetic fun transform (Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;Ljava/lang/String;)Ljava/lang/Object;
+	public fun transform (Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;Ljava/lang/String;)Lme/kpavlov/kt/schema/json/JsonSchema;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/serialization/SerializationClassJsonSchemaGenerator : me/kpavlov/kt/schema/generator/core/AbstractSchemaGenerator {
+	public static final field Companion Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassJsonSchemaGenerator$Companion;
+	public fun <init> ()V
+	public fun <init> (Lkotlinx/serialization/json/Json;Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;)V
+	public synthetic fun <init> (Lkotlinx/serialization/json/Json;Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun encodeToString (Ljava/lang/Object;)Ljava/lang/String;
+	public fun encodeToString (Lme/kpavlov/kt/schema/json/JsonSchema;)Ljava/lang/String;
+	public synthetic fun getRootName (Ljava/lang/Object;)Ljava/lang/String;
+	public fun schemaType ()Lkotlin/reflect/KClass;
+	public fun targetType ()Lkotlin/reflect/KClass;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/serialization/SerializationClassJsonSchemaGenerator$Companion {
+	public final fun getDefault ()Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassJsonSchemaGenerator;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector : me/kpavlov/kt/schema/generator/core/ir/SchemaIntrospector {
+	public fun <init> ()V
+	public fun <init> (Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;Lkotlinx/serialization/json/Json;)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;Lkotlinx/serialization/json/Json;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun getConfig ()Ljava/lang/Object;
+	public fun getConfig ()Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;
+	public synthetic fun introspect (Ljava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;
+	public fun introspect (Lkotlinx/serialization/descriptors/SerialDescriptor;)Lme/kpavlov/kt/schema/generator/core/ir/TypeGraph;
+}
+
+public final class me/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config {
+	public fun <init> ()V
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;
+	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;)Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescriptionExtractor ()Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

@@ -14,10 +14,9 @@ dokka {
             localDirectory.set(rootDir)
         }
 
-        externalDocumentationLinks.register("kotlinx-schema") {
-            url("https://kotlin.github.io/kotlinx-schema/")
-            packageListUrl("https://kotlin.github.io/kotlinx-schema/package-list")
-        }
+//        externalDocumentationLinks.register("kt-schema") {
+//            url("https://kpavlov.github.io/kt-schema/")
+//        }
 
         externalDocumentationLinks.register("ktor") {
             url("https://api.ktor.io")

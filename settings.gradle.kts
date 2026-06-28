@@ -21,7 +21,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 include(
     ":kt-schema-annotations",
     ":kt-schema-json",
-    ":kt-schema-ksp",
+    ":kt-schema-generator-core",
     ":kt-schema-ksp-json",
     ":kt-schema-ksp-processor",
     ":ksp-integration-tests",

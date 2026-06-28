@@ -13,7 +13,7 @@ import kotlin.annotation.AnnotationTarget.CLASS
  * All three generators (KSP, reflection, serialization) recognize this annotation.
  * For serialization-based generation where annotations must carry
  * [@SerialInfo][kotlinx.serialization.SerialInfo], use
- * `@SerialSchemaIgnore` from the `kotlinx-schema-generator-json` module instead.
+ * `@SerialSchemaIgnore` from the `kt-schema-ksp-json` module instead.
  *
  * Example:
  * ```kotlin

@@ -17,7 +17,7 @@ kotlin {
             dependencies {
                 api(libs.kotlinx.serialization.json)
                 api(project(":kt-schema-annotations"))
-                api(project(":kt-schema-ksp"))
+                api(project(":kt-schema-generator-core"))
                 api(project(":kt-schema-json"))
             }
         }

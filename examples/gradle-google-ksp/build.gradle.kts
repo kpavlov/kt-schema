@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.google.ksp)
 }
 
-val kotlinxSchemaVersion = project.properties["kotlinxSchemaVersion"]
+val ktSchemaVersion = project.properties["ktSchemaVersion"]
 
 kotlin {
     compilerOptions {
@@ -24,7 +24,7 @@ kotlin {
                 implementation(dependencies.platform(libs.ktor.bom))
                 implementation(libs.koog.agents.tools)
                 implementation(libs.kotlinx.serialization.json)
-                implementation("org.jetbrains.kotlinx:kotlinx-schema-annotations:$kotlinxSchemaVersion")
+                implementation("me.kpavlov.kt.schema:kt-schema-annotations:$ktSchemaVersion")
 
                 implementation(libs.mcp.kotlin.server)
                 implementation(libs.ktor.server.cio)
@@ -65,5 +65,5 @@ ksp {
 
 // Add KSP processor for common target
 dependencies {
-    add("kspCommonMainMetadata", "org.jetbrains.kotlinx:kotlinx-schema-ksp:$kotlinxSchemaVersion")
+    add("kspCommonMainMetadata", "me.kpavlov.kt.schemakt-schema-ksp:$ktSchemaVersion")
 }

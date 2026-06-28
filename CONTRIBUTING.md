@@ -8,7 +8,7 @@ fixes/changes/improvements via pull requests.
 ## Submitting issues
 
 Both bug reports and feature requests are welcome.
-Submit issues [here](https://github.com/Kotlin/kotlinx-schema/issues).
+Submit issues [here](https://github.com/kpavlov/kt-schema/issues).
 
 * Search for existing issues to avoid reporting duplicates.
 * When submitting a bug report:
@@ -29,7 +29,7 @@ Submit issues [here](https://github.com/Kotlin/kotlinx-schema/issues).
 
 ## Submitting PRs
 
-We love PRs. Submit PRs [here](https://github.com/Kotlin/kotlinx-schema/pulls).
+We love PRs. Submit PRs [here](https://github.com/kpavlov/kt-schema/pulls).
 However, please keep in mind that maintainers will have to support the resulting code of the project,
 so do familiarize yourself with the following guidelines.
 
@@ -98,24 +98,13 @@ Make sure you have run `make all` before commit
 ### Testing Specific Modules
 
 ```bash
-# KSP processor tests (no Gradle plugin)
 ./gradlew :ksp-integration-tests:test
-
-# Gradle plugin integration tests (separate build)
-(cd gradle-plugin-integration-tests && ./gradlew build)
 ```
-
-**How gradle plugin is tested**: `gradle-plugin-integration-tests` is an independent build 
-that includes the main build via [`includeBuild()`](https://docs.gradle.org/current/userguide/organizing_gradle_projects.html#sec:composite_builds).
-It applies the plugin to a real multiplatform project, runs KSP, and verifies generated schemas. 
-This tests the plugin exactly as external users would use it, 
-without requiring maven publication during development.
 
 ### Generated Code
 
 ```
 ksp-integration-tests/build/generated/ksp/metadata/commonMain/kotlin
-gradle-plugin-integration-tests/build/generated/ksp/metadata/commonMain/kotlin
 ```
 
 ### Makefile Targets
@@ -123,7 +112,7 @@ gradle-plugin-integration-tests/build/generated/ksp/metadata/commonMain/kotlin
 - `make build` - Full build with verification and docs
 - `make apidocs` - Generate API docs (→ `docs/public/apidocs`)
 - `make lint` - Code style check with detekt
-- `make integration-test` - Runs integration tests for the Gradle plugin
+- `make integration-test` - Runs KSP integration tests
 
 ## Contacting maintainers
 
