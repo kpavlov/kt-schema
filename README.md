@@ -8,10 +8,64 @@
 [![Kotlin Multiplatform](https://img.shields.io/badge/Platforms-%20JVM%20%7C%20Wasm%2FJS%20%7C%20Native%20-blueviolet?logo=kotlin)](https://kotlinlang.org/docs/multiplatform.html)
 [![JVM](https://img.shields.io/badge/JVM-17+-red.svg?logo=jvm)](http://java.com)
 
+# kt-schema
+
+**Generate JSON schemas and LLM function calling schemas from Kotlin code — including classes you don't own.**
+
+> [!NOTE]
+> **kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema),
+> originally created by me, Konstantin Pavlov, at JetBrains, and is licensed under the Apache 2.0 License.
+
+Quick Links:
+
+- [KSP Configuration Guide](docs/ksp.md)
+- [Serialization-Based Schema Generation](docs/serializable.md)
+- [Project Architecture](docs/architecture.md)
+
+## Key Features
+
+**Generation Modes:**
+
+- **Compile-time (KSP)**: Zero runtime overhead, multiplatform, for your annotated classes
+- **Runtime (Reflection)**: JVM-only, for any class including third-party libraries
+- **Runtime (SerialDescriptor)**: Kotlin serializable classes, including open polymorphism via `SerializersModule`
+
+**LLM Integration:**
+
+- First-class support for OpenAI/Anthropic function calling format
+- Automatic strict mode and parameter validation
+- Function name and description extraction
+
+**Flexible Annotation Support:**
+
+- Recognizes `@Description`, `@LLMDescription`, `@JsonPropertyDescription`, `@P`, and more
+- Recognizes KDoc (KSP compile-time only)
+- Works with annotations from Jackson, LangChain4j, Koog without code changes
+
+**Comprehensive Type Support:**
+
+- **Enums, collections, maps, nested objects, nullability, generics** (with star-projection)
+- **Polymorphic hierarchies** — sealed classes and open polymorphism (via `SerializersModule`) with automatic `oneOf` generation and discriminator field
+- **Union types** for nullable parameters (`["string", "null"]`)
+- **Type constraints** (min/max, patterns, formats) via the JSON Schema DSL
+- **Default values** (compile-time: tracked but not extracted; runtime: fully extracted)
+- **`$ref`/`$defs` deduplication**: named types appear once in `$defs` and are referenced everywhere via `$ref`
+- **`kotlin.Any`**: maps to the empty schema `{}` (accepts any JSON value)
+
+**Developer Experience:**
+
+- Gradle plugin for one-line setup (experimental)
+- Type-safe Kotlin DSL for programmatic schema construction
+- Works everywhere: JVM, JS, iOS, macOS, Wasm
+
+> [!TIP]
+> **Need to build JSON Schemas manually?** The [**kt-schema-json**](kt-schema-json) module provides type-safe
+> Kotlin models and DSL compliant with [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/schema), with
+> support for polymorphism, discriminators, and type-safe enums. [See JSON Schema DSL section ↓](#json-schema-dsl)
+
 **Table of contents:**
 <!--- TOC -->
 
-* [Key Features](#key-features)
 * [Why kt-schema?](#why-kt-schema?)
   * [When to Use](#when-to-use)
 * [Choosing Your Approach](#choosing-your-approach)
@@ -65,63 +119,9 @@
 * [Requirements](#requirements)
 * [Code of Conduct](#code-of-conduct)
 * [License](#license)
+  * [Attribution](#attribution)
 
 <!--- END -->
-
-# kt-schema
-
-**Generate JSON schemas and LLM function calling schemas from Kotlin code — including classes you don't own.**
-
-> [!INFO]
-> **kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema),
-> originally started by Konstantin Pavlov at JetBrains, and is licensed under the Apache 2.0 License.
-
-Quick Links:
-
-- [KSP Configuration Guide](docs/ksp.md)
-- [Serialization-Based Schema Generation](docs/serializable.md)
-- [Project Architecture](docs/architecture.md)
-
-## Key Features
-
-**Generation Modes:**
-
-- **Compile-time (KSP)**: Zero runtime overhead, multiplatform, for your annotated classes
-- **Runtime (Reflection)**: JVM-only, for any class including third-party libraries
-- **Runtime (SerialDescriptor)**: Kotlin serializable classes, including open polymorphism via `SerializersModule`
-
-**LLM Integration:**
-
-- First-class support for OpenAI/Anthropic function calling format
-- Automatic strict mode and parameter validation
-- Function name and description extraction
-
-**Flexible Annotation Support:**
-
-- Recognizes `@Description`, `@LLMDescription`, `@JsonPropertyDescription`, `@P`, and more
-- Recognizes KDoc (KSP compile-time only)
-- Works with annotations from Jackson, LangChain4j, Koog without code changes
-
-**Comprehensive Type Support:**
-
-- **Enums, collections, maps, nested objects, nullability, generics** (with star-projection)
-- **Polymorphic hierarchies** — sealed classes and open polymorphism (via `SerializersModule`) with automatic `oneOf` generation and discriminator field
-- **Union types** for nullable parameters (`["string", "null"]`)
-- **Type constraints** (min/max, patterns, formats) via the JSON Schema DSL
-- **Default values** (compile-time: tracked but not extracted; runtime: fully extracted)
-- **`$ref`/`$defs` deduplication**: named types appear once in `$defs` and are referenced everywhere via `$ref`
-- **`kotlin.Any`**: maps to the empty schema `{}` (accepts any JSON value)
-
-**Developer Experience:**
-
-- Gradle plugin for one-line setup (experimental)
-- Type-safe Kotlin DSL for programmatic schema construction
-- Works everywhere: JVM, JS, iOS, macOS, Wasm
-
-> [!TIP]
-> **Need to build JSON Schemas manually?** The [**kt-schema-json**](kt-schema-json) module provides type-safe
-> Kotlin models and DSL compliant with [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/schema), with
-> support for polymorphism, discriminators, and type-safe enums. [See JSON Schema DSL section ↓](#json-schema-dsl)
 
 ## Why kt-schema?
 
