@@ -1,14 +1,21 @@
 [![Maven Central](https://img.shields.io/maven-central/v/me.kpavlov.kt.schema/kt-schema-generator-core.svg?label=Maven%20Central)](https://central.sonatype.com/search?q=me.kpavlov.kt.schema%2Fkt-schema-*)
 [![Build with Gradle](https://github.com/kpavlov/kt-schema/actions/workflows/build.yml/badge.svg)](https://github.com/kpavlov/kt-schema/actions/workflows/build.yml)
-[![Docs](https://img.shields.io/badge/Docs-Live-blue?logo=kotlin)](https://kpavlov.github.io/kt-schema/)
+[![Docs](https://img.shields.io/badge/Docs-blue?logo=github)](https://kpavlov.github.io/kt-schema/)
 [![Examples](https://img.shields.io/badge/Examples-blue?logo=github)](https://github.com/kpavlov/kt-schema/tree/main/examples)
 [![License](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](LICENSE)
-
 [![Kotlin](https://img.shields.io/badge/kotlin-2.2+-blueviolet.svg?logo=kotlin)](http://kotlinlang.org)
 [![Kotlin Multiplatform](https://img.shields.io/badge/Platforms-%20JVM%20%7C%20Wasm%2FJS%20%7C%20Native%20-blueviolet?logo=kotlin)](https://kotlinlang.org/docs/multiplatform.html)
 [![JVM](https://img.shields.io/badge/JVM-17+-red.svg?logo=jvm)](http://java.com)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/kpavlov/kt-schema)
+<div style="align-content: center">
+  <img
+    src="docs/static/social-preview-1.jpg"
+    alt="Social preview"
+    style="width: 100%; height: auto;"
+  />
+</div>
 
-# kt-schema
+# KT-Schema
 
 **Generate JSON schemas and LLM function calling schemas from Kotlin code — including classes you don't own.**
 
