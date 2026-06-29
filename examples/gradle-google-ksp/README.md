@@ -109,7 +109,6 @@ A complete example is available here: [GreetingMcpServer.kt](src/commonMain/kotl
 
 When you start the server, you may inspect the tool metadata 
 with [MCP inspector](https://modelcontextprotocol.io/docs/tools/inspector):
-![mcp-light.png](screenshots/mcp-light.png)
 
 ## Build & Run
 

@@ -1,0 +1,53 @@
+name: Examples
+
+on:
+  merge_group:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  JAVA_VERSION: 17
+  JAVA_DISTRIBUTION: temurin
+  GRADLE_BUILD_ACTION_CACHE_DEBUG_ENABLED: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          fetch-depth: 1
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v5
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          add-job-summary-as-pr-comment: on-failure
+          cache-cleanup: always
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          gradle-home-cache-includes: |
+            caches
+            notifications
+            jdks
+            caches/build-cache-1
+          gradle-home-cache-excludes: |
+            caches/keyrings
+
+      - name: Verify examples
+        run: make examples
