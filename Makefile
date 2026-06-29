@@ -1,12 +1,15 @@
 .SHELLFLAGS := -e -c
 
 .PHONY: all
-#all:clean lint build examples knit
-all:clean lint build knit
+all:clean lint build publish examples-snapshot knit
+
+.PHONY: ci
+ci:clean lint build knit apidocs publish examples-snapshot
 
 .PHONY: build
 build:clean
 	@echo "🔨 Building..."
+	@rm -rf build
 	@./gradlew --rerun-tasks  \
 		kotlinUpgradePackageLock kotlinWasmUpgradePackageLock build
 	@echo "🔨 Coverage reports..."
@@ -34,13 +37,13 @@ apidump:
 apidocs:
 	@echo "📚 Generating API documentation..."
 	@rm -rf docs/public/apidocs
-	@./gradlew clean :docs:dokkaGenerate
+	@./gradlew :docs:dokkaGenerate
 	@echo "✅ API docs generated!"
 
 .PHONY: knit
 knit:
 	@echo "🪡🧶 Running Knit check ..."
-	@./gradlew :docs:clean knit knitCheck --no-configuration-cache
+	@./gradlew knit knitCheck --no-configuration-cache
 	@./gradlew :docs:test --rerun-tasks
 	@echo "✅ Knit check completed!"
 
@@ -61,7 +64,7 @@ lint:
 publish:
 	@echo "📦 Publishing to project repository (build/project-repo)..."
 	@rm -rf build/project-repo
-	@./gradlew publishAllPublicationsToProjectRepository -Pversion=1-SNAPSHOT --rerun-tasks
+	@./gradlew publishAllPublicationsToProjectRepository -Pversion=1-SNAPSHOT
 	@echo "✅ Version '1-SNAPSHOT' was published to build/project-repo! (1-SNAPSHOT)"
 
 .PHONY: sync
@@ -73,4 +76,11 @@ examples:
 	@echo "Running examples..."
 	@(cd examples/gradle-google-ksp && rm -rf kotlin-js-store && ./gradlew clean build --no-daemon --rerun-tasks)
 	@(cd examples/maven-ksp && rm -rf target && mvn package)
+	@echo "✅ Examples complete!"
+
+.PHONY: examples-snapshot
+examples-snapshot:
+	@echo "Running examples..."
+	@(cd examples/gradle-google-ksp && rm -rf kotlin-js-store && ./gradlew clean build -PktSchemaVersion=1-SNAPSHOT --no-daemon --rerun-tasks)
+	@(cd examples/maven-ksp && rm -rf target && mvn test -U -Plocal)
 	@echo "✅ Examples complete!"

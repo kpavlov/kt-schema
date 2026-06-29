@@ -1,7 +1,5 @@
 package me.kpavlov.kt.schema.integration.functions
 
-import EmptyPackageFunctionClass
-import EmptyPackageFunctionObject
 import classFunctionJsonSchema
 import classFunctionJsonSchemaString
 import companionFunctionJsonSchema

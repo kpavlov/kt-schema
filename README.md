@@ -72,10 +72,9 @@
 
 **Generate JSON schemas and LLM function calling schemas from Kotlin code — including classes you don't own.**
 
-> [!IMPORTANT]
-> Given the highly experimental nature of this work, nothing is settled in stone.
-> [kt-schema-json](kt-schema-json) might eventually be merged
-> to [kotlinx-serialization](https://github.com/Kotlin/kotlinx.serialization).
+> [!INFO]
+> **kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema),
+> originally started by Konstantin Pavlov at JetBrains, and is licensed under the Apache 2.0 License.
 
 Quick Links:
 
@@ -1455,8 +1454,8 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 >
 > ### Attribution
 > 
-> **kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema), , originally developed by JetBrains s.r.o. and contributors, 
-> and is licensed under the Apache License, Version 2.0.
+> **kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema), 
+> originally developed by JetBrains s.r.o. and contributors, and is licensed under the Apache License, Version 2.0.
 > 
 > This project contains modified and unmodified portions of the original work. 
 > Notable changes include renaming the Kotlin packages from `kotlinx.schema` to `me.kpavlov.kt.schema`, 
