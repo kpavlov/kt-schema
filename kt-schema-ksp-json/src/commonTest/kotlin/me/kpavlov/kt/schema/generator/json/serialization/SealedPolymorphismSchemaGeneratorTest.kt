@@ -3,9 +3,6 @@
 package me.kpavlov.kt.schema.generator.json.serialization
 
 import io.kotest.assertions.json.shouldEqualJson
-import kotlinx.schema.generator.json.JsonSchemaConfig
-import me.kpavlov.kt.schema.generator.json.SerialDescription
-import me.kpavlov.kt.schema.generator.json.SerialSchemaIgnore
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -13,6 +10,9 @@ import kotlinx.serialization.json.JsonClassDiscriminator
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
+import me.kpavlov.kt.schema.generator.json.JsonSchemaConfig
+import me.kpavlov.kt.schema.generator.json.SerialDescription
+import me.kpavlov.kt.schema.generator.json.SerialSchemaIgnore
 import kotlin.test.Test
 
 class SealedPolymorphismSchemaGeneratorTest {
