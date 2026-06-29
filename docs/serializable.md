@@ -40,12 +40,12 @@ or when integrating with existing kotlinx.serialization descriptors directly.
 
 ## Setup
 
-Add the `kotlinx-schema-generator-json` dependency to your project:
+Add the `kt-schema-ksp-json` dependency to your project:
 
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-schema-generator-json:<version>")
+    implementation("me.kpavlov.kt.schema:kt-schema-ksp-json:<version>")
 }
 ```
 
@@ -59,8 +59,8 @@ Define your model using a `@Serializable` data class:
 <!--- INCLUDE
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
-import kotlinx.schema.json.encodeToString
+import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
+import me.kpavlov.kt.schema.json.encodeToString
 import kotlinx.serialization.json.Json
 -->
 ```kotlin
@@ -122,7 +122,7 @@ and `required` array:
 <!--- INCLUDE
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
+import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
 import io.kotest.assertions.json.shouldEqualJson
 -->
 ```kotlin
@@ -173,7 +173,7 @@ Properties with default values (`userAgent`) remain optional.
 <!--- INCLUDE
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
+import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
 import io.kotest.assertions.json.shouldEqualJson
 -->
 ```kotlin
@@ -240,15 +240,15 @@ different annotation, supply a custom `DescriptionExtractor` — see [Custom des
 Unlike `@Description`, it carries `@SerialInfo` so the serialization runtime preserves it in
 `SerialDescriptor` — no custom configuration required.
 
-It ships in the `kotlinx-schema-generator-json` module (`kotlinx.schema.generator.json` package),
+It ships in the `kt-schema-ksp-json` module (`me.kpavlov.kt.schema.generator.json` package),
 so you already have it when using the serialization-based generator.
 
 Add it to your class and constructor parameters:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.generator.json.SerialDescription
-import kotlinx.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
+import me.kpavlov.kt.schema.generator.json.SerialDescription
+import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 -->
@@ -317,11 +317,11 @@ Define your annotation and model:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.generator.json.JsonSchemaConfig
-import kotlinx.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
-import kotlinx.schema.generator.json.serialization.SerializationClassSchemaIntrospector
-import kotlinx.schema.json.JsonSchema
-import kotlinx.schema.json.encodeToString
+import me.kpavlov.kt.schema.generator.json.JsonSchemaConfig
+import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
+import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassSchemaIntrospector
+import me.kpavlov.kt.schema.json.JsonSchema
+import me.kpavlov.kt.schema.json.encodeToString
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialInfo
 import kotlinx.serialization.SerialName
@@ -401,7 +401,7 @@ This code prints:
 > [!IMPORTANT]
 > `SerialDescriptor` only carries annotations marked with
 > [`@SerialInfo`](https://kotlinlang.org/api/kotlinx.serialization/kotlinx-serialization-core/kotlinx.serialization/-serial-info/).
-> The built-in `@Description` from `kotlinx-schema-annotations` lacks `@SerialInfo` and is therefore **not** visible here.
+> The built-in `@Description` from `kt-schema-annotations` lacks `@SerialInfo` and is therefore **not** visible here.
 > Use [`@SerialDescription`](#serialdescription-support) from this module instead — it carries `@SerialInfo` and works with `Default` out of the box.
 > If you're describing classes you don't own, use the [KSP processor](ksp.md) or
 > the [reflection-based generator](../README.md#runtime-schema-generation).
@@ -412,10 +412,10 @@ Pass a `JsonSchemaConfig` to control how nullable types and required fields appe
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.generator.json.JsonSchemaConfig
-import kotlinx.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
-import kotlinx.schema.json.JsonSchema
-import kotlinx.schema.json.encodeToString
+import me.kpavlov.kt.schema.generator.json.JsonSchemaConfig
+import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
+import me.kpavlov.kt.schema.json.JsonSchema
+import me.kpavlov.kt.schema.json.encodeToString
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.json.Json
@@ -498,9 +498,9 @@ For sealed classes, the compiler embeds all subtypes in the `SerialDescriptor` �
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
-import kotlinx.schema.json.JsonSchema
-import kotlinx.schema.json.encodeToString
+import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
+import me.kpavlov.kt.schema.json.JsonSchema
+import me.kpavlov.kt.schema.json.encodeToString
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.json.Json
@@ -621,7 +621,7 @@ The `Internal` subtype compiles and serializes normally — only schema generati
 
 > [!NOTE]
 > `@SerialSchemaIgnore` carries `@SerialInfo` so it's preserved in `SerialDescriptor`.
-> The plain `@SchemaIgnore` annotation (from `kotlinx-schema-annotations`) works with KSP and
+> The plain `@SchemaIgnore` annotation (from `kt-schema-annotations`) works with KSP and
 > reflection generators but is not visible through `SerialDescriptor`.
 
 ### Open polymorphism
@@ -632,7 +632,7 @@ appear in the generated schema:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
+import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
@@ -696,4 +696,4 @@ of subtypes to produce a schema limited to those types.
 - [Annotation Reference](../README.md#using-schema-and-description-annotations) — `@Schema`, `@Description`, and `@SerialDescription` usage
 - [Multi-Framework Annotation Support](../README.md#multi-framework-annotation-support) — Recognize Jackson, LangChain4j, and other annotations
 - [Runtime Schema Generation](../README.md#runtime-schema-generation) — Reflection-based alternative for third-party classes
-- [JSON Schema DSL](../kotlinx-schema-json/README.md) — Manual schema construction
+- [JSON Schema DSL](../kt-schema-json/README.md) — Manual schema construction

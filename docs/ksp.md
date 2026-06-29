@@ -7,14 +7,10 @@
   * [Google KSP gradle plugin](#google-ksp-gradle-plugin)
     * [Multiplatform projects](#multiplatform-projects)
     * [JVM-only projects](#jvm-only-projects)
-  * [Kotlinx-Schema gradle plugin](#kotlinx-schema-gradle-plugin)
-    * [Multiplatform projects](#multiplatform-projects)
-    * [JVM-only projects](#jvm-only-projects)
   * [Maven Plugin](#maven-plugin)
 * [Configuration options](#configuration-options)
   * [Options reference](#options-reference)
   * [Filtering by class/function name](#filtering-by-classfunction-name)
-    * [Kotlinx-Schema Gradle plugin](#kotlinx-schema-gradle-plugin)
     * [Google KSP plugin](#google-ksp-plugin)
     * [Maven plugin](#maven-plugin)
   * [Option priority](#option-priority)
@@ -23,7 +19,7 @@
 
 <!--- END -->
 
-Generate JSON schemas at compile time with zero runtime overhead using the `kotlinx-schema` KSP processor.
+Generate JSON schemas at compile time with zero runtime overhead using the `kt-schema` KSP processor.
 
 ## Setup
 
@@ -42,8 +38,8 @@ plugins {
 }
 
 dependencies {
-    add("kspCommonMainMetadata", "org.jetbrains.kotlinx:kotlinx-schema-ksp:<version>")
-    implementation("org.jetbrains.kotlinx:kotlinx-schema-annotations:<version>")
+    add("kspCommonMainMetadata", "me.kpavlov.kt.schema:kt-schema-ksp:<version>")
+    implementation("me.kpavlov.kt.schema:kt-schema-annotations:<version>")
 }
 
 kotlin {
@@ -56,11 +52,11 @@ tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
 }
 
 ksp {
-    arg("kotlinx.schema.rootPackage", "com.example")
+    arg("me.kpavlov.kt.schema.rootPackage", "com.example")
 }
 ```
 
-Check out an [example project](https://github.com/Kotlin/kotlinx-schema/tree/main/examples/gradle-google-ksp).
+Check out an [example project](https://github.com/kpavlov/kt-schema/tree/main/examples/gradle-google-ksp).
 
 #### JVM-only projects
 
@@ -71,81 +67,12 @@ plugins {
 }
 
 dependencies {
-    ksp("org.jetbrains.kotlinx:kotlinx-schema-ksp:<version>")
-    implementation("org.jetbrains.kotlinx:kotlinx-schema-annotations:<version>")
+    ksp("me.kpavlov.kt.schemakt-schema-ksp:<version>")
+    implementation("me.kpavlov.kt.schema:kt-schema-annotations:<version>")
 }
 
 sourceSets.main.kotlin.srcDir("build/generated/ksp/main/kotlin")
 ```
-
-### Kotlinx-Schema gradle plugin
-
-The plugin automatically handles KSP configuration, source set registration, and task dependencies,
-and provides additional configuration options (DSL) for schema generation.
-
-1. Register the plugin in `settings.gradle.kts`:
-
-    ```kotlin
-    pluginManagement {
-        repositories {
-            google()
-            mavenCentral()
-        }
-        
-        resolutionStrategy {
-            eachPlugin {
-                if (requested.id.id == "org.jetbrains.kotlinx.schema.ksp") {
-                    useModule("org.jetbrains.kotlinx:kotlinx-schema-gradle-plugin:<version>")
-                }
-            }
-        }
-    }
-    ```
-
-2. Apply the plugin and dependencies in your `build.gradle.kts`:
-
-#### Multiplatform projects
-
-```kotlin
-plugins {
-    kotlin("multiplatform")
-    id("org.jetbrains.kotlinx.schema.ksp")
-}
-
-kotlin {
-    sourceSets.commonMain.dependencies {
-        implementation("org.jetbrains.kotlinx:kotlinx-schema-annotations:<version>")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:<version>") // Required for withSchemaObject
-    }
-}
-
-kotlinxSchema {
-    rootPackage.set("com.example")
-}
-```
-
-#### JVM-only projects
-
-```kotlin
-plugins {
-    kotlin("jvm")
-    id("org.jetbrains.kotlinx.schema.ksp")
-}
-
-dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-schema-annotations:<version>")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:<version>")
-}
-
-kotlinxSchema {
-    rootPackage.set("com.example")
-}
-```
-
-**Notes:**
-- You do NOT need to apply the KSP plugin yourself — the Gradle plugin does it.
-- You do NOT need to add generated source directories — the plugin does it.
-- For an example project, see [gradle-plugin-integration-tests](https://github.com/Kotlin/kotlinx-schema/tree/main/gradle-plugin-integration-tests).
 
 ### Maven Plugin
 
@@ -163,14 +90,14 @@ and include the annotations library in your project.
     <extensions>true</extensions>
     <dependencies>
         <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-schema-ksp</artifactId>
-            <version>${kotlinx-schema.version}</version>
+            <groupId>me.kpavlov</groupId>
+            <artifactId>kt-schema-ksp</artifactId>
+            <version>${kt-schema.version}</version>
         </dependency>
     </dependencies>
     <configuration>
         <options>
-            <kotlinx.schema.rootPackage>com.example</kotlinx.schema.rootPackage>
+            <me.kpavlov.kt.schema.rootPackage>com.example</me.kpavlov.kt.schema.rootPackage>
         </options>
     </configuration>
 </plugin>
@@ -178,19 +105,19 @@ and include the annotations library in your project.
 <!-- In <dependencies> -->
 <dependencies>
     <dependency>
-        <groupId>org.jetbrains.kotlinx</groupId>
-        <artifactId>kotlinx-schema-annotations-jvm</artifactId>
-        <version>${kotlinx-schema.version}</version>
+        <groupId>me.kpavlov</groupId>
+        <artifactId>kt-schema-annotations</artifactId>
+        <version>${kt-schema.version}</version>
     </dependency>
 </dependencies>
 
 <properties>
-<!-- check latest version: https://central.sonatype.com/artifact/org.jetbrains.kotlinx/kotlinx-schema-ksp -->
-<kotlinx-schema.version>0.0.5</kotlinx-schema.version>
+<!-- check latest version: https://central.sonatype.com/artifact/me.kpavlov/kt-schema-ksp -->
+<kt-schema.version>0.0.5</kt-schema.version>
 </properties>
 ```
 
-Check out an [example project](https://github.com/Kotlin/kotlinx-schema/tree/main/examples/maven-ksp).
+Check out an [example project](https://github.com/kpavlov/kt-schema/tree/main/examples/maven-ksp).
 
 ## Configuration options
 
@@ -209,7 +136,7 @@ Options can be set globally in your build configuration or overridden per-class 
 
 ### Filtering by class/function name
 
-Use `kotlinx.schema.include` and `kotlinx.schema.exclude` to control exactly which annotated classes 
+Use `me.kpavlov.kt.schema.include` and `me.kpavlov.kt.schema.exclude` to control exactly which annotated classes 
 and functions get schemas generated — without touching the annotations themselves. 
 Both options accept a comma- or semicolon-separated list of glob patterns matched against the fully qualified name.
 
@@ -227,24 +154,12 @@ Both options accept a comma- or semicolon-separated list of glob patterns matche
 - `exclude` is applied after `include` — a symbol matching any exclude pattern is always skipped.
 - Both options apply to classes and functions, and work alongside `rootPackage`; the root package filter runs first.
 
-#### Kotlinx-Schema Gradle plugin
-
-```kotlin
-kotlinxSchema {
-    // Generate schemas only for symbols in the api and dto subpackages
-    include.set("com.example.api.**, com.example.dto.**")
-
-    // Skip internal implementation symbols even if they match the include pattern
-    exclude.set("**.internal.**, **.*Internal")
-}
-```
-
 #### Google KSP plugin
 
 ```kotlin
 ksp {
-    arg("kotlinx.schema.include", "com.example.api.**, com.example.dto.**")
-    arg("kotlinx.schema.exclude", "**.internal.**, **.*Internal")
+    arg("me.kpavlov.kt.schema.include", "com.example.api.**, com.example.dto.**")
+    arg("me.kpavlov.kt.schema.exclude", "**.internal.**, **.*Internal")
 }
 ```
 
@@ -253,8 +168,8 @@ ksp {
 ```xml
 <configuration>
     <options>
-        <kotlinx.schema.include>com.example.api.**, com.example.dto.**</kotlinx.schema.include>
-        <kotlinx.schema.exclude>**.internal.**, **.*Internal</kotlinx.schema.exclude>
+        <me.kpavlov.kt.schema.include>com.example.api.**, com.example.dto.**</me.kpavlov.kt.schema.include>
+        <me.kpavlov.kt.schema.exclude>**.internal.**, **.*Internal</me.kpavlov.kt.schema.exclude>
     </options>
 </configuration>
 ```
@@ -267,8 +182,7 @@ ksp {
 
 1. **Annotation Parameter** (highest) — `@Schema(withSchemaObject = true)`
 2. **KSP Argument** — Global processor options (e.g., `arg()` in Gradle or `<options>` in Maven)
-3. **Gradle Option** (Plugin only) — `kotlinxSchema { withSchemaObject.set(true) }`
-4. **Default Value** (lowest)
+3. **Default Value** (lowest)
 
 > [!TIP]
 > Use an empty string `visibility.set("")` (default) for Multiplatform projects targeting Native
@@ -281,7 +195,7 @@ For each `@Schema`-annotated class, the processor generates extension properties
 <!--- CLEAR -->
 <!--- MODULE docs -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
+import me.kpavlov.kt.schema.Schema
 -->
 ```kotlin
 @Schema(withSchemaObject = true)
@@ -301,7 +215,7 @@ For each `@Schema`-annotated function, the processor generates additional top-le
 <!--- CLEAR -->
 <!--- MODULE docs -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
+import me.kpavlov.kt.schema.Schema
 data class Shape(val name: String)
 -->
 ```kotlin
@@ -322,4 +236,4 @@ val functionCallSchema: JsonObject = calculateAreaJsonSchema() // <function name
 - [Annotation Reference](../README.md#using-schema-and-description-annotations) — `@Schema` and `@Description` usage
 - [Runtime Schema Generation](../README.md#runtime-schema-generation) — Alternative using Reflection (JVM only)
 - [Function Calling Schemas](../README.md#function-calling-schema-generation-for-llms) — Generate LLM function schemas
-- [JSON Schema DSL](../kotlinx-schema-json/README.md) — Manual schema construction
+- [JSON Schema DSL](../kt-schema-json/README.md) — Manual schema construction

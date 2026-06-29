@@ -1,0 +1,356 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, js, linuxArm64, linuxX64, macosArm64, mingwX64, tvosArm64, tvosSimulatorArm64, wasmJs, watchosArm32, watchosArm64, watchosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <me.kpavlov.kt.schema:kt-schema-generator-core>
+open annotation class me.kpavlov.kt.schema.generator.core/InternalSchemaGeneratorApi : kotlin/Annotation { // me.kpavlov.kt.schema.generator.core/InternalSchemaGeneratorApi|null[0]
+    constructor <init>() // me.kpavlov.kt.schema.generator.core/InternalSchemaGeneratorApi.<init>|<init>(){}[0]
+}
+
+final enum class me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind : kotlin/Enum<me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind> { // me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind|null[0]
+    enum entry BOOLEAN // me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind.BOOLEAN|null[0]
+    enum entry DOUBLE // me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind.DOUBLE|null[0]
+    enum entry FLOAT // me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind.FLOAT|null[0]
+    enum entry INT // me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind.INT|null[0]
+    enum entry LONG // me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind.LONG|null[0]
+    enum entry STRING // me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind.STRING|null[0]
+
+    final val entries // me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind> // me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind // me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind> // me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind.values|values#static(){}[0]
+}
+
+abstract fun interface me.kpavlov.kt.schema.generator.core.ir/DescriptionExtractor { // me.kpavlov.kt.schema.generator.core.ir/DescriptionExtractor|null[0]
+    abstract fun extract(kotlin.collections/List<kotlin/Annotation>): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/DescriptionExtractor.extract|extract(kotlin.collections.List<kotlin.Annotation>){}[0]
+}
+
+abstract interface <#A: kotlin/Any, #B: kotlin/Any> me.kpavlov.kt.schema.generator.core/SchemaGenerator { // me.kpavlov.kt.schema.generator.core/SchemaGenerator|null[0]
+    abstract fun encodeToString(#B): kotlin/String // me.kpavlov.kt.schema.generator.core/SchemaGenerator.encodeToString|encodeToString(1:1){}[0]
+    abstract fun generateSchema(#A): #B // me.kpavlov.kt.schema.generator.core/SchemaGenerator.generateSchema|generateSchema(1:0){}[0]
+    abstract fun generateSchemaString(#A): kotlin/String // me.kpavlov.kt.schema.generator.core/SchemaGenerator.generateSchemaString|generateSchemaString(1:0){}[0]
+    abstract fun schemaType(): kotlin.reflect/KClass<#B> // me.kpavlov.kt.schema.generator.core/SchemaGenerator.schemaType|schemaType(){}[0]
+    abstract fun targetType(): kotlin.reflect/KClass<#A> // me.kpavlov.kt.schema.generator.core/SchemaGenerator.targetType|targetType(){}[0]
+}
+
+abstract interface <#A: kotlin/Any?, #B: kotlin/Any?> me.kpavlov.kt.schema.generator.core.ir/SchemaIntrospector { // me.kpavlov.kt.schema.generator.core.ir/SchemaIntrospector|null[0]
+    abstract val config // me.kpavlov.kt.schema.generator.core.ir/SchemaIntrospector.config|{}config[0]
+        abstract fun <get-config>(): #B // me.kpavlov.kt.schema.generator.core.ir/SchemaIntrospector.config.<get-config>|<get-config>(){}[0]
+
+    abstract fun introspect(#A): me.kpavlov.kt.schema.generator.core.ir/TypeGraph // me.kpavlov.kt.schema.generator.core.ir/SchemaIntrospector.introspect|introspect(1:0){}[0]
+}
+
+abstract interface <#A: kotlin/Any?, #B: kotlin/Any?> me.kpavlov.kt.schema.generator.core.ir/TypeGraphTransformer { // me.kpavlov.kt.schema.generator.core.ir/TypeGraphTransformer|null[0]
+    abstract val config // me.kpavlov.kt.schema.generator.core.ir/TypeGraphTransformer.config|{}config[0]
+        abstract fun <get-config>(): #B // me.kpavlov.kt.schema.generator.core.ir/TypeGraphTransformer.config.<get-config>|<get-config>(){}[0]
+
+    abstract fun transform(me.kpavlov.kt.schema.generator.core.ir/TypeGraph, kotlin/String): #A // me.kpavlov.kt.schema.generator.core.ir/TypeGraphTransformer.transform|transform(me.kpavlov.kt.schema.generator.core.ir.TypeGraph;kotlin.String){}[0]
+}
+
+sealed interface me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/TypeNode|null[0]
+    abstract val description // me.kpavlov.kt.schema.generator.core.ir/TypeNode.description|{}description[0]
+        abstract fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/TypeNode.description.<get-description>|<get-description>(){}[0]
+}
+
+sealed interface me.kpavlov.kt.schema.generator.core.ir/TypeRef { // me.kpavlov.kt.schema.generator.core.ir/TypeRef|null[0]
+    abstract val nullable // me.kpavlov.kt.schema.generator.core.ir/TypeRef.nullable|{}nullable[0]
+        abstract fun <get-nullable>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeRef.nullable.<get-nullable>|<get-nullable>(){}[0]
+
+    final class Inline : me.kpavlov.kt.schema.generator.core.ir/TypeRef { // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline|null[0]
+        constructor <init>(me.kpavlov.kt.schema.generator.core.ir/TypeNode, kotlin/Boolean = ...) // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.TypeNode;kotlin.Boolean){}[0]
+
+        final val node // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.node|{}node[0]
+            final fun <get-node>(): me.kpavlov.kt.schema.generator.core.ir/TypeNode // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.node.<get-node>|<get-node>(){}[0]
+        final val nullable // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.nullable|{}nullable[0]
+            final fun <get-nullable>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.nullable.<get-nullable>|<get-nullable>(){}[0]
+
+        final fun component1(): me.kpavlov.kt.schema.generator.core.ir/TypeNode // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.component1|component1(){}[0]
+        final fun component2(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.component2|component2(){}[0]
+        final fun copy(me.kpavlov.kt.schema.generator.core.ir/TypeNode = ..., kotlin/Boolean = ...): me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.copy|copy(me.kpavlov.kt.schema.generator.core.ir.TypeNode;kotlin.Boolean){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.toString|toString(){}[0]
+    }
+
+    final class Ref : me.kpavlov.kt.schema.generator.core.ir/TypeRef { // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref|null[0]
+        constructor <init>(me.kpavlov.kt.schema.generator.core.ir/TypeId, kotlin/Boolean = ...) // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.TypeId;kotlin.Boolean){}[0]
+
+        final val id // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.id|{}id[0]
+            final fun <get-id>(): me.kpavlov.kt.schema.generator.core.ir/TypeId // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.id.<get-id>|<get-id>(){}[0]
+        final val nullable // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.nullable|{}nullable[0]
+            final fun <get-nullable>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.nullable.<get-nullable>|<get-nullable>(){}[0]
+
+        final fun component1(): me.kpavlov.kt.schema.generator.core.ir/TypeId // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.component1|component1(){}[0]
+        final fun component2(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.component2|component2(){}[0]
+        final fun copy(me.kpavlov.kt.schema.generator.core.ir/TypeId = ..., kotlin/Boolean = ...): me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.copy|copy(me.kpavlov.kt.schema.generator.core.ir.TypeId;kotlin.Boolean){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.toString|toString(){}[0]
+    }
+}
+
+abstract class <#A: kotlin/Any, #B: kotlin/Any, #C: kotlin/Any> me.kpavlov.kt.schema.generator.core/AbstractSchemaGenerator : me.kpavlov.kt.schema.generator.core/SchemaGenerator<#A, #B> { // me.kpavlov.kt.schema.generator.core/AbstractSchemaGenerator|null[0]
+    constructor <init>(me.kpavlov.kt.schema.generator.core.ir/SchemaIntrospector<#A, #C>, me.kpavlov.kt.schema.generator.core.ir/TypeGraphTransformer<#B, *>) // me.kpavlov.kt.schema.generator.core/AbstractSchemaGenerator.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.SchemaIntrospector<1:0,1:2>;me.kpavlov.kt.schema.generator.core.ir.TypeGraphTransformer<1:1,*>){}[0]
+
+    final val introspector // me.kpavlov.kt.schema.generator.core/AbstractSchemaGenerator.introspector|{}introspector[0]
+        final fun <get-introspector>(): me.kpavlov.kt.schema.generator.core.ir/SchemaIntrospector<#A, #C> // me.kpavlov.kt.schema.generator.core/AbstractSchemaGenerator.introspector.<get-introspector>|<get-introspector>(){}[0]
+    final val typeGraphTransformer // me.kpavlov.kt.schema.generator.core/AbstractSchemaGenerator.typeGraphTransformer|{}typeGraphTransformer[0]
+        final fun <get-typeGraphTransformer>(): me.kpavlov.kt.schema.generator.core.ir/TypeGraphTransformer<#B, *> // me.kpavlov.kt.schema.generator.core/AbstractSchemaGenerator.typeGraphTransformer.<get-typeGraphTransformer>|<get-typeGraphTransformer>(){}[0]
+
+    abstract fun getRootName(#A): kotlin/String // me.kpavlov.kt.schema.generator.core/AbstractSchemaGenerator.getRootName|getRootName(1:0){}[0]
+    open fun generateSchema(#A): #B // me.kpavlov.kt.schema.generator.core/AbstractSchemaGenerator.generateSchema|generateSchema(1:0){}[0]
+    open fun generateSchemaString(#A): kotlin/String // me.kpavlov.kt.schema.generator.core/AbstractSchemaGenerator.generateSchemaString|generateSchemaString(1:0){}[0]
+}
+
+abstract class <#A: kotlin/Any> me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext { // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext|null[0]
+    constructor <init>() // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.<init>|<init>(){}[0]
+
+    final val nodes // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.nodes|{}nodes[0]
+        final fun <get-nodes>(): kotlin.collections/Map<me.kpavlov.kt.schema.generator.core.ir/TypeId, me.kpavlov.kt.schema.generator.core.ir/TypeNode> // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.nodes.<get-nodes>|<get-nodes>(){}[0]
+    final val typeRefCache // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.typeRefCache|{}typeRefCache[0]
+        final fun <get-typeRefCache>(): kotlin.collections/MutableMap<#A, me.kpavlov.kt.schema.generator.core.ir/TypeRef> // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.typeRefCache.<get-typeRefCache>|<get-typeRefCache>(){}[0]
+    final val visitingTypes // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.visitingTypes|{}visitingTypes[0]
+        final fun <get-visitingTypes>(): kotlin.collections/MutableSet<#A> // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.visitingTypes.<get-visitingTypes>|<get-visitingTypes>(){}[0]
+
+    abstract fun toRef(#A): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.toRef|toRef(1:0){}[0]
+    final fun withCycleDetection(#A, me.kpavlov.kt.schema.generator.core.ir/TypeId, kotlin/Function0<me.kpavlov.kt.schema.generator.core.ir/TypeNode>): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.withCycleDetection|withCycleDetection(1:0;me.kpavlov.kt.schema.generator.core.ir.TypeId;kotlin.Function0<me.kpavlov.kt.schema.generator.core.ir.TypeNode>){}[0]
+}
+
+abstract class <#A: kotlin/Any?, #B: kotlin/Any?> me.kpavlov.kt.schema.generator.core.ir/AbstractTypeGraphTransformer : me.kpavlov.kt.schema.generator.core.ir/TypeGraphTransformer<#A, #B> { // me.kpavlov.kt.schema.generator.core.ir/AbstractTypeGraphTransformer|null[0]
+    constructor <init>(#B) // me.kpavlov.kt.schema.generator.core.ir/AbstractTypeGraphTransformer.<init>|<init>(1:1){}[0]
+
+    open val config // me.kpavlov.kt.schema.generator.core.ir/AbstractTypeGraphTransformer.config|{}config[0]
+        open fun <get-config>(): #B // me.kpavlov.kt.schema.generator.core.ir/AbstractTypeGraphTransformer.config.<get-config>|<get-config>(){}[0]
+}
+
+final class me.kpavlov.kt.schema.generator.core.ir/AnyNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/AnyNode|null[0]
+    constructor <init>(kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/AnyNode.<init>|<init>(kotlin.String?){}[0]
+
+    final val description // me.kpavlov.kt.schema.generator.core.ir/AnyNode.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/AnyNode.description.<get-description>|<get-description>(){}[0]
+
+    final fun component1(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/AnyNode.component1|component1(){}[0]
+    final fun copy(kotlin/String? = ...): me.kpavlov.kt.schema.generator.core.ir/AnyNode // me.kpavlov.kt.schema.generator.core.ir/AnyNode.copy|copy(kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/AnyNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/AnyNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/AnyNode.toString|toString(){}[0]
+}
+
+final class me.kpavlov.kt.schema.generator.core.ir/Discriminator { // me.kpavlov.kt.schema.generator.core.ir/Discriminator|null[0]
+    constructor <init>(kotlin/String, kotlin.collections/Map<kotlin/String, me.kpavlov.kt.schema.generator.core.ir/TypeId>? = ...) // me.kpavlov.kt.schema.generator.core.ir/Discriminator.<init>|<init>(kotlin.String;kotlin.collections.Map<kotlin.String,me.kpavlov.kt.schema.generator.core.ir.TypeId>?){}[0]
+
+    final val mapping // me.kpavlov.kt.schema.generator.core.ir/Discriminator.mapping|{}mapping[0]
+        final fun <get-mapping>(): kotlin.collections/Map<kotlin/String, me.kpavlov.kt.schema.generator.core.ir/TypeId>? // me.kpavlov.kt.schema.generator.core.ir/Discriminator.mapping.<get-mapping>|<get-mapping>(){}[0]
+    final val name // me.kpavlov.kt.schema.generator.core.ir/Discriminator.name|{}name[0]
+        final fun <get-name>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Discriminator.name.<get-name>|<get-name>(){}[0]
+
+    final fun component1(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Discriminator.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/Map<kotlin/String, me.kpavlov.kt.schema.generator.core.ir/TypeId>? // me.kpavlov.kt.schema.generator.core.ir/Discriminator.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin.collections/Map<kotlin/String, me.kpavlov.kt.schema.generator.core.ir/TypeId>? = ...): me.kpavlov.kt.schema.generator.core.ir/Discriminator // me.kpavlov.kt.schema.generator.core.ir/Discriminator.copy|copy(kotlin.String;kotlin.collections.Map<kotlin.String,me.kpavlov.kt.schema.generator.core.ir.TypeId>?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Discriminator.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/Discriminator.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Discriminator.toString|toString(){}[0]
+}
+
+final class me.kpavlov.kt.schema.generator.core.ir/EnumNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/EnumNode|null[0]
+    constructor <init>(kotlin/String, kotlin.collections/List<kotlin/String>, kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/EnumNode.<init>|<init>(kotlin.String;kotlin.collections.List<kotlin.String>;kotlin.String?){}[0]
+
+    final val description // me.kpavlov.kt.schema.generator.core.ir/EnumNode.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/EnumNode.description.<get-description>|<get-description>(){}[0]
+    final val entries // me.kpavlov.kt.schema.generator.core.ir/EnumNode.entries|{}entries[0]
+        final fun <get-entries>(): kotlin.collections/List<kotlin/String> // me.kpavlov.kt.schema.generator.core.ir/EnumNode.entries.<get-entries>|<get-entries>(){}[0]
+    final val name // me.kpavlov.kt.schema.generator.core.ir/EnumNode.name|{}name[0]
+        final fun <get-name>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/EnumNode.name.<get-name>|<get-name>(){}[0]
+
+    final fun component1(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/EnumNode.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<kotlin/String> // me.kpavlov.kt.schema.generator.core.ir/EnumNode.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/EnumNode.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/String? = ...): me.kpavlov.kt.schema.generator.core.ir/EnumNode // me.kpavlov.kt.schema.generator.core.ir/EnumNode.copy|copy(kotlin.String;kotlin.collections.List<kotlin.String>;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/EnumNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/EnumNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/EnumNode.toString|toString(){}[0]
+}
+
+final class me.kpavlov.kt.schema.generator.core.ir/ListNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/ListNode|null[0]
+    constructor <init>(me.kpavlov.kt.schema.generator.core.ir/TypeRef, kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/ListNode.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.TypeRef;kotlin.String?){}[0]
+
+    final val description // me.kpavlov.kt.schema.generator.core.ir/ListNode.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/ListNode.description.<get-description>|<get-description>(){}[0]
+    final val element // me.kpavlov.kt.schema.generator.core.ir/ListNode.element|{}element[0]
+        final fun <get-element>(): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/ListNode.element.<get-element>|<get-element>(){}[0]
+
+    final fun component1(): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/ListNode.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/ListNode.component2|component2(){}[0]
+    final fun copy(me.kpavlov.kt.schema.generator.core.ir/TypeRef = ..., kotlin/String? = ...): me.kpavlov.kt.schema.generator.core.ir/ListNode // me.kpavlov.kt.schema.generator.core.ir/ListNode.copy|copy(me.kpavlov.kt.schema.generator.core.ir.TypeRef;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/ListNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/ListNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/ListNode.toString|toString(){}[0]
+}
+
+final class me.kpavlov.kt.schema.generator.core.ir/MapNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/MapNode|null[0]
+    constructor <init>(me.kpavlov.kt.schema.generator.core.ir/TypeRef, me.kpavlov.kt.schema.generator.core.ir/TypeRef, kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/MapNode.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.TypeRef;me.kpavlov.kt.schema.generator.core.ir.TypeRef;kotlin.String?){}[0]
+
+    final val description // me.kpavlov.kt.schema.generator.core.ir/MapNode.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/MapNode.description.<get-description>|<get-description>(){}[0]
+    final val key // me.kpavlov.kt.schema.generator.core.ir/MapNode.key|{}key[0]
+        final fun <get-key>(): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/MapNode.key.<get-key>|<get-key>(){}[0]
+    final val value // me.kpavlov.kt.schema.generator.core.ir/MapNode.value|{}value[0]
+        final fun <get-value>(): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/MapNode.value.<get-value>|<get-value>(){}[0]
+
+    final fun component1(): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/MapNode.component1|component1(){}[0]
+    final fun component2(): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/MapNode.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/MapNode.component3|component3(){}[0]
+    final fun copy(me.kpavlov.kt.schema.generator.core.ir/TypeRef = ..., me.kpavlov.kt.schema.generator.core.ir/TypeRef = ..., kotlin/String? = ...): me.kpavlov.kt.schema.generator.core.ir/MapNode // me.kpavlov.kt.schema.generator.core.ir/MapNode.copy|copy(me.kpavlov.kt.schema.generator.core.ir.TypeRef;me.kpavlov.kt.schema.generator.core.ir.TypeRef;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/MapNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/MapNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/MapNode.toString|toString(){}[0]
+}
+
+final class me.kpavlov.kt.schema.generator.core.ir/ObjectNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/ObjectNode|null[0]
+    constructor <init>(kotlin/String, kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Property>, kotlin.collections/Set<kotlin/String>, kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.<init>|<init>(kotlin.String;kotlin.collections.List<me.kpavlov.kt.schema.generator.core.ir.Property>;kotlin.collections.Set<kotlin.String>;kotlin.String?){}[0]
+
+    final val description // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.description.<get-description>|<get-description>(){}[0]
+    final val name // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.name|{}name[0]
+        final fun <get-name>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.name.<get-name>|<get-name>(){}[0]
+    final val properties // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.properties|{}properties[0]
+        final fun <get-properties>(): kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Property> // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.properties.<get-properties>|<get-properties>(){}[0]
+    final val required // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.required|{}required[0]
+        final fun <get-required>(): kotlin.collections/Set<kotlin/String> // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.required.<get-required>|<get-required>(){}[0]
+
+    final fun component1(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Property> // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.component2|component2(){}[0]
+    final fun component3(): kotlin.collections/Set<kotlin/String> // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Property> = ..., kotlin.collections/Set<kotlin/String> = ..., kotlin/String? = ...): me.kpavlov.kt.schema.generator.core.ir/ObjectNode // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.copy|copy(kotlin.String;kotlin.collections.List<me.kpavlov.kt.schema.generator.core.ir.Property>;kotlin.collections.Set<kotlin.String>;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.toString|toString(){}[0]
+}
+
+final class me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode|null[0]
+    constructor <init>(kotlin/String, kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/SubtypeRef>, me.kpavlov.kt.schema.generator.core.ir/Discriminator, kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.<init>|<init>(kotlin.String;kotlin.collections.List<me.kpavlov.kt.schema.generator.core.ir.SubtypeRef>;me.kpavlov.kt.schema.generator.core.ir.Discriminator;kotlin.String?){}[0]
+
+    final val baseName // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.baseName|{}baseName[0]
+        final fun <get-baseName>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.baseName.<get-baseName>|<get-baseName>(){}[0]
+    final val description // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.description.<get-description>|<get-description>(){}[0]
+    final val discriminator // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.discriminator|{}discriminator[0]
+        final fun <get-discriminator>(): me.kpavlov.kt.schema.generator.core.ir/Discriminator // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.discriminator.<get-discriminator>|<get-discriminator>(){}[0]
+    final val subtypes // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.subtypes|{}subtypes[0]
+        final fun <get-subtypes>(): kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/SubtypeRef> // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.subtypes.<get-subtypes>|<get-subtypes>(){}[0]
+
+    final fun component1(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/SubtypeRef> // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.component2|component2(){}[0]
+    final fun component3(): me.kpavlov.kt.schema.generator.core.ir/Discriminator // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/SubtypeRef> = ..., me.kpavlov.kt.schema.generator.core.ir/Discriminator = ..., kotlin/String? = ...): me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.copy|copy(kotlin.String;kotlin.collections.List<me.kpavlov.kt.schema.generator.core.ir.SubtypeRef>;me.kpavlov.kt.schema.generator.core.ir.Discriminator;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.toString|toString(){}[0]
+}
+
+final class me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode|null[0]
+    constructor <init>(me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind, kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind;kotlin.String?){}[0]
+
+    final val description // me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode.description.<get-description>|<get-description>(){}[0]
+    final val kind // me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode.kind|{}kind[0]
+        final fun <get-kind>(): me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind // me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode.kind.<get-kind>|<get-kind>(){}[0]
+
+    final fun component1(): me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind // me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode.component2|component2(){}[0]
+    final fun copy(me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind = ..., kotlin/String? = ...): me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode // me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode.copy|copy(me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode.toString|toString(){}[0]
+}
+
+final class me.kpavlov.kt.schema.generator.core.ir/Property { // me.kpavlov.kt.schema.generator.core.ir/Property|null[0]
+    constructor <init>(kotlin/String, me.kpavlov.kt.schema.generator.core.ir/TypeRef, kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Any? = ..., kotlin/Boolean = ..., kotlin.collections/Map<kotlin/String, kotlin/String?> = ...) // me.kpavlov.kt.schema.generator.core.ir/Property.<init>|<init>(kotlin.String;me.kpavlov.kt.schema.generator.core.ir.TypeRef;kotlin.String?;kotlin.Boolean;kotlin.Boolean;kotlin.Any?;kotlin.Boolean;kotlin.collections.Map<kotlin.String,kotlin.String?>){}[0]
+
+    final val annotations // me.kpavlov.kt.schema.generator.core.ir/Property.annotations|{}annotations[0]
+        final fun <get-annotations>(): kotlin.collections/Map<kotlin/String, kotlin/String?> // me.kpavlov.kt.schema.generator.core.ir/Property.annotations.<get-annotations>|<get-annotations>(){}[0]
+    final val defaultValue // me.kpavlov.kt.schema.generator.core.ir/Property.defaultValue|{}defaultValue[0]
+        final fun <get-defaultValue>(): kotlin/Any? // me.kpavlov.kt.schema.generator.core.ir/Property.defaultValue.<get-defaultValue>|<get-defaultValue>(){}[0]
+    final val deprecated // me.kpavlov.kt.schema.generator.core.ir/Property.deprecated|{}deprecated[0]
+        final fun <get-deprecated>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Property.deprecated.<get-deprecated>|<get-deprecated>(){}[0]
+    final val description // me.kpavlov.kt.schema.generator.core.ir/Property.description|{}description[0]
+        final fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Property.description.<get-description>|<get-description>(){}[0]
+    final val hasDefaultValue // me.kpavlov.kt.schema.generator.core.ir/Property.hasDefaultValue|{}hasDefaultValue[0]
+        final fun <get-hasDefaultValue>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Property.hasDefaultValue.<get-hasDefaultValue>|<get-hasDefaultValue>(){}[0]
+    final val isConstant // me.kpavlov.kt.schema.generator.core.ir/Property.isConstant|{}isConstant[0]
+        final fun <get-isConstant>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Property.isConstant.<get-isConstant>|<get-isConstant>(){}[0]
+    final val name // me.kpavlov.kt.schema.generator.core.ir/Property.name|{}name[0]
+        final fun <get-name>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Property.name.<get-name>|<get-name>(){}[0]
+    final val type // me.kpavlov.kt.schema.generator.core.ir/Property.type|{}type[0]
+        final fun <get-type>(): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/Property.type.<get-type>|<get-type>(){}[0]
+
+    final fun component1(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Property.component1|component1(){}[0]
+    final fun component2(): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/Property.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Property.component3|component3(){}[0]
+    final fun component4(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Property.component4|component4(){}[0]
+    final fun component5(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Property.component5|component5(){}[0]
+    final fun component6(): kotlin/Any? // me.kpavlov.kt.schema.generator.core.ir/Property.component6|component6(){}[0]
+    final fun component7(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Property.component7|component7(){}[0]
+    final fun component8(): kotlin.collections/Map<kotlin/String, kotlin/String?> // me.kpavlov.kt.schema.generator.core.ir/Property.component8|component8(){}[0]
+    final fun copy(kotlin/String = ..., me.kpavlov.kt.schema.generator.core.ir/TypeRef = ..., kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Any? = ..., kotlin/Boolean = ..., kotlin.collections/Map<kotlin/String, kotlin/String?> = ...): me.kpavlov.kt.schema.generator.core.ir/Property // me.kpavlov.kt.schema.generator.core.ir/Property.copy|copy(kotlin.String;me.kpavlov.kt.schema.generator.core.ir.TypeRef;kotlin.String?;kotlin.Boolean;kotlin.Boolean;kotlin.Any?;kotlin.Boolean;kotlin.collections.Map<kotlin.String,kotlin.String?>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Property.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/Property.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Property.toString|toString(){}[0]
+}
+
+final class me.kpavlov.kt.schema.generator.core.ir/SubtypeRef { // me.kpavlov.kt.schema.generator.core.ir/SubtypeRef|null[0]
+    constructor <init>(me.kpavlov.kt.schema.generator.core.ir/TypeId, me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref = ...) // me.kpavlov.kt.schema.generator.core.ir/SubtypeRef.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.TypeId;me.kpavlov.kt.schema.generator.core.ir.TypeRef.Ref){}[0]
+
+    final val id // me.kpavlov.kt.schema.generator.core.ir/SubtypeRef.id|{}id[0]
+        final fun <get-id>(): me.kpavlov.kt.schema.generator.core.ir/TypeId // me.kpavlov.kt.schema.generator.core.ir/SubtypeRef.id.<get-id>|<get-id>(){}[0]
+    final val ref // me.kpavlov.kt.schema.generator.core.ir/SubtypeRef.ref|{}ref[0]
+        final fun <get-ref>(): me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref // me.kpavlov.kt.schema.generator.core.ir/SubtypeRef.ref.<get-ref>|<get-ref>(){}[0]
+
+    final fun component1(): me.kpavlov.kt.schema.generator.core.ir/TypeId // me.kpavlov.kt.schema.generator.core.ir/SubtypeRef.component1|component1(){}[0]
+    final fun component2(): me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref // me.kpavlov.kt.schema.generator.core.ir/SubtypeRef.component2|component2(){}[0]
+    final fun copy(me.kpavlov.kt.schema.generator.core.ir/TypeId = ..., me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref = ...): me.kpavlov.kt.schema.generator.core.ir/SubtypeRef // me.kpavlov.kt.schema.generator.core.ir/SubtypeRef.copy|copy(me.kpavlov.kt.schema.generator.core.ir.TypeId;me.kpavlov.kt.schema.generator.core.ir.TypeRef.Ref){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/SubtypeRef.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/SubtypeRef.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/SubtypeRef.toString|toString(){}[0]
+}
+
+final class me.kpavlov.kt.schema.generator.core.ir/TypeGraph { // me.kpavlov.kt.schema.generator.core.ir/TypeGraph|null[0]
+    constructor <init>(me.kpavlov.kt.schema.generator.core.ir/TypeRef, kotlin.collections/Map<me.kpavlov.kt.schema.generator.core.ir/TypeId, me.kpavlov.kt.schema.generator.core.ir/TypeNode>) // me.kpavlov.kt.schema.generator.core.ir/TypeGraph.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.TypeRef;kotlin.collections.Map<me.kpavlov.kt.schema.generator.core.ir.TypeId,me.kpavlov.kt.schema.generator.core.ir.TypeNode>){}[0]
+
+    final val nodes // me.kpavlov.kt.schema.generator.core.ir/TypeGraph.nodes|{}nodes[0]
+        final fun <get-nodes>(): kotlin.collections/Map<me.kpavlov.kt.schema.generator.core.ir/TypeId, me.kpavlov.kt.schema.generator.core.ir/TypeNode> // me.kpavlov.kt.schema.generator.core.ir/TypeGraph.nodes.<get-nodes>|<get-nodes>(){}[0]
+    final val root // me.kpavlov.kt.schema.generator.core.ir/TypeGraph.root|{}root[0]
+        final fun <get-root>(): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/TypeGraph.root.<get-root>|<get-root>(){}[0]
+
+    final fun component1(): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/TypeGraph.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/Map<me.kpavlov.kt.schema.generator.core.ir/TypeId, me.kpavlov.kt.schema.generator.core.ir/TypeNode> // me.kpavlov.kt.schema.generator.core.ir/TypeGraph.component2|component2(){}[0]
+    final fun copy(me.kpavlov.kt.schema.generator.core.ir/TypeRef = ..., kotlin.collections/Map<me.kpavlov.kt.schema.generator.core.ir/TypeId, me.kpavlov.kt.schema.generator.core.ir/TypeNode> = ...): me.kpavlov.kt.schema.generator.core.ir/TypeGraph // me.kpavlov.kt.schema.generator.core.ir/TypeGraph.copy|copy(me.kpavlov.kt.schema.generator.core.ir.TypeRef;kotlin.collections.Map<me.kpavlov.kt.schema.generator.core.ir.TypeId,me.kpavlov.kt.schema.generator.core.ir.TypeNode>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeGraph.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/TypeGraph.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeGraph.toString|toString(){}[0]
+}
+
+final class me.kpavlov.kt.schema.generator.core.ir/TypeId { // me.kpavlov.kt.schema.generator.core.ir/TypeId|null[0]
+    constructor <init>(kotlin/String) // me.kpavlov.kt.schema.generator.core.ir/TypeId.<init>|<init>(kotlin.String){}[0]
+
+    final val value // me.kpavlov.kt.schema.generator.core.ir/TypeId.value|{}value[0]
+        final fun <get-value>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.value.<get-value>|<get-value>(){}[0]
+
+    final fun component1(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.component1|component1(){}[0]
+    final fun copy(kotlin/String = ...): me.kpavlov.kt.schema.generator.core.ir/TypeId // me.kpavlov.kt.schema.generator.core.ir/TypeId.copy|copy(kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeId.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/TypeId.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.toString|toString(){}[0]
+}
+
+final object me.kpavlov.kt.schema.generator.core.ir/Introspections { // me.kpavlov.kt.schema.generator.core.ir/Introspections|null[0]
+    final fun getDescriptionFromAnnotation(kotlin/String, kotlin/String?, kotlin.collections/List<kotlin/Pair<kotlin/String, kotlin/Any?>>): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Introspections.getDescriptionFromAnnotation|getDescriptionFromAnnotation(kotlin.String;kotlin.String?;kotlin.collections.List<kotlin.Pair<kotlin.String,kotlin.Any?>>){}[0]
+    final fun getNameOverride(kotlin/String, kotlin/String?, kotlin.collections/List<kotlin/Pair<kotlin/String, kotlin/Any?>>): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Introspections.getNameOverride|getNameOverride(kotlin.String;kotlin.String?;kotlin.collections.List<kotlin.Pair<kotlin.String,kotlin.Any?>>){}[0]
+    final fun isIgnoreAnnotation(kotlin/String, kotlin/String? = ...): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Introspections.isIgnoreAnnotation|isIgnoreAnnotation(kotlin.String;kotlin.String?){}[0]
+}

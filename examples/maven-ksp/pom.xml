@@ -4,19 +4,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>maven-kotlinx-schema-ksp</artifactId>
+    <artifactId>maven-kt-schema-ksp</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <description>
-        Maven project is a Demo for kotlinx-schema-ksp, a Kotlin KSP symbol processor,
+        Maven project is a Demo for kt-schema-ksp, a Kotlin KSP symbol processor,
         that generates JSON schemas for Kotlin classes.
     </description>
 
     <properties>
-        <kotlin.version>2.3.20</kotlin.version>
+        <kotlin.version>2.3.21</kotlin.version>
         <maven.compiler.release>25</maven.compiler.release>
-        <ksp.plugin.version>0.4.0</ksp.plugin.version>
-        <kotlinx-schema.version>0.5.0</kotlinx-schema.version>
+        <ksp.plugin.version>0.4.5</ksp.plugin.version>
+        <kt-schema.version>0.6.0</kt-schema.version>
         <kotest.version>6.1.11</kotest.version>
         <kotlinx-serialization.version>1.10.0</kotlinx-serialization.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -36,9 +36,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-schema-annotations-jvm</artifactId>
-            <version>${kotlinx-schema.version}</version>
+            <groupId>me.kpavlov.kt.schema</groupId>
+            <artifactId>kt-schema-annotations-jvm</artifactId>
+            <version>${kt-schema.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
@@ -76,9 +76,9 @@
                 <extensions>true</extensions>
                 <dependencies>
                     <dependency>
-                        <groupId>org.jetbrains.kotlinx</groupId>
-                        <artifactId>kotlinx-schema-ksp</artifactId>
-                        <version>${kotlinx-schema.version}</version>
+                        <groupId>me.kpavlov.kt.schema</groupId>
+                        <artifactId>kt-schema-ksp</artifactId>
+                        <version>${kt-schema.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -119,4 +119,39 @@
         <sourceDirectory>src/main/kotlin</sourceDirectory>
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
     </build>
+
+
+    <profiles>
+        <profile>
+            <id>local</id>
+            <properties>
+                <kt-schema.version>1-SNAPSHOT</kt-schema.version>
+            </properties>
+
+            <repositories>
+                <repository>
+                    <id>project</id>
+                    <url>file:../../build/project-repo</url>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>project-plugins</id>
+                    <url>file:../../build/project-repo</url>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
 </project>

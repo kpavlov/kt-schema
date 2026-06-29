@@ -1,24 +1,79 @@
-[![JetBrains incubator project](https://jb.gg/badges/incubator.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
-[![JetBrains Experimental](https://kotl.in/badges/experimental.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
-
-[![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx/kotlinx-schema-ksp.svg?label=Maven%20Central)](https://central.sonatype.com/search?q=org.jetbrains.kotlinx%2Fkotlinx-schema-*)
-[![Build with Gradle](https://github.com/Kotlin/kotlinx-schema/actions/workflows/build.yml/badge.svg)](https://github.com/Kotlin/kotlinx-schema/actions/workflows/build.yml)
-[![CodeQL](https://github.com/Kotlin/kotlinx-schema/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Kotlin/kotlinx-schema/actions/workflows/github-code-scanning/codeql)
-[![Docs](https://img.shields.io/badge/Docs-Live-blue?logo=kotlin)](https://kotlin.github.io/kotlinx-schema/)
-[![Examples](https://img.shields.io/badge/Examples-blue?logo=github)](https://github.com/Kotlin/kotlinx-schema/tree/main/examples)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Kotlin/kotlinx-schema)
-[![Slack channel](https://img.shields.io/badge/chat-slack-blue.svg?logo=slack)](https://kotlinlang.slack.com/messages/kotlinx-schema/)
-
+[![Maven Central](https://img.shields.io/maven-central/v/me.kpavlov.kt.schema/kt-schema-generator-core.svg?label=Maven%20Central)](https://central.sonatype.com/search?q=me.kpavlov.kt.schema%2Fkt-schema-*)
+[![Build with Gradle](https://github.com/kpavlov/kt-schema/actions/workflows/build.yml/badge.svg)](https://github.com/kpavlov/kt-schema/actions/workflows/build.yml)
+[![Docs](https://img.shields.io/badge/Docs-blue?logo=github)](https://kpavlov.github.io/kt-schema/)
+[![Examples](https://img.shields.io/badge/Examples-blue?logo=github)](https://github.com/kpavlov/kt-schema/tree/main/examples)
+[![License](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.2+-blueviolet.svg?logo=kotlin)](http://kotlinlang.org)
 [![Kotlin Multiplatform](https://img.shields.io/badge/Platforms-%20JVM%20%7C%20Wasm%2FJS%20%7C%20Native%20-blueviolet?logo=kotlin)](https://kotlinlang.org/docs/multiplatform.html)
 [![JVM](https://img.shields.io/badge/JVM-17+-red.svg?logo=jvm)](http://java.com)
-[![License](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](LICENSE)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/kpavlov/kt-schema)
+<div style="align-content: center">
+  <img
+    src="docs/static/social-preview-1.jpg"
+    alt="Social preview"
+    style="width: 100%; height: auto;"
+  />
+</div>
+
+# KT-Schema
+
+**Generate JSON schemas and LLM function calling schemas from Kotlin code — including classes you don't own.**
+
+> [!NOTE]
+> **kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema),
+> originally created by me, Konstantin Pavlov, at JetBrains, and is licensed under the Apache 2.0 License.
+
+Quick Links:
+
+- [KSP Configuration Guide](docs/ksp.md)
+- [Serialization-Based Schema Generation](docs/serializable.md)
+- [Project Architecture](docs/architecture.md)
+
+## Key Features
+
+**Generation Modes:**
+
+- **Compile-time (KSP)**: Zero runtime overhead, multiplatform, for your annotated classes
+- **Runtime (Reflection)**: JVM-only, for any class including third-party libraries
+- **Runtime (SerialDescriptor)**: Kotlin serializable classes, including open polymorphism via `SerializersModule`
+
+**LLM Integration:**
+
+- First-class support for OpenAI/Anthropic function calling format
+- Automatic strict mode and parameter validation
+- Function name and description extraction
+
+**Flexible Annotation Support:**
+
+- Recognizes `@Description`, `@LLMDescription`, `@JsonPropertyDescription`, `@P`, and more
+- Recognizes KDoc (KSP compile-time only)
+- Works with annotations from Jackson, LangChain4j, Koog without code changes
+
+**Comprehensive Type Support:**
+
+- **Enums, collections, maps, nested objects, nullability, generics** (with star-projection)
+- **Polymorphic hierarchies** — sealed classes and open polymorphism (via `SerializersModule`) with automatic `oneOf` generation and discriminator field
+- **Union types** for nullable parameters (`["string", "null"]`)
+- **Type constraints** (min/max, patterns, formats) via the JSON Schema DSL
+- **Default values** (compile-time: tracked but not extracted; runtime: fully extracted)
+- **`$ref`/`$defs` deduplication**: named types appear once in `$defs` and are referenced everywhere via `$ref`
+- **`kotlin.Any`**: maps to the empty schema `{}` (accepts any JSON value)
+
+**Developer Experience:**
+
+- Gradle plugin for one-line setup (experimental)
+- Type-safe Kotlin DSL for programmatic schema construction
+- Works everywhere: JVM, JS, iOS, macOS, Wasm
+
+> [!TIP]
+> **Need to build JSON Schemas manually?** The [**kt-schema-json**](kt-schema-json) module provides type-safe
+> Kotlin models and DSL compliant with [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/schema), with
+> support for polymorphism, discriminators, and type-safe enums. [See JSON Schema DSL section ↓](#json-schema-dsl)
 
 **Table of contents:**
 <!--- TOC -->
 
-* [Key Features](#key-features)
-* [Why kotlinx-schema?](#why-kotlinx-schema?)
+* [Why kt-schema?](#why-kt-schema?)
   * [When to Use](#when-to-use)
 * [Choosing Your Approach](#choosing-your-approach)
 * [Quick Start](#quick-start)
@@ -71,66 +126,11 @@
 * [Requirements](#requirements)
 * [Code of Conduct](#code-of-conduct)
 * [License](#license)
+  * [Attribution](#attribution)
 
 <!--- END -->
 
-# kotlinx-schema
-
-**Generate JSON schemas and LLM function calling schemas from Kotlin code — including classes you don't own.**
-
-> [!IMPORTANT]
-> Given the highly experimental nature of this work, nothing is settled in stone.
-> [Kotlinx-schema-json](kotlinx-schema-json) might eventually be moved
-> to [kotlinx-serialization](https://github.com/Kotlin/kotlinx.serialization).
-
-Quick Links:
-
-- [KSP Configuration Guide](docs/ksp.md)
-- [Serialization-Based Schema Generation](docs/serializable.md)
-- [Project Architecture](docs/architecture.md)
-
-## Key Features
-
-**Generation Modes:**
-
-- **Compile-time (KSP)**: Zero runtime overhead, multiplatform, for your annotated classes
-- **Runtime (Reflection)**: JVM-only, for any class including third-party libraries
-- **Runtime (SerialDescriptor)**: Kotlin serializable classes, including open polymorphism via `SerializersModule`
-
-**LLM Integration:**
-
-- First-class support for OpenAI/Anthropic function calling format
-- Automatic strict mode and parameter validation
-- Function name and description extraction
-
-**Flexible Annotation Support:**
-
-- Recognizes `@Description`, `@LLMDescription`, `@JsonPropertyDescription`, `@P`, and more
-- Recognizes KDoc (KSP compile-time only)
-- Works with annotations from Jackson, LangChain4j, Koog without code changes
-
-**Comprehensive Type Support:**
-
-- **Enums, collections, maps, nested objects, nullability, generics** (with star-projection)
-- **Polymorphic hierarchies** — sealed classes and open polymorphism (via `SerializersModule`) with automatic `oneOf` generation and discriminator field
-- **Union types** for nullable parameters (`["string", "null"]`)
-- **Type constraints** (min/max, patterns, formats) via the JSON Schema DSL
-- **Default values** (compile-time: tracked but not extracted; runtime: fully extracted)
-- **`$ref`/`$defs` deduplication**: named types appear once in `$defs` and are referenced everywhere via `$ref`
-- **`kotlin.Any`**: maps to the empty schema `{}` (accepts any JSON value)
-
-**Developer Experience:**
-
-- Gradle plugin for one-line setup (experimental)
-- Type-safe Kotlin DSL for programmatic schema construction
-- Works everywhere: JVM, JS, iOS, macOS, Wasm
-
-> [!TIP]
-> **Need to build JSON Schemas manually?** The [**kotlinx-schema-json**](kotlinx-schema-json) module provides type-safe
-> Kotlin models and DSL compliant with [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/schema), with
-> support for polymorphism, discriminators, and type-safe enums. [See JSON Schema DSL section ↓](#json-schema-dsl)
-
-## Why kotlinx-schema?
+## Why kt-schema?
 
 This library solves three key challenges:
 
@@ -182,8 +182,8 @@ Refer to the example projects [here](./examples).
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
-import kotlinx.schema.Description
+import me.kpavlov.kt.schema.Schema
+import me.kpavlov.kt.schema.Description
 -->
 
 ```kotlin
@@ -217,8 +217,8 @@ plugins {
 }
 
 dependencies {
-    add("kspCommonMainMetadata", "org.jetbrains.kotlinx:kotlinx-schema-ksp:<version>")
-    implementation("org.jetbrains.kotlinx:kotlinx-schema-annotations:<version>")
+    add("kspCommonMainMetadata", "me.kpavlov.kt.schema:kt-schema-ksp:<version>")
+    implementation("me.kpavlov.kt.schema:kt-schema-annotations:<version>")
 }
 
 kotlin {
@@ -226,7 +226,7 @@ kotlin {
 }
 ```
 
-For JVM-only projects, the Kotlinx-Schema Gradle plugin, Maven, and full configuration options, see *
+For JVM-only projects, Maven, and full configuration options, see *
 *[KSP Configuration Guide](docs/ksp.md)**.
 
 ## Runtime schema generation
@@ -237,9 +237,9 @@ For JVM-only projects, the Kotlinx-Schema Gradle plugin, Maven, and full configu
 
 For JVM-only scenarios with classes you don't own or can't annotate, use
 [
-`ReflectionClassJsonSchemaGenerator`](kotlinx-schema-generator-json/src/main/kotlin/kotlinx/schema/generator/json/ReflectionClassJsonSchemaGenerator.kt)
+`ReflectionClassJsonSchemaGenerator`](kt-schema-ksp-json/src/jvmMain/kotlin/me/kpavlov/kt/schema/generator/json/ReflectionClassJsonSchemaGenerator.kt)
 and [
-`ReflectionFunctionCallingSchemaGenerator`](kotlinx-schema-generator-json/src/main/kotlin/kotlinx/schema/generator/json/ReflectionFunctionCallingSchemaGenerator.kt)
+`ReflectionFunctionCallingSchemaGenerator`](kt-schema-ksp-json/src/jvmMain/kotlin/me/kpavlov/kt/schema/generator/json/ReflectionFunctionCallingSchemaGenerator.kt)
 with Kotlin reflection.
 
 ### Why Runtime Generation?
@@ -264,22 +264,22 @@ Runtime generation solves this by using reflection to analyze any class at runti
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
-import kotlinx.schema.json.JsonSchema
+import me.kpavlov.kt.schema.Schema
+import me.kpavlov.kt.schema.json.JsonSchema
 -->
 
 ```kotlin
 // Works with ANY class, even from third-party libraries
 import com.thirdparty.library.User  // Not your code!
 
-val generator = kotlinx.schema.generator.json.ReflectionClassJsonSchemaGenerator.Default
+val generator = me.kpavlov.kt.schema.generator.json.ReflectionClassJsonSchemaGenerator.Default
 val schema: JsonSchema = generator.generateSchema(User::class)
 val schemaString: String = generator.generateSchemaString(User::class)
 ```
 
 <!--- KNIT example-knit-readme-02.kt -->
 
-**Add dependency**: `org.jetbrains.kotlinx:kotlinx-schema-generator-json:<version>`
+**Add dependency**: `me.kpavlov.kt.schema:kt-schema-ksp-json:<version>`
 
 ## What Gets Generated
 
@@ -338,8 +338,8 @@ Here's a practical example of a product model with various property types:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
-import kotlinx.schema.Description
+import me.kpavlov.kt.schema.Schema
+import me.kpavlov.kt.schema.Description
 -->
 
 ```kotlin
@@ -429,8 +429,8 @@ Enums are supported with descriptions on both the enum class and individual valu
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
-import kotlinx.schema.Description
+import me.kpavlov.kt.schema.Schema
+import me.kpavlov.kt.schema.Description
 -->
 
 ```kotlin
@@ -475,8 +475,8 @@ You can compose schemas by nesting annotated classes:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
-import kotlinx.schema.Description
+import me.kpavlov.kt.schema.Schema
+import me.kpavlov.kt.schema.Description
 
 @Schema
 data class Address(val street: String, val city: String, val zipCode: String, val country: String = "US")
@@ -528,8 +528,8 @@ Generic classes are supported, with type parameters resolved at usage sites:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
-import kotlinx.schema.Description
+import me.kpavlov.kt.schema.Schema
+import me.kpavlov.kt.schema.Description
 -->
 
 ```kotlin
@@ -555,10 +555,10 @@ The library automatically generates JSON schemas for Kotlin sealed class hierarc
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
-import kotlinx.schema.Description
-import kotlinx.schema.generator.json.ReflectionClassJsonSchemaGenerator
-import kotlinx.schema.json.encodeToString
+import me.kpavlov.kt.schema.Schema
+import me.kpavlov.kt.schema.Description
+import me.kpavlov.kt.schema.generator.json.ReflectionClassJsonSchemaGenerator
+import me.kpavlov.kt.schema.json.encodeToString
 import kotlinx.serialization.json.Json
 -->
 
@@ -608,25 +608,25 @@ println(schema.encodeToString(Json { prettyPrint = true }))
 ```json
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "kotlinx.schema.integration.type.Animal",
+    "$id": "me.kpavlov.kt.schema.integration.type.Animal",
     "description": "Multicellular eukaryotic organism of the kingdom Metazoa",
     "type": "object",
     "additionalProperties": false,
     "oneOf": [
         {
-            "$ref": "#/$defs/kotlinx.schema.integration.type.Animal.Cat"
+            "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.Animal.Cat"
         },
         {
-            "$ref": "#/$defs/kotlinx.schema.integration.type.Animal.Dog"
+            "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.Animal.Dog"
         }
     ],
     "$defs": {
-        "kotlinx.schema.integration.type.Animal.Cat": {
+        "me.kpavlov.kt.schema.integration.type.Animal.Cat": {
             "type": "object",
             "properties": {
                 "type": {
                     "type": "string",
-                    "const": "kotlinx.schema.integration.type.Animal.Cat"
+                    "const": "me.kpavlov.kt.schema.integration.type.Animal.Cat"
                 },
                 "name": {
                     "type": "string",
@@ -639,12 +639,12 @@ println(schema.encodeToString(Json { prettyPrint = true }))
             ],
             "additionalProperties": false
         },
-        "kotlinx.schema.integration.type.Animal.Dog": {
+        "me.kpavlov.kt.schema.integration.type.Animal.Dog": {
             "type": "object",
             "properties": {
                 "type": {
                     "type": "string",
-                    "const": "kotlinx.schema.integration.type.Animal.Dog"
+                    "const": "me.kpavlov.kt.schema.integration.type.Animal.Dog"
                 },
                 "name": {
                     "type": "string",
@@ -703,7 +703,7 @@ sealed class Event {
 ```
 
 Jackson's `@JsonIgnoreType` is also recognized automatically. Custom ignore annotations can be
-registered via `kotlinx-schema.properties`:
+registered via `kt-schema.properties`:
 
 ```properties
 introspector.annotations.ignore.names=SchemaIgnore,SerialSchemaIgnore,JsonIgnoreType,MyCustomIgnore
@@ -772,8 +772,8 @@ expose Kotlin functions to LLMs.
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Description
-import kotlinx.schema.generator.json.ReflectionFunctionCallingSchemaGenerator
+import me.kpavlov.kt.schema.Description
+import me.kpavlov.kt.schema.generator.json.ReflectionFunctionCallingSchemaGenerator
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -847,10 +847,10 @@ The generated schema follows the LLM function calling format:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Description
-import kotlinx.schema.generator.json.ReflectionFunctionCallingSchemaGenerator
+import me.kpavlov.kt.schema.Description
+import me.kpavlov.kt.schema.generator.json.ReflectionFunctionCallingSchemaGenerator
 import kotlinx.serialization.json.Json
-import kotlinx.schema.json.encodeToJsonObject
+import me.kpavlov.kt.schema.json.encodeToJsonObject
 -->
 
 ```kotlin
@@ -890,7 +890,7 @@ Nullable parameters are represented as union types:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Description
+import me.kpavlov.kt.schema.Description
 import kotlinx.serialization.Serializable
 -->
 
@@ -940,7 +940,7 @@ Generates:
 **Note**: Even nullable parameters are in `required` array. The `null` type in the union indicates optionality.
 
 For more details on function calling schemas and OpenAI compatibility,
-see [kotlinx-schema-json/README.md](kotlinx-schema-json/README.md#function-calling-schema-for-llm-apis).
+see [kt-schema-json/README.md](kt-schema-json/README.md#function-calling-schema-for-llm-apis).
 
 ### Compile-time Function Schema Generation (KSP)
 
@@ -953,8 +953,8 @@ Annotate package-level functions to generate top-level schema accessors:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
-import kotlinx.schema.Description
+import me.kpavlov.kt.schema.Schema
+import me.kpavlov.kt.schema.Description
 
 fun greetPersonJsonSchemaString(): String = ""
 -->
@@ -981,8 +981,8 @@ Annotate class methods to generate `KClass` extensions on the containing class:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
-import kotlinx.schema.Description
+import me.kpavlov.kt.schema.Schema
+import me.kpavlov.kt.schema.Description
 import kotlin.reflect.KClass
 
 fun KClass<UserService>.registerUserJsonSchemaString(): String = ""
@@ -1012,8 +1012,8 @@ Annotate companion methods to generate `KClass` extensions on the companion obje
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
-import kotlinx.schema.Description
+import me.kpavlov.kt.schema.Schema
+import me.kpavlov.kt.schema.Description
 import kotlin.reflect.KClass
 
 fun KClass<DatabaseConnection.Companion>.createJsonSchemaString(): String = ""
@@ -1047,8 +1047,8 @@ Annotate object methods to generate `KClass` extensions on the object type:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
-import kotlinx.schema.Description
+import me.kpavlov.kt.schema.Schema
+import me.kpavlov.kt.schema.Description
 import kotlin.reflect.KClass
 
 fun KClass<ConfigurationManager>.loadConfigJsonSchemaString(): String = ""
@@ -1139,8 +1139,8 @@ describe parameter types only:
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
-import kotlinx.schema.Description
+import me.kpavlov.kt.schema.Schema
+import me.kpavlov.kt.schema.Description
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -1166,7 +1166,7 @@ val schema = fetchUserDataJsonSchemaString()
 
 **You don't need to change your existing code!**
 
-kotlinx-schema recognizes description annotations from multiple frameworks by their **simple name**, allowing you to
+kt-schema recognizes description annotations from multiple frameworks by their **simple name**, allowing you to
 generate schemas from code that uses annotations from other libraries.
 
 ### Supported Annotations
@@ -1175,7 +1175,7 @@ The library automatically recognizes these description annotations by default:
 
 | Annotation                                                 | Simple Name               | Library/Framework | Example                               |
 |------------------------------------------------------------|---------------------------|-------------------|---------------------------------------|
-| `kotlinx.schema.Description`                               | `Description`             | kotlinx-schema    | `@Description("User name")`           |
+| `me.kpavlov.kt.schema.Description`                         | `Description`             | kt-schema         | `@Description("User name")`           |
 | `ai.koog.agents.core.tools.annotations.LLMDescription`     | `LLMDescription`          | Koog AI agents    | `@LLMDescription("Query text")`       |
 | `com.fasterxml.jackson.annotation.JsonPropertyDescription` | `JsonPropertyDescription` | Jackson           | `@JsonPropertyDescription("Email")`   |
 | `com.fasterxml.jackson.annotation.JsonClassDescription`    | `JsonClassDescription`    | Jackson           | `@JsonClassDescription("User model")` |
@@ -1197,7 +1197,7 @@ The introspector matches annotations by their **simple name only**, not the full
 
 ### Customizing Annotation Detection
 
-Annotation detection is configurable via `kotlinx-schema.properties` loaded from the classpath.
+Annotation detection is configurable via `kt-schema.properties` loaded from the classpath.
 The configuration file is **optional** — if not provided or fails to load, the library uses sensible defaults.
 
 #### Default Configuration
@@ -1217,7 +1217,7 @@ By default, the library recognizes:
 
 #### Adding Custom Annotations
 
-To customize, place `kotlinx-schema.properties` in your project's resources:
+To customize, place `kt-schema.properties` in your project's resources:
 
 ```properties
 # Add your custom annotations to the defaults
@@ -1248,7 +1248,7 @@ data class Customer(
 )
 ```
 
-Update `kotlinx-schema.properties`:
+Update `kt-schema.properties`:
 
 ```properties
 introspector.annotations.description.names=Description,ApiDoc
@@ -1265,7 +1265,7 @@ annotations are already present.
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.generator.json.ReflectionClassJsonSchemaGenerator
+import me.kpavlov.kt.schema.generator.json.ReflectionClassJsonSchemaGenerator
 
 annotation class JsonClassDescription(val value: String)
 annotation class JsonPropertyDescription(val value: String)
@@ -1286,7 +1286,7 @@ data class Customer(
 )
 
 // Generate JSON schema without modifying the code
-val generator = kotlinx.schema.generator.json.ReflectionClassJsonSchemaGenerator.Default
+val generator = me.kpavlov.kt.schema.generator.json.ReflectionClassJsonSchemaGenerator.Default
 val schema = generator.generateSchema(Customer::class)
 
 // Schema includes all Jackson descriptions!
@@ -1301,7 +1301,7 @@ annotations automatically, enabling seamless integration with existing LangChain
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.generator.json.ReflectionFunctionCallingSchemaGenerator
+import me.kpavlov.kt.schema.generator.json.ReflectionFunctionCallingSchemaGenerator
 
 annotation class P(val value: String)
 -->
@@ -1330,7 +1330,7 @@ verbose `description =` syntax and the shorthand form, making migration from Koo
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.Schema
+import me.kpavlov.kt.schema.Schema
 
 annotation class LLMDescription(val value: String = "", val description: String = "")
 -->
@@ -1363,14 +1363,14 @@ kotlinx-schema alongside another recognized annotation, put `@Description` first
 
 ## JSON Schema DSL
 
-For manual schema construction, use the [**kotlinx-schema-json**](kotlinx-schema-json) module.
+For manual schema construction, use the [**kt-schema-json**](kt-schema-json) module.
 It provides type-safe Kotlin models compliant with
 the [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/schema) specification
 and a DSL for building JSON Schema definitions programmatically, with full kotlinx-serialization support.
 
 ```kotlin
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-schema-json:<version>")
+    implementation("me.kpavlov.kt.schemakt-schema-json:<version>")
 }
 ```
 
@@ -1378,7 +1378,7 @@ dependencies {
 
 <!--- CLEAR -->
 <!--- INCLUDE
-import kotlinx.schema.json.jsonSchema
+import me.kpavlov.kt.schema.json.jsonSchema
 -->
 
 ```kotlin
@@ -1424,7 +1424,7 @@ val schema = jsonSchema {
 - ✅ Full kotlinx-serialization integration
 - ✅ Kotlin Multiplatform support
 
-**📖 For comprehensive documentation, see [kotlinx-schema-json/README.md](kotlinx-schema-json/README.md)** covering:
+**📖 For comprehensive documentation, see [kt-schema-json/README.md](kt-schema-json/README.md)** covering:
 
 - Complete DSL reference and type-safe enum API
 - Polymorphism patterns (oneOf, anyOf, allOf) with discriminators
@@ -1449,10 +1449,23 @@ property.
 
 ## Code of Conduct
 
-This project and the corresponding community are governed by
-the [JetBrains Open Source and Community Code of Conduct](https://github.com/jetbrains#code-of-conduct). Please make
+This project and the corresponding community are governed by the
+[Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). Please make
 sure you read and adhere to it.
 
 ## License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+### Attribution
+ 
+**kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema), 
+originally developed by JetBrains s.r.o. and contributors, and is licensed under the Apache License, Version 2.0.
+ 
+This project contains modified and unmodified portions of the original work. 
+Notable changes include renaming the Kotlin packages from `kotlinx.schema` to `me.kpavlov.kt.schema`, renaming Maven coordinates from `org.jetbrains.kotlinx` to `me.kpavlov`, and further independent development.
+ 
+See the [LICENSE](LICENSE) and [NOTICE]() files for licensing and attribution information.
+
+**kt-schema** is an independent project and is not affiliated with, endorsed by, or sponsored by JetBrains.
+"Kotlin" and "JetBrains" are trademarks of their respective owners.

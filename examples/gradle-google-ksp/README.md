@@ -109,7 +109,6 @@ A complete example is available here: [GreetingMcpServer.kt](src/commonMain/kotl
 
 When you start the server, you may inspect the tool metadata 
 with [MCP inspector](https://modelcontextprotocol.io/docs/tools/inspector):
-![mcp-light.png](screenshots/mcp-light.png)
 
 ## Build & Run
 
@@ -134,12 +133,12 @@ with [MCP inspector](https://modelcontextprotocol.io/docs/tools/inspector):
 
 ```kotlin
 ksp {
-    arg("kotlinx.schema.withSchemaObject", "true")  // Generate JsonObject accessor
-    arg("kotlinx.schema.visibility", "internal")     // Control generated code visibility
+    arg("me.kpavlov.kt.schema.withSchemaObject", "true")  // Generate JsonObject accessor
+    arg("me.kpavlov.kt.schema.visibility", "internal")     // Control generated code visibility
 }
 
 dependencies {
-    add("kspCommonMainMetadata", "org.jetbrains.kotlinx:kotlinx-schema-ksp:$version")
+    add("kspCommonMainMetadata", "me.kpavlov.kt.schema:kt-schema-ksp:$version")
 }
 ```
 

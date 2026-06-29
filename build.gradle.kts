@@ -8,59 +8,10 @@ plugins {
 }
 
 dependencies {
-    kover(project(":kotlinx-schema-annotations"))
-    kover(project(":kotlinx-schema-generator-core"))
-    kover(project(":kotlinx-schema-generator-json"))
-    kover(project(":kotlinx-schema-ksp-gradle-plugin"))
-    kover(project(":kotlinx-schema-json"))
-    kover(project(":kotlinx-schema-ksp"))
-}
-
-/*
- * Publishes the gradle plugin to local maven repository and syncs the project.
- * After running this, reload your IDE/Gradle to enable gradle-plugin-integration-tests.
- */
-tasks.register("publishPluginAndSync") {
-    group = "build setup"
-    description = "Publishes gradle plugin to local repo (run once, then reload IDE)"
-
-    dependsOn(":kotlinx-schema-ksp-gradle-plugin:publishAllPublicationsToProjectRepository")
-
-    doLast {
-        val repoDir =
-            layout.buildDirectory
-                .dir("project-repo")
-                .get()
-                .asFile
-        println("✓ Plugin published to: $repoDir")
-        println()
-        println("Next steps:")
-        println("1. Reload Gradle/IDE to enable :gradle-plugin-integration-tests module")
-        println("2. Run: ./gradlew testGradlePlugin")
-        println()
-        println("The integration tests module is now available and will remain enabled.")
-    }
-}
-
-/*
- * Runs integration tests (requires plugin to be published first via publishPluginAndSync).
- */
-tasks.register("testGradlePlugin") {
-    group = "verification"
-    description = "Tests the gradle plugin (publishes if needed)"
-
-    dependsOn("publishToProjectRepo")
-
-    val integrationTestsProject = project.findProject(":gradle-plugin-integration-tests")
-    if (integrationTestsProject != null) {
-        dependsOn(":gradle-plugin-integration-tests:allTests")
-    } else {
-        doLast {
-            throw GradleException(
-                "Integration tests not available. Run './gradlew publishPluginAndSync' first and reload IDE.",
-            )
-        }
-    }
+    kover(project(":kt-schema-annotations"))
+    "kover"(project(":kt-schema-generator-core"))
+    kover(project(":kt-schema-ksp-json"))
+    kover(project(":kt-schema-json"))
 }
 
 subprojects {
@@ -79,8 +30,8 @@ subprojects {
 kover {
     reports {
         filters {
-            includes.classes("kotlinx.schema.*")
-            excludes.classes("kotlinx.schema.ksp.ir.*", "*Test") // tested indirectly
+            includes.classes("me.kpavlov.kt.schema.*")
+            excludes.classes("me.kpavlov.kt.schema.ksp.ir.*", "*Test") // tested indirectly
         }
         total {
             xml {}

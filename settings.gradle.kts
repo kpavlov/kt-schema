@@ -14,17 +14,16 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "kotlinx-schema"
+rootProject.name = "kt-schema"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 include(
-    ":kotlinx-schema-annotations",
-    ":kotlinx-schema-json",
-    ":kotlinx-schema-generator-core",
-    ":kotlinx-schema-generator-json",
-    ":kotlinx-schema-ksp",
-    ":kotlinx-schema-ksp-gradle-plugin",
+    ":kt-schema-annotations",
+    ":kt-schema-json",
+    ":kt-schema-generator-core",
+    ":kt-schema-ksp-json",
+    ":kt-schema-ksp",
     ":ksp-integration-tests",
     ":docs",
 )

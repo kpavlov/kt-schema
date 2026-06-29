@@ -11,17 +11,15 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":kotlinx-schema-annotations"))
-    implementation(project(":kotlinx-schema-generator-json"))
+    implementation(project(":kt-schema-annotations"))
+    implementation(project(":kt-schema-ksp-json"))
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotest.assertions.json)
 
-    dokka(project(":kotlinx-schema-annotations"))
-    dokka(project(":kotlinx-schema-generator-core"))
-    dokka(project(":kotlinx-schema-generator-json"))
-    dokka(project(":kotlinx-schema-json"))
-    dokka(project(":kotlinx-schema-ksp"))
-    dokka(project(":kotlinx-schema-ksp-gradle-plugin"))
+    dokka(project(":kt-schema-annotations"))
+    "dokka"(project(":kt-schema-generator-core"))
+    dokka(project(":kt-schema-ksp-json"))
+    dokka(project(":kt-schema-json"))
 }
 
 detekt {
@@ -29,14 +27,24 @@ detekt {
 }
 
 dokka {
-    moduleName.set("KotlinX-Schema")
+    moduleName.set("kt-schema")
 
     pluginsConfiguration.html {
-        footerMessage = "Copyright © 2025 JetBrains s.r.o."
+        footerMessage =
+            """
+            (c) 2026 Konstantin Pavlov and Contributors.
+            <br/>
+            <small>
+                kt-schema is an independent fork of kotlinx-schema, originally developed by
+                JetBrains s.r.o. and contributors, and distributed under the Apache License,
+                Version 2.0. See the <a href="https://github.com/kpavlov/kt-schema/blob/main/LICENSE">LICENSE</a>
+                and <a href="https://github.com/kpavlov/kt-schema/blob/main/NOTICE">NOTICE</a> files for attribution information.
+            </small>
+            """.trimIndent()
     }
 
     dokkaPublications.html {
-        outputDirectory = layout.projectDirectory.dir("public/apidocs")
+        outputDirectory = layout.projectDirectory.dir("public/api")
     }
 }
 
@@ -45,12 +53,11 @@ knit {
     files =
         fileTree(project.rootDir) {
             include("README.md")
-            include("kotlinx-schema-ksp-gradle-plugin/README.md")
-            include("kotlinx-schema-json/README.md")
+            include("kt-schema-json/README.md")
             include("docs/*.md")
         }
     defaultLineSeparator = "\n"
-    siteRoot = "https://kotlin.github.io/kotlinx-schema/"
+    siteRoot = "https://kpavlov.github.io/kt-schema/"
     moduleDocs = "public/apidocs"
 }
 

@@ -10,13 +10,13 @@ dokka {
         includes.from("Module.md")
         sourceLink {
             // Read docs for more details: https://kotlinlang.org/docs/dokka-gradle.html#source-link-configuration
-            remoteUrl("https://github.com/Kotlin/kotlinx-schema/blob/main")
+            remoteUrl("https://github.com/kpavlov/kt-schema/blob/main")
             localDirectory.set(rootDir)
         }
 
-        externalDocumentationLinks.register("kotlinx-schema") {
-            url("https://kotlin.github.io/kotlinx-schema/")
-            packageListUrl("https://kotlin.github.io/kotlinx-schema/package-list")
+        externalDocumentationLinks.register("kt-schema") {
+            url("https://kpavlov.github.io/kt-schema/api/")
+            packageListUrl("https://kpavlov.github.io/kt-schema/api/package-list")
         }
 
         externalDocumentationLinks.register("ktor") {

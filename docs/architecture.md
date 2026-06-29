@@ -1,6 +1,6 @@
 # Architecture
 
-`kotlinx-schema` is a layered library that generates schemas—primarily JSON Schema—from Kotlin declarations
+`kt-schema` is a layered library that generates schemas—primarily JSON Schema—from Kotlin declarations
 and Java classes. It unifies compile-time analysis (KSP) and runtime inspection (reflection) by translating
 both into a shared Internal Representation (IR).
 
@@ -97,15 +97,15 @@ graph LR
 
 ```mermaid
 C4Context
-    title kotlinx-schema
+    title kt-schema
 
-    Boundary(lib, "kotlinx-schema") {
-        System(kxsGenCore, "kotlinx-schema-generator-core")
-        System(kxsAnnotations, "kotlinx-schema-annotations")
-        System(kxsGenJson, "kotlinx-schema-generator-json")
-        System(kxsJsn, "kotlinx-schema-json")
-        System(kxsKsp, "kotlinx-schema-ksp")
-        System(kxsGradle, "kotlinx-schema-gradle-plugin")
+    Boundary(lib, "kt-schema") {
+        System(kxsKs, "kt-schema-ksp")
+        System(kxsAnnotations, "kt-schema-annotations")
+        System(kxsGenJson, "kt-schema-ksp-json")
+        System(kxsJsn, "kt-schema-json")
+        System(kxsKsp, "kt-schema-ksp")
+        System(kxsGradle, "kt-schema-gradle-plugin")
     }
 
     Rel(kxsGenJson, kxsGenCore, "uses")
@@ -127,21 +127,14 @@ C4Context
 
 Top-level modules you might interact with:
 
-- **kotlinx-schema-annotations** — runtime annotations: @Schema and @Description
-- **kotlinx-schema-json** — type-safe models and DSL for building JSON Schema definitions programmatically
-- **kotlinx-schema-generator-core** — internal representation (IR) for schema descriptions, introspection utils,
+- **kt-schema-annotations** — runtime annotations: @Schema and @Description
+- **kt-schema-json** — type-safe models and DSL for building JSON Schema definitions programmatically
+- **kt-schema-generator-core** — core abstractions, intermediate representation (IR) for schema descriptions, introspection utils,
   generator interfaces
-- **kotlinx-schema-generator-json** — JSON Schema transformer from the IR, kotlinx-serialization schema generator
-- **kotlinx-schema-ksp** — KSP processor that scans your code and generates the extension properties:
+- **kt-schema-ksp-json** — JSON Schema transformer from the IR, kotlinx-serialization schema generator
+- **kt-schema-ksp-processor** — KSP processor that scans your code and generates the extension properties:
     - `KClass<T>.jsonSchema: JsonObject`
     - `KClass<T>.jsonSchemaString: String`
-- **kotlinx-schema-gradle-plugin** — Gradle plugin (id: "org.jetbrains.kotlinx.schema.ksp") that:
-    - Applies KSP automatically
-    - Adds the KSP processor dependency
-    - Wires generated sources into your source sets
-    - Sets up multiplatform task dependencies
-- **gradle-plugin-integration-tests** — Independent build that includes the main project; demonstrates real MPP usage
-  and integration testing
 - **ksp-integration-tests** — KSP end‑to‑end tests for generation without the Gradle plugin
 
 ### Workflow

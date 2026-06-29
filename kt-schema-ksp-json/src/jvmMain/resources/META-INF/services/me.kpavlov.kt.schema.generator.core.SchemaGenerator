@@ -1,0 +1,4 @@
+me.kpavlov.kt.schema.generator.json.ReflectionClassJsonObjectSchemaGenerator
+me.kpavlov.kt.schema.generator.json.ReflectionClassJsonSchemaGenerator
+me.kpavlov.kt.schema.generator.json.ReflectionFunctionCallingSchemaGenerator
+me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator

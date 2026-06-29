@@ -1,0 +1,462 @@
+package me.kpavlov.kt.schema.generator.json
+
+import me.kpavlov.kt.schema.generator.core.ir.AbstractTypeGraphTransformer
+import me.kpavlov.kt.schema.generator.core.ir.AnyNode
+import me.kpavlov.kt.schema.generator.core.ir.EnumNode
+import me.kpavlov.kt.schema.generator.core.ir.ListNode
+import me.kpavlov.kt.schema.generator.core.ir.MapNode
+import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
+import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
+import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
+import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
+import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
+import me.kpavlov.kt.schema.generator.core.ir.TypeNode
+import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.json.AdditionalPropertiesSchema
+import me.kpavlov.kt.schema.json.AnyOfPropertyDefinition
+import me.kpavlov.kt.schema.json.ArrayPropertyDefinition
+import me.kpavlov.kt.schema.json.BooleanPropertyDefinition
+import me.kpavlov.kt.schema.json.DenyAdditionalProperties
+import me.kpavlov.kt.schema.json.FunctionCallingSchema
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.ARRAY_OR_NULL_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.ARRAY_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.BOOLEAN_OR_NULL_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.BOOLEAN_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.INTEGER_OR_NULL_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.INTEGER_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.NULL_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.NUMBER_OR_NULL_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.NUMBER_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.OBJECT_OR_NULL_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.OBJECT_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.STRING_OR_NULL_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.STRING_TYPE
+import me.kpavlov.kt.schema.json.GenericPropertyDefinition
+import me.kpavlov.kt.schema.json.NumericPropertyDefinition
+import me.kpavlov.kt.schema.json.ObjectPropertyDefinition
+import me.kpavlov.kt.schema.json.PropertyDefinition
+import me.kpavlov.kt.schema.json.StringPropertyDefinition
+import kotlinx.serialization.json.JsonPrimitive
+import kotlin.jvm.JvmOverloads
+import me.kpavlov.kt.schema.generator.json.FunctionCallingSchemaConfig.Companion.Default as DefaultConfig
+
+/**
+ * Transforms a [TypeGraph] into a [FunctionCallingSchema] for tool/function schema representation.
+ *
+ * This transformer converts the IR representation of a function's parameters
+ * into a tool schema suitable for LLM function calling APIs.
+ *
+ * ## Flat Schema Structure (Default)
+ *
+ * Function schemas use a **FLAT/INLINED structure** by default (`useDefsAndRefs = false`):
+ * - Complex types are inlined at their point of use
+ * - No `$defs` section or `$ref` references
+ * - All type information embedded directly in parameters
+ *
+ * This design optimizes for:
+ * - LLM parsing simplicity (no reference resolution)
+ * - Self-contained schemas (single parameter object)
+ * - API compatibility (OpenAI, Anthropic, etc.)
+ *
+ * Contrast with [TypeGraphToJsonSchemaTransformer] which can use `$defs`/`$ref` for type reuse.
+ *
+ * ## Nullable Types
+ *
+ * Nullable/optional fields are represented using union types that include "null"
+ * (e.g., ["string", "null"]) instead of using the "nullable" flag.
+ */
+@Suppress("TooManyFunctions")
+public class TypeGraphToFunctionCallingSchemaTransformer
+    @JvmOverloads
+    public constructor(
+        public override val config: FunctionCallingSchemaConfig = DefaultConfig,
+    ) : AbstractTypeGraphTransformer<
+            FunctionCallingSchema,
+            FunctionCallingSchemaConfig,
+        >(config = config) {
+        public override fun transform(
+            graph: TypeGraph,
+            rootName: String,
+        ): FunctionCallingSchema =
+            when (val rootRef = graph.root) {
+                is TypeRef.Ref -> {
+                    val node =
+                        graph.nodes[rootRef.id]
+                            ?: error(
+                                "Type reference '${rootRef.id.value}' not found in type graph. " +
+                                    "This indicates a bug in the introspector.",
+                            )
+
+                    when (node) {
+                        is ObjectNode -> convertObjectNodeToToolSchema(node, graph)
+
+                        else -> throw IllegalArgumentException(
+                            "Root node must be ObjectNode for tool schema, got: ${node::class.simpleName}",
+                        )
+                    }
+                }
+
+                is TypeRef.Inline -> {
+                    throw IllegalArgumentException(
+                        "Root cannot be inline for tool schema. Expected ObjectNode reference.",
+                    )
+                }
+            }
+
+        @Suppress("CyclomaticComplexMethod")
+        private fun convertObjectNodeToToolSchema(
+            node: ObjectNode,
+            graph: TypeGraph,
+        ): FunctionCallingSchema {
+            val requiredFields =
+                if (config.strictMode) {
+                    node.properties.map { it.name }
+                } else if (config.respectDefaultPresence) {
+                    if (config.requireNullableFields) {
+                        node.properties
+                            .filter { it.name in node.required || it.type.nullable || it.isConstant }
+                            .map { it.name }
+                    } else {
+                        // Use the required set from the ObjectNode (respects DefaultPresence)
+                        node.required.toList()
+                    }
+                } else if (config.requireNullableFields) {
+                    // All properties are required (legacy strict mode from JsonSchemaConfig)
+                    node.properties.map { it.name }
+                } else {
+                    // Only non-nullable properties are required
+                    node.properties.filter { !it.type.nullable || it.isConstant }.map { it.name }
+                }
+
+            val requiredSet = requiredFields.toSet()
+            val properties =
+                node.properties.associate { property ->
+                    val isRequired = property.name in requiredSet
+                    val finalDef =
+                        convertTypeRef(property.type, graph)
+                            .let { def -> property.description?.let { setDescription(def, it) } ?: def }
+                            .let { def ->
+                                when {
+                                    property.isConstant -> {
+                                        setConstValue(def, property.defaultValue)
+                                    }
+
+                                    !isRequired && property.defaultValue != null -> {
+                                        setDefaultValue(
+                                            def,
+                                            property.defaultValue,
+                                        )
+                                    }
+
+                                    else -> {
+                                        def
+                                    }
+                                }
+                            }
+                    property.name to finalDef
+                }
+
+            return FunctionCallingSchema(
+                name = node.name,
+                description = node.description.orEmpty(),
+                strict = if (config.strictMode) true else null,
+                parameters =
+                    ObjectPropertyDefinition(
+                        properties = properties,
+                        required = requiredFields,
+                        additionalProperties = DenyAdditionalProperties,
+                    ),
+            )
+        }
+
+        // FIXME throw on recursive polymorphism since defs are not allowed for function calling
+        private fun convertTypeRef(
+            typeRef: TypeRef,
+            graph: TypeGraph,
+        ): PropertyDefinition =
+            when (typeRef) {
+                is TypeRef.Inline -> {
+                    convertInlineNode(typeRef.node, typeRef.nullable, graph)
+                }
+
+                is TypeRef.Ref -> {
+                    val node =
+                        checkNotNull(graph.nodes[typeRef.id]) {
+                            "Type reference '${typeRef.id.value}' not found in type graph. " +
+                                "This indicates a bug in the introspector - all referenced types " +
+                                "should be present in the graph's nodes map."
+                        }
+                    convertNode(node, typeRef.nullable, graph)
+                }
+            }
+
+        private fun convertInlineNode(
+            node: TypeNode,
+            nullable: Boolean,
+            graph: TypeGraph,
+        ): PropertyDefinition =
+            when (node) {
+                is PrimitiveNode -> {
+                    convertPrimitive(node, nullable)
+                }
+
+                is AnyNode -> {
+                    // AnyNode emits {} which already accepts null — nullable flag intentionally ignored
+                    GenericPropertyDefinition(description = node.description)
+                }
+
+                is ListNode -> {
+                    convertList(node, nullable, graph)
+                }
+
+                is MapNode -> {
+                    convertMap(node, nullable, graph)
+                }
+
+                else -> {
+                    throw IllegalArgumentException(
+                        "Unsupported inline node type: ${node::class.simpleName}. " +
+                            "Only PrimitiveNode, AnyNode, ListNode, and MapNode can be inlined.",
+                    )
+                }
+            }
+
+        private fun convertNode(
+            node: TypeNode,
+            nullable: Boolean,
+            graph: TypeGraph,
+        ): PropertyDefinition =
+            when (node) {
+                is PrimitiveNode -> {
+                    convertPrimitive(node, nullable)
+                }
+
+                is AnyNode -> {
+                    GenericPropertyDefinition(description = node.description)
+                }
+
+                is ObjectNode -> {
+                    convertObject(node, nullable, graph)
+                }
+
+                is EnumNode -> {
+                    convertEnum(node, nullable)
+                }
+
+                is ListNode -> {
+                    convertList(node, nullable, graph)
+                }
+
+                is MapNode -> {
+                    convertMap(node, nullable, graph)
+                }
+
+                is PolymorphicNode -> {
+                    convertPolymorphic(node, nullable, graph)
+                }
+            }
+
+        private fun convertPrimitive(
+            node: PrimitiveNode,
+            nullable: Boolean,
+        ): PropertyDefinition =
+            when (node.kind) {
+                PrimitiveKind.STRING -> {
+                    StringPropertyDefinition(
+                        type = if (nullable) STRING_OR_NULL_TYPE else STRING_TYPE,
+                        description = node.description,
+                        nullable = null,
+                    )
+                }
+
+                PrimitiveKind.BOOLEAN -> {
+                    BooleanPropertyDefinition(
+                        type = if (nullable) BOOLEAN_OR_NULL_TYPE else BOOLEAN_TYPE,
+                        description = node.description,
+                        nullable = null,
+                    )
+                }
+
+                PrimitiveKind.INT, PrimitiveKind.LONG -> {
+                    NumericPropertyDefinition(
+                        type = if (nullable) INTEGER_OR_NULL_TYPE else INTEGER_TYPE,
+                        description = node.description,
+                        nullable = null,
+                    )
+                }
+
+                PrimitiveKind.FLOAT, PrimitiveKind.DOUBLE -> {
+                    NumericPropertyDefinition(
+                        type = if (nullable) NUMBER_OR_NULL_TYPE else NUMBER_TYPE,
+                        description = node.description,
+                        nullable = null,
+                    )
+                }
+            }
+
+        @Suppress("CyclomaticComplexMethod")
+        private fun convertObject(
+            node: ObjectNode,
+            nullable: Boolean,
+            graph: TypeGraph,
+        ): PropertyDefinition {
+            val requiredFields =
+                if (config.strictMode) {
+                    node.properties.map { it.name }
+                } else if (config.respectDefaultPresence) {
+                    if (config.requireNullableFields) {
+                        node.properties
+                            .filter { it.name in node.required || it.type.nullable || it.isConstant }
+                            .map { it.name }
+                    } else {
+                        node.required.toList()
+                    }
+                } else if (config.requireNullableFields) {
+                    // All properties are required (legacy strict mode from JsonSchemaConfig)
+                    node.properties.map { it.name }
+                } else {
+                    // Only non-nullable properties are required
+                    node.properties.filter { !it.type.nullable || it.isConstant }.map { it.name }
+                }
+
+            val requiredSet = requiredFields.toSet()
+            val properties =
+                node.properties.associate { property ->
+                    val isRequired = property.name in requiredSet
+                    val finalDef =
+                        convertTypeRef(property.type, graph)
+                            .let { def -> property.description?.let { setDescription(def, it) } ?: def }
+                            .let { def ->
+                                when {
+                                    property.isConstant -> {
+                                        setConstValue(def, property.defaultValue)
+                                    }
+
+                                    !isRequired && property.defaultValue != null -> {
+                                        setDefaultValue(
+                                            def,
+                                            property.defaultValue,
+                                        )
+                                    }
+
+                                    else -> {
+                                        def
+                                    }
+                                }
+                            }
+                    property.name to finalDef
+                }
+
+            return ObjectPropertyDefinition(
+                type = if (nullable) OBJECT_OR_NULL_TYPE else OBJECT_TYPE,
+                description = node.description,
+                nullable = null,
+                properties = properties,
+                required = requiredFields,
+                additionalProperties = DenyAdditionalProperties,
+            )
+        }
+
+        private fun convertEnum(
+            node: EnumNode,
+            nullable: Boolean,
+        ): PropertyDefinition =
+            StringPropertyDefinition(
+                type = if (nullable) STRING_OR_NULL_TYPE else STRING_TYPE,
+                description = node.description,
+                nullable = null,
+                enum = node.entries,
+            )
+
+        private fun convertList(
+            node: ListNode,
+            nullable: Boolean,
+            graph: TypeGraph,
+        ): PropertyDefinition {
+            val items = convertTypeRef(node.element, graph)
+            return ArrayPropertyDefinition(
+                type = if (nullable) ARRAY_OR_NULL_TYPE else ARRAY_TYPE,
+                description = node.description,
+                nullable = null,
+                items = items,
+            )
+        }
+
+        private fun convertMap(
+            node: MapNode,
+            nullable: Boolean,
+            graph: TypeGraph,
+        ): PropertyDefinition {
+            val valuePropertyDef = convertTypeRef(node.value, graph)
+            return ObjectPropertyDefinition(
+                type = if (nullable) OBJECT_OR_NULL_TYPE else OBJECT_TYPE,
+                description = node.description,
+                nullable = null,
+                additionalProperties = AdditionalPropertiesSchema(valuePropertyDef),
+            )
+        }
+
+        private fun convertPolymorphic(
+            node: PolymorphicNode,
+            nullable: Boolean,
+            graph: TypeGraph,
+        ): PropertyDefinition {
+            // Get a list of subtype definitions
+            val subtypeDefs =
+                node.subtypes.map { subtypeRef ->
+                    val typeName = subtypeRef.id.value
+
+                    convertTypeRef(subtypeRef.ref, graph)
+                        .let { definition ->
+                            @Suppress("UseCheckOrError")
+                            definition as? ObjectPropertyDefinition
+                                ?: throw IllegalStateException(
+                                    "All subtypes of a polymorphic type must be objects. " +
+                                        "Found subtype '$typeName' with type '${definition::class.simpleName}'.",
+                                )
+                        }.let { definition ->
+                            // Append discriminator property to the definition if enabled
+                            if (config.includePolymorphicDiscriminator) {
+                                val discriminatorProperty =
+                                    StringPropertyDefinition(
+                                        constValue = JsonPrimitive(typeName),
+                                    )
+
+                                definition.copy(
+                                    properties =
+                                        mapOf(node.discriminator.name to discriminatorProperty) +
+                                            definition.properties.orEmpty(),
+                                    required = listOf(node.discriminator.name) + definition.required.orEmpty(),
+                                )
+                            } else {
+                                definition
+                            }
+                        }
+                }
+
+            // oneOf is not supported by OpenAI-like JSON schemas, using anyOf instead
+            val anyOfDef =
+                AnyOfPropertyDefinition(
+                    anyOf = subtypeDefs,
+                    description = if (nullable) null else node.description,
+                )
+
+            // If nullable, wrap in additional anyOf with the 'null' option
+            return if (nullable) {
+                AnyOfPropertyDefinition(
+                    anyOf =
+                        listOf(
+                            anyOfDef,
+                            StringPropertyDefinition(
+                                type = NULL_TYPE,
+                                description = null,
+                                nullable = null,
+                            ),
+                        ),
+                    description = null, // Description set by setDescription in convertObject
+                )
+            } else {
+                anyOfDef
+            }
+        }
+    }
