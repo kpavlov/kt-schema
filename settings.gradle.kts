@@ -23,7 +23,7 @@ include(
     ":kt-schema-json",
     ":kt-schema-generator-core",
     ":kt-schema-ksp-json",
-    ":kt-schema-ksp-processor",
+    ":kt-schema-ksp",
     ":ksp-integration-tests",
     ":docs",
 )

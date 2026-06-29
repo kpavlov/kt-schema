@@ -25,9 +25,9 @@ dependencies {
     testImplementation(libs.kotest.assertions.core)
     testImplementation(libs.kotest.assertions.json)
     testImplementation(project(":kt-schema-ksp-json"))
+    ksp(project(":kt-schema-ksp"))
 
     // KSP processor
-    ksp(project(":kt-schema-ksp-processor"))
 }
 
 ksp {

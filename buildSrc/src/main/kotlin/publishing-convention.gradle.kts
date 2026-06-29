@@ -53,7 +53,7 @@ mavenPublishing {
             developer {
                 id = "kpavlov"
                 name = "Konstantin Pavlov"
-                email = "k.pavlov@jetbrains.com"
+                email = "mail@kpavlov.me"
                 organization = "kpavlov"
                 organizationUrl = "https://github.com/kpavlov"
             }
