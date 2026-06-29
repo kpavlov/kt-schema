@@ -30,11 +30,21 @@ dokka {
     moduleName.set("kt-schema")
 
     pluginsConfiguration.html {
-        footerMessage = "Copyright © 2025 kpavlov"
+        footerMessage =
+            """
+            (c) 2026 Konstantin Pavlov and Contributors.
+            <br/>
+            <small>
+                kt-schema is an independent fork of kotlinx-schema, originally developed by
+                JetBrains s.r.o. and contributors, and distributed under the Apache License,
+                Version 2.0. See the <a href="https://github.com/kpavlov/kt-schema/blob/main/LICENSE">LICENSE</a>
+                and <a href="https://github.com/kpavlov/kt-schema/blob/main/NOTICE">NOTICE</a> files for attribution information.
+            </small>
+            """.trimIndent()
     }
 
     dokkaPublications.html {
-        outputDirectory = layout.projectDirectory.dir("public/apidocs")
+        outputDirectory = layout.projectDirectory.dir("public/api")
     }
 }
 

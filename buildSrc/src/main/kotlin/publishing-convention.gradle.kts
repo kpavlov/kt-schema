@@ -35,18 +35,17 @@ mavenPublishing {
                 .gradleProperty("POM_URL")
                 .orElse("https://github.com/kpavlov/kt-schema")
                 .get()
+        inceptionYear = "2026"
 
         licenses {
             license {
                 name = "The Apache Software License, Version 2.0"
                 url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
                 distribution = "repo"
+                comments = "kt-schema is an independent fork of kotlinx-schema, originally developed by\n" +
+                    "JetBrains s.r.o. and contributors, and distributed under the Apache License,\n" +
+                    "Version 2.0. See the LICENSE and NOTICE files for attribution information."
             }
-        }
-
-        organization {
-            name = "kpavlov"
-            url = "https://github.com/kpavlov"
         }
 
         developers {
