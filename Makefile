@@ -13,7 +13,7 @@ build:
 	@echo "🔨 Building..."
 	@./gradlew -PkotlinTargets=$(KOTLIN_TARGETS) \
 		kotlinUpgradePackageLock kotlinWasmUpgradePackageLock build
-	@echo "🔨 Coverage reports..."
+	@echo "☂️ Coverage reports..."
 	@./gradlew -PkotlinTargets=$(KOTLIN_TARGETS) koverLog koverXmlReport koverHtmlReport
 	@echo "✅ Build complete!"
 
@@ -64,7 +64,7 @@ lint:
 
 .PHONY: publish
 publish:
-	@echo "📦 Publishing to project repository (build/project-repo)..."
+	@echo "📰📦 Publishing to project repository (build/project-repo)..."
 	@rm -rf build/project-repo
 	@./gradlew publishAllPublicationsToProjectRepository -Pversion=1-SNAPSHOT
 	@echo "✅ Version '1-SNAPSHOT' was published to build/project-repo! (1-SNAPSHOT)"
@@ -75,14 +75,14 @@ sync:
 
 .PHONY: examples
 examples:
-	@echo "Running examples..."
+	@echo "📖 Running examples..."
 	@(cd examples/gradle-google-ksp && rm -rf kotlin-js-store && ./gradlew clean build --no-daemon --rerun-tasks)
 	@(cd examples/maven-ksp && rm -rf target && mvn package --no-transfer-progress)
 	@echo "✅ Examples complete!"
 
 .PHONY: examples-snapshot
 examples-snapshot:
-	@echo "Running examples..."
+	@echo "🧫 Running examples..."
 	@(cd examples/gradle-google-ksp && rm -rf kotlin-js-store && ./gradlew clean build -PktSchemaVersion=1-SNAPSHOT --no-daemon --rerun-tasks)
 	@(cd examples/maven-ksp && rm -rf target && mvn test -U -Plocal --no-transfer-progress)
 	@echo "✅ Examples complete!"
