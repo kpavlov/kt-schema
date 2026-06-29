@@ -7,6 +7,10 @@ public abstract class me/kpavlov/kt/schema/generator/core/AbstractSchemaGenerato
 	protected final fun getTypeGraphTransformer ()Lme/kpavlov/kt/schema/generator/core/ir/TypeGraphTransformer;
 }
 
+public final class me/kpavlov/kt/schema/generator/core/ConfigKt {
+	public static final fun defaultOpaqueTypeNames ()Ljava/util/Set;
+}
+
 public abstract interface annotation class me/kpavlov/kt/schema/generator/core/InternalSchemaGeneratorApi : java/lang/annotation/Annotation {
 }
 

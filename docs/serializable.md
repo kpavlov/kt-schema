@@ -13,6 +13,7 @@
   * [Introspector configuration](#introspector-configuration)
   * [@SerialDescription support](#@serialdescription-support)
   * [Custom description extraction](#custom-description-extraction)
+  * [Opaque JSON types](#opaque-json-types)
   * [JSON Schema output configuration](#json-schema-output-configuration)
   * [JsonSchemaConfig presets](#jsonschemaconfig-presets)
   * [JsonSchemaConfig reference](#jsonschemaconfig-reference)
@@ -225,11 +226,13 @@ schema shouldEqualJson $$"""
 ### Introspector configuration
 
 `SerializationClassSchemaIntrospector.Config` controls how the generator reads descriptions from
-annotations on your serializable classes and properties. Its single field is:
+annotations on your serializable classes and properties, and which types are treated as opaque
+JSON values.
 
 | Field | Type | Default |
 |:------|:-----|:--------|
 | `descriptionExtractor` | `DescriptionExtractor` | Reads `@SerialDescription` |
+| `opaqueSerialNames` | `Set<String>` | `defaultOpaqueTypeNames()` |
 
 By default, the generator recognizes `@SerialDescription` with no extra setup. To read a
 different annotation, supply a custom `DescriptionExtractor` — see [Custom description extraction](#custom-description-extraction) below.
@@ -405,6 +408,35 @@ This code prints:
 > Use [`@SerialDescription`](#serialdescription-support) from this module instead — it carries `@SerialInfo` and works with `Default` out of the box.
 > If you're describing classes you don't own, use the [KSP processor](ksp.md) or
 > the [reflection-based generator](../README.md#runtime-schema-generation).
+
+### Opaque JSON types
+
+Some types represent arbitrary JSON values rather than a fixed structure — [`JsonElement`](https://kotlinlang.org/api/kotlinx.serialization/kotlinx-serialization-json/kotlinx.serialization.json/-json-element/) and
+[`JsonPrimitive`](https://kotlinlang.org/api/kotlinx.serialization/kotlinx-serialization-json/kotlinx.serialization.json/-json-primitive/) from `kotlinx-serialization-json` are the most common examples. Their
+serialization descriptors use a runtime-generated format that is incompatible with the standard
+sealed-type processing pipeline, so the generator maps them directly to an empty JSON Schema `{}`
+(which accepts any value).
+
+`defaultOpaqueTypeNames()` contains the built-in set:
+
+- `kotlinx.serialization.json.JsonElement` → `{}`
+- `kotlinx.serialization.json.JsonPrimitive` → `{}`
+- `kotlinx.serialization.json.JsonNull` → `{}`
+
+`JsonObject` fields are handled correctly as typed maps without any special configuration — their
+value type `JsonElement` is already opaque, so the emitted schema is `{"type": "object", "additionalProperties": {}}`.
+
+**Adding custom opaque types**: if you have a type whose descriptor causes processing errors
+(e.g., a custom sealed class with a non-standard runtime descriptor), add its serial name to
+`opaqueSerialNames`:
+
+```kotlin
+val generator = SerializationClassJsonSchemaGenerator(
+    introspectorConfig = SerializationClassSchemaIntrospector.Config(
+        opaqueSerialNames = defaultOpaqueTypeNames() + setOf("com.example.RawJson"),
+    ),
+)
+```
 
 ### JSON Schema output configuration
 

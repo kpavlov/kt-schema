@@ -21,7 +21,7 @@
 
 > [!NOTE]
 > **kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema),
-> originally created by me, Konstantin Pavlov, at JetBrains, and is licensed under the Apache 2.0 License.
+> originally started by me, Konstantin Pavlov, at JetBrains, and is licensed under the Apache 2.0 License.
 
 Quick Links:
 

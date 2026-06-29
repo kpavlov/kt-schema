@@ -168,13 +168,15 @@ public final class me/kpavlov/kt/schema/generator/json/serialization/Serializati
 
 public final class me/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config {
 	public fun <init> ()V
-	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;)V
-	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;Ljava/util/Set;)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;
-	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;)Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;
-	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;
+	public final fun component2 ()Ljava/util/Set;
+	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;Ljava/util/Set;)Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;Ljava/util/Set;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/json/serialization/SerializationClassSchemaIntrospector$Config;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDescriptionExtractor ()Lme/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor;
+	public final fun getOpaqueSerialNames ()Ljava/util/Set;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

@@ -1,5 +1,7 @@
 package me.kpavlov.kt.schema.generator.core
 
+import io.github.oshai.kotlinlogging.KotlinLogging
+import me.kpavlov.kt.schema.generator.core.Config.descriptionAnnotationNames
 import java.io.IOException
 import java.util.Properties
 import kotlin.io.bufferedReader
@@ -11,6 +13,7 @@ private const val DESCRIPTION_ATTRIBUTES_KEY = "introspector.annotations.descrip
 private const val IGNORE_NAMES_KEY = "introspector.annotations.ignore.names"
 private const val NAME_NAMES_KEY = "introspector.annotations.name.names"
 private const val NAME_ATTRIBUTES_KEY = "introspector.annotations.name.attributes"
+private const val OPAQUE_TYPE_NAMES_KEY = "introspector.opaque.type.names"
 
 /**
  * Default fallback values if configuration loading fails
@@ -58,6 +61,8 @@ private val DEFAULT_NAME_VALUE_ATTRIBUTES =
     listOf(
         "value",
     )
+
+private val logger = KotlinLogging.logger {}
 
 internal actual object Config {
     /**
@@ -118,14 +123,21 @@ internal actual object Config {
         } ?: DEFAULT_NAME_VALUE_ATTRIBUTES
     }
 
+    actual val opaqueTypeNames: Set<String> by lazy {
+        loadConfiguration { properties ->
+            parseListPropertyPreservingFqnCase(properties, OPAQUE_TYPE_NAMES_KEY).toSet()
+        } ?: DEFAULT_OPAQUE_TYPE_NAMES
+    }
+
     private fun <T> loadConfiguration(extractor: (Properties) -> T): T? =
         try {
             val properties = loadProperties()
             extractor(properties)
         } catch (e: IOException) {
-            // Log and return null to use fallback
-            System.err.println("Warning: Failed to load configuration from $CONFIG_FILE_NAME: ${e.message}")
-            System.err.println("Using default configuration values")
+            logger.warn { "Failed to load configuration from $CONFIG_FILE_NAME: ${e.message}. Using defaults." }
+            null
+        } catch (e: IllegalArgumentException) {
+            logger.warn { "Invalid configuration in $CONFIG_FILE_NAME: ${e.message}. Using defaults." }
             null
         }
 
@@ -186,15 +198,8 @@ internal actual object Config {
                         "Ensure the file exists in your resources directory.",
                 )
 
-        return try {
-            stream.bufferedReader(Charsets.UTF_8).use { reader ->
-                Properties().apply { load(reader) }
-            }
-        } catch (e: IOException) {
-            throw IllegalStateException(
-                "Failed to parse configuration file '$CONFIG_FILE_NAME': ${e.message}",
-                e,
-            )
+        return stream.bufferedReader(Charsets.UTF_8).use { reader ->
+            Properties().apply { load(reader) }
         }
     }
 }
