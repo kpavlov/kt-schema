@@ -530,7 +530,7 @@ public class TypeGraphToJsonSchemaTransformer
                 type = if (nullable && config.useUnionTypes) ARRAY_OR_NULL_TYPE else ARRAY_TYPE,
                 description = node.description,
                 nullable = getNullableFlag(nullable),
-                items = items,
+                items = items.takeIf { it !is GenericPropertyDefinition },
             )
         }
 

@@ -64,10 +64,8 @@ internal class SerializationIntrospectionContext(
 
         val nullable = type.isNullable
 
-        // kotlin.Any / java.lang.Object: any value — emit empty schema {}
-        if (type.serialName.removeSuffix("?") in ANY_SERIAL_NAMES) {
-            return TypeRef.Inline(AnyNode(), nullable)
-        }
+        // kotlin.Any, java.lang.Object, and configured opaque types all emit {} (empty schema)
+        opaqueRefOrNull(type.serialName.removeSuffix("?"), nullable)?.let { return it }
 
         // Try primitives first (always inlined)
         primitiveFor(type)?.let { primitiveNode ->
@@ -358,14 +356,39 @@ internal class SerializationIntrospectionContext(
         }
 
     private fun extractSealedSubtypes(descriptor: SerialDescriptor): List<SerialDescriptor> {
-        require(descriptor.elementsCount >= 2 && descriptor.getElementName(1) == "value") {
-            "Unexpected sealed descriptor structure: expected 'value' element at index 1, " +
-                "but found '${descriptor.getElementName(1)}'"
+        // Standard format produced by the Kotlin serialization compiler plugin for `sealed`
+        // classes: a wrapper whose element[0]="type" is the discriminator and element[1]="value"
+        // is a synthetic descriptor whose sub-elements are the concrete subtype descriptors.
+        if (descriptor.isStandardSealedWrapper()) {
+            val valueDescriptor = descriptor.getElementDescriptor(1)
+            return (0 until valueDescriptor.elementsCount).map { valueDescriptor.getElementDescriptor(it) }
         }
 
-        val valueDescriptor = descriptor.getElementDescriptor(1)
-        return (0 until valueDescriptor.elementsCount).map { valueDescriptor.getElementDescriptor(it) }
+        // Any other SEALED descriptor comes from a hand-written serializer (e.g. the
+        // kotlinx.serialization.json types, which enumerate heterogeneous subtypes such as
+        // primitives, maps and lists directly, with no 'type'/'value' wrapper). Such shapes do
+        // not map onto a discriminated `oneOf`, so we fail with actionable guidance rather than
+        // guessing a structure and emitting a wrong schema.
+        error(
+            "Cannot derive a polymorphic schema for sealed descriptor '${descriptor.serialName}': " +
+                "its structure is not the standard ['type', 'value'] wrapper " +
+                "(elements: ${descriptor.elementNames()}). " +
+                "If it represents an arbitrary JSON value, add its serial name to " +
+                "SerializationClassSchemaIntrospector.Config.opaqueSerialNames.",
+        )
     }
+
+    /**
+     * True when [descriptor] has the compiler-generated sealed wrapper shape:
+     * element[0] named `type` (the discriminator) and element[1] named `value` (the subtype holder).
+     */
+    private fun SerialDescriptor.isStandardSealedWrapper(): Boolean =
+        elementsCount >= 2 &&
+            getElementName(0) == "type" &&
+            getElementName(1) == "value"
+
+    private fun SerialDescriptor.elementNames(): List<String> =
+        (0 until elementsCount).map { getElementName(it) }
 
     /**
      * Extracts subtype descriptors for open polymorphic types by querying the
@@ -458,9 +481,29 @@ internal class SerializationIntrospectionContext(
     private fun descriptorId(descriptor: SerialDescriptor): TypeId =
         TypeId(descriptor.unwrapSerialName().removeSuffix("?"))
 
+    /**
+     * Returns a cached [AnyNode] ref if [serialName] is a known opaque type, null otherwise.
+     *
+     * Checks [ANY_SERIAL_NAMES] (`kotlin.Any`, `java.lang.Object`) unconditionally, then
+     * [SerializationClassSchemaIntrospector.Config.opaqueSerialNames] for caller-configured types.
+     * These two sets are additive: setting [SerializationClassSchemaIntrospector.Config.opaqueSerialNames]
+     * to an empty set suppresses only the configurable opaque types — it does not disable
+     * the built-in `kotlin.Any`/`java.lang.Object` handling.
+     */
+    private fun opaqueRefOrNull(serialName: String, nullable: Boolean): TypeRef? =
+        if (serialName in ANY_SERIAL_NAMES || serialName in config.opaqueSerialNames) {
+            if (nullable) ANY_REF_NULLABLE else ANY_REF
+        } else {
+            null
+        }
+
     private companion object {
         /** Serial names that represent "any value" — mapped to [AnyNode] (empty schema `{}`). */
-        val ANY_SERIAL_NAMES = setOf("kotlin.Any", "java.lang.Object")
+        val ANY_SERIAL_NAMES: Set<String> = setOf("kotlin.Any", "java.lang.Object")
+
+        /** Cached [TypeRef] for [AnyNode] to avoid per-call allocation. */
+        val ANY_REF: TypeRef = TypeRef.Inline(AnyNode(), false)
+        val ANY_REF_NULLABLE: TypeRef = TypeRef.Inline(AnyNode(), true)
     }
 
     /**

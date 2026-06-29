@@ -1,5 +1,35 @@
 package me.kpavlov.kt.schema.generator.core
 
+import me.kpavlov.kt.schema.generator.core.Config.descriptionAnnotationNames
+import me.kpavlov.kt.schema.generator.core.Config.nameAnnotationNames
+
+/**
+ * Default opaque type names used across all platforms.
+ * JVM overrides this by loading from `kt-schema.properties`.
+ */
+internal val DEFAULT_OPAQUE_TYPE_NAMES: Set<String> =
+    setOf(
+        "kotlinx.serialization.json.JsonElement",
+        "kotlinx.serialization.json.JsonPrimitive",
+        "kotlinx.serialization.json.JsonNull",
+    )
+
+/**
+ * Canonical set of fully qualified names of `kotlinx.serialization.json` types treated as
+ * opaque JSON values (mapped to the empty schema `{}`).
+ *
+ * This is the single source of truth shared across modules and platforms:
+ * - the JVM reflection introspector uses it as the fallback for [Config.opaqueTypeNames];
+ * - the serialization- and KSP-based generators (in `kt-schema-ksp-json`) default their
+ *   opaque-type sets to this function, so all paths stay consistent.
+ *
+ * Exposed as a function (rather than a constant) so callers can build on it — e.g.
+ * `opaqueSerialNames = defaultOpaqueTypeNames() + myCustomTypes` — without depending on an
+ * inlined constant value. The JVM reflection path additionally lets users override the
+ * effective list via the `introspector.opaque.type.names` property in `kt-schema.properties`.
+ */
+public fun defaultOpaqueTypeNames(): Set<String> = DEFAULT_OPAQUE_TYPE_NAMES
+
 /**
  * Configuration for schema generation.
  *
@@ -18,9 +48,11 @@ package me.kpavlov.kt.schema.generator.core
  *
  * ## Fallback Behavior
  *
- * If configuration loading fails (file not found or I/O error), the system automatically uses
- * default values: Description, LLMDescription, JsonPropertyDescription, JsonClassDescription, P
- * for annotation names, and "value", "description" for attributes.
+ * If the configuration file is present but unreadable or contains invalid values, the system
+ * automatically uses default values: Description, LLMDescription, JsonPropertyDescription,
+ * JsonClassDescription, P for annotation names, and "value", "description" for attributes.
+ * A completely absent `kt-schema.properties` resource is treated as a packaging error and is
+ * not silently defaulted.
  */
 internal expect object Config {
     /**
@@ -96,4 +128,21 @@ internal expect object Config {
      * Default value: "value"
      */
     val nameValueAttributes: List<String>
+
+    /**
+     * Set of fully qualified class names of types that should be treated as opaque
+     * JSON values (mapped to empty schema `{}`) during reflection-based introspection.
+     *
+     * These types have incompatible class structures for standard object or sealed-type
+     * processing but represent arbitrary JSON values.
+     *
+     * Loaded lazily from the `introspector.opaque.type.names` property in
+     * `kt-schema.properties`. If the property is missing or invalid, falls back to built-in
+     * defaults; an absent configuration file is not silently defaulted.
+     *
+     * Default value: kotlinx.serialization.json.JsonElement,
+     *                kotlinx.serialization.json.JsonPrimitive,
+     *                kotlinx.serialization.json.JsonNull
+     */
+    val opaqueTypeNames: Set<String>
 }

@@ -1,5 +1,6 @@
 package me.kpavlov.kt.schema.generator.reflect
 
+import me.kpavlov.kt.schema.generator.core.Config
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
 import me.kpavlov.kt.schema.generator.core.ir.Discriminator
@@ -62,6 +63,11 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             return TypeRef.Inline(AnyNode(), nullable)
         }
 
+        // kotlinx.serialization.json opaque types: treated as any JSON value — emit empty schema {}
+        if (klass.qualifiedName in Config.opaqueTypeNames) {
+            return TypeRef.Inline(AnyNode(), nullable)
+        }
+
         // Try to convert to primitive type
         primitiveKindFor(klass)?.let { primitiveKind ->
             val ref = TypeRef.Inline(PrimitiveNode(primitiveKind), nullable)
@@ -112,15 +118,33 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      */
     private fun isEnumClass(klass: KClass<*>): Boolean = !klass.isData && klass.java.isEnum
 
+    /**
+     * Extracts a type argument from a supertype of [klass].
+     * Searches through direct supertypes using [superType]'s `isAssignableFrom` to match
+     * both the exact type and its subtypes (e.g., [Iterable] matches [List]/[Collection]).
+     * Returns null if no matching supertype is found or the argument index is out of bounds.
+     */
+    private fun superTypeArg(klass: KClass<*>, superType: KClass<*>, argumentIndex: Int): KType? {
+        val found = klass.supertypes.firstOrNull {
+            val classifier = it.classifier as? KClass<*> ?: return@firstOrNull false
+            superType.java.isAssignableFrom(classifier.java)
+        } ?: return null
+        return found.arguments.getOrNull(argumentIndex)?.type
+    }
+
     //endregion
 
     //region KType to TypeRef conversion handlers
 
     /**
      * Handles list-like types (List, Collection, Iterable).
+     * Falls back to supertype type arguments when the direct type arguments are unavailable
+     * (e.g., for classes like [kotlinx.serialization.json.JsonArray] that implement
+     * [List] with concrete type arguments).
      */
     private fun handleListType(type: KType): TypeRef {
         val elementType = type.arguments.firstOrNull()?.type
+            ?: superTypeArg(type.klass, Iterable::class, 0)
 
         val elementRef =
             elementType
@@ -134,11 +158,15 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
 
     /**
      * Handles Map types.
-     * Creates a fallback MapNode with String keys and values when type arguments are unavailable.
+     * Falls back to supertype type arguments when the direct type arguments are unavailable
+     * (e.g., for classes like [kotlinx.serialization.json.JsonObject] that implement
+     * [Map] with concrete type arguments).
      */
     private fun handleMapType(type: KType): TypeRef {
         val keyType = type.arguments.getOrNull(0)?.type
+            ?: superTypeArg(type.klass, Map::class, 0)
         val valueType = type.arguments.getOrNull(1)?.type
+            ?: superTypeArg(type.klass, Map::class, 1)
 
         val keyRef =
             keyType
@@ -455,4 +483,5 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
 
         return properties to requiredProperties
     }
+
 }

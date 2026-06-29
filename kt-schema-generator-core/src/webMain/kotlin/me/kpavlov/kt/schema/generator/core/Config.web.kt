@@ -11,4 +11,6 @@ internal actual object Config {
         get() = listOf("kotlinx.serialization.SerialName")
     actual val nameValueAttributes: List<String>
         get() = listOf("value")
+    actual val opaqueTypeNames: Set<String>
+        get() = DEFAULT_OPAQUE_TYPE_NAMES
 }
