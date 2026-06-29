@@ -21,7 +21,7 @@ publishing {
 }
 
 mavenPublishing {
-    publishToMavenCentral(automaticRelease = true)
+    publishToMavenCentral(automaticRelease = false)
 
     pom {
         name = providers.gradleProperty("POM_NAME").orElse(project.name).get()
@@ -69,10 +69,9 @@ mavenPublishing {
 
 afterEvaluate {
     signing {
-        val signingKeyId: String? by project
         val signingKey: String? by project
         val signingPassword: String? by project
-        useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+        useInMemoryPgpKeys(signingKey, signingPassword)
         mavenPublishing.signAllPublications()
         isRequired = !signingKey.isNullOrBlank() // don't fail if no key
     }
