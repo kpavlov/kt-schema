@@ -1,4 +1,4 @@
-[![Maven Central](https://img.shields.io/maven-central/v/me.kpavlov/kt-schema-ksp.svg?label=Maven%20Central)](https://central.sonatype.com/search?q=me.kpavlov%2Fkt-schema-*)
+[![Maven Central](https://img.shields.io/maven-central/v/me.kpavlov.kt.schema/kt-schema-generator-core.svg?label=Maven%20Central)](https://central.sonatype.com/search?q=me.kpavlov.kt.schema%2Fkt-schema-*)
 [![Build with Gradle](https://github.com/kpavlov/kt-schema/actions/workflows/build.yml/badge.svg)](https://github.com/kpavlov/kt-schema/actions/workflows/build.yml)
 [![Docs](https://img.shields.io/badge/Docs-Live-blue?logo=kotlin)](https://kpavlov.github.io/kt-schema/)
 [![Examples](https://img.shields.io/badge/Examples-blue?logo=github)](https://github.com/kpavlov/kt-schema/tree/main/examples)
