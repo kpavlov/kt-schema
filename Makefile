@@ -1,25 +1,26 @@
 .SHELLFLAGS := -e -c
 
+KOTLIN_TARGETS ?= full
+
 .PHONY: all
 all:clean lint build publish examples-snapshot knit
 
 .PHONY: ci
-ci:clean lint build knit apidocs publish examples-snapshot
+ci:lint build knit apidocs publish examples-snapshot
 
 .PHONY: build
-build:clean
+build:
 	@echo "🔨 Building..."
-	@rm -rf build
-	@./gradlew --rerun-tasks  \
+	@./gradlew -PkotlinTargets=$(KOTLIN_TARGETS) \
 		kotlinUpgradePackageLock kotlinWasmUpgradePackageLock build
 	@echo "🔨 Coverage reports..."
-	@./gradlew koverLog koverXmlReport koverHtmlReport
+	@./gradlew -PkotlinTargets=$(KOTLIN_TARGETS) koverLog koverXmlReport koverHtmlReport
 	@echo "✅ Build complete!"
 
 .PHONY: test
 test:
 	@echo "🧪 Running tests..."
-	@./gradlew kotlinWasmUpgradePackageLock build --rerun-tasks
+	@./gradlew -PkotlinTargets=$(KOTLIN_TARGETS) kotlinWasmUpgradePackageLock check --rerun-tasks
 	@echo "✅ Tests complete!"
 
 .PHONY: scan
@@ -51,6 +52,7 @@ knit:
 clean:
 	@echo "🧹 Cleaning build artifacts..."
 	@./gradlew --stop
+	@rm -rf ~/.m2/repository/me/kpavlov/kt/schema
 	@rm -rf **/kotlin-js-store **/build **/.gradle/configuration-cache
 	@echo "✅ Clean complete!"
 
@@ -75,12 +77,12 @@ sync:
 examples:
 	@echo "Running examples..."
 	@(cd examples/gradle-google-ksp && rm -rf kotlin-js-store && ./gradlew clean build --no-daemon --rerun-tasks)
-	@(cd examples/maven-ksp && rm -rf target && mvn package)
+	@(cd examples/maven-ksp && rm -rf target && mvn package --no-transfer-progress)
 	@echo "✅ Examples complete!"
 
 .PHONY: examples-snapshot
 examples-snapshot:
 	@echo "Running examples..."
 	@(cd examples/gradle-google-ksp && rm -rf kotlin-js-store && ./gradlew clean build -PktSchemaVersion=1-SNAPSHOT --no-daemon --rerun-tasks)
-	@(cd examples/maven-ksp && rm -rf target && mvn test -U -Plocal)
+	@(cd examples/maven-ksp && rm -rf target && mvn test -U -Plocal --no-transfer-progress)
 	@echo "✅ Examples complete!"
