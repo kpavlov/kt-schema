@@ -13,6 +13,7 @@ env:
   JAVA_DISTRIBUTION: temurin
   PROJECT_VERSION: 42-SNAPSHOT
   GRADLE_BUILD_ACTION_CACHE_DEBUG_ENABLED: false
+  KOTLIN_TARGETS: ${{ github.ref == 'refs/heads/main' && 'full' || 'quick' }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -36,21 +37,9 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
 
-      - name: Cache Kotlin compiler and daemon
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.gradle/caches/modules-2
-            ~/.gradle/caches/build-cache-1
-            ~/.konan
-          key: ${{ runner.os }}-gradle-kotlin-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'gradle/libs.versions.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-kotlin-
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6.2.0
         with:
-          cache-provider: basic
           add-job-summary-as-pr-comment: on-failure
           cache-cleanup: always
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
@@ -58,12 +47,14 @@ jobs:
             caches
             notifications
             jdks
-          gradle-home-cache-excludes: |
             caches/build-cache-1
+          gradle-home-cache-excludes: |
             caches/keyrings
 
       - name: Build
-        run: make ci
+        run: |-
+          rm -rf ~/.m2/repository/me/kpavlov/kt/schema
+          make ci
 
       - name: Upload project repository
         uses: actions/upload-artifact@v7
@@ -109,17 +100,6 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DISTRIBUTION }}
-
-      - name: Cache Kotlin compiler and daemon
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.gradle/caches/modules-2
-            ~/.gradle/caches/build-cache-1
-            ~/.konan
-          key: ${{ runner.os }}-gradle-kotlin-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'gradle/libs.versions.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-kotlin-
 
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0

@@ -11,6 +11,8 @@ plugins {
     kotlin("multiplatform")
 }
 
+val kotlinTargets = project.findProperty("kotlinTargets") as? String ?: "full"
+
 kotlin {
 
     @OptIn(ExperimentalAbiValidation::class)
@@ -83,32 +85,34 @@ kotlin {
         nodejs()
     }
 
-    // https://kotlinlang.org/docs/native-target-support.html
-    // Kotlin Native Tier 1
-    macosArm64()
-    iosSimulatorArm64()
-    iosArm64()
+    if (kotlinTargets != "quick") {
+        // https://kotlinlang.org/docs/native-target-support.html
+        // Kotlin Native Tier 1
+        macosArm64()
+        iosSimulatorArm64()
+        iosArm64()
 
-    // Kotlin Native Tier 2
-    linuxX64()
-    linuxArm64()
+        // Kotlin Native Tier 2
+        linuxX64()
+        linuxArm64()
 
-    watchosSimulatorArm64()
-    watchosArm32()
-    watchosArm64()
-    watchosX64()
-    tvosSimulatorArm64()
-    tvosArm64()
+        watchosSimulatorArm64()
+        watchosArm32()
+        watchosArm64()
+        watchosX64()
+        tvosSimulatorArm64()
+        tvosArm64()
 
-    // Tier 3
-    mingwX64()
-    // androidNativeArm32()
-    // androidNativeArm64()
-    // androidNativeX86()
-    // androidNativeX64()
-    macosX64()
-    iosX64()
-    tvosX64()
+        // Tier 3
+        mingwX64()
+        // androidNativeArm32()
+        // androidNativeArm64()
+        // androidNativeX86()
+        // androidNativeX64()
+        macosX64()
+        iosX64()
+        tvosX64()
+    }
 }
 
 tasks.named("detekt").configure {
