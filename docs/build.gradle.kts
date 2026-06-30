@@ -12,13 +12,13 @@ plugins {
 
 dependencies {
     implementation(project(":kt-schema-annotations"))
-    implementation(project(":kt-schema-ksp-json"))
+    implementation(project(":kt-schema-generator-json"))
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotest.assertions.json)
 
     dokka(project(":kt-schema-annotations"))
     "dokka"(project(":kt-schema-generator-core"))
-    dokka(project(":kt-schema-ksp-json"))
+    "dokka"(project(":kt-schema-generator-json"))
     dokka(project(":kt-schema-json"))
 }
 
@@ -32,14 +32,7 @@ dokka {
     pluginsConfiguration.html {
         footerMessage =
             """
-            (c) 2026 Konstantin Pavlov and Contributors.
-            <br/>
-            <small>
-                kt-schema is an independent fork of kotlinx-schema, originally developed by
-                JetBrains s.r.o. and contributors, and distributed under the Apache License,
-                Version 2.0. See the <a href="https://github.com/kpavlov/kt-schema/blob/main/LICENSE">LICENSE</a>
-                and <a href="https://github.com/kpavlov/kt-schema/blob/main/NOTICE">NOTICE</a> files for attribution information.
-            </small>
+            (c) 2026 Konstantin Pavlov and Contributors. Portions copyright JetBrains s.r.o. and contributors.
             """.trimIndent()
     }
 

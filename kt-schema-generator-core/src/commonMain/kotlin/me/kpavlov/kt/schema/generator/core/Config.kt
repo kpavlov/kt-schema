@@ -20,7 +20,7 @@ internal val DEFAULT_OPAQUE_TYPE_NAMES: Set<String> =
  *
  * This is the single source of truth shared across modules and platforms:
  * - the JVM reflection introspector uses it as the fallback for [Config.opaqueTypeNames];
- * - the serialization- and KSP-based generators (in `kt-schema-ksp-json`) default their
+ * - the serialization- and KSP-based generators (in `kt-schema-generator-json`) default their
  *   opaque-type sets to this function, so all paths stay consistent.
  *
  * Exposed as a function (rather than a constant) so callers can build on it — e.g.

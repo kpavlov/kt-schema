@@ -237,9 +237,9 @@ For JVM-only projects, Maven, and full configuration options, see *
 
 For JVM-only scenarios with classes you don't own or can't annotate, use
 [
-`ReflectionClassJsonSchemaGenerator`](kt-schema-ksp-json/src/jvmMain/kotlin/me/kpavlov/kt/schema/generator/json/ReflectionClassJsonSchemaGenerator.kt)
+`ReflectionClassJsonSchemaGenerator`](kt-schema-generator-json/src/jvmMain/kotlin/me/kpavlov/kt/schema/generator/json/ReflectionClassJsonSchemaGenerator.kt)
 and [
-`ReflectionFunctionCallingSchemaGenerator`](kt-schema-ksp-json/src/jvmMain/kotlin/me/kpavlov/kt/schema/generator/json/ReflectionFunctionCallingSchemaGenerator.kt)
+`ReflectionFunctionCallingSchemaGenerator`](kt-schema-generator-json/src/jvmMain/kotlin/me/kpavlov/kt/schema/generator/json/ReflectionFunctionCallingSchemaGenerator.kt)
 with Kotlin reflection.
 
 ### Why Runtime Generation?
@@ -279,7 +279,7 @@ val schemaString: String = generator.generateSchemaString(User::class)
 
 <!--- KNIT example-knit-readme-02.kt -->
 
-**Add dependency**: `me.kpavlov.kt.schema:kt-schema-ksp-json:<version>`
+**Add dependency**: `me.kpavlov.kt.schema:kt-schema-generator-json:<version>`
 
 ## What Gets Generated
 

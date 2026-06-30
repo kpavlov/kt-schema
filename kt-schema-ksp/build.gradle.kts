@@ -19,7 +19,7 @@ kotlin {
     }
 
     dependencies {
-        implementation(project(":kt-schema-ksp-json"))
+        implementation(project(":kt-schema-generator-json"))
         implementation(libs.ksp.api)
 
         testImplementation(libs.junit.jupiter.params)

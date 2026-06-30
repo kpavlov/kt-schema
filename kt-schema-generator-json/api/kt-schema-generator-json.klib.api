@@ -5,7 +5,7 @@
 // - Show manifest properties: true
 // - Show declarations: true
 
-// Library unique name: <me.kpavlov.kt.schema:kt-schema-ksp-json>
+// Library unique name: <me.kpavlov.kt.schema:kt-schema-generator-json>
 open annotation class me.kpavlov.kt.schema.generator.json/SerialDescription : kotlin/Annotation { // me.kpavlov.kt.schema.generator.json/SerialDescription|null[0]
     constructor <init>(kotlin/String) // me.kpavlov.kt.schema.generator.json/SerialDescription.<init>|<init>(kotlin.String){}[0]
 

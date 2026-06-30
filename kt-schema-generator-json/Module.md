@@ -1,4 +1,4 @@
-# Module kt-schema-ksp-json
+# Module kt-schema-generator-json
 
 Runtime JSON Schema generation from Kotlin classes and functions.
 
