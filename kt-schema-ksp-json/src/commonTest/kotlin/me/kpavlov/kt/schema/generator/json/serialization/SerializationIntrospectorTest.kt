@@ -5,6 +5,11 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.ClassDiscriminatorMode
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonClassDiscriminator
+import kotlinx.serialization.serializer
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
@@ -14,9 +19,6 @@ import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonClassDiscriminator
-import kotlinx.serialization.serializer
 import kotlin.test.Test
 import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassSchemaIntrospector as SerializationIntrospector
 
@@ -224,6 +226,13 @@ class SerializationIntrospectorTest {
 
     @Test
     fun `introspects JsonClassDiscriminator annotation for sealed polymorphic`() {
+        val json =
+            Json {
+                classDiscriminator = "kind"
+                classDiscriminatorMode = ClassDiscriminatorMode.ALL_JSON_OBJECTS
+            }
+        val introspector = SerializationIntrospector(json = json)
+
         val graph = introspector.introspect(DiscriminatedButton.serializer().descriptor)
 
         val rootRef = graph.root.shouldBeInstanceOf<TypeRef.Ref>()

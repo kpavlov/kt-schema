@@ -2,6 +2,7 @@
 
 ### Added
 
+- `@JsonClassDiscriminator` support: per-class discriminator key from `@JsonClassDiscriminator` now takes precedence over the global `Json.classDiscriminator` setting in sealed polymorphic schema generation ([#53](https://github.com/kpavlov/kt-schema/issues/53))
 - Support built-in kotlinx-serialization JSON types (`JsonObject`, `JsonElement`, `JsonArray`, `JsonPrimitive`, `JsonNull`) ([#54](https://github.com/kpavlov/kt-schema/issues/54))
 
 ---
@@ -47,6 +48,7 @@ Published: 2026-04-07
   routed through cycle-safe path with idempotent discriminator injection (#307)
 - **Inline value class schemas**: generation now matches kotlinx-serialization format; descriptions propagated to flattened
   primitive schema with correct property-level override precedence; TypeRef caching added
+- **`@JsonClassDiscriminator` support**: per-class discriminator key from `@JsonClassDiscriminator` now takes precedence over the global `Json.classDiscriminator` setting in sealed polymorphic schema generation (#53)
 
 ### Dependencies
 - Bump `kotest` from 6.1.7 to 6.1.11
