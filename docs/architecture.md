@@ -102,7 +102,7 @@ C4Context
     Boundary(lib, "kt-schema") {
         System(kxsKs, "kt-schema-ksp")
         System(kxsAnnotations, "kt-schema-annotations")
-        System(kxsGenJson, "kt-schema-ksp-json")
+        System(kxsGenJson, "kt-schema-generator-json")
         System(kxsJsn, "kt-schema-json")
         System(kxsKsp, "kt-schema-ksp")
         System(kxsGradle, "kt-schema-gradle-plugin")
@@ -131,7 +131,7 @@ Top-level modules you might interact with:
 - **kt-schema-json** — type-safe models and DSL for building JSON Schema definitions programmatically
 - **kt-schema-generator-core** — core abstractions, intermediate representation (IR) for schema descriptions, introspection utils,
   generator interfaces
-- **kt-schema-ksp-json** — JSON Schema transformer from the IR, kotlinx-serialization schema generator
+- **kt-schema-generator-json** — JSON Schema transformer from the IR, kotlinx-serialization schema generator
 - **kt-schema-ksp-processor** — KSP processor that scans your code and generates the extension properties:
     - `KClass<T>.jsonSchema: JsonObject`
     - `KClass<T>.jsonSchemaString: String`

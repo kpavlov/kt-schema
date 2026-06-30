@@ -22,7 +22,7 @@ include(
     ":kt-schema-annotations",
     ":kt-schema-json",
     ":kt-schema-generator-core",
-    ":kt-schema-ksp-json",
+    ":kt-schema-generator-json",
     ":kt-schema-ksp",
     ":ksp-integration-tests",
     ":docs",

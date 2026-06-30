@@ -41,12 +41,12 @@ or when integrating with existing kotlinx.serialization descriptors directly.
 
 ## Setup
 
-Add the `kt-schema-ksp-json` dependency to your project:
+Add the `kt-schema-generator-json` dependency to your project:
 
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("me.kpavlov.kt.schema:kt-schema-ksp-json:<version>")
+    implementation("me.kpavlov.kt.schema:kt-schema-generator-json:<version>")
 }
 ```
 
@@ -243,7 +243,7 @@ different annotation, supply a custom `DescriptionExtractor` — see [Custom des
 Unlike `@Description`, it carries `@SerialInfo` so the serialization runtime preserves it in
 `SerialDescriptor` — no custom configuration required.
 
-It ships in the `kt-schema-ksp-json` module (`me.kpavlov.kt.schema.generator.json` package),
+It ships in the `kt-schema-generator-json` module (`me.kpavlov.kt.schema.generator.json` package),
 so you already have it when using the serialization-based generator.
 
 Add it to your class and constructor parameters:

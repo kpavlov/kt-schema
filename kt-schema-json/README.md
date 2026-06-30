@@ -485,7 +485,7 @@ Produces function schema serializable as JSON:
 
 ### Runtime Generation from Functions
 
-For runtime schema generation from Kotlin functions, use `ReflectionFunctionCallingSchemaGenerator` from the `kt-schema-ksp-json` module:
+For runtime schema generation from Kotlin functions, use `ReflectionFunctionCallingSchemaGenerator` from the `kt-schema-generator-json` module:
 
 <!--- CLEAR -->
 <!--- INCLUDE
