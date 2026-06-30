@@ -6,10 +6,14 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Nullability
-
+import me.kpavlov.kt.schema.generator.core.defaultOpaqueTypeNames
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
+import me.kpavlov.kt.schema.generator.core.ir.ListNode
+import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
+import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
+import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.Property
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 
@@ -24,11 +28,14 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeRef
  *
  * Resolution strategy (applied in order):
  * 1. Basic types (primitives and collections) via [resolveBasicTypeOrNull]
- * 2. Generic type parameters and unknowns -> kotlin.Any via [handleAnyFallback]
- * 3. Sealed class hierarchies -> PolymorphicNode via [handleSealedClass]
- * 4. Enum classes -> EnumNode via [handleEnum]
- * 5. Regular objects/classes -> ObjectNode via [handleObjectOrClass]
+ * 2. JSON collection types ([JsonObject]/[JsonArray]) → inline [MapNode]/[ListNode]
+ * 3. Opaque JSON types ([JsonElement]/[JsonPrimitive]/[JsonNull]) → [AnyNode] → empty schema `{}`
+ * 4. Generic type parameters and unknowns -> kotlin.Any via [handleAnyFallback]
+ * 5. Sealed class hierarchies -> PolymorphicNode via [handleSealedClass]
+ * 6. Enum classes -> EnumNode via [handleEnum]
+ * 7. Regular objects/classes -> ObjectNode via [handleObjectOrClass]
  */
+@Suppress("TooManyFunctions")
 internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     /**
      * Converts a KSType to a TypeRef using the standard resolution strategy.
@@ -50,6 +57,8 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         // Try each handler in order, using elvis operator chain for single return
         return requireNotNull(
             resolveBasicTypeOrNull(type)
+                ?: resolveJsonCollectionTypeOrNull(type)
+                ?: resolveOpaqueTypeOrNull(type)
                 ?: handleAnyFallback(type)
                 ?: handleSealedClass(type, nullable)
                 ?: handleEnum(type, nullable)
@@ -76,6 +85,60 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         // Try primitive types first, then collections, using elvis operator chain
         return KspTypeMappers.primitiveFor(type)?.let { TypeRef.Inline(it, nullable) }
             ?: KspTypeMappers.collectionTypeRefOrNull(type, ::toRef)
+    }
+
+    /**
+     * Maps the built-in `kotlinx.serialization.json` collection-like types
+     * ([JsonObject], [JsonArray]) to their proper inline schema representations.
+     *
+     * - [JsonObject] implements [Map] → [MapNode] → `{ "type": "object", "additionalProperties": {} }`
+     * - [JsonArray] implements [List] → [ListNode] → `{ "type": "array" }`
+     *
+     * The element/value types are [AnyNode] (matching the opaque handling of [JsonElement]),
+     * so they produce no `$ref`/`$defs` and remain inline.
+     *
+     * KSP cannot reliably resolve the supertype type-arguments of external library classes,
+     * so we construct the IR nodes directly rather than walking supertypes.
+     */
+    private fun resolveJsonCollectionTypeOrNull(type: KSType): TypeRef? {
+        val nullable = type.nullability == Nullability.NULLABLE
+        val qn = type.declaration.qualifiedName?.asString() ?: return null
+        return when (qn) {
+            "kotlinx.serialization.json.JsonObject" -> {
+                TypeRef.Inline(
+                    MapNode(
+                        key = TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING)),
+                        value = TypeRef.Inline(AnyNode()),
+                    ),
+                    nullable,
+                )
+            }
+
+            "kotlinx.serialization.json.JsonArray" -> {
+                TypeRef.Inline(
+                    ListNode(element = TypeRef.Inline(AnyNode())),
+                    nullable,
+                )
+            }
+
+            else -> {
+                null
+            }
+        }
+    }
+
+    /**
+     * Checks whether [type] is a known opaque type (e.g., [kotlinx.serialization.json] types
+     * with incompatible class structures) and maps it to [AnyNode] → empty schema `{}`.
+     */
+    private fun resolveOpaqueTypeOrNull(type: KSType): TypeRef? {
+        val nullable = type.nullability == Nullability.NULLABLE
+        val qualifiedName = type.declaration.qualifiedName?.asString() ?: return null
+        return if (qualifiedName in OPAQUE_TYPE_NAMES) {
+            TypeRef.Inline(AnyNode(), nullable)
+        } else {
+            null
+        }
     }
 
     /**
@@ -115,9 +178,11 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
 
         withCycleDetection(type, id) {
             // Find all sealed subclasses, excluding those annotated with @SchemaIgnore
-            val sealedSubclasses = decl.getSealedSubclasses()
-                .filter { !it.isSchemaIgnored() }
-                .toList()
+            val sealedSubclasses =
+                decl
+                    .getSealedSubclasses()
+                    .filter { !it.isSchemaIgnored() }
+                    .toList()
 
             // Create SubtypeRef for each sealed subclass using their typeId()
             val subtypes =
@@ -318,5 +383,13 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 }
             }
         }
+    }
+
+    private companion object {
+        /**
+         * Fully-qualified class names of types that represent arbitrary JSON values
+         * and should be treated as opaque (mapped to [AnyNode] → empty schema `{}`).
+         */
+        val OPAQUE_TYPE_NAMES: Set<String> = defaultOpaqueTypeNames()
     }
 }

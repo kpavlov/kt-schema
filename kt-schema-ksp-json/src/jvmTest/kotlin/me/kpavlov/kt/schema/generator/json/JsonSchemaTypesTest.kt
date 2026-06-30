@@ -1,10 +1,10 @@
 package me.kpavlov.kt.schema.generator.json
 
 import io.kotest.assertions.json.shouldEqualJson
+import kotlinx.serialization.json.Json
 import me.kpavlov.kt.schema.Schema
 import me.kpavlov.kt.schema.generator.core.SchemaGenerator
 import me.kpavlov.kt.schema.json.JsonSchema
-import kotlinx.serialization.json.Json
 import kotlin.reflect.KClass
 import kotlin.test.Test
 
@@ -702,10 +702,10 @@ class JsonSchemaTypesTest {
     @Test
     fun `should handle data object schema with constant values`() {
         val schema = ReflectionClassJsonSchemaGenerator().generateSchemaString(ObjectWithProps::class)
-        schema shouldEqualJson """
+        schema shouldEqualJson $$"""
             {
-              "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-              "${'$'}id": "me.kpavlov.kt.schema.generator.json.JsonSchemaTypesTest.ObjectWithProps",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "me.kpavlov.kt.schema.generator.json.JsonSchemaTypesTest.ObjectWithProps",
               "type": "object",
               "properties": {
                 "foo": {

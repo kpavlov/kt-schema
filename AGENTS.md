@@ -99,6 +99,7 @@
 ./gradlew test           # all tests
 make integration-test    # KSP integration tests
 make knit                # verify knit examples
+make apidump             # generate apidump
 ```
 
 ## Ask for Help When

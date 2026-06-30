@@ -1,5 +1,36 @@
+## Unreleased
+
+### Added
+
+- Support built-in kotlinx-serialization JSON types (`JsonObject`, `JsonElement`, `JsonArray`, `JsonPrimitive`, `JsonNull`) ([#54](https://github.com/kpavlov/kt-schema/issues/54))
+
+---
+
+## 0.6.0 Migrate to kt-schema 🚀
+
+Published: 2026-06-29
+
+## What's Changed
+
+### Breaking
+
+* **Migrate from kotlinx-schema to kt-schema** [#31](https://github.com/kpavlov/kt-schema/pull/31). Notable changes include renaming the Kotlin packages from `kotlinx.schema` to `me.kpavlov.kt.schema`, renaming Maven coordinates from `org.jetbrains.kotlinx` to `me.kpavlov`
+* **Remove deprecated Apple platform targets** [#43](https://github.com/kpavlov/kt-schema/pull/43)
+
+### Chores
+
+* Compress AGENTS.md
+* Update Dokka config
+* Update GitHub workflows
+
+---
+
+<details>
+<summary>kotlinx-schema changes</summary>
+
+
 ## 0.5.0
-> Published 2026-04-07
+Published: 2026-04-07
 
 ### Added
 - **Open polymorphism support**: abstract classes and interfaces generate JSON Schema when subtypes are registered via          
@@ -26,7 +57,7 @@
 - Bump `ai.koog:agents-tools` from 0.6.4 to 0.7.3 (examples)
 
 ## 0.4.4
-> Published 2026-03-18
+Published: 2026-03-18
 
 ### Fixed
 
@@ -36,7 +67,7 @@
 ---
 
 ## 0.4.3
-> Published 2026-03-17
+Published: 2026-03-17
 
 ### Fixed
 - **Java record class support**: reflection schema generator now correctly introspects Java `record` types (#263)
@@ -52,7 +83,7 @@
 ---
 
 ## 0.4.2
-> Published 2026-03-13
+Published: 2026-03-13
 
 ### Fixed
 - **Missing descriptions for inline primitive, list, and map nodes**: `node.description` is now correctly propagated
@@ -64,7 +95,7 @@
 ---
 
 ## 0.4.1
-> Published 2026-03-10
+Published: 2026-03-10
 
 ### Fixed
 - **Missing property descriptions for class types**: class-level `@Description` annotations are now correctly propagated
@@ -76,7 +107,7 @@
 ---
 
 ## 0.4.0
-> Published 2026-03-09
+Published: 2026-03-09
 
 ### Breaking Changes
 - **`$defs` for all named types**: all named types now always register in `$defs` and use `$ref` at every call site;
@@ -113,7 +144,7 @@
 ---
 
 ## 0.3.2
-> Published 2026-02-20
+Published: 2026-02-20
 
 ### Added
 - **Custom description extraction**: `SerializationClassJsonSchemaGenerator` now accepts `SerializationClassSchemaIntrospector.Config`
@@ -128,7 +159,7 @@
 - Bump `io.github.oshai:kotlin-logging` from 7.0.14 to 8.0.01
 
 ## 0.3.1
-> Published 2026-02-12
+Published: 2026-02-12
 
 ### Added
 - Support WasmJS/Browser and watchOS X64 targets
@@ -137,7 +168,7 @@
 - Move slf4j.simple dependency to test scope
 
 ## 0.3.0
-> Published 2026-02-03
+Published: 2026-02-03
 
 ### Breaking Changes
 - **Multiplatform migration**: `kotlinx-schema-generator-core` and `kotlinx-schema-generator-json` are now Kotlin Multiplatform
@@ -157,7 +188,7 @@
 - **Package structure**: Moved `TypeGraphToJsonObjectSchemaTransformer` to `kotlinx.schema.json`
 
 ## 0.2.0
-> Published 2026-02-02
+Published: 2026-02-02
 
 ### Breaking Changes
 - **JsonSchema: `additionalProperties` API**: Replaced `JsonPrimitive` with type-safe `AdditionalPropertiesConstraint` sealed interface
@@ -192,13 +223,13 @@
 
 
 ## 0.1.0
-> Published 2026-02-02
+Published: 2026-02-02
 
 **Note**: Duplicate entry - see version below for actual release notes.
 
 
 ## 0.1.0
-> Published 2026-01-30
+Published: 2026-01-30
 
 ### Breaking Changes
 - Flattened `JsonSchema` structure - removed nested `JsonSchemaDefinition` wrapper
@@ -227,3 +258,5 @@
 - Bump `ai.koog:agents-tools` from 0.6.0 to 0.6.1
 - Bump `com.google.devtools.ksp` from 2.3.4 to 2.3.5 (examples)
 
+
+</details>

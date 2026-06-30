@@ -4,7 +4,13 @@ package me.kpavlov.kt.schema.generator.json
 
 import io.kotest.assertions.json.shouldEqualJson
 import me.kpavlov.kt.schema.Description
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 
 class JsonSchemaGeneratorTest {
@@ -65,6 +71,20 @@ class JsonSchemaGeneratorTest {
         @property:SerialDescription("Described property")
         val name: String,
         val count: Int,
+    )
+
+    @Serializable
+    data class BuiltInJsonTypes(
+        val objProp: JsonObject,
+        val objPropOpt: JsonObject?,
+        val elementProp: JsonElement,
+        val elementPropOpt: JsonElement?,
+        val arrayProp: JsonArray,
+        val arrayPropOpt: JsonArray?,
+        val primitive: JsonPrimitive,
+        val primitiveOpt: JsonPrimitive?,
+        val nullProp: JsonNull,
+        val nullPropOpt: JsonNull?,
     )
 
     private val generator =
@@ -245,5 +265,59 @@ class JsonSchemaGeneratorTest {
               "additionalProperties": false
             }
             """.trimIndent()
+    }
+
+    @Test
+    fun `Should generate schema for class with built-in Json types`() {
+        // language=JSON
+        val expected =
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.BuiltInJsonTypes",
+              "type": "object",
+              "properties": {
+                "objProp": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "objPropOpt": {
+                  "type": ["object", "null"],
+                  "additionalProperties": {}
+                },
+                "elementProp": {},
+                "elementPropOpt": {},
+                "arrayProp": {
+                  "type": "array"
+                },
+                "arrayPropOpt": {
+                  "type": ["array", "null"]
+                },
+                "primitive": {},
+                "primitiveOpt": {},
+                "nullProp": {},
+                "nullPropOpt": {}
+              },
+              "required": [
+                "objProp",
+                "objPropOpt",
+                "elementProp",
+                "elementPropOpt",
+                "arrayProp",
+                "arrayPropOpt",
+                "primitive",
+                "primitiveOpt",
+                "nullProp",
+                "nullPropOpt"
+              ],
+              "additionalProperties": false
+            }
+            """.trimIndent()
+
+        val schema = generator.generateSchemaString(BuiltInJsonTypes::class)
+        schema shouldEqualJson expected
+
+        val schemaObject = generator.generateSchema(BuiltInJsonTypes::class)
+        generator.encodeToString(schemaObject) shouldEqualJson expected
     }
 }

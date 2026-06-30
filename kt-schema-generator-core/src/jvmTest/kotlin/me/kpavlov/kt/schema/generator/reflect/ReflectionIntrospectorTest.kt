@@ -76,6 +76,12 @@ class ReflectionIntrospectorTest {
         val metadata: Map<String, Any>,
     )
 
+    @Suppress("unused")
+    data class WithStarProjections(
+        val items: List<*>,
+        val mapping: Map<*, *>,
+    )
+
     private val introspector = ReflectionClassIntrospector
 
     @Test
@@ -280,5 +286,41 @@ class ReflectionIntrospectorTest {
 
         // kotlin.Any does not create a named node in the graph
         graph.nodes.keys.none { it.value == "kotlin.Any" } shouldBe true
+    }
+
+    @Test
+    fun `introspects star-projected collections without surfacing raw type parameters`() {
+        val graph = introspector.introspect(WithStarProjections::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+        val props = node.properties.associateBy { it.name }
+
+        // List<*> falls back to a STRING element instead of leaking the `E` type parameter
+        props.getValue("items").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<ListNode> { list ->
+                list.element.shouldBeInstanceOf<TypeRef.Inline> { el ->
+                    el.node.shouldBeInstanceOf<PrimitiveNode> { prim ->
+                        prim.kind shouldBe PrimitiveKind.STRING
+                    }
+                }
+            }
+        }
+
+        // Map<*, *> falls back to STRING key/value instead of leaking type parameters
+        props.getValue("mapping").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<MapNode> { map ->
+                map.key.shouldBeInstanceOf<TypeRef.Inline> { k ->
+                    k.node.shouldBeInstanceOf<PrimitiveNode> { prim ->
+                        prim.kind shouldBe PrimitiveKind.STRING
+                    }
+                }
+                map.value.shouldBeInstanceOf<TypeRef.Inline> { v ->
+                    v.node.shouldBeInstanceOf<PrimitiveNode> { prim ->
+                        prim.kind shouldBe PrimitiveKind.STRING
+                    }
+                }
+            }
+        }
     }
 }

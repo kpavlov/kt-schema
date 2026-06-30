@@ -354,3 +354,5 @@ final object me.kpavlov.kt.schema.generator.core.ir/Introspections { // me.kpavl
     final fun getNameOverride(kotlin/String, kotlin/String?, kotlin.collections/List<kotlin/Pair<kotlin/String, kotlin/Any?>>): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Introspections.getNameOverride|getNameOverride(kotlin.String;kotlin.String?;kotlin.collections.List<kotlin.Pair<kotlin.String,kotlin.Any?>>){}[0]
     final fun isIgnoreAnnotation(kotlin/String, kotlin/String? = ...): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Introspections.isIgnoreAnnotation|isIgnoreAnnotation(kotlin.String;kotlin.String?){}[0]
 }
+
+final fun me.kpavlov.kt.schema.generator.core/defaultOpaqueTypeNames(): kotlin.collections/Set<kotlin/String> // me.kpavlov.kt.schema.generator.core/defaultOpaqueTypeNames|defaultOpaqueTypeNames(){}[0]
