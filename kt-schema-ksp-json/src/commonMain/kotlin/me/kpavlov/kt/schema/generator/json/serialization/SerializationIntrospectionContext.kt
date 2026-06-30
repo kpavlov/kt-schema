@@ -40,16 +40,10 @@ internal class SerializationIntrospectionContext(
     private val config: SerializationClassSchemaIntrospector.Config,
 ) : BaseIntrospectionContext<SerialDescriptor>() {
     /**
-     * Converts a [SerialDescriptor] to a [TypeRef].
-     * This is the main entry point for type conversion.
+     * Converts a serial descriptor into a schema type reference.
      *
-     * Handles:
-     * - Nullability from descriptor.isNullable
-     * - Primitives (inlined)
-     * - Collections (List, Map) (inlined)
-     * - Enums (referenced via TypeId)
-     * - Objects/Classes (referenced via TypeId)
-     * - Polymorphic types (referenced via TypeId)
+     * @param type The descriptor to convert.
+     * @return The corresponding schema type reference.
      */
     @Suppress("ReturnCount")
     override fun toRef(type: SerialDescriptor): TypeRef {
@@ -335,19 +329,10 @@ internal class SerializationIntrospectionContext(
     }
 
     /**
-     * Extracts subtype descriptors from a polymorphic descriptor.
-     *
-     * For sealed classes (`PolymorphicKind.SEALED`), subtypes are embedded in the descriptor:
-     * ```
-     * SerialDescriptor (PolymorphicKind.SEALED)
-     *   ├─ element[0] → "klass" discriminator descriptor
-     *   └─ element[1] → "value" descriptor containing subtypes
-     *        └─ elements → [subtype1, subtype2, ...]
-     * ```
-     *
-     * For open polymorphism (`PolymorphicKind.OPEN`), subtypes are resolved from the
-     * [SerializersModule][kotlinx.serialization.modules.SerializersModule] registered in the [Json] instance.
-     */
+         * Extracts subtype descriptors from a polymorphic descriptor.
+         *
+         * @return The subtype descriptors declared by the polymorphic type.
+         */
     private fun extractPolymorphicSubtypes(descriptor: SerialDescriptor): List<SerialDescriptor> =
         when (descriptor.kind) {
             is PolymorphicKind.SEALED -> extractSealedSubtypes(descriptor)
@@ -355,6 +340,13 @@ internal class SerializationIntrospectionContext(
             else -> error("Expected polymorphic descriptor, got ${descriptor.kind}")
         }
 
+    /**
+     * Extracts subtype descriptors from a sealed polymorphic descriptor.
+     *
+     * @param descriptor The sealed descriptor to inspect.
+     * @return The concrete subtype descriptors declared by the sealed wrapper.
+     * @throws IllegalStateException If the descriptor is not the standard `["type", "value"]` sealed wrapper shape.
+     */
     private fun extractSealedSubtypes(descriptor: SerialDescriptor): List<SerialDescriptor> {
         // Standard format produced by the Kotlin serialization compiler plugin for `sealed`
         // classes: a wrapper whose element[0]="type" is the discriminator and element[1]="value"
@@ -379,15 +371,21 @@ internal class SerializationIntrospectionContext(
     }
 
     /**
-     * True when [descriptor] has the compiler-generated sealed wrapper shape:
-     * element[0] named `type` (the discriminator) and element[1] named `value` (the subtype holder).
-     */
+             * Checks whether this descriptor uses the compiler-generated sealed wrapper shape.
+             *
+             * The wrapper shape has element[0] named `type` and element[1] named `value`.
+             *
+             * @return `true` if this descriptor uses the standard sealed wrapper shape, `false` otherwise.
+             */
     private fun SerialDescriptor.isStandardSealedWrapper(): Boolean =
         elementsCount >= 2 &&
             getElementName(0) == "type" &&
             getElementName(1) == "value"
 
-    private fun SerialDescriptor.elementNames(): List<String> =
+    /**
+         * Returns the names of all elements in declaration order.
+         */
+        private fun SerialDescriptor.elementNames(): List<String> =
         (0 until elementsCount).map { getElementName(it) }
 
     /**
@@ -473,23 +471,21 @@ internal class SerializationIntrospectionContext(
     }
 
     /**
-     * Creates a [TypeId] from a [SerialDescriptor] using its serialName.
-     *
-     * For open polymorphic descriptors, unwraps the `kotlinx.serialization.Polymorphic<Name>`
-     * wrapper to extract the inner type name.
-     */
+         * Builds a type identifier from a serial descriptor's name.
+         *
+         * @param descriptor The descriptor to identify.
+         * @return The type identifier derived from the descriptor's serial name.
+         */
     private fun descriptorId(descriptor: SerialDescriptor): TypeId =
         TypeId(descriptor.unwrapSerialName().removeSuffix("?"))
 
     /**
-     * Returns a cached [AnyNode] ref if [serialName] is a known opaque type, null otherwise.
-     *
-     * Checks [ANY_SERIAL_NAMES] (`kotlin.Any`, `java.lang.Object`) unconditionally, then
-     * [SerializationClassSchemaIntrospector.Config.opaqueSerialNames] for caller-configured types.
-     * These two sets are additive: setting [SerializationClassSchemaIntrospector.Config.opaqueSerialNames]
-     * to an empty set suppresses only the configurable opaque types — it does not disable
-     * the built-in `kotlin.Any`/`java.lang.Object` handling.
-     */
+         * Resolves an opaque schema reference for a serial name.
+         *
+         * @param serialName The serial name to check.
+         * @param nullable Whether the resulting reference should be nullable.
+         * @return An [AnyNode] reference for built-in or configured opaque types, or `null` otherwise.
+         */
     private fun opaqueRefOrNull(serialName: String, nullable: Boolean): TypeRef? =
         if (serialName in ANY_SERIAL_NAMES || serialName in config.opaqueSerialNames) {
             if (nullable) ANY_REF_NULLABLE else ANY_REF

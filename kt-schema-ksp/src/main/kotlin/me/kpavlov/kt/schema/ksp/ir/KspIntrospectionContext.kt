@@ -38,18 +38,11 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 @Suppress("TooManyFunctions")
 internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     /**
-     * Converts a KSType to a TypeRef using the standard resolution strategy.
+     * Converts a KSType into schema IR using the standard resolution order.
      *
-     * This method implements the common type resolution pattern used across all KSP
-     * introspectors. It tries each handler in priority order, using elvis operator
-     * chain to return the first successful match.
-     *
-     * All types should be handled by one of the resolution steps. If not, an exception
-     * is thrown to fail fast and help identify missing handler cases during development.
-     *
-     * @param type The KSType to convert
-     * @return TypeRef representing the type in the schema IR
-     * @throws IllegalArgumentException if the type cannot be handled by any handler
+     * @param type The type to convert.
+     * @return The resolved type reference.
+     * @throws IllegalArgumentException if the type does not match any supported handler.
      */
     override fun toRef(type: KSType): TypeRef {
         val nullable = type.nullability == Nullability.NULLABLE
@@ -69,15 +62,10 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     }
 
     /**
-     * Attempts to resolve basic types (primitives and collections) to TypeRef.
+     * Resolves primitive and supported collection types to a type reference.
      *
-     * This is the shared prefix logic used by both KspClassIntrospector and KspFunctionIntrospector
-     * for handling primitive types and collections before diverging to handle complex types.
-     *
-     * Returns null if the type requires complex handling (classes, enums, sealed, etc.).
-     *
-     * @param type The KSType to resolve
-     * @return TypeRef if this is a primitive or collection type, null otherwise
+     * @param type Type to resolve.
+     * @return An inline primitive or collection type reference, or `null` if the type requires structured handling.
      */
     private fun resolveBasicTypeOrNull(type: KSType): TypeRef? {
         val nullable = type.nullability == Nullability.NULLABLE
@@ -88,17 +76,9 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     }
 
     /**
-     * Maps the built-in `kotlinx.serialization.json` collection-like types
-     * ([JsonObject], [JsonArray]) to their proper inline schema representations.
+     * Resolves Kotlinx Serialization JSON collection types to inline schema nodes.
      *
-     * - [JsonObject] implements [Map] → [MapNode] → `{ "type": "object", "additionalProperties": {} }`
-     * - [JsonArray] implements [List] → [ListNode] → `{ "type": "array" }`
-     *
-     * The element/value types are [AnyNode] (matching the opaque handling of [JsonElement]),
-     * so they produce no `$ref`/`$defs` and remain inline.
-     *
-     * KSP cannot reliably resolve the supertype type-arguments of external library classes,
-     * so we construct the IR nodes directly rather than walking supertypes.
+     * @return An inline `MapNode` for `kotlinx.serialization.json.JsonObject`, an inline `ListNode` for `kotlinx.serialization.json.JsonArray`, or `null` when the type is not handled.
      */
     private fun resolveJsonCollectionTypeOrNull(type: KSType): TypeRef? {
         val nullable = type.nullability == Nullability.NULLABLE
@@ -128,8 +108,10 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     }
 
     /**
-     * Checks whether [type] is a known opaque type (e.g., [kotlinx.serialization.json] types
-     * with incompatible class structures) and maps it to [AnyNode] → empty schema `{}`.
+     * Maps a known opaque type to an inline `AnyNode`.
+     *
+     * @param type The type to inspect.
+     * @return An inline `AnyNode` when the type is in the opaque type allowlist, `null` otherwise.
      */
     private fun resolveOpaqueTypeOrNull(type: KSType): TypeRef? {
         val nullable = type.nullability == Nullability.NULLABLE
@@ -159,15 +141,11 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     }
 
     /**
-     * Handles sealed class hierarchies by generating a PolymorphicNode.
+     * Builds a polymorphic type reference for a sealed class hierarchy.
      *
-     * Creates a polymorphic schema with discriminator-based subtype resolution. Each sealed
-     * subclass is recursively processed and registered in the type graph. The discriminator
-     * maps simple class names to their fully qualified TypeIds.
-     *
-     * @param type The KSType to check
-     * @param nullable Whether the type reference should be nullable
-     * @return TypeRef.Ref to the polymorphic node if this is a sealed class, null otherwise
+     * @param type Type to resolve.
+     * @param nullable Whether the resulting reference should be nullable.
+     * @return A reference to the sealed class node, or null if the type is not sealed.
      */
     private fun handleSealedClass(
         type: KSType,
@@ -349,6 +327,13 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         }
     }
 
+    /**
+     * Adds public properties declared in sealed parent classes that are not already processed.
+     *
+     * @param decl The class declaration being inspected.
+     * @param processedProperties Property names that have already been added.
+     * @param addProperty Callback used to record each inherited property.
+     */
     private fun extractInheritedSealedProperties(
         decl: KSClassDeclaration,
         processedProperties: Set<String>,

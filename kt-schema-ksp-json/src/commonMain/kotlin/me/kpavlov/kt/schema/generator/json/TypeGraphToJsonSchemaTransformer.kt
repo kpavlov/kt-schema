@@ -519,6 +519,15 @@ public class TypeGraphToJsonSchemaTransformer
                 enum = node.entries,
             )
 
+        /**
+         * Converts a list node into an array schema definition.
+         *
+         * @param node The list node to convert.
+         * @param nullable Whether the resulting schema can be nullable.
+         * @param graph The type graph containing referenced nodes.
+         * @param definitions The schema definitions collected during conversion.
+         * @return The array schema definition for the list.
+         */
         private fun convertList(
             node: ListNode,
             nullable: Boolean,

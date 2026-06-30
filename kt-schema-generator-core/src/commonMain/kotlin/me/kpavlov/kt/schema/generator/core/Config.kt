@@ -15,18 +15,9 @@ internal val DEFAULT_OPAQUE_TYPE_NAMES: Set<String> =
     )
 
 /**
- * Canonical set of fully qualified names of `kotlinx.serialization.json` types treated as
- * opaque JSON values (mapped to the empty schema `{}`).
+ * Provides the default opaque JSON type names.
  *
- * This is the single source of truth shared across modules and platforms:
- * - the JVM reflection introspector uses it as the fallback for [Config.opaqueTypeNames];
- * - the serialization- and KSP-based generators (in `kt-schema-ksp-json`) default their
- *   opaque-type sets to this function, so all paths stay consistent.
- *
- * Exposed as a function (rather than a constant) so callers can build on it — e.g.
- * `opaqueSerialNames = defaultOpaqueTypeNames() + myCustomTypes` — without depending on an
- * inlined constant value. The JVM reflection path additionally lets users override the
- * effective list via the `introspector.opaque.type.names` property in `kt-schema.properties`.
+ * @return The canonical set of fully qualified `kotlinx.serialization.json` type names treated as opaque JSON values.
  */
 public fun defaultOpaqueTypeNames(): Set<String> = DEFAULT_OPAQUE_TYPE_NAMES
 

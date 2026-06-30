@@ -129,7 +129,12 @@ internal actual object Config {
         } ?: DEFAULT_OPAQUE_TYPE_NAMES
     }
 
-    private fun <T> loadConfiguration(extractor: (Properties) -> T): T? =
+    /**
+         * Loads the configuration file and extracts a value from it.
+         *
+         * @return The extracted value, or `null` if the configuration file cannot be read or contains invalid values.
+         */
+        private fun <T> loadConfiguration(extractor: (Properties) -> T): T? =
         try {
             val properties = loadProperties()
             extractor(properties)
@@ -188,6 +193,12 @@ internal actual object Config {
             }
     }
 
+    /**
+     * Loads the configuration properties file from the classpath.
+     *
+     * @return The loaded properties.
+     * @throws IllegalStateException If the configuration file cannot be found on the classpath.
+     */
     private fun loadProperties(): Properties {
         val classLoader = Config.javaClass.classLoader
         val stream =

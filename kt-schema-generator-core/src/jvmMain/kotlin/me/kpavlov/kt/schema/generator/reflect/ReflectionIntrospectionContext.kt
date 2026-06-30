@@ -33,16 +33,10 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
     private val defaultValueExtractor = DefaultValueExtractor
 
     /**
-     * Converts a [KType] to a [TypeRef].
-     * This is the main entry point for type conversion.
+     * Converts a Kotlin type into a schema type reference.
      *
-     * Handles:
-     * - Nullability from descriptor.isNullable
-     * - Primitives (inlined)
-     * - Collections (List, Map) (inlined)
-     * - Enums (referenced via TypeId)
-     * - Objects/Classes (referenced via TypeId)
-     * - Polymorphic types (referenced via TypeId)
+     * @param type The type to convert.
+     * @return The corresponding schema type reference.
      */
     @Suppress("ReturnCount")
     override fun toRef(type: KType): TypeRef {
@@ -114,15 +108,16 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
     private fun isMapLike(klass: KClass<*>): Boolean = Map::class.java.isAssignableFrom(klass.java)
 
     /**
-     * Checks if a class is an enum class.
-     */
+ * Determines whether a class is a Java enum class.
+ *
+ * @return `true` if the class is an enum and not a data class, `false` otherwise.
+ */
     private fun isEnumClass(klass: KClass<*>): Boolean = !klass.isData && klass.java.isEnum
 
     /**
-     * Extracts a type argument from a supertype of [klass].
-     * Searches through direct supertypes using [superType]'s `isAssignableFrom` to match
-     * both the exact type and its subtypes (e.g., [Iterable] matches [List]/[Collection]).
-     * Returns null if no matching supertype is found or the argument index is out of bounds.
+     * Gets a type argument from a matching direct supertype of [klass].
+     *
+     * @return The type argument at [argumentIndex] from the first direct supertype assignable to [superType], or `null` if no match exists or the argument is unavailable.
      */
     private fun superTypeArg(klass: KClass<*>, superType: KClass<*>, argumentIndex: Int): KType? {
         val found = klass.supertypes.firstOrNull {
@@ -137,10 +132,13 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
     //region KType to TypeRef conversion handlers
 
     /**
-     * Handles list-like types (List, Collection, Iterable).
-     * Falls back to supertype type arguments when the direct type arguments are unavailable
-     * (e.g., for classes like [kotlinx.serialization.json.JsonArray] that implement
-     * [List] with concrete type arguments).
+     * Converts a list-like type into a list schema.
+     *
+     * Uses the element type from the type arguments when available, otherwise derives it from the
+     * nearest `Iterable` supertype.
+     *
+     * @param type The list-like type to convert.
+     * @return A list type reference for the provided type.
      */
     private fun handleListType(type: KType): TypeRef {
         val elementType = type.arguments.firstOrNull()?.type
@@ -157,10 +155,9 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
     }
 
     /**
-     * Handles Map types.
-     * Falls back to supertype type arguments when the direct type arguments are unavailable
-     * (e.g., for classes like [kotlinx.serialization.json.JsonObject] that implement
-     * [Map] with concrete type arguments).
+     * Converts a map-like type to a map schema.
+     *
+     * @return The map schema for the type.
      */
     private fun handleMapType(type: KType): TypeRef {
         val keyType = type.arguments.getOrNull(0)?.type
@@ -433,14 +430,11 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
     //endregion
 
     /**
-     * Extracts properties from the primary constructor of a class.
+     * Extracts schema properties from the primary constructor.
      *
-     * This method processes constructor parameters to create Property objects,
-     * handling type conversion, default values, descriptions, and nullability.
-     *
-     * @param klass The class whose constructor to analyze
-     * @param defaultValues Map of property names to their default values (from DefaultValueExtractor)
-     * @return Pair of (list of properties, set of required property names)
+     * @param klass The class to inspect.
+     * @param defaultValues Default values keyed by constructor parameter name.
+     * @return A pair containing the extracted properties and the names of required properties.
      */
     private fun extractConstructorProperties(
         klass: KClass<*>,
