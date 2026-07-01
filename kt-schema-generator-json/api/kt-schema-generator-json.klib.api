@@ -33,6 +33,8 @@ final class me.kpavlov.kt.schema.generator.json.serialization/SerializationClass
     final object Companion { // me.kpavlov.kt.schema.generator.json.serialization/SerializationClassJsonSchemaGenerator.Companion|null[0]
         final val Default // me.kpavlov.kt.schema.generator.json.serialization/SerializationClassJsonSchemaGenerator.Companion.Default|{}Default[0]
             final fun <get-Default>(): me.kpavlov.kt.schema.generator.json.serialization/SerializationClassJsonSchemaGenerator // me.kpavlov.kt.schema.generator.json.serialization/SerializationClassJsonSchemaGenerator.Companion.Default.<get-Default>|<get-Default>(){}[0]
+
+        final inline fun <#A2: reified kotlin/Any?> jsonSchemaOf(me.kpavlov.kt.schema.generator.json.serialization/SerializationClassJsonSchemaGenerator = ...): me.kpavlov.kt.schema.json/JsonSchema // me.kpavlov.kt.schema.generator.json.serialization/SerializationClassJsonSchemaGenerator.Companion.jsonSchemaOf|jsonSchemaOf(me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator){0§<kotlin.Any?>}[0]
     }
 }
 

@@ -13,6 +13,9 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import me.kpavlov.kt.schema.generator.core.defaultOpaqueTypeNames
+import me.kpavlov.kt.schema.generator.json.json
+import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator.Companion.jsonSchemaOf
+import me.kpavlov.kt.schema.json.encodeToString
 import kotlin.test.Test
 
 class SerializationClassJsonSchemaGeneratorTest {
@@ -79,6 +82,37 @@ class SerializationClassJsonSchemaGeneratorTest {
                     },
                 ),
         )
+
+    @Test
+    fun `generates with default generator`() {
+        @Serializable
+        @SerialName("MyTestClass")
+        data class MyTestClass(
+            val prop: String,
+        )
+
+        val schema = jsonSchemaOf<MyTestClass>()
+        val schemaJson = schema.encodeToString(json)
+
+        schemaJson shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "MyTestClass",
+              "type": "object",
+              "properties": {
+                "prop": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "prop"
+              ]
+            }
+            """.trimIndent()
+    }
 
     @Test
     fun `Should generate JsonSchema for complex class`() {
