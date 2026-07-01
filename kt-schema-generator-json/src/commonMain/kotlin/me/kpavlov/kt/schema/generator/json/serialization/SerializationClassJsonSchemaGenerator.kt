@@ -1,11 +1,12 @@
 package me.kpavlov.kt.schema.generator.json.serialization
 
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import me.kpavlov.kt.schema.generator.core.AbstractSchemaGenerator
 import me.kpavlov.kt.schema.generator.json.JsonSchemaConfig
 import me.kpavlov.kt.schema.generator.json.TypeGraphToJsonSchemaTransformer
 import me.kpavlov.kt.schema.json.JsonSchema
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.json.Json
 import kotlin.reflect.KClass
 
 /**
@@ -51,5 +52,20 @@ public class SerializationClassJsonSchemaGenerator(
          * without requiring explicit configuration.
          */
         public val Default: SerializationClassJsonSchemaGenerator = SerializationClassJsonSchemaGenerator()
+
+        /**
+         * Generates a JSON Schema for the given `@Serializable` type [T], using the provided [generator].
+         *
+         * Example:
+         * ```kotlin
+         * @Serializable
+         * data class Person(val name: String, val age: Int)
+         *
+         * val schema = SerializationClassJsonSchemaGenerator.jsonSchemaOf<Person>()
+         * ```
+         */
+        public inline fun <reified T> jsonSchemaOf(
+            generator: SerializationClassJsonSchemaGenerator = SerializationClassJsonSchemaGenerator.Default,
+        ): JsonSchema = generator.generateSchema(serializer<T>().descriptor)
     }
 }
