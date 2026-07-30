@@ -25,11 +25,13 @@ graph LR
         Kotlin["Kotlin Classes<br/>@Schema annotated"]
         KSerializer["SerialDescriptor"]
         Java["Java Classes<br/>Third-party libs"]
+        JavaApt["Java Records<br/>@Schema or rootPackage"]
         Functions["Kotlin Functions"]
     end
 
     subgraph Introspectors["🔍 Stage 1: INTROSPECTORS"]
         KSP["KspSchemaIntrospector<br/><i>compile-time</i>"]
+        Apt["AptClassIntrospector<br/><i>compile-time</i>"]
         Reflect["ReflectionSchemaIntrospector<br/><i>runtime</i>"]
         Serialization["SerializationClassSchemaIntrospector<br/><i>runtime</i>"]
     end
@@ -49,16 +51,19 @@ graph LR
         JsonSchema["JsonSchema<br/>(@Serializable)"]
         JsonObj["JsonObject<br/>kotlinx.serialization"]
         JsonStr["JSON String<br/>Serialized schema"]
+        AptResource["Generated .json resource<br/>META-INF/kt-schema/schemas/..."]
         FuncSchema["FunctionCallingSchema<br/>(@Serializable)"]
     end
 
     Kotlin --> KSP
     KSerializer --> Serialization
     Java --> Reflect
+    JavaApt --> Apt
     Functions --> KSP
     Functions --> Reflect
 
     KSP --> TypeGraph
+    Apt --> TypeGraph
     Reflect --> TypeGraph
     Serialization --> TypeGraph
 
@@ -71,6 +76,7 @@ graph LR
     FuncSchema --> KtFunc
     JsonObj --> JsonStr
     JsonObj --> KtClass
+    JsonObj --> AptResource
 
     classDef sourceStyle fill:#e3f2fd,stroke:#1565c0,stroke-width:3px,color:#000
     classDef introspectorStyle fill:#fff3e0,stroke:#ef6c00,stroke-width:3px,color:#000
@@ -78,20 +84,20 @@ graph LR
     classDef transformStyle fill:#f3e5f5,stroke:#7b1fa2,stroke-width:3px,color:#000
     classDef outputStyle fill:#e8f5e9,stroke:#2e7d32,stroke-width:3px,color:#000
 
-    class Kotlin,Java,Functions,KSerializer sourceStyle
-    class KSP,Reflect,Serialization introspectorStyle
+    class Kotlin,Java,JavaApt,Functions,KSerializer sourceStyle
+    class KSP,Apt,Reflect,Serialization introspectorStyle
     class TypeGraph irStyle
     class JsonTransform,FuncTransform transformStyle
-    class KtClass,KtFunc,JsonSchema,FuncSchema,JsonObj,JsonStr outputStyle
+    class KtClass,KtFunc,JsonSchema,FuncSchema,JsonObj,JsonStr,AptResource outputStyle
 ```
 
 **The Transformation Story:**
 
-1. **Sources** — Kotlin classes, Java classes, Kotlin functions, or [SerialDescriptor][kser-descriptor] serve as input
-2. **Introspectors** — Extract type information at compile-time (KSP) or runtime (Reflection, Serialization)
+1. **Sources** — Kotlin classes, Java classes/records, Kotlin functions, or [SerialDescriptor][kser-descriptor] serve as input
+2. **Introspectors** — Extract type information at compile-time (KSP, [Java APT](apt.md)) or runtime (Reflection, Serialization)
 3. **TypeGraph** — Unified internal representation containing all type metadata
 4. **Transformers** — Convert TypeGraph to JSON Schema or Function Calling format
-5. **Outputs** — Generated Kotlin code, JsonSchema, FunctionCallingSchema, and then to JsonObject, or JSON strings
+5. **Outputs** — Generated Kotlin code, a generated `.json` resource (Java APT), JsonSchema, FunctionCallingSchema, and then to JsonObject, or JSON strings
 
 ## Module Dependencies
 
@@ -105,6 +111,7 @@ C4Context
         System(kxsGenJson, "kt-schema-generator-json")
         System(kxsJsn, "kt-schema-json")
         System(kxsKsp, "kt-schema-ksp")
+        System(kxsApt, "kt-schema-apt")
         System(kxsGradle, "kt-schema-gradle-plugin")
     }
 
@@ -112,6 +119,7 @@ C4Context
     Rel(kxsGenJson, kxsJsn, "uses")
     Rel(kxsGenCore, kxsAnnotations, "knows")
     Rel(kxsKsp, kxsGenJson, "uses")
+    Rel(kxsApt, kxsGenJson, "uses")
     Rel(kxsGradle, kxsKsp, "uses")
 
     Boundary(userCode, "User's Application Code") {
@@ -122,6 +130,7 @@ C4Context
 
     Rel(userModels, kxsAnnotations, "uses")
     Rel(kxsKsp, userModelsExt, "generates")
+    Rel(kxsApt, userModels, "generates schema resource for")
 
 ```
 
@@ -135,7 +144,10 @@ Top-level modules you might interact with:
 - **kt-schema-ksp-processor** — KSP processor that scans your code and generates the extension properties:
     - `KClass<T>.jsonSchema: JsonObject`
     - `KClass<T>.jsonSchemaString: String`
+- **kt-schema-apt** — [JSR 269 annotation processor](apt.md) for plain Java projects; generates a JSON Schema
+  resource per processed type instead of Kotlin extensions
 - **ksp-integration-tests** — KSP end‑to‑end tests for generation without the Gradle plugin
+- **apt-integration-tests** — Java-only end‑to‑end tests for `kt-schema-apt`
 
 ### Workflow
 
