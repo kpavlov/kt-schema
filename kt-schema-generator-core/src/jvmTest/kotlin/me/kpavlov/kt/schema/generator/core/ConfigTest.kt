@@ -1,5 +1,6 @@
 package me.kpavlov.kt.schema.generator.core
 
+import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
@@ -36,16 +37,20 @@ class ConfigTest {
 
     @Test
     fun `loads ignore annotation names from properties`() {
-        Config.ignoreAnnotationNames shouldContain "schemaignore"
-        Config.ignoreAnnotationNames shouldContain "serialschemaignore"
-        Config.ignoreAnnotationNames shouldContain "jsonignoretype"
-        Config.ignoreAnnotationNames shouldContain "jsonignore"
+        assertSoftly(Config.ignoreAnnotationNames) {
+            shouldContain("schemaignore")
+            shouldContain("serialschemaignore")
+            shouldContain("jsonignoretype")
+            shouldContain("jsonignore")
+        }
     }
 
     @Test
     fun `loads name override annotation names from properties`() {
-        Config.nameAnnotationNames shouldContain "kotlinx.serialization.SerialName"
-        Config.nameAnnotationNames shouldContain "com.fasterxml.jackson.annotation.JsonProperty"
-        Config.nameAnnotationNames shouldContain "com.fasterxml.jackson.annotation.JsonTypeName"
+        assertSoftly(Config.nameAnnotationNames) {
+            shouldContain("kotlinx.serialization.SerialName")
+            shouldContain("com.fasterxml.jackson.annotation.JsonProperty")
+            shouldContain("com.fasterxml.jackson.annotation.JsonTypeName")
+        }
     }
 }

@@ -43,6 +43,19 @@ internal fun findPropertyByName(
         .firstOrNull { it.name == propertyName }
 
 /**
+ * Collects all annotations relevant to a property: its own annotations, its getter's,
+ * and its backing Java field's.
+ *
+ * This covers all common use-site targets (e.g. `@property:`, `@get:`, `@field:`) so
+ * annotations like `@JsonProperty` and `@JsonIgnore` are recognized regardless of
+ * where the compiler places them.
+ */
+internal fun collectPropertyAnnotations(property: KProperty<*>): List<Annotation> =
+    property.annotations +
+        property.getter.annotations +
+        property.javaField?.annotations.orEmpty()
+
+/**
  * Collects all annotations relevant to a constructor property, from the constructor
  * parameter, the Kotlin property, its getter, and its backing Java field.
  *
@@ -56,10 +69,7 @@ internal fun collectConstructorAnnotations(
     paramAnnotations: List<Annotation>,
 ): List<Annotation> {
     val property = findPropertyByName(klass, propertyName)
-    return paramAnnotations +
-        property?.annotations.orEmpty() +
-        property?.getter?.annotations.orEmpty() +
-        property?.javaField?.annotations.orEmpty()
+    return paramAnnotations + property?.let(::collectPropertyAnnotations).orEmpty()
 }
 
 /**

@@ -332,8 +332,9 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 val property = declaredProperties[kotlinName]
                 // Skip properties marked with an ignore annotation (e.g. @JsonIgnore)
                 if (p.isSchemaIgnored() || property?.isIgnoredForSchema() == true) return@forEach
-                val propertyName = extractNameOverride(p) ?: kotlinName
-                val description = extractConstructorParamDescription(p, kotlinName, decl.docString)
+                val propertyName =
+                    extractNameOverride(p) ?: property?.let { extractNameOverride(it) } ?: kotlinName
+                val description = extractConstructorParamDescription(p, kotlinName, decl.docString, property)
                 addProperty(propertyName, p.type.resolve(), description, p.hasDefault)
             }
         } else {

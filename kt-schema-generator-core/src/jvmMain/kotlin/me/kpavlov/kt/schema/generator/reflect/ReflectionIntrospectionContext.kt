@@ -343,7 +343,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             // Find the property in the current class (inherited)
             val property = findPropertyByName(klass, propertyName)
 
-            if (property != null && !isSchemaIgnored(property.annotations)) {
+            if (property != null && !isSchemaIgnored(collectPropertyAnnotations(property))) {
                 val typeRef = toRef(property.returnType)
                 val description = parentPropertyDescriptions[propertyName]
 
@@ -372,7 +372,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                 .filterIsInstance<KProperty<*>>()
                 .filter { it.visibility == KVisibility.PUBLIC }
                 .forEach { prop ->
-                    if (prop.name !in processedProperties && !isSchemaIgnored(prop.annotations)) {
+                    if (prop.name !in processedProperties && !isSchemaIgnored(collectPropertyAnnotations(prop))) {
                         val fixedValue = defaultValues[prop.name]
                         properties +=
                             Property(

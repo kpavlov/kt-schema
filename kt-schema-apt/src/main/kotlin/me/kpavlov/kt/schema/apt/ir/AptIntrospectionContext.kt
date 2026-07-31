@@ -256,8 +256,8 @@ internal class AptIntrospectionContext(
                     val field = fieldFor(element, name)
                     val targets = listOfNotNull(component, component.accessor, field)
                     // Skip components marked with an ignore annotation (e.g. @JsonIgnore)
-                    if (isIgnored(*targets.toTypedArray())) return@forEach
-                    val propertyName = nameOverrideFor(*targets.toTypedArray()) ?: name
+                    if (isIgnored(targets)) return@forEach
+                    val propertyName = nameOverrideFor(targets) ?: name
                     required += propertyName
                     val description = recordComponentDescription(component, field)
                     props += toProperty(propertyName, component.asType(), description)
@@ -287,8 +287,8 @@ internal class AptIntrospectionContext(
                     .forEach { field ->
                         val name = field.simpleName.toString()
                         // Skip fields marked with an ignore annotation (e.g. @JsonIgnore)
-                        if (isIgnored(field)) return@forEach
-                        val propertyName = nameOverrideFor(field) ?: name
+                        if (isIgnored(listOf(field))) return@forEach
+                        val propertyName = nameOverrideFor(listOf(field)) ?: name
                         required += propertyName
                         props += toProperty(propertyName, field.asType(), extractDescription(field))
                     }
@@ -318,8 +318,8 @@ internal class AptIntrospectionContext(
                     .filter { it.parameters.isEmpty() && it.returnType.kind != TypeKind.VOID }
                     .forEach { method ->
                         // Skip accessors marked with an ignore annotation (e.g. @JsonIgnore)
-                        if (isIgnored(method)) return@forEach
-                        val name = nameOverrideFor(method) ?: propertyName(method.simpleName.toString())
+                        if (isIgnored(listOf(method))) return@forEach
+                        val name = nameOverrideFor(listOf(method)) ?: propertyName(method.simpleName.toString())
                         required += name
                         props += toProperty(name, method.returnType, extractDescription(method))
                     }
@@ -438,7 +438,7 @@ internal class AptIntrospectionContext(
         required: Set<String>,
     ): ObjectNode =
         ObjectNode(
-            name = nameOverrideFor(element) ?: element.qualifiedName.toString(),
+            name = nameOverrideFor(listOf(element)) ?: element.qualifiedName.toString(),
             properties = properties,
             required = required,
             description = extractDescription(element),
@@ -491,7 +491,7 @@ internal class AptIntrospectionContext(
      * Returns the first name-override value (e.g. from `@JsonProperty`, `@JsonTypeName`)
      * found across the given annotation targets, in order, or null if none provides one.
      */
-    private fun nameOverrideFor(vararg targets: Element): String? =
+    private fun nameOverrideFor(targets: List<Element>): String? =
         targets.firstNotNullOfOrNull(::extractNameOverride)
 
     private fun extractNameOverride(element: Element): String? =
@@ -512,7 +512,7 @@ internal class AptIntrospectionContext(
      * Returns `true` if any of the given annotation targets carries a recognized
      * ignore annotation (e.g. `@JsonIgnore`).
      */
-    private fun isIgnored(vararg targets: Element): Boolean =
+    private fun isIgnored(targets: List<Element>): Boolean =
         targets.any(::isIgnoreAnnotation)
 
     private fun isIgnoreAnnotation(element: Element): Boolean =

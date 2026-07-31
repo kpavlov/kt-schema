@@ -102,6 +102,22 @@ class ReflectionIntrospectorTest {
         data class Truck(val payload: Double) : JacksonVehicle
     }
 
+    @Suppress("unused")
+    sealed class SealedWithHiddenParentProperty {
+        @get:JsonIgnore
+        val internalId: String = "hidden-parent"
+
+        data class Variant(val visible: Int) : SealedWithHiddenParentProperty()
+    }
+
+    @Suppress("unused")
+    object SingletonWithHiddenProperty {
+        const val visible: Int = 1
+
+        @get:JsonIgnore
+        val internalToken: String = "hidden-singleton"
+    }
+
     private val introspector = ReflectionClassIntrospector
 
     @Test
@@ -377,5 +393,27 @@ class ReflectionIntrospectorTest {
         subtypeIds.shouldContainExactlyInAnyOrder(setOf("car", "truck"))
 
         polyNode.discriminator.mapping?.keys shouldBe setOf("car", "truck")
+    }
+
+    @Test
+    fun `excludes sealed-parent inherited property annotated with @get JsonIgnore`() {
+        val graph = introspector.introspect(SealedWithHiddenParentProperty.Variant::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+
+        node.properties.map { it.name } shouldNotContain "internalId"
+        node.required shouldNotContain "internalId"
+    }
+
+    @Test
+    fun `excludes singleton object property annotated with @get JsonIgnore`() {
+        val graph = introspector.introspect(SingletonWithHiddenProperty::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+
+        node.properties.map { it.name } shouldNotContain "internalToken"
+        node.required shouldNotContain "internalToken"
     }
 }

@@ -31,6 +31,9 @@ data class JacksonModel(
     val internalNote: String = "hidden",
     @get:JsonIgnore
     val sessionId: String = "session",
+    @get:JsonProperty("stock_keeping_unit")
+    @get:JsonPropertyDescription("Stock keeping unit code")
+    val sku: String = "sku",
 )
 
 @Schema

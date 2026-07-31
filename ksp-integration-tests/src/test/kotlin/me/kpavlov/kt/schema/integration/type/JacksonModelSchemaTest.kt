@@ -47,9 +47,13 @@ class JacksonModelSchemaTest {
                   "items": {
                     "type": "string"
                   }
+                },
+                "stock_keeping_unit": {
+                  "type": "string",
+                  "description": "Stock keeping unit code"
                 }
               },
-              "required": ["product_id", "display_name", "description", "price", "inStock", "tags"],
+              "required": ["product_id", "display_name", "description", "price", "inStock", "tags", "stock_keeping_unit"],
               "additionalProperties": false
             }
             """.trimIndent()

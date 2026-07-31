@@ -1,9 +1,22 @@
 package me.kpavlov.kt.schema.ksp.ir
 
 import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSValueParameter
 import me.kpavlov.kt.schema.generator.core.ir.Property
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+
+/**
+ * Extracts a name override from an annotated element's own annotations (no getter fallback).
+ */
+private fun nameOverrideFromAnnotations(annotated: KSAnnotated): String? =
+    annotated.annotations.firstNotNullOfOrNull { it.nameOverrideOrNull() }
+
+/**
+ * Extracts a description from an annotated element's own annotations (no getter fallback).
+ */
+private fun descriptionFromAnnotations(annotated: KSAnnotated): String? =
+    annotated.annotations.firstNotNullOfOrNull { it.descriptionOrNull() }
 
 /**
  * Extracts a name override from an annotated element's annotations.
@@ -14,8 +27,19 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeRef
  * @param annotated The annotated element to inspect
  * @return The override name if found, or null if no name-override annotation is present
  */
-internal fun extractNameOverride(annotated: KSAnnotated): String? =
-    annotated.annotations.firstNotNullOfOrNull { it.nameOverrideOrNull() }
+internal fun extractNameOverride(annotated: KSAnnotated): String? = nameOverrideFromAnnotations(annotated)
+
+/**
+ * Extracts a name override from a property's own annotations or its getter's annotations.
+ *
+ * Covers `@get:` use-site targets (e.g. `@get:JsonProperty("name")`), the idiomatic
+ * Jackson-Kotlin placement for renamed properties, mirroring [isIgnoredForSchema].
+ *
+ * @param property The property to inspect
+ * @return The override name if found, or null if no name-override annotation is present
+ */
+internal fun extractNameOverride(property: KSPropertyDeclaration): String? =
+    nameOverrideFromAnnotations(property) ?: property.getter?.let(::nameOverrideFromAnnotations)
 
 /**
  * Extracts description from annotations with KDoc fallback.
@@ -31,9 +55,7 @@ internal fun extractNameOverride(annotated: KSAnnotated): String? =
 internal fun extractDescription(
     annotated: KSAnnotated,
     kdocFallback: () -> String?,
-): String? =
-    annotated.annotations.firstNotNullOfOrNull { it.descriptionOrNull() }
-        ?: kdocFallback()
+): String? = descriptionFromAnnotations(annotated) ?: kdocFallback()
 
 /**
  * Extracts description for a property or parameter with multiple fallback sources.
@@ -57,11 +79,32 @@ internal fun extractPropertyDescription(
     kdocTagName: String,
     elementKdocFallback: () -> String?,
 ): String? =
-    // 1. Try annotations first
-    annotated.annotations.firstNotNullOfOrNull { it.descriptionOrNull() }
-        // 2. Fall back to property's own KDoc
+    descriptionFromAnnotations(annotated)
         ?: elementKdocFallback()
-        // 3. Finally, try parent KDoc tag
+        ?: extractTagDescriptionFromKdoc(parentKdoc, kdocTagName, propertyName)
+
+/**
+ * Extracts description for a property, also checking its getter's annotations.
+ *
+ * Covers `@get:` use-site targets (e.g. `@get:JsonPropertyDescription("...")`),
+ * mirroring the getter fallback in [extractNameOverride].
+ *
+ * @param annotated The property to inspect
+ * @param propertyName The name of the property (used for parent KDoc lookup)
+ * @param parentKdoc The parent's KDoc string (class KDoc for the `@property` tag)
+ * @param kdocTagName The tag name to search in parent KDoc ("property")
+ * @param elementKdocFallback Lazy KDoc description provider for the element itself
+ * @return Description string or null if not found in any source
+ */
+internal fun extractPropertyDescription(
+    annotated: KSPropertyDeclaration,
+    propertyName: String,
+    parentKdoc: String?,
+    kdocTagName: String,
+    elementKdocFallback: () -> String?,
+): String? =
+    (descriptionFromAnnotations(annotated) ?: annotated.getter?.let(::descriptionFromAnnotations))
+        ?: elementKdocFallback()
         ?: extractTagDescriptionFromKdoc(parentKdoc, kdocTagName, propertyName)
 
 /**
@@ -72,20 +115,25 @@ internal fun extractPropertyDescription(
  *
  * Resolution chain:
  * 1. Annotations on the parameter (e.g., @Description)
- * 2. Class KDoc @param tag
- * 3. Class KDoc @property tag
+ * 2. The corresponding property's own annotations, then its getter's (e.g. `@get:JsonPropertyDescription`)
+ * 3. Class KDoc @param tag
+ * 4. Class KDoc @property tag
  *
  * @param param The constructor parameter
  * @param paramName The parameter name
  * @param classKdoc The class KDoc string
+ * @param property The property corresponding to this parameter, if any, used for the getter fallback
  * @return Description string or null if not found in any source
  */
 internal fun extractConstructorParamDescription(
     param: KSValueParameter,
     paramName: String,
     classKdoc: String?,
+    property: KSPropertyDeclaration? = null,
 ): String? =
-    param.annotations.firstNotNullOfOrNull { it.descriptionOrNull() }
+    descriptionFromAnnotations(param)
+        ?: property?.let(::descriptionFromAnnotations)
+        ?: property?.getter?.let(::descriptionFromAnnotations)
         ?: extractTagDescriptionFromKdoc(classKdoc, "param", paramName)
         ?: extractTagDescriptionFromKdoc(classKdoc, "property", paramName)
 
