@@ -7,11 +7,9 @@ import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.io.StringWriter
-import java.net.URI
 import java.nio.file.Path
 import javax.tools.DiagnosticCollector
 import javax.tools.JavaFileObject
-import javax.tools.SimpleJavaFileObject
 import javax.tools.ToolProvider
 
 class JsonSchemaProcessorTest {
@@ -453,6 +451,388 @@ class JsonSchemaProcessorTest {
     }
 
     @Test
+    fun `should generate schema for record with collections arrays and nested object`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val addressSource = """
+            package com.example;
+
+            public record Address(String city) {}
+        """.trimIndent()
+
+        // language=java
+        val orderSource = """
+            package com.example;
+
+            import java.util.List;
+            import java.util.Map;
+
+            public record Order(List<String> tags, Map<String, Integer> counts, int[] values, Address address) {}
+        """.trimIndent()
+
+        val outputDir =
+            compile(
+                sources = listOf(addressSource, orderSource),
+                tempDir = tempDir,
+                options = listOf("-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example"),
+            )
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Order.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Order",
+                "type": "object",
+                "properties": {
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "counts": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "address": {
+                        "$ref": "#/$defs/com.example.Address"
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["tags", "counts", "values", "address"],
+                "$defs": {
+                    "com.example.Address": {
+                        "type": "object",
+                        "properties": {
+                            "city": {
+                                "type": "string"
+                            }
+                        },
+                        "additionalProperties": false,
+                        "required": ["city"]
+                    }
+                }
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should generate schema for record with set and collection fields`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Bundle(
+                java.util.Set<String> tags,
+                java.util.Collection<Integer> scores
+            ) {}
+        """.trimIndent()
+
+        val outputDir = compile(source, tempDir)
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Bundle.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Bundle",
+                "type": "object",
+                "properties": {
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "scores": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["tags", "scores"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should generate schema for record with multi-dimensional array field`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record ArraysHolder(double[][] matrix) {}
+        """.trimIndent()
+
+        val outputDir = compile(source, tempDir)
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/ArraysHolder.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.ArraysHolder",
+                "type": "object",
+                "properties": {
+                    "matrix": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["matrix"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should generate schema for record with nested collections`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Nested(
+                java.util.List<java.util.List<String>> matrix,
+                java.util.Map<String, java.util.List<Integer>> grouped,
+                java.util.List<java.util.Map<String, java.lang.Boolean>> flags
+            ) {}
+        """.trimIndent()
+
+        val outputDir = compile(source, tempDir)
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Nested.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Nested",
+                "type": "object",
+                "properties": {
+                    "matrix": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "grouped": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "flags": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["matrix", "grouped", "flags"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should generate schema for record with java lang Object component`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Wrapper(Object payload) {}
+        """.trimIndent()
+
+        val outputDir = compile(source, tempDir)
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Wrapper.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Wrapper",
+                "type": "object",
+                "properties": {
+                    "payload": {}
+                },
+                "additionalProperties": false,
+                "required": ["payload"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should generate schema for record with upper bounded type variable`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Box<T extends Number>(T value) {}
+        """.trimIndent()
+
+        val outputDir = compile(source, tempDir)
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Box.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Box",
+                "type": "object",
+                "properties": {
+                    "value": {
+                        "$ref": "#/$defs/java.lang.Number"
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["value"],
+                "$defs": {
+                    "java.lang.Number": {
+                        "type": "object",
+                        "properties": {},
+                        "required": [],
+                        "additionalProperties": false
+                    }
+                }
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should generate schema for record with unbounded type variable`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Box<T>(T value) {}
+        """.trimIndent()
+
+        val outputDir = compile(source, tempDir)
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Box.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Box",
+                "type": "object",
+                "properties": {
+                    "value": {}
+                },
+                "additionalProperties": false,
+                "required": ["value"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should generate schema for record with iterable subclass component`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val namesSource = """
+            package com.example;
+
+            class Names extends java.util.ArrayList<String> {}
+        """.trimIndent()
+
+        // language=java
+        val orderSource = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Order(Names names) {}
+        """.trimIndent()
+
+        val outputDir = compile(listOf(namesSource, orderSource), tempDir)
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Order.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Order",
+                "type": "object",
+                "properties": {
+                    "names": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["names"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
     fun `should not generate schema when no annotated types`(
         @TempDir tempDir: Path,
     ) {
@@ -779,19 +1159,7 @@ class JsonSchemaProcessorTest {
         val outputDir = tempDir.resolve("classes")
         outputDir.toFile().mkdirs()
 
-        val sourceFiles = sources.map { code ->
-            val pkg = Regex("""package\s+(\S+);""").find(code)?.groupValues?.get(1) ?: ""
-            val cls =
-                Regex("""(?:public\s+)?(?:record|class|interface|enum)\s+(\w+)""").find(code)?.groupValues?.get(1)
-                    ?: error("Cannot infer class name from source:\n$code")
-            val fqn = "$pkg.$cls"
-            object : SimpleJavaFileObject(
-                URI.create("string:///${fqn.replace('.', '/')}${JavaFileObject.Kind.SOURCE.extension}"),
-                JavaFileObject.Kind.SOURCE,
-            ) {
-                override fun getCharContent(ignoreEncodingErrors: Boolean) = code
-            }
-        }
+        val sourceFiles = sources.map(JavaSources::of)
 
         val allOptions = mutableListOf("-d", outputDir.toFile().absolutePath)
         allOptions.addAll(options)

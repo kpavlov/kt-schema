@@ -2,8 +2,11 @@
 package me.kpavlov.kt.schema.apt.ir
 
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
+import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
 import me.kpavlov.kt.schema.generator.core.ir.Introspections
+import me.kpavlov.kt.schema.generator.core.ir.ListNode
+import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
@@ -18,16 +21,22 @@ import javax.lang.model.element.Modifier
 import javax.lang.model.element.RecordComponentElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
+import javax.lang.model.type.ArrayType
+import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
+import javax.lang.model.type.TypeVariable
+import javax.lang.model.type.WildcardType
 import javax.lang.model.util.Types
 
 /**
  * Introspection context for the Java annotation-processor (JSR 269) front end.
  *
- * Supports Java records, plain classes and interfaces with primitive/boxed/String fields
- * and nested references. Reference types are treated as non-nullable/required: Java has
- * no notion of optionality/default values, so every property is required.
+ * Supports Java records, plain classes and interfaces with primitive/boxed/String fields,
+ * nested references, collections (`List`/`Set`/`Collection`/`Iterable`), maps (`Map`),
+ * arrays, `Object` and upper-bounded type variables. Reference types are treated as
+ * non-nullable/required: Java has no notion of optionality/default values, so every property
+ * is required.
  *
  * A fresh context is created per root type so `$defs` stay scoped to the types reachable
  * from that root; [nodeCache] memoizes built nodes across roots so nested types shared
@@ -46,15 +55,53 @@ internal class AptIntrospectionContext(
 
     override fun toRef(type: TypeMirror): TypeRef {
         primitiveKindFor(type)?.let { return TypeRef.Inline(PrimitiveNode(it)) }
+        return when (type.kind) {
+            TypeKind.ARRAY -> handleArray(type)
+            TypeKind.TYPEVAR -> handleTypeVariable(type)
+            TypeKind.DECLARED -> handleDeclared(type as DeclaredType) ?: handleReferenceType(type)
+            else -> handleReferenceType(type)
+        }
+    }
 
-        return handleRecord(type)
+    /**
+     * Handles `Object`, map and iterable-derived declared types; returns null for anything
+     * else so [toRef] falls through to [handleReferenceType].
+     */
+    private fun handleDeclared(type: DeclaredType): TypeRef? {
+        val element = asTypeElement(type) ?: return null
+        val container = containerKindOf(type)
+        return when {
+            element.qualifiedName.toString() == "java.lang.Object" -> TypeRef.Inline(AnyNode())
+            container?.kind == ContainerKind.MAP -> handleMap(container.type)
+            container?.kind == ContainerKind.ITERABLE -> handleList(container.type)
+            else -> null
+        }
+    }
+
+    /**
+     * Resolves a type variable to its upper bound, so `T extends Foo` introspects as `Foo`
+     * and an unbounded `T` (whose bound is `Object`) introspects as [AnyNode].
+     */
+    private fun handleTypeVariable(type: TypeMirror): TypeRef {
+        val upperBound = (type as TypeVariable).upperBound
+        return when (upperBound.kind) {
+            TypeKind.DECLARED -> toRef(upperBound)
+            else -> error(
+                "Unsupported type parameter $type for kt-schema-apt " +
+                    "(only upper-bounded type variables are supported)",
+            )
+        }
+    }
+
+    private fun handleReferenceType(type: TypeMirror): TypeRef =
+        handleRecord(type)
             ?: handleClass(type)
             ?: handleInterface(type)
             ?: error(
                 "Unsupported type for kt-schema-apt " +
-                    "(only records, classes, interfaces, primitives and String are supported): $type",
+                    "(only records, classes, interfaces, primitives, String, collections, maps and arrays " +
+                    "are supported): $type",
             )
-    }
 
     private fun primitiveKindFor(type: TypeMirror): PrimitiveKind? =
         when (type.kind) {
@@ -81,6 +128,117 @@ internal class AptIntrospectionContext(
         }
 
     private fun asTypeElement(type: TypeMirror): TypeElement? = types.asElement(type) as? TypeElement
+
+    /**
+     * Converts an array type to an inline [ListNode] of its component type, so `int[]`
+     * and `String[][]` map to `{"type": "array", "items": ...}` in JSON Schema.
+     */
+    private fun handleArray(type: TypeMirror): TypeRef =
+        TypeRef.Inline(ListNode(toRef((type as ArrayType).componentType)))
+
+    /**
+     * Converts an `Iterable`-derived declared type to an inline [ListNode]. [type] is the
+     * supertype that declares the interface (resolved by [containerKindOf]), so type
+     * arguments are read from it rather than the original subtype. Unbounded wildcards and
+     * raw types fall back to a STRING element, mirroring the reflection introspector's
+     * star-projection handling.
+     */
+    private fun handleList(type: DeclaredType): TypeRef {
+        val elementRef =
+            type.typeArguments.firstOrNull()?.resolveWildcard()?.let(::toRef)
+                ?: TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING))
+        return TypeRef.Inline(ListNode(elementRef))
+    }
+
+    /**
+     * Converts a `Map`-derived declared type to an inline [MapNode]. [type] is the supertype
+     * that declares the interface (resolved by [containerKindOf]), so type arguments are read
+     * from it rather than the original subtype. Unbounded wildcards and raw types fall back
+     * to a STRING key/value, mirroring the reflection introspector's star-projection handling.
+     */
+    private fun handleMap(type: DeclaredType): TypeRef {
+        val keyRef =
+            type.typeArguments.getOrNull(0)?.resolveWildcard()?.let(::toRef)
+                ?: TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING))
+        val valueRef =
+            type.typeArguments.getOrNull(1)?.resolveWildcard()?.let(::toRef)
+                ?: TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING))
+        return TypeRef.Inline(MapNode(keyRef, valueRef))
+    }
+
+    /**
+     * The container kind of a `Map`/`Iterable`-derived declared type, or null otherwise.
+     */
+    private enum class ContainerKind { MAP, ITERABLE }
+
+    /**
+     * A container kind paired with the declared type that declares the matching
+     * `java.util.Map`/`java.lang.Iterable` interface, so type arguments can be read from
+     * the resolved supertype rather than the original subtype (e.g. `ArrayList<String>` for
+     * a raw `MyList extends ArrayList<String>` field).
+     */
+    private data class ContainerInfo(
+        val kind: ContainerKind,
+        val type: DeclaredType,
+    )
+
+    /** Container kinds are memoized by qualified name. */
+    private val containerKinds: MutableMap<String, ContainerKind?> = mutableMapOf()
+
+    /**
+     * Returns the [ContainerInfo] of [type], walking the supertype hierarchy (so `ArrayList`
+     * matches `java.lang.Iterable`). Whether a type is a container does not depend on its type
+     * arguments, so the kind is memoized by qualified name. The matched declared supertype,
+     * however, is resolved per call so its type arguments reflect the concrete usage.
+     */
+    private fun containerKindOf(type: DeclaredType): ContainerInfo? {
+        val element = asTypeElement(type) ?: return null
+        val name = element.qualifiedName.toString()
+        return containerKinds.getOrPut(name) { computeContainerKind(type, name) }
+            ?.let { kind -> ContainerInfo(kind, resolveContainerType(type, kind) ?: type) }
+    }
+
+    private fun computeContainerKind(
+        type: DeclaredType,
+        name: String,
+    ): ContainerKind? =
+        when (name) {
+            "java.lang.Object" -> null
+            "java.util.Map" -> ContainerKind.MAP
+            "java.lang.Iterable" -> ContainerKind.ITERABLE
+            else ->
+                types.directSupertypes(type)
+                    .filterIsInstance<DeclaredType>()
+                    .firstNotNullOfOrNull(::containerKindOf)
+                    ?.kind
+        }
+
+    private fun resolveContainerType(
+        type: DeclaredType,
+        kind: ContainerKind,
+    ): DeclaredType? {
+        val element = asTypeElement(type) ?: return null
+        return when (element.qualifiedName.toString()) {
+            "java.util.Map" -> if (kind == ContainerKind.MAP) type else null
+            "java.lang.Iterable" -> if (kind == ContainerKind.ITERABLE) type else null
+            "java.lang.Object" -> null
+            else ->
+                types.directSupertypes(type)
+                    .filterIsInstance<DeclaredType>()
+                    .firstNotNullOfOrNull { resolveContainerType(it, kind) }
+        }
+    }
+
+    /**
+     * Resolves a wildcard type argument to its declared bound (`? extends Foo` → `Foo`,
+     * `? super Bar` → `Bar`), leaving concrete types untouched. Unbounded wildcards
+     * resolve to null so callers can apply a fallback.
+     */
+    private fun TypeMirror.resolveWildcard(): TypeMirror? =
+        when (this) {
+            is WildcardType -> extendsBound ?: superBound
+            else -> this
+        }
 
     private fun handleRecord(type: TypeMirror): TypeRef? {
         val element = asTypeElement(type)
@@ -215,16 +373,31 @@ internal class AptIntrospectionContext(
 
     /**
      * Re-registers the types referenced by [node] into the current context. The apt front
-     * end only emits object nodes whose properties reference primitives inline or other
-     * objects by id, so any other cached node kind is an unsupported invariant.
+     * end only caches object nodes, so any other cached node kind is an unsupported
+     * invariant. References are registered through inline list/map nodes as well, so a
+     * cached `List<Shared>` property still pulls `Shared` into a fresh root's `$defs`.
      */
     private fun registerRefs(node: TypeNode) {
-        val objectNode = node as? ObjectNode
-            ?: error("Unsupported cached node kind $node; registerRefs must handle all node kinds")
+        val objectNode =
+            node as? ObjectNode
+                ?: error("Unsupported cached node kind $node; registerRefs must handle all node kinds")
         objectNode.properties.forEach { property ->
-            (property.type as? TypeRef.Ref)?.let { ref ->
-                toRef(nodeCache.getValue(ref.id).type)
-            }
+            registerRefs(property.type)
+        }
+    }
+
+    private fun registerRefs(typeRef: TypeRef) {
+        when (typeRef) {
+            is TypeRef.Ref -> toRef(nodeCache.getValue(typeRef.id).type)
+            is TypeRef.Inline ->
+                when (val node = typeRef.node) {
+                    is ListNode -> registerRefs(node.element)
+                    is MapNode -> {
+                        registerRefs(node.key)
+                        registerRefs(node.value)
+                    }
+                    else -> Unit
+                }
         }
     }
 

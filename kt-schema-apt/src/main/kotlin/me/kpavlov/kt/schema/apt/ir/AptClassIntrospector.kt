@@ -5,14 +5,15 @@ import me.kpavlov.kt.schema.generator.core.ir.SchemaIntrospector
 import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeNode
+import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
-import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Types
 
 /**
  * Java-APT-backed schema IR introspector. Supports records, plain classes and interfaces
- * with primitive/String/boxed field types and nested references; generics/enums/sealed
- * hierarchies are not yet supported.
+ * with primitive/String/boxed field types, nested references, collections, maps, arrays
+ * and upper-bounded type variables; enums and sealed/polymorphic hierarchies are not yet
+ * supported.
  *
  * A fresh [AptIntrospectionContext] is created per root so `$defs` stay scoped to the
  * types reachable from that root; [nodeCache] memoizes built nodes across roots so nested
@@ -21,11 +22,17 @@ import javax.lang.model.util.Types
  * @author Konstantin Pavlov
  */
 internal class AptClassIntrospector(
-    private val types: Types,
+    processingEnv: ProcessingEnvironment,
 ) : SchemaIntrospector<TypeElement, Unit> {
     //region Configuration
 
     override val config = Unit
+
+    /**
+     * The processing environment's type utils. Bound to the same round as the [TypeElement]s
+     * handed to [introspect], so elements and utilities always come from one [ProcessingEnvironment].
+     */
+    private val types: Types = processingEnv.typeUtils
 
     private val nodeCache: MutableMap<TypeId, CachedNode> = mutableMapOf()
 

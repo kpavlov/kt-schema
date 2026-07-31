@@ -47,7 +47,7 @@ public class JsonSchemaProcessor : AbstractProcessor() {
      * Shared across roots so nested types referenced by several roots are introspected
      * once; `processingEnv` is only available after `init()`, hence the lazy delegate.
      */
-    private val introspector by lazy { AptClassIntrospector(processingEnv.typeUtils) }
+    private val introspector by lazy { AptClassIntrospector(processingEnv) }
 
     private val transformer =
         TypeGraphToJsonSchemaTransformer(
