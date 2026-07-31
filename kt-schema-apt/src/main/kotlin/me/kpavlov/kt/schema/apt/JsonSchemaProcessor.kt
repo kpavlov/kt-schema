@@ -4,6 +4,8 @@ package me.kpavlov.kt.schema.apt
 import kotlinx.serialization.json.Json
 import me.kpavlov.kt.schema.Schema
 import me.kpavlov.kt.schema.apt.ir.AptClassIntrospector
+import me.kpavlov.kt.schema.generator.core.GlobMatcher
+import me.kpavlov.kt.schema.generator.core.parseGlobPatterns
 import me.kpavlov.kt.schema.generator.json.JsonSchemaConfig
 import me.kpavlov.kt.schema.generator.json.TypeGraphToJsonSchemaTransformer
 import me.kpavlov.kt.schema.json.JsonSchema
@@ -26,8 +28,8 @@ import javax.tools.StandardLocation
  * processor uses, so output shape ($id/$defs/$ref/nullability) stays identical.
  *
  * Supports `"*"` annotation types so javac invokes it in every round: this lets the
- * [ROOT_PACKAGE_OPTION] scanning pick up types even when no `@Schema` annotation is
- * present in the compilation. The processor never claims annotations (always returns
+ * [ROOT_PACKAGE_OPTION]/[INCLUDE_OPTION] scanning pick up types even when no `@Schema`
+ * annotation is present in the compilation. The processor never claims annotations (always returns
  * `false`) and deduplicates by type name, so it coexists safely with other processors.
  *
  * @author Konstantin Pavlov
@@ -35,6 +37,8 @@ import javax.tools.StandardLocation
 @SupportedAnnotationTypes("*")
 @SupportedOptions(
     JsonSchemaProcessor.ROOT_PACKAGE_OPTION,
+    JsonSchemaProcessor.INCLUDE_OPTION,
+    JsonSchemaProcessor.EXCLUDE_OPTION,
 )
 public class JsonSchemaProcessor : AbstractProcessor() {
     //region Processor state
@@ -89,25 +93,33 @@ public class JsonSchemaProcessor : AbstractProcessor() {
     }
 
     /**
-     * Types annotated with `@Schema`, plus — when [ROOT_PACKAGE_OPTION] is configured —
-     * every record, class or interface declared under that package, so consumers don't
-     * have to annotate every type individually.
+     * Discovers the types to process, mirroring the KSP processor's filtering:
+     *
+     * 1. Only records, classes and interfaces are considered.
+     * 2. When [ROOT_PACKAGE_OPTION] is set, only types under that package (and its
+     *    sub-packages) are considered; otherwise the whole module is scanned.
+     * 3. A type is selected when it is annotated with `@Schema` or matches at least one
+     *    [INCLUDE_OPTION] glob pattern.
+     * 4. A type matching any [EXCLUDE_OPTION] glob pattern is dropped, even when selected
+     *    by `@Schema` or an include pattern.
      */
     private fun candidateTypes(roundEnv: RoundEnvironment): Set<TypeElement> {
+        val rootPackage = processingEnv.options[ROOT_PACKAGE_OPTION]?.trim()?.takeIf { it.isNotEmpty() }
+        val globMatcher =
+            GlobMatcher(
+                includePatterns = parseGlobPatterns(processingEnv.options[INCLUDE_OPTION]),
+                excludePatterns = parseGlobPatterns(processingEnv.options[EXCLUDE_OPTION]),
+            )
+
         val annotated = roundEnv.getElementsAnnotatedWith(Schema::class.java).filterIsInstance<TypeElement>()
+        val fromRoots = roundEnv.rootElements.filterIsInstance<TypeElement>()
 
-        val rootPackage = processingEnv.options[ROOT_PACKAGE_OPTION]
-        val underRootPackage =
-            if (rootPackage.isNullOrBlank()) {
-                emptyList()
-            } else {
-                roundEnv.rootElements
-                    .filterIsInstance<TypeElement>()
-                    .filter { it.isSupported() }
-                    .filter { it.isUnderPackage(rootPackage) }
-            }
-
-        return (annotated + underRootPackage).toSet()
+        return (annotated + fromRoots)
+            .filter { it.isSupported() }
+            .filter { rootPackage == null || it.isUnderPackage(rootPackage) }
+            .filter { it.isAnnotatedWithSchema() || globMatcher.matchesInclude(it.qualifiedName.toString()) }
+            .filterNot { globMatcher.matchesExclude(it.qualifiedName.toString()) }
+            .toSet()
     }
 
     private fun TypeElement.isSupported(): Boolean =
@@ -117,6 +129,12 @@ public class JsonSchemaProcessor : AbstractProcessor() {
         val packageName = processingEnv.elementUtils.getPackageOf(this).qualifiedName.toString()
         return packageName == rootPackage || packageName.startsWith("$rootPackage.")
     }
+
+    private fun TypeElement.isAnnotatedWithSchema(): Boolean =
+        annotationMirrors.any { mirror ->
+            (mirror.annotationType.asElement() as? TypeElement)?.qualifiedName?.toString() ==
+                Schema::class.qualifiedName
+        }
 
     //endregion
 
@@ -168,12 +186,26 @@ public class JsonSchemaProcessor : AbstractProcessor() {
 
     public companion object {
         /**
-         * Processor option (`-A<name>=<value>`) that, when set, processes every top-level
-         * record, class or interface declared under the given package (and its sub-packages)
-         * in addition to types annotated with `@Schema`. Lets consumers skip annotating
-         * every type individually.
+         * Processor option (`-A<name>=<value>`) that, when set, restricts discovery to types
+         * declared under the given package (and its sub-packages). When absent, the whole
+         * module is scanned. Applies to `@Schema`-annotated types and include-glob matches alike.
          */
         public const val ROOT_PACKAGE_OPTION: String = "me.kpavlov.kt.schema.rootPackage"
+
+        /**
+         * Processor option (`-A<name>=<value>`) with comma/semicolon-separated glob patterns.
+         * A type not annotated with `@Schema` is processed only when it matches at least one
+         * include pattern. Glob syntax: `*` matches any sequence of non-`.` characters,
+         * `**` any sequence including `.`, `?` a single non-`.` character.
+         */
+        public const val INCLUDE_OPTION: String = "me.kpavlov.kt.schema.include"
+
+        /**
+         * Processor option (`-A<name>=<value>`) with comma/semicolon-separated glob patterns.
+         * A type matching any exclude pattern is dropped, even when it is `@Schema`-annotated
+         * or matches an include pattern. Glob syntax matches [INCLUDE_OPTION].
+         */
+        public const val EXCLUDE_OPTION: String = "me.kpavlov.kt.schema.exclude"
     }
 
     //endregion

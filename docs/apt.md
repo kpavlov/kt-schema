@@ -37,6 +37,7 @@ Generate JSON Schema resources at compile time from plain Java records, classes 
         </annotationProcessorPaths>
         <compilerArgs>
             <arg>-Ame.kpavlov.kt.schema.rootPackage=com.example</arg>
+            <arg>-Ame.kpavlov.kt.schema.include=com.example.**</arg>
         </compilerArgs>
     </configuration>
 </plugin>
@@ -67,11 +68,16 @@ dependencies {
 
 ## Triggering schema generation
 
-The processor picks up a Java type either of two ways — you don't need both:
+The processor discovers types as follows:
 
-1. **Annotate the type with `@Schema`** (from `kt-schema-annotations`) — processed regardless of package.
-2. **Set the [`rootPackage`](#configuration-options) option** — every top-level `record`, `class` or `interface`
-   declared under that package (and its sub-packages) is processed, `@Schema` or not.
+1. **Scope** — when the [`rootPackage`](#configuration-options) option is set, only types
+   declared under that package (and its sub-packages) are considered; otherwise the whole
+   module is scanned. This applies to `@Schema`-annotated types and include-glob matches alike.
+2. **Selection** — a `record`, `class` or `interface` is processed when it is annotated with
+   `@Schema` (from `kt-schema-annotations`) or matches at least one
+   [`include`](#configuration-options) glob pattern.
+3. **Exclusion** — a type matching any [`exclude`](#configuration-options) glob pattern is
+   dropped, even when selected by `@Schema` or an include pattern.
 
 ```java
 import me.kpavlov.kt.schema.Description;
@@ -86,8 +92,8 @@ public record Person(
 }
 ```
 
-With `rootPackage` configured, you can skip `kt-schema-annotations` entirely and reuse annotations you
-already depend on — for example Jackson's:
+With `rootPackage` + `include` configured, you can skip `kt-schema-annotations` entirely and reuse
+annotations you already depend on — for example Jackson's:
 
 ```java
 import com.fasterxml.jackson.annotation.JsonClassDescription;
@@ -108,20 +114,25 @@ public record Person(
 
 | Option        | Type     | Default | Description                                                                                                     |
 |:--------------|:---------|:--------|:------------------------------------------------------------------------------------------------------------------|
-| `rootPackage` | `String` | `null`  | Process every top-level `record`, `class` or `interface` under this package (and sub-packages), in addition to `@Schema`-annotated types.   |
+| `rootPackage` | `String` | `null`  | Scope discovery to types declared under this package (and sub-packages); absent means the whole module is scanned.  |
+| `include`     | `String` | `null`  | Comma/semicolon-separated glob patterns; a type not annotated with `@Schema` is processed only when it matches at least one. |
+| `exclude`     | `String` | `null`  | Comma/semicolon-separated glob patterns; a type matching any of them is dropped, even when `@Schema`-annotated or include-matched. |
 
-Set it as a javac `-A` compiler argument:
+Set them as javac `-A` compiler arguments:
 
 ```kotlin
 tasks.withType<JavaCompile>().configureEach {
-    options.compilerArgs.add("-Ame.kpavlov.kt.schema.rootPackage=com.example")
+    options.compilerArgs.addAll(
+        listOf(
+            "-Ame.kpavlov.kt.schema.rootPackage=com.example",
+            "-Ame.kpavlov.kt.schema.include=com.example.**",
+        ),
+    )
 }
 ```
 
-> [!NOTE]
-> `kt-schema-apt` is newer than the KSP processor and doesn't yet support all of its options.
-> `include`/`exclude` glob filtering, `withSchemaObject`, `visibility`, and `enabled` from
-> [the KSP processor](ksp.md) aren't implemented here yet.
+Glob syntax: `*` matches any sequence of non-`.` characters, `**` matches any sequence including
+`.`, `?` matches a single non-`.` character — the same syntax the KSP processor uses.
 
 ## Generated output
 

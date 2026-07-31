@@ -15,10 +15,14 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.MethodSource
 import java.io.StringWriter
 import java.nio.file.Files
+import java.util.stream.Stream
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
@@ -27,11 +31,12 @@ import javax.tools.DiagnosticCollector
 import javax.tools.JavaFileObject
 import javax.tools.ToolProvider
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AptClassIntrospectorTest {
     //region test cases
 
     @Test
-    fun `introspects plain class instance fields and excludes static fields`() {
+    fun `should introspect plain class instance fields and exclude static fields`() {
         val graph =
             graph(
                 root = "com.example.Company",
@@ -112,7 +117,7 @@ class AptClassIntrospectorTest {
     }
 
     @Test
-    fun `introspects nested object field as ref with object node registered in graph`() {
+    fun `should introspect nested object field as ref with object node registered in graph`() {
         val graph =
             graph(
                 root = "com.example.Person",
@@ -149,7 +154,7 @@ class AptClassIntrospectorTest {
     }
 
     @Test
-    fun `introspects java lang Object field as inline AnyNode`() {
+    fun `should introspect java lang Object field as inline AnyNode`() {
         val graph =
             graph(
                 root = "com.example.Wrapper",
@@ -166,7 +171,7 @@ class AptClassIntrospectorTest {
     }
 
     @Test
-    fun `introspects list set and collection fields as inline list nodes`() {
+    fun `should introspect list set and collection fields as inline list nodes`() {
         val graph =
             graph(
                 root = "com.example.Bundle",
@@ -197,7 +202,7 @@ class AptClassIntrospectorTest {
     }
 
     @Test
-    fun `introspects map field as inline map node with key and value types`() {
+    fun `should introspect map field as inline map node with key and value types`() {
         val graph =
             graph(
                 root = "com.example.Attributes",
@@ -215,7 +220,7 @@ class AptClassIntrospectorTest {
     }
 
     @Test
-    fun `introspects array fields as inline list nodes with component type`() {
+    fun `should introspect array fields as inline list nodes with component type`() {
         val graph =
             graph(
                 root = "com.example.ArraysHolder",
@@ -244,7 +249,7 @@ class AptClassIntrospectorTest {
     }
 
     @Test
-    fun `introspects nested collections`() {
+    fun `should introspect nested collections`() {
         val graph =
             graph(
                 root = "com.example.Nested",
@@ -278,26 +283,28 @@ class AptClassIntrospectorTest {
         }
     }
 
-    @Test
-    fun `introspects list of nested objects with ref element`() {
+    @ParameterizedTest(name = "should introspect {0} of nested objects with ref element")
+    @MethodSource("objectContainerFields")
+    fun `should introspect container of nested objects with ref element`(
+        @Suppress("UnusedParameter") kind: String,
+        fieldDeclaration: String,
+        assertFieldType: (TypeRef) -> Unit,
+    ) {
         val graph =
             graph(
                 root = "com.example.Catalog",
                 javaClass("com.example", "Address", "public String city;"),
-                javaClass("com.example", "Catalog", "public java.util.List<Address> addresses;"),
+                javaClass("com.example", "Catalog", "public $fieldDeclaration;"),
             )
 
-        graph.rootNode().properties.single().type.shouldBeList { element ->
-            element.shouldBeInstanceOf<TypeRef.Ref> { ref ->
-                ref.id.value shouldBe "com.example.Address"
-            }
-        }
+        val fieldType = graph.rootNode().properties.single().type
+        assertFieldType(fieldType)
 
         graph.nodes.keys.any { it.value == "com.example.Address" } shouldBe true
     }
 
     @Test
-    fun `introspects record components as object node properties`() {
+    fun `should introspect record components as object node properties`() {
         val graph =
             graph(
                 root = "com.example.Person",
@@ -314,7 +321,7 @@ class AptClassIntrospectorTest {
     }
 
     @Test
-    fun `introspects upper bounded type variable via its bound`() {
+    fun `should introspect upper bounded type variable via its bound`() {
         val graph =
             graph(
                 root = "com.example.Box",
@@ -329,7 +336,7 @@ class AptClassIntrospectorTest {
     }
 
     @Test
-    fun `introspects unbounded type variable as inline AnyNode`() {
+    fun `should introspect unbounded type variable as inline AnyNode`() {
         val graph =
             graph(
                 root = "com.example.Box",
@@ -344,6 +351,38 @@ class AptClassIntrospectorTest {
     //endregion
 
     //region helpers
+
+    private fun objectContainerFields(): Stream<Arguments> =
+        Stream.of(
+            Arguments.of(
+                "list",
+                "java.util.List<Address> addresses",
+                { field: TypeRef ->
+                    field.shouldBeList { element ->
+                        element.shouldBeRefTo("com.example.Address")
+                    }
+                },
+            ),
+            Arguments.of(
+                "collection",
+                "java.util.Collection<Address> addresses",
+                { field: TypeRef ->
+                    field.shouldBeList { element ->
+                        element.shouldBeRefTo("com.example.Address")
+                    }
+                },
+            ),
+            Arguments.of(
+                "map",
+                "java.util.Map<String, Address> byCity",
+                { field: TypeRef ->
+                    field.shouldBeMap(
+                        key = { it.shouldBePrimitive(PrimitiveKind.STRING) },
+                        value = { it.shouldBeRefTo("com.example.Address") },
+                    )
+                },
+            ),
+        )
 
     private fun graph(
         root: String,
@@ -463,6 +502,11 @@ class AptClassIntrospectorTest {
         }
     }
 
+    private fun TypeRef.shouldBeRefTo(fqn: String) {
+        shouldBeInstanceOf<TypeRef.Ref> { ref ->
+            ref.id.value shouldBe fqn
+        }
+    }
 
     //endregion
 }

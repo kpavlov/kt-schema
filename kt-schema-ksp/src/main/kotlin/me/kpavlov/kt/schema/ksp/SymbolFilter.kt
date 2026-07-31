@@ -3,6 +3,8 @@ package me.kpavlov.kt.schema.ksp
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSDeclaration
+import me.kpavlov.kt.schema.generator.core.GlobMatcher
+import me.kpavlov.kt.schema.generator.core.parseGlobPatterns
 
 /**
  * Filters [KSClassDeclaration] and [KSFunctionDeclaration] symbols from a mixed sequence,
@@ -15,8 +17,7 @@ import com.google.devtools.ksp.symbol.KSDeclaration
  *    A declaration with no qualified name is excluded when any include pattern is present.
  * 4. Exclude patterns: a declaration matching any of these is dropped.
  *
- * Glob syntax: `*` matches any sequence of non-`.` characters; `**` matches any sequence
- * including `.`; `?` matches a single non-`.` character.
+ * Glob matching is delegated to [GlobMatcher]; glob syntax is documented there.
  *
  * Prefer constructing via [fromOptions] when reading directly from KSP processor options.
  *
@@ -43,8 +44,7 @@ internal class SymbolFilter(
     excludePatterns: List<String>,
     private val logger: KSPLogger,
 ) {
-    private val includeRegexes = includePatterns.map { globToRegex(it) }
-    private val excludeRegexes = excludePatterns.map { globToRegex(it) }
+    private val globMatcher = GlobMatcher(includePatterns, excludePatterns)
 
     companion object {
         /**
@@ -65,19 +65,10 @@ internal class SymbolFilter(
             logger: KSPLogger,
         ) = SymbolFilter(
             rootPackage = rootPackage?.trim()?.takeIf { it.isNotEmpty() },
-            includePatterns = includeOption.parsePatterns(),
-            excludePatterns = excludeOption.parsePatterns(),
+            includePatterns = parseGlobPatterns(includeOption),
+            excludePatterns = parseGlobPatterns(excludeOption),
             logger = logger,
         )
-
-        private fun String?.parsePatterns(): List<String> =
-            this
-                ?.trim()
-                ?.takeIf { it.isNotEmpty() }
-                ?.split(Regex("[,;]"))
-                ?.map { it.trim() }
-                ?.filter { it.isNotEmpty() }
-                .orEmpty()
     }
 
     inline fun <reified T : KSDeclaration> filter(symbols: Sequence<KSAnnotated>): Sequence<T> =
@@ -88,51 +79,7 @@ internal class SymbolFilter(
 
     @Suppress("ReturnCount")
     private fun matchesPatterns(name: String?): Boolean {
-        if (includeRegexes.isEmpty() && excludeRegexes.isEmpty()) return true
-        if (name == null) return includeRegexes.isEmpty()
-        val included = includeRegexes.isEmpty() || includeRegexes.any { it.matches(name) }
-        val excluded = excludeRegexes.isNotEmpty() && excludeRegexes.any { it.matches(name) }
-        return included && !excluded
+        if (name == null) return globMatcher.includePatterns.isEmpty()
+        return globMatcher.matches(name)
     }
-}
-
-/**
- * Converts a glob pattern to a [Regex].
- *
- * - `**` matches any sequence of characters including `.`
- * - `*` matches any sequence of non-`.` characters
- * - `?` matches a single non-`.` character
- * - All other characters are matched literally.
- */
-internal fun globToRegex(glob: String): Regex {
-    val regex =
-        buildString {
-            append('^')
-            var i = 0
-            while (i < glob.length) {
-                when {
-                    glob[i] == '*' && i + 1 < glob.length && glob[i + 1] == '*' -> {
-                        append(".*")
-                        i += 2
-                    }
-
-                    glob[i] == '*' -> {
-                        append("[^.]*")
-                        i++
-                    }
-
-                    glob[i] == '?' -> {
-                        append("[^.]")
-                        i++
-                    }
-
-                    else -> {
-                        append(Regex.escape(glob[i].toString()))
-                        i++
-                    }
-                }
-            }
-            append('$')
-        }
-    return Regex(regex)
 }

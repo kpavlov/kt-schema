@@ -13,7 +13,6 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -46,48 +45,6 @@ class SymbolFilterTest {
             .filter<T>(symbols.asSequence())
             .map { it.qualifiedName!!.asString() }
             .toList()
-
-    //region globToRegex
-
-    @ParameterizedTest(name = "glob `{0}` on `{1}` → {2}")
-    @MethodSource("globMatchCases")
-    fun `globToRegex matches correctly`(
-        glob: String,
-        input: String,
-        expected: Boolean,
-    ) {
-        globToRegex(glob).matches(input) shouldBe expected
-    }
-
-    fun globMatchCases() =
-        listOf(
-            // single star — matches within one dot-segment only
-            Arguments.of("com.example.*", "com.example.Foo", true),
-            Arguments.of("com.example.*", "com.example.FooBar", true),
-            Arguments.of("com.example.*", "com.example.sub.Foo", false),
-            Arguments.of("com.example.*", "com.other.Foo", false),
-            // double star — matches across dots
-            Arguments.of("com.example.**", "com.example.Foo", true),
-            Arguments.of("com.example.**", "com.example.sub.Foo", true),
-            Arguments.of("com.example.**", "com.example.a.b.c.Foo", true),
-            Arguments.of("com.example.**", "com.other.Foo", false),
-            // suffix glob
-            Arguments.of("**.*Dto", "com.example.UserDto", true),
-            Arguments.of("**.*Dto", "com.example.sub.OrderDto", true),
-            Arguments.of("**.*Dto", "com.example.UserService", false),
-            // question mark — single non-dot character
-            Arguments.of("com.example.Fo?", "com.example.Foo", true),
-            Arguments.of("com.example.Fo?", "com.example.For", true),
-            Arguments.of("com.example.Fo?", "com.example.Fo", false),
-            Arguments.of("com.example.Fo?", "com.example.Fooo", false),
-            Arguments.of("com.example.Fo?", "com.example.F.o", false),
-            // exact match
-            Arguments.of("com.example.MyClass", "com.example.MyClass", true),
-            Arguments.of("com.example.MyClass", "com.example.MyClassX", false),
-            Arguments.of("com.example.MyClass", "com.other.MyClass", false),
-        )
-
-    //endregion
 
     //region filterClasses and filterFunctions — pattern filtering
 

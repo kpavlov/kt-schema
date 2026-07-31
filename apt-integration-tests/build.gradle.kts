@@ -13,6 +13,7 @@ dependencies {
     annotationProcessor(project(":kt-schema-apt"))
 
     testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.junit.jupiter.params)
     testImplementation(libs.assertj.core)
     testImplementation(libs.jackson.databind)
     testImplementation(platform(libs.junit.bom))
@@ -25,7 +26,10 @@ tasks.test {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.compilerArgs.add(
-        "-Ame.kpavlov.kt.schema.rootPackage=me.kpavlov.kt.schema.apt.integration"
+    options.compilerArgs.addAll(
+        listOf(
+            "-Ame.kpavlov.kt.schema.rootPackage=me.kpavlov.kt.schema.apt.integration",
+            "-Ame.kpavlov.kt.schema.include=me.kpavlov.kt.schema.apt.integration.**",
+        ),
     )
 }

@@ -11,6 +11,20 @@ public final class me/kpavlov/kt/schema/generator/core/ConfigKt {
 	public static final fun defaultOpaqueTypeNames ()Ljava/util/Set;
 }
 
+public final class me/kpavlov/kt/schema/generator/core/GlobMatcher {
+	public fun <init> (Ljava/util/List;Ljava/util/List;)V
+	public final fun getExcludePatterns ()Ljava/util/List;
+	public final fun getIncludePatterns ()Ljava/util/List;
+	public final fun matches (Ljava/lang/String;)Z
+	public final fun matchesExclude (Ljava/lang/String;)Z
+	public final fun matchesInclude (Ljava/lang/String;)Z
+}
+
+public final class me/kpavlov/kt/schema/generator/core/GlobMatcherKt {
+	public static final fun globToRegex (Ljava/lang/String;)Lkotlin/text/Regex;
+	public static final fun parseGlobPatterns (Ljava/lang/String;)Ljava/util/List;
+}
+
 public abstract interface annotation class me/kpavlov/kt/schema/generator/core/InternalSchemaGeneratorApi : java/lang/annotation/Annotation {
 }
 
