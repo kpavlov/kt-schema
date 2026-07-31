@@ -9,7 +9,7 @@ import kotlin.test.Test
  */
 class JacksonModelSchemaTest {
     @Test
-    fun `extracts descriptions from Jackson annotations`() {
+    fun `extracts descriptions and names from Jackson annotations`() {
         val schema = JacksonModel::class.jsonSchemaString
 
         // language=json
@@ -21,11 +21,11 @@ class JacksonModelSchemaTest {
               "description": "A purchasable product using Jackson annotations.",
               "type": "object",
               "properties": {
-                "id": {
+                "product_id": {
                   "type": "integer",
                   "description": "Unique identifier for the product"
                 },
-                "name": {
+                "display_name": {
                   "type": "string",
                   "description": "Human-readable product name"
                 },
@@ -49,7 +49,7 @@ class JacksonModelSchemaTest {
                   }
                 }
               },
-              "required": ["id", "name", "description", "price", "inStock", "tags"],
+              "required": ["product_id", "display_name", "description", "price", "inStock", "tags"],
               "additionalProperties": false
             }
             """.trimIndent()

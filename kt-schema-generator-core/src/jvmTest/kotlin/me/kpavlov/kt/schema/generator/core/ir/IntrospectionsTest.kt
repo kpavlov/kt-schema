@@ -100,6 +100,7 @@ class IntrospectionsTest {
         "SchemaIgnore",
         "SerialSchemaIgnore",
         "JsonIgnoreType",
+        "JsonIgnore",
     )
     fun `recognizes ignore annotations by simple name`(name: String) {
         Introspections.isIgnoreAnnotation(name) shouldBe true
@@ -120,7 +121,7 @@ class IntrospectionsTest {
     @ParameterizedTest
     @CsvSource(
         "Ignore",
-        "JsonIgnore",
+        "JsonIgnoreProperties",
         "Transient",
         "Description",
         "UnknownAnnotation",
@@ -178,6 +179,7 @@ class IntrospectionsTest {
         "SerialName, , custom_name",
         "serialname, kotlinx.serialization.serialname, custom_name",
         "SerialName, kotlinx.serialization.SerialName, ''",
+        "JsonProperty, com.fasterxml.jackson.annotation.JsonProperty, ''",
     )
     fun `getNameOverride returns null for non-matching cases`(
         simpleName: String,
@@ -187,6 +189,47 @@ class IntrospectionsTest {
         Introspections.getNameOverride(
             simpleName = simpleName,
             qualifiedName = qualifiedName?.takeIf { it.isNotEmpty() },
+            annotationArguments = listOf("value" to inputValue),
+        ) shouldBe null
+    }
+
+    //endregion
+
+    //region Jackson name override extraction
+
+    @ParameterizedTest
+    @CsvSource(
+        "JsonProperty, com.fasterxml.jackson.annotation.JsonProperty, user_email, user_email",
+        "JsonProperty, com.fasterxml.jackson.annotation.JsonProperty, productId, productId",
+        "JsonTypeName, com.fasterxml.jackson.annotation.JsonTypeName, cat, cat",
+    )
+    fun `getNameOverride extracts value from Jackson annotations when FQN matches`(
+        simpleName: String,
+        qualifiedName: String,
+        inputValue: String,
+        expectedResult: String,
+    ) {
+        Introspections.getNameOverride(
+            simpleName = simpleName,
+            qualifiedName = qualifiedName,
+            annotationArguments = listOf("value" to inputValue),
+        ) shouldBe expectedResult
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "JsonProperty, JsonProperty, custom_name",
+        "JsonTypeName, JsonTypeName, custom_name",
+        "JsonProperty, com.fasterxml.jackson.annotation.JsonPropertyDescription, custom_name",
+    )
+    fun `getNameOverride matches Jackson annotations only by FQN`(
+        simpleName: String,
+        qualifiedName: String?,
+        inputValue: String,
+    ) {
+        Introspections.getNameOverride(
+            simpleName = simpleName,
+            qualifiedName = qualifiedName,
             annotationArguments = listOf("value" to inputValue),
         ) shouldBe null
     }

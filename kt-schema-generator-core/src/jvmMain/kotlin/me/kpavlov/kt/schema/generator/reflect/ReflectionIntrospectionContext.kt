@@ -343,7 +343,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             // Find the property in the current class (inherited)
             val property = findPropertyByName(klass, propertyName)
 
-            if (property != null) {
+            if (property != null && !isSchemaIgnored(property.annotations)) {
                 val typeRef = toRef(property.returnType)
                 val description = parentPropertyDescriptions[propertyName]
 
@@ -372,7 +372,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                 .filterIsInstance<KProperty<*>>()
                 .filter { it.visibility == KVisibility.PUBLIC }
                 .forEach { prop ->
-                    if (prop.name !in processedProperties) {
+                    if (prop.name !in processedProperties && !isSchemaIgnored(prop.annotations)) {
                         val fixedValue = defaultValues[prop.name]
                         properties +=
                             Property(
@@ -466,10 +466,13 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             val kotlinName = param.name ?: return@forEach
             val hasDefault = param.isOptional
 
-            // Get annotations both on the constructor parameter and property associated with it
-            val annotations = param.annotations + findPropertyByName(klass, kotlinName)?.annotations.orEmpty()
+            // Collect annotations from the parameter, property, getter, and backing field
+            val annotations = collectConstructorAnnotations(klass, kotlinName, param.annotations)
 
-            // Use @SerialName override if present, otherwise use Kotlin property name
+            // Skip properties marked with an ignore annotation (e.g. @JsonIgnore)
+            if (isSchemaIgnored(annotations)) return@forEach
+
+            // Name override (e.g. @SerialName, @JsonProperty), else Kotlin property name
             val propertyName = extractNameOverride(annotations) ?: kotlinName
 
             val propertyType = param.type

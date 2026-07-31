@@ -47,6 +47,7 @@ kotlin {
             dependencies {
                 implementation(libs.junit.jupiter.params)
                 implementation(libs.mockk)
+                implementation(libs.jackson.annotations)
                 runtimeOnly(libs.slf4j.simple)
             }
         }

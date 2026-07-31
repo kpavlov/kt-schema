@@ -1188,6 +1188,14 @@ The library automatically recognizes these description annotations by default:
 | `com.fasterxml.jackson.annotation.JsonClassDescription`    | `JsonClassDescription`    | Jackson           | `@JsonClassDescription("User model")` |
 | `dev.langchain4j.model.output.structured.P`                | `P`                       | LangChain4j       | `@P("Search query")`                  |
 
+Beyond descriptions, kt-schema also recognizes **name overrides** and **ignore markers** by default:
+
+| Annotation | FQN (matched) | Maps to |
+|---|---|---|
+| `com.fasterxml.jackson.annotation.JsonProperty` | `JsonProperty` | property **name** in `properties`/`required` |
+| `com.fasterxml.jackson.annotation.JsonTypeName` | `JsonTypeName` | polymorphic subtype name (`$defs` key + discriminator `const`) |
+| `com.fasterxml.jackson.annotation.JsonIgnore` | `JsonIgnore` | excludes the property/field from the schema |
+
 ### How It Works
 
 The introspector matches annotations by their **simple name only**, not the fully qualified name. This means:
@@ -1213,8 +1221,8 @@ By default, the library recognizes:
 
 **Description annotations**: Description, LLMDescription, JsonPropertyDescription, JsonClassDescription, P
 **Description attributes**: value, description
-**Ignore annotations**: SchemaIgnore, SerialSchemaIgnore, JsonIgnoreType
-**Name-override annotations**: kotlinx.serialization.SerialName (matched by fully qualified name)
+**Ignore annotations**: SchemaIgnore, SerialSchemaIgnore, JsonIgnoreType, JsonIgnore
+**Name-override annotations**: kotlinx.serialization.SerialName, com.fasterxml.jackson.annotation.JsonProperty, com.fasterxml.jackson.annotation.JsonTypeName
 **Name-override attributes**: value
 
 > [!NOTE]

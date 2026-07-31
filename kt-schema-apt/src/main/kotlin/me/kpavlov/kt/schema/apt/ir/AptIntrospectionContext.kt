@@ -253,8 +253,14 @@ internal class AptIntrospectionContext(
 
                 element.recordComponents.forEach { component ->
                     val name = component.simpleName.toString()
-                    required += name
-                    props += toProperty(name, component.asType(), recordComponentDescription(component, element))
+                    val field = fieldFor(element, name)
+                    val targets = listOfNotNull(component, component.accessor, field)
+                    // Skip components marked with an ignore annotation (e.g. @JsonIgnore)
+                    if (isIgnored(*targets.toTypedArray())) return@forEach
+                    val propertyName = nameOverrideFor(*targets.toTypedArray()) ?: name
+                    required += propertyName
+                    val description = recordComponentDescription(component, field)
+                    props += toProperty(propertyName, component.asType(), description)
                 }
 
                 objectNode(element, props, required)
@@ -280,8 +286,11 @@ internal class AptIntrospectionContext(
                     .filter { it.kind == ElementKind.FIELD && !it.modifiers.contains(Modifier.STATIC) }
                     .forEach { field ->
                         val name = field.simpleName.toString()
-                        required += name
-                        props += toProperty(name, field.asType(), extractDescription(field))
+                        // Skip fields marked with an ignore annotation (e.g. @JsonIgnore)
+                        if (isIgnored(field)) return@forEach
+                        val propertyName = nameOverrideFor(field) ?: name
+                        required += propertyName
+                        props += toProperty(propertyName, field.asType(), extractDescription(field))
                     }
 
                 objectNode(element, props, required)
@@ -308,7 +317,9 @@ internal class AptIntrospectionContext(
                     .filter { !it.modifiers.contains(Modifier.STATIC) }
                     .filter { it.parameters.isEmpty() && it.returnType.kind != TypeKind.VOID }
                     .forEach { method ->
-                        val name = propertyName(method.simpleName.toString())
+                        // Skip accessors marked with an ignore annotation (e.g. @JsonIgnore)
+                        if (isIgnored(method)) return@forEach
+                        val name = nameOverrideFor(method) ?: propertyName(method.simpleName.toString())
                         required += name
                         props += toProperty(name, method.returnType, extractDescription(method))
                     }
@@ -427,7 +438,7 @@ internal class AptIntrospectionContext(
         required: Set<String>,
     ): ObjectNode =
         ObjectNode(
-            name = element.qualifiedName.toString(),
+            name = nameOverrideFor(element) ?: element.qualifiedName.toString(),
             properties = properties,
             required = required,
             description = extractDescription(element),
@@ -443,11 +454,11 @@ internal class AptIntrospectionContext(
      */
     private fun recordComponentDescription(
         component: RecordComponentElement,
-        type: TypeElement,
+        field: VariableElement?,
     ): String? =
         extractDescription(component)
             ?: extractDescription(component.accessor)
-            ?: fieldFor(type, component.simpleName.toString())?.let(::extractDescription)
+            ?: field?.let(::extractDescription)
 
     /**
      * Record component annotations propagate to the backing field (among other targets),
@@ -473,6 +484,43 @@ internal class AptIntrospectionContext(
                 simpleName = annotationElement.simpleName.toString(),
                 qualifiedName = annotationElement.qualifiedName.toString(),
                 annotationArguments = args,
+            )
+        }
+
+    /**
+     * Returns the first name-override value (e.g. from `@JsonProperty`, `@JsonTypeName`)
+     * found across the given annotation targets, in order, or null if none provides one.
+     */
+    private fun nameOverrideFor(vararg targets: Element): String? =
+        targets.firstNotNullOfOrNull(::extractNameOverride)
+
+    private fun extractNameOverride(element: Element): String? =
+        element.annotationMirrors.firstNotNullOfOrNull { mirror ->
+            val annotationElement = mirror.annotationType.asElement() as TypeElement
+            val args =
+                mirror.elementValues.entries.map { (attribute, value) ->
+                    attribute.simpleName.toString() to value.value
+                }
+            Introspections.getNameOverride(
+                simpleName = annotationElement.simpleName.toString(),
+                qualifiedName = annotationElement.qualifiedName.toString(),
+                annotationArguments = args,
+            )
+        }
+
+    /**
+     * Returns `true` if any of the given annotation targets carries a recognized
+     * ignore annotation (e.g. `@JsonIgnore`).
+     */
+    private fun isIgnored(vararg targets: Element): Boolean =
+        targets.any(::isIgnoreAnnotation)
+
+    private fun isIgnoreAnnotation(element: Element): Boolean =
+        element.annotationMirrors.any { mirror ->
+            val annotationElement = mirror.annotationType.asElement() as TypeElement
+            Introspections.isIgnoreAnnotation(
+                simpleName = annotationElement.simpleName.toString(),
+                qualifiedName = annotationElement.qualifiedName.toString(),
             )
         }
 

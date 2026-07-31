@@ -97,7 +97,7 @@ internal expect object Config {
      * Loaded lazily from the `introspector.annotations.ignore.names` property in
      * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
      *
-     * Default value: SchemaIgnore, SerialSchemaIgnore, JsonIgnoreType
+     * Default value: SchemaIgnore, SerialSchemaIgnore, JsonIgnoreType, JsonIgnore
      */
     val ignoreAnnotationNames: List<String>
 
@@ -111,7 +111,9 @@ internal expect object Config {
      * Loaded lazily from the `introspector.annotations.name.names` property in
      * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
      *
-     * Default value: kotlinx.serialization.SerialName
+     * Default value: kotlinx.serialization.SerialName,
+     *                com.fasterxml.jackson.annotation.JsonProperty,
+     *                com.fasterxml.jackson.annotation.JsonTypeName
      */
     val nameAnnotationNames: List<String>
 

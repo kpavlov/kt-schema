@@ -33,4 +33,19 @@ class ConfigTest {
         Config.descriptionAnnotationNames.all { it == it.lowercase() } shouldBe true
         Config.descriptionValueAttributes.all { it == it.lowercase() } shouldBe true
     }
+
+    @Test
+    fun `loads ignore annotation names from properties`() {
+        Config.ignoreAnnotationNames shouldContain "schemaignore"
+        Config.ignoreAnnotationNames shouldContain "serialschemaignore"
+        Config.ignoreAnnotationNames shouldContain "jsonignoretype"
+        Config.ignoreAnnotationNames shouldContain "jsonignore"
+    }
+
+    @Test
+    fun `loads name override annotation names from properties`() {
+        Config.nameAnnotationNames shouldContain "kotlinx.serialization.SerialName"
+        Config.nameAnnotationNames shouldContain "com.fasterxml.jackson.annotation.JsonProperty"
+        Config.nameAnnotationNames shouldContain "com.fasterxml.jackson.annotation.JsonTypeName"
+    }
 }
