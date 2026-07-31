@@ -69,10 +69,11 @@ internal class AptIntrospectionContext(
      */
     private fun handleDeclared(type: DeclaredType): TypeRef? {
         val element = asTypeElement(type) ?: return null
+        val container = containerKindOf(type)
         return when {
             element.qualifiedName.toString() == "java.lang.Object" -> TypeRef.Inline(AnyNode())
-            containerKindOf(type) == ContainerKind.MAP -> handleMap(type)
-            containerKindOf(type) == ContainerKind.ITERABLE -> handleList(type)
+            container?.kind == ContainerKind.MAP -> handleMap(container.type)
+            container?.kind == ContainerKind.ITERABLE -> handleList(container.type)
             else -> null
         }
     }
@@ -87,7 +88,7 @@ internal class AptIntrospectionContext(
             TypeKind.DECLARED -> toRef(upperBound)
             else -> error(
                 "Unsupported type parameter $type for kt-schema-apt " +
-                    "(only upper-bounded type variables are supported): $type",
+                    "(only upper-bounded type variables are supported)",
             )
         }
     }
@@ -136,9 +137,11 @@ internal class AptIntrospectionContext(
         TypeRef.Inline(ListNode(toRef((type as ArrayType).componentType)))
 
     /**
-     * Converts an `Iterable`-derived type (`List`, `Set`, `Collection`, ...) to an inline
-     * [ListNode]. Unbounded wildcards and raw types fall back to a STRING element, mirroring
-     * the reflection introspector's star-projection handling.
+     * Converts an `Iterable`-derived declared type to an inline [ListNode]. [type] is the
+     * supertype that declares the interface (resolved by [containerKindOf]), so type
+     * arguments are read from it rather than the original subtype. Unbounded wildcards and
+     * raw types fall back to a STRING element, mirroring the reflection introspector's
+     * star-projection handling.
      */
     private fun handleList(type: DeclaredType): TypeRef {
         val elementRef =
@@ -148,9 +151,10 @@ internal class AptIntrospectionContext(
     }
 
     /**
-     * Converts a `Map`-derived type to an inline [MapNode]. Unbounded wildcards and raw
-     * types fall back to a STRING key/value, mirroring the reflection introspector's
-     * star-projection handling.
+     * Converts a `Map`-derived declared type to an inline [MapNode]. [type] is the supertype
+     * that declares the interface (resolved by [containerKindOf]), so type arguments are read
+     * from it rather than the original subtype. Unbounded wildcards and raw types fall back
+     * to a STRING key/value, mirroring the reflection introspector's star-projection handling.
      */
     private fun handleMap(type: DeclaredType): TypeRef {
         val keyRef =
@@ -168,20 +172,30 @@ internal class AptIntrospectionContext(
     private enum class ContainerKind { MAP, ITERABLE }
 
     /**
-     * Returns the [ContainerKind] of [type], walking the supertype hierarchy (so `ArrayList`
-     * matches `java.util.List`/`java.lang.Iterable`). Memoized by qualified name — a type is
-     * or isn't a container regardless of its type arguments — so each hierarchy walk happens
-     * once per type instead of once per field occurrence.
+     * A container kind paired with the declared type that declares the matching
+     * `java.util.Map`/`java.lang.Iterable` interface, so type arguments can be read from
+     * the resolved supertype rather than the original subtype (e.g. `ArrayList<String>` for
+     * a raw `MyList extends ArrayList<String>` field).
      */
+    private data class ContainerInfo(
+        val kind: ContainerKind,
+        val type: DeclaredType,
+    )
+
+    /** Container kinds are memoized by qualified name. */
     private val containerKinds: MutableMap<String, ContainerKind?> = mutableMapOf()
 
-    private fun containerKindOf(type: DeclaredType): ContainerKind? {
+    /**
+     * Returns the [ContainerInfo] of [type], walking the supertype hierarchy (so `ArrayList`
+     * matches `java.lang.Iterable`). Whether a type is a container does not depend on its type
+     * arguments, so the kind is memoized by qualified name. The matched declared supertype,
+     * however, is resolved per call so its type arguments reflect the concrete usage.
+     */
+    private fun containerKindOf(type: DeclaredType): ContainerInfo? {
         val element = asTypeElement(type) ?: return null
         val name = element.qualifiedName.toString()
-        if (name !in containerKinds) {
-            containerKinds[name] = computeContainerKind(type, name)
-        }
-        return containerKinds[name]
+        return containerKinds.getOrPut(name) { computeContainerKind(type, name) }
+            ?.let { kind -> ContainerInfo(kind, resolveContainerType(type, kind) ?: type) }
     }
 
     private fun computeContainerKind(
@@ -196,7 +210,24 @@ internal class AptIntrospectionContext(
                 types.directSupertypes(type)
                     .filterIsInstance<DeclaredType>()
                     .firstNotNullOfOrNull(::containerKindOf)
+                    ?.kind
         }
+
+    private fun resolveContainerType(
+        type: DeclaredType,
+        kind: ContainerKind,
+    ): DeclaredType? {
+        val element = asTypeElement(type) ?: return null
+        return when (element.qualifiedName.toString()) {
+            "java.util.Map" -> if (kind == ContainerKind.MAP) type else null
+            "java.lang.Iterable" -> if (kind == ContainerKind.ITERABLE) type else null
+            "java.lang.Object" -> null
+            else ->
+                types.directSupertypes(type)
+                    .filterIsInstance<DeclaredType>()
+                    .firstNotNullOfOrNull { resolveContainerType(it, kind) }
+        }
+    }
 
     /**
      * Resolves a wildcard type argument to its declared bound (`? extends Foo` → `Foo`,

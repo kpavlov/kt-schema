@@ -9,6 +9,7 @@
 * [Triggering schema generation](#triggering-schema-generation)
 * [Configuration options](#configuration-options)
 * [Generated output](#generated-output)
+  * [Extended example](#extended-example)
   * [Reading the resource at runtime](#reading-the-resource-at-runtime)
 * [Supported types](#supported-types)
 * [See Also](#see-also)
@@ -136,8 +137,9 @@ For the `Person` record above, that's `META-INF/kt-schema/schemas/com/example/Pe
 
 ```json
 {
-  "$id": "com.example.Person",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "com.example.Person",
+  "description": "A person with a first and last name and age.",
   "type": "object",
   "properties": {
     "firstName": {
@@ -153,14 +155,111 @@ For the `Person` record above, that's `META-INF/kt-schema/schemas/com/example/Pe
       "description": "Age of the person in years"
     }
   },
-  "required": ["firstName", "lastName", "age"],
   "additionalProperties": false,
-  "description": "A person with a first and last name and age."
+  "required": ["firstName", "lastName", "age"]
 }
 ```
 
 This is the same [Draft 2020-12 JSON Schema model](../kt-schema-json) the KSP processor produces — both reuse
 the same `TypeGraphToJsonSchemaTransformer`, so `$id`/`$defs`/`$ref`/nullability handling is identical.
+
+### Extended example
+
+Beyond plain scalars and nested records, the processor handles collections, maps, arrays, `Object` and type
+variables. Consider an `Order` record referencing an `Address`:
+
+```java
+import me.kpavlov.kt.schema.Description;
+import me.kpavlov.kt.schema.Schema;
+
+@Schema
+@Description("A customer order with tags, quantities, price points and billing address.")
+public record Order(
+        @Description("Unique order identifier") String id,
+        @Description("Tags attached to the order") java.util.Set<String> tags,
+        @Description("Line item quantities by SKU") java.util.Map<String, Integer> quantities,
+        @Description("Historical price points") double[] prices,
+        @Description("Free-form metadata") Object metadata,
+        @Description("Billing address") Address address) {
+}
+```
+
+```java
+@Schema
+public record Address(
+        @Description("City part of the address") String city,
+        @Description("Street part of the address") String street) {
+}
+```
+
+This generates `META-INF/kt-schema/schemas/com/example/Order.json`:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "com.example.Order",
+  "description": "A customer order with tags, quantities, price points and billing address.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique order identifier"
+    },
+    "tags": {
+      "type": "array",
+      "description": "Tags attached to the order",
+      "items": {
+        "type": "string"
+      }
+    },
+    "quantities": {
+      "type": "object",
+      "description": "Line item quantities by SKU",
+      "additionalProperties": {
+        "type": "integer"
+      }
+    },
+    "prices": {
+      "type": "array",
+      "description": "Historical price points",
+      "items": {
+        "type": "number"
+      }
+    },
+    "metadata": {
+      "description": "Free-form metadata"
+    },
+    "address": {
+      "$ref": "#/$defs/com.example.Address",
+      "description": "Billing address"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["id", "tags", "quantities", "prices", "metadata", "address"],
+  "$defs": {
+    "com.example.Address": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string",
+          "description": "City part of the address"
+        },
+        "street": {
+          "type": "string",
+          "description": "Street part of the address"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["city", "street"]
+    }
+  }
+}
+```
+
+Collections (`List`, `Set`, `Collection`, and subclasses thereof) map to `array` with `items`, `Map` maps to
+`object` with `additionalProperties`, arrays nest `items` per dimension, `Object` emits an empty schema `{}`
+(accepts any value), and nested records become `$ref`/`$defs` entries. `Address` is also emitted as its own
+root resource because it is `@Schema`-annotated.
 
 ### Reading the resource at runtime
 
@@ -181,9 +280,15 @@ try (InputStream in = Person.class.getClassLoader()
 - Java `interface`s — no-arg methods map to required properties, named per the JavaBeans convention
   (`getName()` → `name`, `isActive()` → `active`, and a bare `name()` accessor stays `name`)
 - `String`, boxed and primitive numeric/boolean types
+- `Iterable`-derived collections (`List`, `Set`, `Collection`, custom subclasses) — emitted as `array` with
+  `items` describing the element type
+- `Map` — emitted as `object` with `additionalProperties` describing the value type
+- Arrays, including multi-dimensional — emitted as `array` with `items` nested per dimension
+- `java.lang.Object` — emitted as an empty schema `{}` accepting any value
+- Type variables: upper-bounded (`T extends Number`) resolve to their bound; unbounded (`T`) emit `{}`
 - Nested records/classes/interfaces, emitted as `$ref`/`$defs` and deduplicated, same as KSP
 
-Not yet supported: enums, sealed interfaces/classes, generics, and collections/maps. Processing an
+Not yet supported: enums and sealed class hierarchies (polymorphic `oneOf` with discriminators). Processing an
 unsupported type fails the build with a descriptive error rather than emitting an incomplete schema.
 
 > [!NOTE]
