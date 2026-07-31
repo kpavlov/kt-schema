@@ -17,7 +17,7 @@
 
 # KT-Schema
 
-**Generate JSON schemas and LLM function calling schemas from Kotlin code — including classes you don't own.**
+**Generate JSON schemas and LLM function calling schemas from Kotlin and Java code — including classes you don't own.**
 
 > [!NOTE]
 > **kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema),
@@ -26,6 +26,7 @@
 Quick Links:
 
 - [KSP Configuration Guide](docs/ksp.md)
+- [Java Annotation Processor Guide](docs/apt.md)
 - [Serialization-Based Schema Generation](docs/serializable.md)
 - [Project Architecture](docs/architecture.md)
 
@@ -33,7 +34,8 @@ Quick Links:
 
 **Generation Modes:**
 
-- **Compile-time (KSP)**: Zero runtime overhead, multiplatform, for your annotated classes
+- **Compile-time (KSP)**: Zero runtime overhead, multiplatform, for your annotated Kotlin classes
+- **Compile-time (Java APT)**: Zero runtime overhead for plain Java records — no Kotlin required in your code
 - **Runtime (Reflection)**: JVM-only, for any class including third-party libraries
 - **Runtime (SerialDescriptor)**: Kotlin serializable classes, including open polymorphism via `SerializersModule`
 
@@ -151,19 +153,24 @@ This library solves three key challenges:
 
 ## Choosing Your Approach
 
-|                                   | 🔧 [KSP Processor](docs/ksp.md) | 📦 [Serialization-based](docs/serializable.md) | 🔍 [Runtime Reflection](#runtime-schema-generation) |
-|:----------------------------------|:-------------------------------:|:----------------------------------------------:|:---------------------------------------------------:|
-| **Platforms**                     |       JVM + Multiplatform       |              JVM + Multiplatform               |                      JVM only                       |
-| **When generated**                |          Compile-time           |                    Runtime                     |                       Runtime                       |
-| **Requires annotation processor** |            Yes (KSP)            |                       No                       |                         No                          |
-| **Class must be `@Serializable`** |               No                |                      Yes                       |                         No                          |
-| **Annotate class with `@Schema`** |            Required             |                  Not required                  |                    Not required                     |
-| **KDoc extracted to description** |                ✅                |                       ❌                        |                          ❌                          |
-| **Extract default values**        |                ❌                |                       ❌                        |                          ✅                          |
-| **Third-party classes**           |                ❌                |            ✅ (only `@Serializable`)            |                   ✅ any JVM class                   |
+|                                   | 🔧 [KSP Processor](docs/ksp.md) | ☕ [Java APT](docs/apt.md) | 📦 [Serialization-based](docs/serializable.md) | 🔍 [Runtime Reflection](#runtime-schema-generation) |
+|:----------------------------------|:-------------------------------:|:--------------------------:|:----------------------------------------------:|:---------------------------------------------------:|
+| **Platforms**                     |       JVM + Multiplatform       |          JVM only          |              JVM + Multiplatform               |                      JVM only                       |
+| **When generated**                |          Compile-time           |        Compile-time        |                    Runtime                     |                       Runtime                       |
+| **Requires annotation processor** |            Yes (KSP)            |          Yes (APT)         |                       No                       |                         No                          |
+| **Class must be `@Serializable`** |               No                |             No             |                      Yes                       |                         No                          |
+| **Annotate class with `@Schema`** |            Required             |    Not required¹           |                  Not required                  |                    Not required                     |
+| **KDoc extracted to description** |                ✅                |             ❌              |                       ❌                        |                          ❌                          |
+| **Extract default values**        |                ❌                |             ❌              |                       ❌                        |                          ✅                          |
+| **Third-party classes**           |                ❌                |             ❌              |            ✅ (only `@Serializable`)            |                   ✅ any JVM class                   |
+
+¹ with the `rootPackage` option — see [Java Annotation Processor Guide](docs/apt.md#triggering-schema-generation).
 
 - **[Pick KSP](docs/ksp.md)** when you own the classes, want zero runtime overhead, and target Multiplatform or need KDoc
 in your schema.
+
+- **[Pick Java APT](docs/apt.md)** when your code is plain Java (no Kotlin) and you want zero runtime overhead.
+Currently supports Java records only.
 
 - **[Pick Serialization-based](docs/serializable.md)** when your classes are already `@Serializable` and you need
 Multiplatform support without a build-time processor.

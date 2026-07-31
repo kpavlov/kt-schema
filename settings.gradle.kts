@@ -24,6 +24,8 @@ include(
     ":kt-schema-generator-core",
     ":kt-schema-generator-json",
     ":kt-schema-ksp",
+    ":kt-schema-apt",
     ":ksp-integration-tests",
+    ":apt-integration-tests",
     ":docs",
 )
