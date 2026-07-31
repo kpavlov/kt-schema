@@ -37,7 +37,7 @@ class ReflectionIntrospectorTest {
         val color: Color,
     )
 
-    @Suppress("unused")
+    @Suppress("unused", "AbstractClassCanBeInterface")
     sealed class Shape {
         @Description("Circle shape")
         data class Circle(
@@ -52,22 +52,22 @@ class ReflectionIntrospectorTest {
     }
 
     @Suppress("unused")
-    sealed class Vehicle {
-        sealed class Motorized : Vehicle() {
-            data class Car(val doors: Int) : Motorized()
-            data class Truck(val payload: Double) : Motorized()
+    sealed interface Vehicle {
+        sealed interface Motorized : Vehicle {
+            data class Car(val doors: Int            ) : Motorized
+            data class Truck(val payload: Double            ) : Motorized
         }
 
-        data class Bicycle(val gears: Int) : Vehicle()
+        data class Bicycle(val gears: Int        ) : Vehicle
     }
 
     @Suppress("unused")
-    sealed class Event {
-        data class Click(val x: Int, val y: Int) : Event()
-        data class PageView(val url: String) : Event()
+    sealed interface Event {
+        data class Click(val x: Int, val y: Int        ) : Event
+        data class PageView(val url: String        ) : Event
 
         @SchemaIgnore
-        data class Internal(val trace: String) : Event()
+        data class Internal(val trace: String        ) : Event
     }
 
     data class WithAny(

@@ -44,18 +44,18 @@ class JsonSchemaGeneratorTest {
     )
 
     @Suppress("unused")
-    sealed class TestClosedPolymorphism {
-        abstract val id: String
+    sealed interface TestClosedPolymorphism {
+        val id: String
 
         data class SubClass1(
             override val id: String,
             val property1: String,
-        ) : TestClosedPolymorphism()
+        ) : TestClosedPolymorphism
 
         data class SubClass2(
             override val id: String,
             val property2: Int,
-        ) : TestClosedPolymorphism()
+        ) : TestClosedPolymorphism
     }
 
     @Suppress("unused")

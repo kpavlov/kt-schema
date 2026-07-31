@@ -31,8 +31,8 @@ class SerializationClassJsonSchemaGeneratorTest {
     @Serializable
     @SerialName("TestClosedPolymorphism")
     @CustomDescription("A closed polymorphism")
-    sealed class TestClosedPolymorphism {
-        abstract val id: String
+    sealed interface TestClosedPolymorphism {
+        val id: String
 
         @Serializable
         @CustomDescription("First subclass")
@@ -42,7 +42,7 @@ class SerializationClassJsonSchemaGeneratorTest {
             override val id: String,
             @property:CustomDescription("First property")
             val property1: String,
-        ) : TestClosedPolymorphism()
+        ) : TestClosedPolymorphism
 
         @Serializable
         @CustomDescription("Second subclass")
@@ -52,7 +52,7 @@ class SerializationClassJsonSchemaGeneratorTest {
             override val id: String,
             @property:CustomDescription("Second property")
             val property2: Int,
-        ) : TestClosedPolymorphism()
+        ) : TestClosedPolymorphism
     }
 
     @Serializable

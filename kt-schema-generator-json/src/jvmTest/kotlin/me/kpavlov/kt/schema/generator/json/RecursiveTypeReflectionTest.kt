@@ -8,19 +8,19 @@ class RecursiveTypeReflectionTest {
     //region Test models
 
     @Suppress("unused")
-    sealed class TreeNode {
-        abstract val id: String
+    sealed interface TreeNode {
+        val id: String
 
         data class Leaf(
             override val id: String,
             val value: String,
-        ) : TreeNode()
+        ) : TreeNode
 
         data class Branch(
             override val id: String,
             val left: TreeNode?,
             val right: TreeNode,
-        ) : TreeNode()
+        ) : TreeNode
     }
 
     data class Tree(

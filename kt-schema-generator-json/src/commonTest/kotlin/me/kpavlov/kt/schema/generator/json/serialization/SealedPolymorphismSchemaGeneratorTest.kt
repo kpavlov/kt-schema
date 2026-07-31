@@ -19,6 +19,7 @@ class SealedPolymorphismSchemaGeneratorTest {
     @Serializable
     @SerialName("Shape")
     @SerialDescription("A geometric shape")
+    @Suppress("AbstractClassCanBeInterface")
     sealed class Shape {
         @Serializable
         @SerialName("Circle")
@@ -38,18 +39,18 @@ class SealedPolymorphismSchemaGeneratorTest {
     @Serializable
     @SerialName("Button")
     @JsonClassDiscriminator("buttonType")
-    sealed class Button {
+    sealed interface Button {
         @Serializable
         @SerialName("BIG")
         data class BigButton(
             val title: String,
-        ) : Button()
+        ) : Button
 
         @Serializable
         @SerialName("SMALL")
         data class SmallButton(
             val icon: String,
-        ) : Button()
+        ) : Button
     }
 
     @Test
@@ -220,28 +221,28 @@ class SealedPolymorphismSchemaGeneratorTest {
     @Serializable
     @SerialName("Event")
     @SerialDescription("An application event")
-    sealed class Event {
+    sealed interface Event {
         @Serializable
         @SerialName("Click")
         @SerialDescription("User clicked")
         data class Click(
             val x: Int,
             val y: Int,
-        ) : Event()
+        ) : Event
 
         @Serializable
         @SerialName("PageView")
         @SerialDescription("Page was viewed")
         data class PageView(
             val url: String,
-        ) : Event()
+        ) : Event
 
         @Serializable
         @SerialName("Internal")
         @SerialSchemaIgnore
         data class Internal(
             val trace: String,
-        ) : Event()
+        ) : Event
     }
 
     @Test

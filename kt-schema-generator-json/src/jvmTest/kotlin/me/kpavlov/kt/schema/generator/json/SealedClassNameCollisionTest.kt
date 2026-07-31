@@ -20,30 +20,30 @@ import kotlin.test.Test
 class SealedClassNameCollisionTest {
     @Description("Result type A")
     @Suppress("unused")
-    sealed class ResultA {
+    sealed interface ResultA {
         @Description("Success result for A")
         data class Success(
             val value: String,
-        ) : ResultA()
+        ) : ResultA
 
         @Description("Unknown error for A")
         data class Unknown(
             val code: Int,
-        ) : ResultA()
+        ) : ResultA
     }
 
     @Description("Result type B")
     @Suppress("unused")
-    sealed class ResultB {
+    sealed interface ResultB {
         @Description("Success result for B")
         data class Success(
             val data: Int,
-        ) : ResultB()
+        ) : ResultB
 
         @Description("Unknown error for B")
         data class Unknown(
             val message: String,
-        ) : ResultB()
+        ) : ResultB
     }
 
     @Description("Container with both result types")

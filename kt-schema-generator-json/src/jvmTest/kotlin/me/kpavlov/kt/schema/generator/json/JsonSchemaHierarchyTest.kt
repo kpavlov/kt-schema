@@ -9,9 +9,9 @@ import kotlin.test.Test
 class JsonSchemaHierarchyTest {
     @Description("Represents an animal")
     @Suppress("unused")
-    sealed class Animal {
+    sealed interface Animal {
         @Description("Animal's name")
-        abstract val name: String
+        val name: String
 
         @Description("Represents a dog")
         data class Dog(
@@ -20,7 +20,7 @@ class JsonSchemaHierarchyTest {
             val breed: String,
             @property:Description("Trained or not")
             val isTrained: Boolean = false,
-        ) : Animal()
+        ) : Animal
 
         @Description("Represents a cat")
         data class Cat(
@@ -29,7 +29,7 @@ class JsonSchemaHierarchyTest {
             val color: String,
             @property:Description("Lives left")
             val lives: Int = 9,
-        ) : Animal()
+        ) : Animal
     }
 
     private val generator =

@@ -59,31 +59,31 @@ class SerializationIntrospectorTest {
     )
 
     @Serializable
-    sealed class Shape {
+    sealed interface Shape {
         @Serializable
         data class Circle(
             val radius: Double,
-        ) : Shape()
+        ) : Shape
 
         @Serializable
         data class Rectangle(
             val width: Double,
             val height: Double,
-        ) : Shape()
+        ) : Shape
     }
 
     @Serializable
     @JsonClassDiscriminator("buttonType")
-    sealed class DiscriminatedButton {
+    sealed interface DiscriminatedButton {
         @Serializable
         data class BigButton(
             val title: String,
-        ) : DiscriminatedButton()
+        ) : DiscriminatedButton
 
         @Serializable
         data class SmallButton(
             val icon: String,
-        ) : DiscriminatedButton()
+        ) : DiscriminatedButton
     }
 
     @Serializable

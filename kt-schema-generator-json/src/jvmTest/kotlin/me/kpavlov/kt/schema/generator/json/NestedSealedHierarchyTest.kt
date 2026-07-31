@@ -9,20 +9,20 @@ import kotlin.test.Test
 class NestedSealedHierarchyTest {
     //region Fixture
 
-    sealed class Vehicle {
-        sealed class Motorized : Vehicle() {
+    sealed interface Vehicle {
+        sealed interface Motorized : Vehicle {
             data class Car(
                 val doors: Int,
-            ) : Motorized()
+            ) : Motorized
 
             data class Truck(
                 val payload: Double,
-            ) : Motorized()
+            ) : Motorized
         }
 
         data class Bicycle(
             val gears: Int,
-        ) : Vehicle()
+        ) : Vehicle
     }
 
     data class Delivery(val vehicle: Vehicle?)
