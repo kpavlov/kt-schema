@@ -10,15 +10,15 @@ class RecursiveTypeSchemaTest {
 
     @Serializable
     @SerialName("Node")
-    private sealed class Node {
-        abstract val id: String
+    private sealed interface Node {
+        val id: String
 
         @Serializable
         @SerialName("Leaf")
         data class Leaf(
             override val id: String,
             val value: String,
-        ) : Node()
+        ) : Node
 
         @Serializable
         @SerialName("Branch")
@@ -26,7 +26,7 @@ class RecursiveTypeSchemaTest {
             override val id: String,
             val left: Node?,
             val right: Node,
-        ) : Node()
+        ) : Node
     }
 
     @Serializable

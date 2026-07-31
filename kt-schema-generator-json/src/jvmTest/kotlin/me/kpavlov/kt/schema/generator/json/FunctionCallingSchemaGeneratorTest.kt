@@ -235,20 +235,20 @@ class FunctionCallingSchemaGeneratorTest {
         val bar: Int,
     )
 
-    sealed class TestClosedPolymorphism {
-        abstract val id: String
+    sealed interface TestClosedPolymorphism {
+        val id: String
 
         @Suppress("unused")
         data class SubClass1(
             override val id: String,
             val property1: String,
-        ) : TestClosedPolymorphism()
+        ) : TestClosedPolymorphism
 
         @Suppress("unused")
         data class SubClass2(
             override val id: String,
             val property2: Int,
-        ) : TestClosedPolymorphism()
+        ) : TestClosedPolymorphism
     }
 
     @Suppress("unused")
