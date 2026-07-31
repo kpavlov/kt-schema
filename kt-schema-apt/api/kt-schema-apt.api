@@ -2,6 +2,7 @@ public final class me/kpavlov/kt/schema/apt/JsonSchemaProcessor : javax/annotati
 	public static final field Companion Lme/kpavlov/kt/schema/apt/JsonSchemaProcessor$Companion;
 	public static final field ROOT_PACKAGE_OPTION Ljava/lang/String;
 	public fun <init> ()V
+	public fun getSupportedSourceVersion ()Ljavax/lang/model/SourceVersion;
 	public fun process (Ljava/util/Set;Ljavax/annotation/processing/RoundEnvironment;)Z
 }
 

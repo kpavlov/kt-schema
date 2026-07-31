@@ -15,7 +15,7 @@
 
 <!--- END -->
 
-Generate JSON Schema resources at compile time from plain Java classes using the `kt-schema-apt` JSR 269
+Generate JSON Schema resources at compile time from plain Java records and classes using the `kt-schema-apt` JSR 269
 (`javax.annotation.processing`) processor — no Kotlin required in your own code.
 
 ## Setup
@@ -69,8 +69,8 @@ dependencies {
 The processor picks up a Java type either of two ways — you don't need both:
 
 1. **Annotate the type with `@Schema`** (from `kt-schema-annotations`) — processed regardless of package.
-2. **Set the [`rootPackage`](#configuration-options) option** — every top-level type declared under that
-   package (and its sub-packages) is processed, `@Schema` or not.
+2. **Set the [`rootPackage`](#configuration-options) option** — every top-level `record` or `class` declared
+   under that package (and its sub-packages) is processed, `@Schema` or not.
 
 ```java
 import me.kpavlov.kt.schema.Description;
@@ -107,7 +107,7 @@ public record Person(
 
 | Option        | Type     | Default | Description                                                                                                     |
 |:--------------|:---------|:--------|:------------------------------------------------------------------------------------------------------------------|
-| `rootPackage` | `String` | `null`  | Process every top-level type under this package (and sub-packages), in addition to `@Schema`-annotated types.   |
+| `rootPackage` | `String` | `null`  | Process every top-level `record` or `class` under this package (and sub-packages), in addition to `@Schema`-annotated types.   |
 
 Set it as a javac `-A` compiler argument:
 
@@ -128,7 +128,7 @@ Unlike the KSP processor — which generates `KClass<T>.jsonSchemaString`/`.json
 `kt-schema-apt` has no Kotlin code to attach extension properties to. Instead, it writes one JSON Schema
 resource per processed type:
 
-```
+```text
 META-INF/kt-schema/schemas/<package-as-directories>/<ClassName>.json
 ```
 
@@ -177,12 +177,12 @@ try (InputStream in = Person.class.getClassLoader()
 
 - Java `record`s — components map to required properties (Java records have no notion of optional/default
   values, so every component is required)
+- Plain Java `class`es — non-static fields map to required properties, treated the same way as records
 - `String`, boxed and primitive numeric/boolean types
-- Nested records, emitted as `$ref`/`$defs` and deduplicated, same as KSP
+- Nested records/classes, emitted as `$ref`/`$defs` and deduplicated, same as KSP
 
-Not yet supported: enums, sealed interfaces/classes, generics, collections/maps, and ordinary (non-record)
-classes. Processing an unsupported type fails the build with a descriptive error rather than emitting an
-incomplete schema.
+Not yet supported: enums, sealed interfaces/classes, generics, and collections/maps. Processing an
+unsupported type fails the build with a descriptive error rather than emitting an incomplete schema.
 
 > [!NOTE]
 > Reference-typed components are always treated as non-nullable/required — there's no `@Nullable` support yet.

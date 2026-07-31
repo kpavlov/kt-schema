@@ -7,13 +7,16 @@ import me.kpavlov.kt.schema.apt.ir.AptClassIntrospector
 import me.kpavlov.kt.schema.generator.json.JsonSchemaConfig
 import me.kpavlov.kt.schema.generator.json.TypeGraphToJsonSchemaTransformer
 import me.kpavlov.kt.schema.json.JsonSchema
+import java.io.IOException
 import javax.annotation.processing.AbstractProcessor
+import javax.annotation.processing.FilerException
 import javax.annotation.processing.RoundEnvironment
 import javax.annotation.processing.SupportedAnnotationTypes
 import javax.annotation.processing.SupportedOptions
-import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
+import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
+import javax.tools.Diagnostic
 import javax.tools.StandardLocation
 
 /**
@@ -30,12 +33,14 @@ import javax.tools.StandardLocation
  * @author Konstantin Pavlov
  */
 @SupportedAnnotationTypes("*")
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
 @SupportedOptions(
     JsonSchemaProcessor.ROOT_PACKAGE_OPTION,
 )
 public class JsonSchemaProcessor : AbstractProcessor() {
     private val processedTypes = mutableSetOf<String>()
+
+    override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
+
     private val transformer =
         TypeGraphToJsonSchemaTransformer(
             // build JsonSchemaConfig upon Strict config, matching kt-schema-ksp's ClassSchemaStrategy
@@ -73,8 +78,8 @@ public class JsonSchemaProcessor : AbstractProcessor() {
 
     /**
      * Types annotated with `@Schema`, plus — when [ROOT_PACKAGE_OPTION] is configured —
-     * every type declared under that package, so consumers don't have to annotate every
-     * class individually.
+     * every record or class declared under that package, so consumers don't have to
+     * annotate every type individually.
      */
     private fun candidateTypes(roundEnv: RoundEnvironment): Set<TypeElement> {
         val annotated = roundEnv.getElementsAnnotatedWith(Schema::class.java).filterIsInstance<TypeElement>()
@@ -86,6 +91,7 @@ public class JsonSchemaProcessor : AbstractProcessor() {
             } else {
                 roundEnv.rootElements
                     .filterIsInstance<TypeElement>()
+                    .filter { it.kind == ElementKind.RECORD || it.kind == ElementKind.CLASS }
                     .filter { it.isUnderPackage(rootPackage) }
             }
 
@@ -98,10 +104,15 @@ public class JsonSchemaProcessor : AbstractProcessor() {
     }
 
     private fun processType(type: TypeElement) {
-        val introspector = AptClassIntrospector(processingEnv.typeUtils)
-        val graph = introspector.introspect(type)
-        val schema = transformer.transform(graph, type.qualifiedName.toString())
-        writeSchemaResource(type, json.encodeToString(JsonSchema.serializer(), schema))
+        @Suppress("TooGenericExceptionCaught")
+        try {
+            val introspector = AptClassIntrospector(processingEnv.typeUtils)
+            val graph = introspector.introspect(type)
+            val schema = transformer.transform(graph, type.qualifiedName.toString())
+            writeSchemaResource(type, json.encodeToString(JsonSchema.serializer(), schema))
+        } catch (e: Exception) {
+            reportError(type, "Failed to generate JSON Schema: ${e.message}")
+        }
     }
 
     private fun writeSchemaResource(
@@ -110,21 +121,35 @@ public class JsonSchemaProcessor : AbstractProcessor() {
     ) {
         val relativePath = source.qualifiedName.toString().replace('.', '/') + ".json"
         val path = "META-INF/kt-schema/schemas/$relativePath"
-        val file =
-            processingEnv.filer.createResource(
-                StandardLocation.CLASS_OUTPUT,
-                "",
-                path,
-                source,
-            )
-        file.openWriter().use { it.write(jsonString) }
+        try {
+            val file =
+                processingEnv.filer.createResource(
+                    StandardLocation.CLASS_OUTPUT,
+                    "",
+                    path,
+                    source,
+                )
+            file.openWriter().use { it.write(jsonString) }
+        } catch (e: IOException) {
+            reportError(source, "Failed to write JSON Schema resource $path: ${e.message}")
+        } catch (e: FilerException) {
+            reportError(source, "Failed to create JSON Schema resource $path: ${e.message}")
+        }
+    }
+
+    private fun reportError(
+        type: TypeElement,
+        message: String,
+    ) {
+        processingEnv.messager.printMessage(Diagnostic.Kind.ERROR, message, type)
     }
 
     public companion object {
         /**
-         * Processor option (`-A<name>=<value>`) that, when set, processes every top-level type
-         * declared under the given package (and its sub-packages) in addition to types
-         * annotated with `@Schema`. Lets consumers skip annotating every class individually.
+         * Processor option (`-A<name>=<value>`) that, when set, processes every top-level
+         * record or class declared under the given package (and its sub-packages) in addition
+         * to types annotated with `@Schema`. Lets consumers skip annotating every type
+         * individually.
          */
         public const val ROOT_PACKAGE_OPTION: String = "me.kpavlov.kt.schema.rootPackage"
     }

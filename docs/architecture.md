@@ -73,10 +73,10 @@ graph LR
     JsonTransform --> JsonSchema
     FuncTransform --> FuncSchema
     JsonSchema --> JsonObj
+    JsonSchema --> AptResource
     FuncSchema --> KtFunc
     JsonObj --> JsonStr
     JsonObj --> KtClass
-    JsonObj --> AptResource
 
     classDef sourceStyle fill:#e3f2fd,stroke:#1565c0,stroke-width:3px,color:#000
     classDef introspectorStyle fill:#fff3e0,stroke:#ef6c00,stroke-width:3px,color:#000

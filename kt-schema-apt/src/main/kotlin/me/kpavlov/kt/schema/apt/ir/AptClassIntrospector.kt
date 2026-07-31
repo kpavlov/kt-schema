@@ -7,9 +7,9 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.util.Types
 
 /**
- * Java-APT-backed schema IR introspector. Supports records with primitive/String/boxed
- * component types and nested record references; generics/enums/sealed hierarchies are
- * not yet supported.
+ * Java-APT-backed schema IR introspector. Supports records and plain classes with
+ * primitive/String/boxed field types and nested references; generics/enums/sealed
+ * hierarchies are not yet supported.
  *
  * @author Konstantin Pavlov
  */
