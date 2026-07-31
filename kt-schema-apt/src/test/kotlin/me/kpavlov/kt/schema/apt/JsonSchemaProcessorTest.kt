@@ -453,6 +453,83 @@ class JsonSchemaProcessorTest {
     }
 
     @Test
+    fun `should generate schema for record with collections arrays and nested object`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val addressSource = """
+            package com.example;
+
+            public record Address(String city) {}
+        """.trimIndent()
+
+        // language=java
+        val orderSource = """
+            package com.example;
+
+            import java.util.List;
+            import java.util.Map;
+
+            public record Order(List<String> tags, Map<String, Integer> counts, int[] values, Address address) {}
+        """.trimIndent()
+
+        val outputDir =
+            compile(
+                sources = listOf(addressSource, orderSource),
+                tempDir = tempDir,
+                options = listOf("-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example"),
+            )
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Order.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Order",
+                "type": "object",
+                "properties": {
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "counts": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "integer"
+                        }
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "address": {
+                        "$ref": "#/$defs/com.example.Address"
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["tags", "counts", "values", "address"],
+                "$defs": {
+                    "com.example.Address": {
+                        "type": "object",
+                        "properties": {
+                            "city": {
+                                "type": "string"
+                            }
+                        },
+                        "additionalProperties": false,
+                        "required": ["city"]
+                    }
+                }
+            }
+        """.trimIndent()
+    }
+
+    @Test
     fun `should not generate schema when no annotated types`(
         @TempDir tempDir: Path,
     ) {
