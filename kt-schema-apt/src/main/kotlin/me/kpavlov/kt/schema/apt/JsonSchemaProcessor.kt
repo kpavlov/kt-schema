@@ -43,6 +43,12 @@ public class JsonSchemaProcessor : AbstractProcessor() {
 
     override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
 
+    /**
+     * Shared across roots so nested types referenced by several roots are introspected
+     * once; `processingEnv` is only available after `init()`, hence the lazy delegate.
+     */
+    private val introspector by lazy { AptClassIntrospector(processingEnv.typeUtils) }
+
     private val transformer =
         TypeGraphToJsonSchemaTransformer(
             // build JsonSchemaConfig upon Strict config, matching kt-schema-ksp's ClassSchemaStrategy
@@ -119,7 +125,6 @@ public class JsonSchemaProcessor : AbstractProcessor() {
     private fun processType(type: TypeElement) {
         @Suppress("TooGenericExceptionCaught")
         try {
-            val introspector = AptClassIntrospector(processingEnv.typeUtils)
             val graph = introspector.introspect(type)
             val schema = transformer.transform(graph, type.qualifiedName.toString())
             writeSchemaResource(type, json.encodeToString(JsonSchema.serializer(), schema))

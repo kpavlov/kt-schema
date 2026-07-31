@@ -358,6 +358,101 @@ class JsonSchemaProcessorTest {
     }
 
     @Test
+    fun `should generate schemas for nested record shared by multiple roots`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val vendorSource = """
+            package com.example;
+
+            public record Vendor(String name, String location) {}
+        """.trimIndent()
+
+        // language=java
+        val lineItemSource = """
+            package com.example;
+
+            public record LineItem(String sku, int quantity, Vendor vendor) {}
+        """.trimIndent()
+
+        // language=java
+        val orderSource = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Order(LineItem item) {}
+        """.trimIndent()
+
+        // language=java
+        val invoiceSource = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Invoice(LineItem item) {}
+        """.trimIndent()
+
+        val outputDir =
+            compile(listOf(vendorSource, lineItemSource, orderSource, invoiceSource), tempDir)
+
+        val orderSchema =
+            outputDir.resolve("META-INF/kt-schema/schemas/com/example/Order.json").toFile()
+        val invoiceSchema =
+            outputDir.resolve("META-INF/kt-schema/schemas/com/example/Invoice.json").toFile()
+
+        // language=json
+        val expectedSchema = $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Order",
+                "type": "object",
+                "properties": {
+                    "item": {
+                        "$ref": "#/$defs/com.example.LineItem"
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["item"],
+                "$defs": {
+                    "com.example.LineItem": {
+                        "type": "object",
+                        "properties": {
+                            "sku": { "type": "string" },
+                            "quantity": { "type": "integer" },
+                            "vendor": {
+                                "$ref": "#/$defs/com.example.Vendor"
+                            }
+                        },
+                        "additionalProperties": false,
+                        "required": ["sku", "quantity", "vendor"]
+                    },
+                    "com.example.Vendor": {
+                        "type": "object",
+                        "properties": {
+                            "name": { "type": "string" },
+                            "location": { "type": "string" }
+                        },
+                        "additionalProperties": false,
+                        "required": ["name", "location"]
+                    }
+                }
+            }
+        """.trimIndent()
+
+        orderSchema.exists() shouldBe true
+        orderSchema.readText() shouldEqualJson expectedSchema
+
+        invoiceSchema.exists() shouldBe true
+        invoiceSchema.readText() shouldEqualJson expectedSchema.replace(
+            "\"\$id\": \"com.example.Order\"",
+            "\"\$id\": \"com.example.Invoice\"",
+        )
+    }
+
+    @Test
     fun `should not generate schema when no annotated types`(
         @TempDir tempDir: Path,
     ) {

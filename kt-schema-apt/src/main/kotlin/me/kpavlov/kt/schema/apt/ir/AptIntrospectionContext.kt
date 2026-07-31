@@ -9,6 +9,7 @@ import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.Property
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
+import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
@@ -28,12 +29,18 @@ import javax.lang.model.util.Types
  * and nested references. Reference types are treated as non-nullable/required: Java has
  * no notion of optionality/default values, so every property is required.
  *
+ * A fresh context is created per root type so `$defs` stay scoped to the types reachable
+ * from that root; [nodeCache] memoizes built nodes across roots so nested types shared
+ * between roots are introspected once. On a cache hit the node's `$ref` targets are
+ * re-registered into the current context to keep `$defs` complete.
+ *
  * @author Konstantin Pavlov
  */
 @OptIn(InternalSchemaGeneratorApi::class)
 @Suppress("TooManyFunctions")
 internal class AptIntrospectionContext(
     private val types: Types,
+    private val nodeCache: MutableMap<TypeId, CachedNode>,
 ) : BaseIntrospectionContext<TypeMirror>() {
     //region Type conversion
 
@@ -82,16 +89,18 @@ internal class AptIntrospectionContext(
         val id = TypeId(element.qualifiedName.toString())
 
         withCycleDetection(type, id) {
-            val props = ArrayList<Property>()
-            val required = LinkedHashSet<String>()
+            buildOrGet(type, id) {
+                val props = ArrayList<Property>()
+                val required = LinkedHashSet<String>()
 
-            element.recordComponents.forEach { component ->
-                val name = component.simpleName.toString()
-                required += name
-                props += toProperty(name, component.asType(), recordComponentDescription(component, element))
+                element.recordComponents.forEach { component ->
+                    val name = component.simpleName.toString()
+                    required += name
+                    props += toProperty(name, component.asType(), recordComponentDescription(component, element))
+                }
+
+                objectNode(element, props, required)
             }
-
-            objectNode(element, props, required)
         }
 
         return TypeRef.Ref(id)
@@ -104,19 +113,21 @@ internal class AptIntrospectionContext(
         val id = TypeId(element.qualifiedName.toString())
 
         withCycleDetection(type, id) {
-            val props = ArrayList<Property>()
-            val required = LinkedHashSet<String>()
+            buildOrGet(type, id) {
+                val props = ArrayList<Property>()
+                val required = LinkedHashSet<String>()
 
-            element.enclosedElements
-                .filterIsInstance<VariableElement>()
-                .filter { it.kind == ElementKind.FIELD && !it.modifiers.contains(Modifier.STATIC) }
-                .forEach { field ->
-                    val name = field.simpleName.toString()
-                    required += name
-                    props += toProperty(name, field.asType(), extractDescription(field))
-                }
+                element.enclosedElements
+                    .filterIsInstance<VariableElement>()
+                    .filter { it.kind == ElementKind.FIELD && !it.modifiers.contains(Modifier.STATIC) }
+                    .forEach { field ->
+                        val name = field.simpleName.toString()
+                        required += name
+                        props += toProperty(name, field.asType(), extractDescription(field))
+                    }
 
-            objectNode(element, props, required)
+                objectNode(element, props, required)
+            }
         }
 
         return TypeRef.Ref(id)
@@ -129,21 +140,23 @@ internal class AptIntrospectionContext(
         val id = TypeId(element.qualifiedName.toString())
 
         withCycleDetection(type, id) {
-            val props = ArrayList<Property>()
-            val required = LinkedHashSet<String>()
+            buildOrGet(type, id) {
+                val props = ArrayList<Property>()
+                val required = LinkedHashSet<String>()
 
-            element.enclosedElements
-                .filterIsInstance<ExecutableElement>()
-                .filter { it.kind == ElementKind.METHOD }
-                .filter { !it.modifiers.contains(Modifier.STATIC) }
-                .filter { it.parameters.isEmpty() && it.returnType.kind != TypeKind.VOID }
-                .forEach { method ->
-                    val name = propertyName(method.simpleName.toString())
-                    required += name
-                    props += toProperty(name, method.returnType, extractDescription(method))
-                }
+                element.enclosedElements
+                    .filterIsInstance<ExecutableElement>()
+                    .filter { it.kind == ElementKind.METHOD }
+                    .filter { !it.modifiers.contains(Modifier.STATIC) }
+                    .filter { it.parameters.isEmpty() && it.returnType.kind != TypeKind.VOID }
+                    .forEach { method ->
+                        val name = propertyName(method.simpleName.toString())
+                        required += name
+                        props += toProperty(name, method.returnType, extractDescription(method))
+                    }
 
-            objectNode(element, props, required)
+                objectNode(element, props, required)
+            }
         }
 
         return TypeRef.Ref(id)
@@ -179,6 +192,41 @@ internal class AptIntrospectionContext(
         } else {
             name.replaceFirstChar { it.lowercase() }
         }
+
+    /**
+     * Returns the cached node for [id] or builds and caches it via [builder].
+     *
+     * A cached node was built for another root, so its `$ref` targets are not yet
+     * registered in the current context; re-register them so each root's `$defs` stays
+     * complete. Registration recurses through [toRef], which deduplicates via
+     * [withCycleDetection], so shared subgraphs are registered exactly once per root.
+     */
+    private fun buildOrGet(
+        type: TypeMirror,
+        id: TypeId,
+        builder: () -> TypeNode,
+    ): TypeNode {
+        nodeCache[id]?.let { cached ->
+            registerRefs(cached.node)
+            return cached.node
+        }
+        return builder().also { nodeCache[id] = CachedNode(type, it) }
+    }
+
+    /**
+     * Re-registers the types referenced by [node] into the current context. The apt front
+     * end only emits object nodes whose properties reference primitives inline or other
+     * objects by id, so any other cached node kind is an unsupported invariant.
+     */
+    private fun registerRefs(node: TypeNode) {
+        val objectNode = node as? ObjectNode
+            ?: error("Unsupported cached node kind $node; registerRefs must handle all node kinds")
+        objectNode.properties.forEach { property ->
+            (property.type as? TypeRef.Ref)?.let { ref ->
+                toRef(nodeCache.getValue(ref.id).type)
+            }
+        }
+    }
 
     private companion object {
         const val GET_PREFIX: String = "get"
@@ -257,3 +305,12 @@ internal class AptIntrospectionContext(
 
     //endregion
 }
+
+/**
+ * A memoized node together with the [TypeMirror] used to build it, so cached `$ref`
+ * targets can be re-registered into a fresh root context.
+ */
+internal data class CachedNode(
+    val type: TypeMirror,
+    val node: TypeNode,
+)
