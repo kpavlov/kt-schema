@@ -349,6 +349,19 @@ final class me.kpavlov.kt.schema.generator.core.ir/TypeId { // me.kpavlov.kt.sch
     final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.toString|toString(){}[0]
 }
 
+final class me.kpavlov.kt.schema.generator.core/GlobMatcher { // me.kpavlov.kt.schema.generator.core/GlobMatcher|null[0]
+    constructor <init>(kotlin.collections/List<kotlin/String>, kotlin.collections/List<kotlin/String>) // me.kpavlov.kt.schema.generator.core/GlobMatcher.<init>|<init>(kotlin.collections.List<kotlin.String>;kotlin.collections.List<kotlin.String>){}[0]
+
+    final val excludePatterns // me.kpavlov.kt.schema.generator.core/GlobMatcher.excludePatterns|{}excludePatterns[0]
+        final fun <get-excludePatterns>(): kotlin.collections/List<kotlin/String> // me.kpavlov.kt.schema.generator.core/GlobMatcher.excludePatterns.<get-excludePatterns>|<get-excludePatterns>(){}[0]
+    final val includePatterns // me.kpavlov.kt.schema.generator.core/GlobMatcher.includePatterns|{}includePatterns[0]
+        final fun <get-includePatterns>(): kotlin.collections/List<kotlin/String> // me.kpavlov.kt.schema.generator.core/GlobMatcher.includePatterns.<get-includePatterns>|<get-includePatterns>(){}[0]
+
+    final fun matches(kotlin/String): kotlin/Boolean // me.kpavlov.kt.schema.generator.core/GlobMatcher.matches|matches(kotlin.String){}[0]
+    final fun matchesExclude(kotlin/String): kotlin/Boolean // me.kpavlov.kt.schema.generator.core/GlobMatcher.matchesExclude|matchesExclude(kotlin.String){}[0]
+    final fun matchesInclude(kotlin/String): kotlin/Boolean // me.kpavlov.kt.schema.generator.core/GlobMatcher.matchesInclude|matchesInclude(kotlin.String){}[0]
+}
+
 final object me.kpavlov.kt.schema.generator.core.ir/Introspections { // me.kpavlov.kt.schema.generator.core.ir/Introspections|null[0]
     final fun getDescriptionFromAnnotation(kotlin/String, kotlin/String?, kotlin.collections/List<kotlin/Pair<kotlin/String, kotlin/Any?>>): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Introspections.getDescriptionFromAnnotation|getDescriptionFromAnnotation(kotlin.String;kotlin.String?;kotlin.collections.List<kotlin.Pair<kotlin.String,kotlin.Any?>>){}[0]
     final fun getNameOverride(kotlin/String, kotlin/String?, kotlin.collections/List<kotlin/Pair<kotlin/String, kotlin/Any?>>): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Introspections.getNameOverride|getNameOverride(kotlin.String;kotlin.String?;kotlin.collections.List<kotlin.Pair<kotlin.String,kotlin.Any?>>){}[0]
@@ -356,3 +369,5 @@ final object me.kpavlov.kt.schema.generator.core.ir/Introspections { // me.kpavl
 }
 
 final fun me.kpavlov.kt.schema.generator.core/defaultOpaqueTypeNames(): kotlin.collections/Set<kotlin/String> // me.kpavlov.kt.schema.generator.core/defaultOpaqueTypeNames|defaultOpaqueTypeNames(){}[0]
+final fun me.kpavlov.kt.schema.generator.core/globToRegex(kotlin/String): kotlin.text/Regex // me.kpavlov.kt.schema.generator.core/globToRegex|globToRegex(kotlin.String){}[0]
+final fun me.kpavlov.kt.schema.generator.core/parseGlobPatterns(kotlin/String?): kotlin.collections/List<kotlin/String> // me.kpavlov.kt.schema.generator.core/parseGlobPatterns|parseGlobPatterns(kotlin.String?){}[0]

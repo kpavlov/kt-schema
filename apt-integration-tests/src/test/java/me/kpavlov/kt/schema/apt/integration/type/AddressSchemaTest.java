@@ -10,13 +10,13 @@ import java.io.InputStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Verifies the kt-schema-apt processor generates a JSON Schema resource for a plain
- * (non-record) Java class selected by the configured {@code rootPackage} compiler option.
+ * Verifies the kt-schema-apt processor generates a JSON Schema resource for a Java
+ * record used as a nested object reference by other types.
  */
-class ClassSchemaTest {
+class AddressSchemaTest {
 
     private static final String RESOURCE_PATH =
-            "META-INF/kt-schema/schemas/me/kpavlov/kt/schema/apt/integration/type/Company.json";
+            "META-INF/kt-schema/schemas/me/kpavlov/kt/schema/apt/integration/type/Address.json";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -27,22 +27,21 @@ class ClassSchemaTest {
         // language=json
         JsonNode expected = MAPPER.readTree("""
                 {
-                  "$id": "me.kpavlov.kt.schema.apt.integration.type.Company",
+                  "$id": "me.kpavlov.kt.schema.apt.integration.type.Address",
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "name": {
+                    "city": {
                       "type": "string",
-                      "description": "Name of the company"
+                      "description": "City or town name"
                     },
-                    "founded": {
-                      "type": "integer",
-                      "description": "Year the company was founded"
+                    "street": {
+                      "type": "string",
+                      "description": "Street name and number"
                     }
                   },
-                  "required": ["name", "founded"],
                   "additionalProperties": false,
-                  "description": "A company with a name and a founding year."
+                  "required": ["city", "street"]
                 }
                 """);
 

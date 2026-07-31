@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Verifies the kt-schema-apt processor generates a JSON Schema resource for a Java
  * interface selected by the configured {@code rootPackage} compiler option.
  */
-class InterfaceSchemaTest {
+class ProductSchemaTest {
 
     private static final String RESOURCE_PATH =
             "META-INF/kt-schema/schemas/me/kpavlov/kt/schema/apt/integration/type/Product.json";
