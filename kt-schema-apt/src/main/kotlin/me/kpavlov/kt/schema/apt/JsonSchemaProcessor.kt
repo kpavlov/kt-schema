@@ -37,6 +37,8 @@ import javax.tools.StandardLocation
     JsonSchemaProcessor.ROOT_PACKAGE_OPTION,
 )
 public class JsonSchemaProcessor : AbstractProcessor() {
+    //region Processor state
+
     private val processedTypes = mutableSetOf<String>()
 
     override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
@@ -62,6 +64,10 @@ public class JsonSchemaProcessor : AbstractProcessor() {
             prettyPrint = true
             encodeDefaults = false
         }
+
+    //endregion
+
+    //region Processing
 
     override fun process(
         annotations: MutableSet<out TypeElement>,
@@ -106,6 +112,10 @@ public class JsonSchemaProcessor : AbstractProcessor() {
         return packageName == rootPackage || packageName.startsWith("$rootPackage.")
     }
 
+    //endregion
+
+    //region Resource writing
+
     private fun processType(type: TypeElement) {
         @Suppress("TooGenericExceptionCaught")
         try {
@@ -133,10 +143,10 @@ public class JsonSchemaProcessor : AbstractProcessor() {
                     source,
                 )
             file.openWriter().use { it.write(jsonString) }
-        } catch (e: IOException) {
-            reportError(source, "Failed to write JSON Schema resource $path: ${e.message}")
         } catch (e: FilerException) {
             reportError(source, "Failed to create JSON Schema resource $path: ${e.message}")
+        } catch (e: IOException) {
+            reportError(source, "Failed to write JSON Schema resource $path: ${e.message}")
         }
     }
 
@@ -147,6 +157,10 @@ public class JsonSchemaProcessor : AbstractProcessor() {
         processingEnv.messager.printMessage(Diagnostic.Kind.ERROR, message, type)
     }
 
+    //endregion
+
+    //region Public constants
+
     public companion object {
         /**
          * Processor option (`-A<name>=<value>`) that, when set, processes every top-level
@@ -156,4 +170,6 @@ public class JsonSchemaProcessor : AbstractProcessor() {
          */
         public const val ROOT_PACKAGE_OPTION: String = "me.kpavlov.kt.schema.rootPackage"
     }
+
+    //endregion
 }

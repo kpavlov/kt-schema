@@ -35,10 +35,10 @@ class JsonSchemaProcessorTest {
         val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Person.json")
         schemaFile.toFile().exists() shouldBe true
         // language=json
-        schemaFile.toFile().readText() shouldEqualJson """
+        schemaFile.toFile().readText() shouldEqualJson $$"""
             {
-                "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                "${'$'}id": "com.example.Person",
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Person",
                 "type": "object",
                 "properties": {
                     "name": { "type": "string" },
@@ -51,9 +51,167 @@ class JsonSchemaProcessorTest {
     }
 
     @Test
+    fun `should resolve record component description from record component annotation`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val annotationSource = """
+            package com.example;
+
+            import java.lang.annotation.ElementType;
+            import java.lang.annotation.Retention;
+            import java.lang.annotation.RetentionPolicy;
+            import java.lang.annotation.Target;
+
+            @Target(ElementType.RECORD_COMPONENT)
+            @Retention(RetentionPolicy.RUNTIME)
+            public @interface Description {
+                String value();
+            }
+        """.trimIndent()
+
+        // language=java
+        val recordSource = """
+            package com.example;
+
+            public record Foo(@Description("component description") String name) {}
+        """.trimIndent()
+
+        val outputDir = compile(
+            sources = listOf(annotationSource, recordSource),
+            tempDir = tempDir,
+            options = listOf("-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example"),
+        )
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Foo.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Foo",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "component description"
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["name"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should resolve record component description from accessor annotation`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val annotationSource = """
+            package com.example;
+
+            import java.lang.annotation.ElementType;
+            import java.lang.annotation.Retention;
+            import java.lang.annotation.RetentionPolicy;
+            import java.lang.annotation.Target;
+
+            @Target(ElementType.METHOD)
+            @Retention(RetentionPolicy.RUNTIME)
+            public @interface Description {
+                String value();
+            }
+        """.trimIndent()
+
+        val recordSource = """
+            package com.example;
+
+            public record Foo(@Description("accessor description") String name) {}
+        """.trimIndent()
+
+        val outputDir = compile(
+            sources = listOf(annotationSource, recordSource),
+            tempDir = tempDir,
+            options = listOf("-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example"),
+        )
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Foo.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Foo",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "accessor description"
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["name"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should resolve record component description from backing field annotation`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val annotationSource = """
+            package com.example;
+
+            import java.lang.annotation.ElementType;
+            import java.lang.annotation.Retention;
+            import java.lang.annotation.RetentionPolicy;
+            import java.lang.annotation.Target;
+
+            @Target(ElementType.FIELD)
+            @Retention(RetentionPolicy.RUNTIME)
+            public @interface Description {
+                String value();
+            }
+        """.trimIndent()
+
+        val recordSource = """
+            package com.example;
+
+            public record Foo(@Description("field description") String name) {}
+        """.trimIndent()
+
+        val outputDir = compile(
+            sources = listOf(annotationSource, recordSource),
+            tempDir = tempDir,
+            options = listOf("-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example"),
+        )
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Foo.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Foo",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "field description"
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["name"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
     fun `should generate schema for record via root package option`(
         @TempDir tempDir: Path,
     ) {
+        // language=java
         val source = """
             package com.example;
 
@@ -90,6 +248,7 @@ class JsonSchemaProcessorTest {
     fun `should generate schema for unannotated record via root package option`(
         @TempDir tempDir: Path,
     ) {
+        // language=java
         val source = """
             package com.example;
 
@@ -124,6 +283,7 @@ class JsonSchemaProcessorTest {
     fun `should generate schemas for nested record references`(
         @TempDir tempDir: Path,
     ) {
+        // language=java
         val addressSource = """
             package com.example;
 
@@ -133,6 +293,7 @@ class JsonSchemaProcessorTest {
             public record Address(String city, String street) {}
         """.trimIndent()
 
+        // language=java
         val personSource = """
             package com.example;
 
@@ -200,6 +361,7 @@ class JsonSchemaProcessorTest {
     fun `should not generate schema when no annotated types`(
         @TempDir tempDir: Path,
     ) {
+        // language=java
         val source = """
             package com.example;
 
@@ -217,6 +379,7 @@ class JsonSchemaProcessorTest {
     fun `should generate schema for plain class via root package option`(
         @TempDir tempDir: Path,
     ) {
+        // language=java
         val source = """
             package com.example;
 
@@ -240,10 +403,10 @@ class JsonSchemaProcessorTest {
         val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Company.json")
         schemaFile.toFile().exists() shouldBe true
         // language=json
-        schemaFile.toFile().readText() shouldEqualJson """
+        schemaFile.toFile().readText() shouldEqualJson $$"""
             {
-                "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                "${'$'}id": "com.example.Company",
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Company",
                 "type": "object",
                 "properties": {
                     "name": { "type": "string" },
@@ -259,6 +422,7 @@ class JsonSchemaProcessorTest {
     fun `should generate schema for annotated interface`(
         @TempDir tempDir: Path,
     ) {
+        // language=java
         val source = """
             package com.example;
 
@@ -280,10 +444,10 @@ class JsonSchemaProcessorTest {
         val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Person.json")
         schemaFile.toFile().exists() shouldBe true
         // language=json
-        schemaFile.toFile().readText() shouldEqualJson """
+        schemaFile.toFile().readText() shouldEqualJson $$"""
             {
-                "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                "${'$'}id": "com.example.Person",
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Person",
                 "type": "object",
                 "properties": {
                     "name": {
@@ -302,9 +466,54 @@ class JsonSchemaProcessorTest {
     }
 
     @Test
+    fun `should decapitalize bean accessors following JavaBeans convention`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source = """
+            package com.example;
+
+            public interface Resource {
+                String getName();
+                String getURL();
+                String getOK();
+                String getUrlPath();
+                boolean isActive();
+            }
+        """.trimIndent()
+
+        val outputDir = compile(
+            source = source,
+            tempDir = tempDir,
+            options = listOf("-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example"),
+        )
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Resource.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Resource",
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string" },
+                    "URL": { "type": "string" },
+                    "OK": { "type": "string" },
+                    "urlPath": { "type": "string" },
+                    "active": { "type": "boolean" }
+                },
+                "additionalProperties": false,
+                "required": ["name", "URL", "OK", "urlPath", "active"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
     fun `should generate schema for interface via root package option`(
         @TempDir tempDir: Path,
     ) {
+        // language=java
         val source = """
             package com.example;
 
@@ -323,10 +532,10 @@ class JsonSchemaProcessorTest {
         val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Product.json")
         schemaFile.toFile().exists() shouldBe true
         // language=json
-        schemaFile.toFile().readText() shouldEqualJson """
+        schemaFile.toFile().readText() shouldEqualJson $$"""
             {
-                "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                "${'$'}id": "com.example.Product",
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Product",
                 "type": "object",
                 "properties": {
                     "name": { "type": "string" },
@@ -342,6 +551,7 @@ class JsonSchemaProcessorTest {
     fun `should not generate schema for enum under root package`(
         @TempDir tempDir: Path,
     ) {
+        // language=java
         val source = """
             package com.example;
 
@@ -365,6 +575,7 @@ class JsonSchemaProcessorTest {
     fun `should generate schema for record in nested subpackage via root package option`(
         @TempDir tempDir: Path,
     ) {
+        // language=java
         val source = """
             package com.example.sub.sub;
 
@@ -381,10 +592,10 @@ class JsonSchemaProcessorTest {
             outputDir.resolve("META-INF/kt-schema/schemas/com/example/sub/sub/DeepRecord.json")
         schemaFile.toFile().exists() shouldBe true
         // language=json
-        schemaFile.toFile().readText() shouldEqualJson """
+        schemaFile.toFile().readText() shouldEqualJson $$"""
             {
-                "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                "${'$'}id": "com.example.sub.sub.DeepRecord",
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.sub.sub.DeepRecord",
                 "type": "object",
                 "properties": {
                     "value": { "type": "string" }
@@ -420,6 +631,7 @@ class JsonSchemaProcessorTest {
         expectedJsonType: String,
         @TempDir tempDir: Path,
     ) {
+        // language=java
         val source = """
             package com.example;
 
@@ -434,13 +646,13 @@ class JsonSchemaProcessorTest {
         val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Scalars.json")
         schemaFile.toFile().exists() shouldBe true
         // language=json
-        schemaFile.toFile().readText() shouldEqualJson """
+        schemaFile.toFile().readText() shouldEqualJson $$"""
             {
-                "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
-                "${'$'}id": "com.example.Scalars",
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Scalars",
                 "type": "object",
                 "properties": {
-                    "value": { "type": "$expectedJsonType" }
+                    "value": { "type": "$$expectedJsonType" }
                 },
                 "additionalProperties": false,
                 "required": ["value"]

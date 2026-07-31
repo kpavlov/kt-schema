@@ -16,12 +16,20 @@ import javax.lang.model.util.Types
 internal class AptClassIntrospector(
     types: Types,
 ) : SchemaIntrospector<TypeElement, Unit> {
+    //region Configuration
+
     override val config = Unit
 
     private val context = AptIntrospectionContext(types)
+
+    //endregion
+
+    //region Introspection
 
     override fun introspect(root: TypeElement): TypeGraph {
         val rootRef = context.toRef(root.asType())
         return TypeGraph(root = rootRef, nodes = context.nodes)
     }
+
+    //endregion
 }

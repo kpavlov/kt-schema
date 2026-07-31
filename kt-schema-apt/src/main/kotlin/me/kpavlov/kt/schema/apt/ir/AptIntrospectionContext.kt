@@ -14,6 +14,7 @@ import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
+import javax.lang.model.element.RecordComponentElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.TypeKind
@@ -30,9 +31,12 @@ import javax.lang.model.util.Types
  * @author Konstantin Pavlov
  */
 @OptIn(InternalSchemaGeneratorApi::class)
+@Suppress("TooManyFunctions")
 internal class AptIntrospectionContext(
     private val types: Types,
 ) : BaseIntrospectionContext<TypeMirror>() {
+    //region Type conversion
+
     override fun toRef(type: TypeMirror): TypeRef {
         primitiveKindFor(type)?.let { return TypeRef.Inline(PrimitiveNode(it)) }
 
@@ -84,15 +88,10 @@ internal class AptIntrospectionContext(
             element.recordComponents.forEach { component ->
                 val name = component.simpleName.toString()
                 required += name
-                props += toProperty(name, component.asType(), fieldFor(element, name) ?: component)
+                props += toProperty(name, component.asType(), recordComponentDescription(component, element))
             }
 
-            ObjectNode(
-                name = element.qualifiedName.toString(),
-                properties = props,
-                required = required,
-                description = extractDescription(element),
-            )
+            objectNode(element, props, required)
         }
 
         return TypeRef.Ref(id)
@@ -114,15 +113,10 @@ internal class AptIntrospectionContext(
                 .forEach { field ->
                     val name = field.simpleName.toString()
                     required += name
-                    props += toProperty(name, field.asType(), field)
+                    props += toProperty(name, field.asType(), extractDescription(field))
                 }
 
-            ObjectNode(
-                name = element.qualifiedName.toString(),
-                properties = props,
-                required = required,
-                description = extractDescription(element),
-            )
+            objectNode(element, props, required)
         }
 
         return TypeRef.Ref(id)
@@ -146,15 +140,10 @@ internal class AptIntrospectionContext(
                 .forEach { method ->
                     val name = propertyName(method.simpleName.toString())
                     required += name
-                    props += toProperty(name, method.returnType, method)
+                    props += toProperty(name, method.returnType, extractDescription(method))
                 }
 
-            ObjectNode(
-                name = element.qualifiedName.toString(),
-                properties = props,
-                required = required,
-                description = extractDescription(element),
-            )
+            objectNode(element, props, required)
         }
 
         return TypeRef.Ref(id)
@@ -169,14 +158,26 @@ internal class AptIntrospectionContext(
             methodName.length > GET_PREFIX.length &&
                 methodName.startsWith(GET_PREFIX) &&
                 methodName[GET_PREFIX.length].isUpperCase() ->
-                methodName.substring(GET_PREFIX.length).replaceFirstChar { it.lowercase() }
+                decapitalize(methodName.substring(GET_PREFIX.length))
 
             methodName.length > IS_PREFIX.length &&
                 methodName.startsWith(IS_PREFIX) &&
                 methodName[IS_PREFIX.length].isUpperCase() ->
-                methodName.substring(IS_PREFIX.length).replaceFirstChar { it.lowercase() }
+                decapitalize(methodName.substring(IS_PREFIX.length))
 
             else -> methodName
+        }
+
+    /**
+     * Applies JavaBeans decapitalization to a property suffix: `Name` → `name`, while
+     * preserving all-uppercase acronyms such as `URL` or `OK` and leaving mixed-case
+     * suffixes such as `urlPath` untouched.
+     */
+    private fun decapitalize(name: String): String =
+        if (name.length > 1 && name[0].isUpperCase() && name[1].isUpperCase()) {
+            name
+        } else {
+            name.replaceFirstChar { it.lowercase() }
         }
 
     private companion object {
@@ -184,21 +185,53 @@ internal class AptIntrospectionContext(
         const val IS_PREFIX: String = "is"
     }
 
+    //endregion
+
+    //region Property conversion
+
     private fun toProperty(
         name: String,
         type: TypeMirror,
-        element: Element,
+        description: String?,
     ): Property =
         Property(
             name = name,
             type = toRef(type),
+            description = description,
+        )
+
+    private fun objectNode(
+        element: TypeElement,
+        properties: List<Property>,
+        required: Set<String>,
+    ): ObjectNode =
+        ObjectNode(
+            name = element.qualifiedName.toString(),
+            properties = properties,
+            required = required,
             description = extractDescription(element),
         )
 
+    //endregion
+
+    //region Annotation helpers
+
+    /**
+     * Resolves a record component's description from its annotation targets, in order of
+     * precedence: the record component itself, its accessor, then the backing field.
+     */
+    private fun recordComponentDescription(
+        component: RecordComponentElement,
+        type: TypeElement,
+    ): String? =
+        extractDescription(component)
+            ?: extractDescription(component.accessor)
+            ?: fieldFor(type, component.simpleName.toString())?.let(::extractDescription)
+
     /**
      * Record component annotations propagate to the backing field (among other targets),
-     * so the field is the most reliable place to read them back from regardless of which
-     * Java targets the annotation declares `@Target` for.
+     * so the field is used as a last-resort description target for annotations whose
+     * `@Target` does not cover the record component or its accessor.
      */
     private fun fieldFor(
         type: TypeElement,
@@ -221,4 +254,6 @@ internal class AptIntrospectionContext(
                 annotationArguments = args,
             )
         }
+
+    //endregion
 }
