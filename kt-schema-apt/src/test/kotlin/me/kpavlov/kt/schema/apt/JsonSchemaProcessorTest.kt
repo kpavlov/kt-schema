@@ -256,13 +256,98 @@ class JsonSchemaProcessorTest {
     }
 
     @Test
-    fun `should not generate schema for interface under root package`(
+    fun `should generate schema for annotated interface`(
         @TempDir tempDir: Path,
     ) {
         val source = """
             package com.example;
 
-            public interface Marker {}
+            import me.kpavlov.kt.schema.Description;
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public interface Person {
+                @Description("Name of the person")
+                String getName();
+
+                @Description("Age of the person")
+                int getAge();
+            }
+        """.trimIndent()
+
+        val outputDir = compile(source, tempDir)
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Person.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson """
+            {
+                "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                "${'$'}id": "com.example.Person",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the person"
+                    },
+                    "age": {
+                        "type": "integer",
+                        "description": "Age of the person"
+                    }
+                },
+                "additionalProperties": false,
+                "required": ["name", "age"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should generate schema for interface via root package option`(
+        @TempDir tempDir: Path,
+    ) {
+        val source = """
+            package com.example;
+
+            public interface Product {
+                String name();
+                int price();
+            }
+        """.trimIndent()
+
+        val outputDir = compile(
+            source = source,
+            tempDir = tempDir,
+            options = listOf("-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example"),
+        )
+
+        val schemaFile = outputDir.resolve("META-INF/kt-schema/schemas/com/example/Product.json")
+        schemaFile.toFile().exists() shouldBe true
+        // language=json
+        schemaFile.toFile().readText() shouldEqualJson """
+            {
+                "${'$'}schema": "https://json-schema.org/draft/2020-12/schema",
+                "${'$'}id": "com.example.Product",
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string" },
+                    "price": { "type": "integer" }
+                },
+                "additionalProperties": false,
+                "required": ["name", "price"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should not generate schema for enum under root package`(
+        @TempDir tempDir: Path,
+    ) {
+        val source = """
+            package com.example;
+
+            public enum Color {
+                RED, GREEN, BLUE
+            }
         """.trimIndent()
 
         val outputDir = compile(
@@ -390,7 +475,7 @@ class JsonSchemaProcessorTest {
         val sourceFiles = sources.map { code ->
             val pkg = Regex("""package\s+(\S+);""").find(code)?.groupValues?.get(1) ?: ""
             val cls =
-                Regex("""(?:public\s+)?(?:record|class|interface)\s+(\w+)""").find(code)?.groupValues?.get(1)
+                Regex("""(?:public\s+)?(?:record|class|interface|enum)\s+(\w+)""").find(code)?.groupValues?.get(1)
                     ?: error("Cannot infer class name from source:\n$code")
             val fqn = "$pkg.$cls"
             object : SimpleJavaFileObject(

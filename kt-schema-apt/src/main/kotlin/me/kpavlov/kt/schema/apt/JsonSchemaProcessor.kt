@@ -78,8 +78,8 @@ public class JsonSchemaProcessor : AbstractProcessor() {
 
     /**
      * Types annotated with `@Schema`, plus — when [ROOT_PACKAGE_OPTION] is configured —
-     * every record or class declared under that package, so consumers don't have to
-     * annotate every type individually.
+     * every record, class or interface declared under that package, so consumers don't
+     * have to annotate every type individually.
      */
     private fun candidateTypes(roundEnv: RoundEnvironment): Set<TypeElement> {
         val annotated = roundEnv.getElementsAnnotatedWith(Schema::class.java).filterIsInstance<TypeElement>()
@@ -91,12 +91,15 @@ public class JsonSchemaProcessor : AbstractProcessor() {
             } else {
                 roundEnv.rootElements
                     .filterIsInstance<TypeElement>()
-                    .filter { it.kind == ElementKind.RECORD || it.kind == ElementKind.CLASS }
+                    .filter { it.isSupported() }
                     .filter { it.isUnderPackage(rootPackage) }
             }
 
         return (annotated + underRootPackage).toSet()
     }
+
+    private fun TypeElement.isSupported(): Boolean =
+        kind == ElementKind.RECORD || kind == ElementKind.CLASS || kind == ElementKind.INTERFACE
 
     private fun TypeElement.isUnderPackage(rootPackage: String): Boolean {
         val packageName = processingEnv.elementUtils.getPackageOf(this).qualifiedName.toString()
@@ -147,9 +150,9 @@ public class JsonSchemaProcessor : AbstractProcessor() {
     public companion object {
         /**
          * Processor option (`-A<name>=<value>`) that, when set, processes every top-level
-         * record or class declared under the given package (and its sub-packages) in addition
-         * to types annotated with `@Schema`. Lets consumers skip annotating every type
-         * individually.
+         * record, class or interface declared under the given package (and its sub-packages)
+         * in addition to types annotated with `@Schema`. Lets consumers skip annotating
+         * every type individually.
          */
         public const val ROOT_PACKAGE_OPTION: String = "me.kpavlov.kt.schema.rootPackage"
     }

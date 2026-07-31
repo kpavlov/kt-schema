@@ -25,7 +25,7 @@ graph LR
         Kotlin["Kotlin Classes<br/>@Schema annotated"]
         KSerializer["SerialDescriptor"]
         Java["Java Classes<br/>Third-party libs"]
-        JavaApt["Java Records<br/>@Schema or rootPackage"]
+        JavaApt["Java Records/Classes/Interfaces<br/>@Schema or rootPackage"]
         Functions["Kotlin Functions"]
     end
 

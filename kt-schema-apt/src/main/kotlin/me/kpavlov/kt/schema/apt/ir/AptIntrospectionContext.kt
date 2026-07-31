@@ -12,6 +12,7 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
+import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
@@ -22,8 +23,8 @@ import javax.lang.model.util.Types
 /**
  * Introspection context for the Java annotation-processor (JSR 269) front end.
  *
- * Supports Java records and plain classes with primitive/boxed/String fields and nested
- * record/class references. Reference types are treated as non-nullable/required: Java has
+ * Supports Java records, plain classes and interfaces with primitive/boxed/String fields
+ * and nested references. Reference types are treated as non-nullable/required: Java has
  * no notion of optionality/default values, so every property is required.
  *
  * @author Konstantin Pavlov
@@ -37,9 +38,10 @@ internal class AptIntrospectionContext(
 
         return handleRecord(type)
             ?: handleClass(type)
+            ?: handleInterface(type)
             ?: error(
                 "Unsupported type for kt-schema-apt " +
-                    "(only records, classes, primitives and String are supported): $type",
+                    "(only records, classes, interfaces, primitives and String are supported): $type",
             )
     }
 
@@ -124,6 +126,62 @@ internal class AptIntrospectionContext(
         }
 
         return TypeRef.Ref(id)
+    }
+
+    private fun handleInterface(type: TypeMirror): TypeRef? {
+        val element = asTypeElement(type)
+        if (element == null || element.kind != ElementKind.INTERFACE) return null
+
+        val id = TypeId(element.qualifiedName.toString())
+
+        withCycleDetection(type, id) {
+            val props = ArrayList<Property>()
+            val required = LinkedHashSet<String>()
+
+            element.enclosedElements
+                .filterIsInstance<ExecutableElement>()
+                .filter { it.kind == ElementKind.METHOD }
+                .filter { !it.modifiers.contains(Modifier.STATIC) }
+                .filter { it.parameters.isEmpty() && it.returnType.kind != TypeKind.VOID }
+                .forEach { method ->
+                    val name = propertyName(method.simpleName.toString())
+                    required += name
+                    props += toProperty(name, method.returnType, method)
+                }
+
+            ObjectNode(
+                name = element.qualifiedName.toString(),
+                properties = props,
+                required = required,
+                description = extractDescription(element),
+            )
+        }
+
+        return TypeRef.Ref(id)
+    }
+
+    /**
+     * Maps a no-arg accessor method to a property name using the JavaBeans convention:
+     * `getName()` → `name`, `isActive()` → `active`, and a bare `name()` accessor is kept as-is.
+     */
+    private fun propertyName(methodName: String): String =
+        when {
+            methodName.length > GET_PREFIX.length &&
+                methodName.startsWith(GET_PREFIX) &&
+                methodName[GET_PREFIX.length].isUpperCase() ->
+                methodName.substring(GET_PREFIX.length).replaceFirstChar { it.lowercase() }
+
+            methodName.length > IS_PREFIX.length &&
+                methodName.startsWith(IS_PREFIX) &&
+                methodName[IS_PREFIX.length].isUpperCase() ->
+                methodName.substring(IS_PREFIX.length).replaceFirstChar { it.lowercase() }
+
+            else -> methodName
+        }
+
+    private companion object {
+        const val GET_PREFIX: String = "get"
+        const val IS_PREFIX: String = "is"
     }
 
     private fun toProperty(

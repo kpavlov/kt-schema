@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 /**
  * Simple test model to verify plain (non-record) Java class schema generation.
  */
+@SuppressWarnings("unused")
 @JsonClassDescription("A company with a name and a founding year.")
 public class Company {
 

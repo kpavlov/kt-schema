@@ -10,13 +10,14 @@ import java.io.InputStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Verifies the kt-schema-apt processor generates a JSON Schema resource for a plain
- * (non-record) Java class selected by the configured {@code rootPackage} compiler option.
+ * Verifies the kt-schema-apt processor generates a JSON Schema resource for a Java record
+ * selected by the configured {@code rootPackage} compiler option, not because it is
+ * annotated with {@code @Schema}.
  */
-class CompanySchemaTest {
+class RecordSchemaTest {
 
     private static final String RESOURCE_PATH =
-            "META-INF/kt-schema/schemas/me/kpavlov/kt/schema/apt/integration/type/Company.json";
+            "META-INF/kt-schema/schemas/me/kpavlov/kt/schema/apt/integration/type/Person.json";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -24,24 +25,29 @@ class CompanySchemaTest {
     void shouldGenerateCompleteSchemaWithAllRequiredFields() throws IOException {
         JsonNode actual = readGeneratedSchema();
 
+        // language=json
         JsonNode expected = MAPPER.readTree("""
                 {
-                  "$id": "me.kpavlov.kt.schema.apt.integration.type.Company",
+                  "$id": "me.kpavlov.kt.schema.apt.integration.type.Person",
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "name": {
+                    "firstName": {
                       "type": "string",
-                      "description": "Name of the company"
+                      "description": "Given name of the person"
                     },
-                    "founded": {
+                    "lastName": {
+                      "type": "string",
+                      "description": "Family name of the person"
+                    },
+                    "age": {
                       "type": "integer",
-                      "description": "Year the company was founded"
+                      "description": "Age of the person in years"
                     }
                   },
-                  "required": ["name", "founded"],
+                  "required": ["firstName", "lastName", "age"],
                   "additionalProperties": false,
-                  "description": "A company with a name and a founding year."
+                  "description": "A person with a first and last name and age."
                 }
                 """);
 
