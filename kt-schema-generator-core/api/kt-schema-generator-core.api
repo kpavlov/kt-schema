@@ -9,6 +9,7 @@ public abstract class me/kpavlov/kt/schema/generator/core/AbstractSchemaGenerato
 
 public final class me/kpavlov/kt/schema/generator/core/ConfigKt {
 	public static final fun defaultOpaqueTypeNames ()Ljava/util/Set;
+	public static final fun defaultPrimitiveTypeKinds ()Ljava/util/Map;
 }
 
 public final class me/kpavlov/kt/schema/generator/core/GlobMatcher {

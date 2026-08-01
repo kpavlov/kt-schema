@@ -374,5 +374,6 @@ final object me.kpavlov.kt.schema.generator.core.ir/Introspections { // me.kpavl
 
 final fun (me.kpavlov.kt.schema.generator.core.ir/TypeRef).me.kpavlov.kt.schema.generator.core.ir/withNullable(kotlin/Boolean): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/withNullable|withNullable@me.kpavlov.kt.schema.generator.core.ir.TypeRef(kotlin.Boolean){}[0]
 final fun me.kpavlov.kt.schema.generator.core/defaultOpaqueTypeNames(): kotlin.collections/Set<kotlin/String> // me.kpavlov.kt.schema.generator.core/defaultOpaqueTypeNames|defaultOpaqueTypeNames(){}[0]
+final fun me.kpavlov.kt.schema.generator.core/defaultPrimitiveTypeKinds(): kotlin.collections/Map<kotlin/String, me.kpavlov.kt.schema.generator.core.ir/PrimitiveKind> // me.kpavlov.kt.schema.generator.core/defaultPrimitiveTypeKinds|defaultPrimitiveTypeKinds(){}[0]
 final fun me.kpavlov.kt.schema.generator.core/globToRegex(kotlin/String): kotlin.text/Regex // me.kpavlov.kt.schema.generator.core/globToRegex|globToRegex(kotlin.String){}[0]
 final fun me.kpavlov.kt.schema.generator.core/parseGlobPatterns(kotlin/String?): kotlin.collections/List<kotlin/String> // me.kpavlov.kt.schema.generator.core/parseGlobPatterns|parseGlobPatterns(kotlin.String?){}[0]
