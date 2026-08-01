@@ -17,6 +17,7 @@ dependencies {
 
     // Third-party annotation libraries for testing description extraction
     implementation(libs.koog.agents.tools)
+    implementation(platform(libs.jackson.bom))
     implementation(libs.jackson.annotations)
     implementation(libs.langchain4j.core)
 
