@@ -12,6 +12,30 @@ internal val DEFAULT_OPAQUE_TYPE_NAMES: Set<String> =
         "kotlinx.serialization.json.JsonElement",
         "kotlinx.serialization.json.JsonPrimitive",
         "kotlinx.serialization.json.JsonNull",
+        // Jackson databind node hierarchy (Jackson 3.x `tools.jackson.databind`): abstract
+        // tree types representing arbitrary JSON values — mapped to the empty schema `{}`.
+        "tools.jackson.databind.JsonNode",
+        "tools.jackson.databind.node.ObjectNode",
+        "tools.jackson.databind.node.ArrayNode",
+        "tools.jackson.databind.node.ContainerNode",
+        "tools.jackson.databind.node.ValueNode",
+        "tools.jackson.databind.node.BaseJsonNode",
+        "tools.jackson.databind.node.StringNode",
+        "tools.jackson.databind.node.BooleanNode",
+        "tools.jackson.databind.node.BinaryNode",
+        "tools.jackson.databind.node.NullNode",
+        "tools.jackson.databind.node.MissingNode",
+        "tools.jackson.databind.node.POJONode",
+        "tools.jackson.databind.node.NumericNode",
+        "tools.jackson.databind.node.NumericIntNode",
+        "tools.jackson.databind.node.NumericFPNode",
+        "tools.jackson.databind.node.IntNode",
+        "tools.jackson.databind.node.LongNode",
+        "tools.jackson.databind.node.ShortNode",
+        "tools.jackson.databind.node.DoubleNode",
+        "tools.jackson.databind.node.FloatNode",
+        "tools.jackson.databind.node.DecimalNode",
+        "tools.jackson.databind.node.BigIntegerNode",
     )
 
 /**
@@ -144,7 +168,8 @@ internal expect object Config {
      *
      * Default value: kotlinx.serialization.json.JsonElement,
      *                kotlinx.serialization.json.JsonPrimitive,
-     *                kotlinx.serialization.json.JsonNull
+     *                kotlinx.serialization.json.JsonNull,
+     *                tools.jackson.databind.JsonNode and its node hierarchy
      */
     val opaqueTypeNames: Set<String>
 }
