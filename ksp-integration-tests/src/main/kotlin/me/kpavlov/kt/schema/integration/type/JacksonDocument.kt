@@ -15,3 +15,27 @@ class JacksonReport(
 ) : JacksonDocument() {
     override val id: String = "r-1"
 }
+
+@Schema
+sealed interface JacksonMemo {
+    val id: String
+}
+
+@Schema
+class JacksonNote(
+    val body: String,
+) : JacksonMemo {
+    @get:JsonProperty("memo_id")
+    override val id: String = "n-1"
+}
+
+@Schema
+sealed class JacksonRecord {
+    abstract val id: String
+}
+
+@Schema
+data class JacksonEntry(
+    @get:JsonProperty("entry_id") override val id: String,
+    val label: String,
+) : JacksonRecord()

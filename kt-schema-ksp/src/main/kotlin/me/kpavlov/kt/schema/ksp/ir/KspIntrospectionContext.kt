@@ -285,7 +285,10 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
             val props = ArrayList<Property>()
             val required = LinkedHashSet<String>()
 
-            val processedProperties = HashSet<String>()
+            // Original (pre-rename) Kotlin declaration names already handled directly by this
+            // class — NOT the emitted/renamed names, so a sealed-parent property satisfied via a
+            // renamed constructor override isn't mistaken for unprocessed and re-added below.
+            val processedKotlinNames = HashSet<String>()
 
             /**
              * Helper to add a property and track whether it's required.
@@ -293,6 +296,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
              * Properties without default values are automatically added to the required set.
              */
             fun addProperty(
+                kotlinName: String,
                 name: String,
                 type: KSType,
                 description: String?,
@@ -301,11 +305,11 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
             ) {
                 if (!hasDefaultValue || isConstant) required += name
                 props += createProperty(name, toRef(type), description, hasDefaultValue, isConstant)
-                processedProperties += name
+                processedKotlinNames += kotlinName
             }
 
             extractConstructorOrProperties(decl, ::addProperty)
-            extractInheritedSealedProperties(decl, processedProperties, ::addProperty)
+            extractInheritedSealedProperties(decl, processedKotlinNames, ::addProperty)
 
             val nameOverride = extractNameOverride(decl)
             ObjectNode(
@@ -321,7 +325,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
 
     private fun extractConstructorOrProperties(
         decl: KSClassDeclaration,
-        addProperty: (String, KSType, String?, Boolean) -> Unit,
+        addProperty: (String, String, KSType, String?, Boolean) -> Unit,
     ) {
         val declaredProperties = decl.getDeclaredProperties().associateBy { it.simpleName.asString() }
         // Prefer primary constructor parameters for data classes; fall back to public properties
@@ -335,7 +339,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 val propertyName =
                     extractNameOverride(p) ?: property?.let { extractNameOverride(it) } ?: kotlinName
                 val description = extractConstructorParamDescription(p, kotlinName, decl.docString, property)
-                addProperty(propertyName, p.type.resolve(), description, p.hasDefault)
+                addProperty(kotlinName, propertyName, p.type.resolve(), description, p.hasDefault)
             }
         } else {
             declaredProperties.values
@@ -351,15 +355,15 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                             kdocTagName = "property",
                             elementKdocFallback = { prop.descriptionFromKdoc() },
                         )
-                    addProperty(propertyName, prop.type.resolve(), description, false)
+                    addProperty(kotlinName, propertyName, prop.type.resolve(), description, false)
                 }
         }
     }
 
     private fun extractInheritedSealedProperties(
         decl: KSClassDeclaration,
-        processedProperties: Set<String>,
-        addProperty: (String, KSType, String?, Boolean, Boolean) -> Unit,
+        processedKotlinNames: Set<String>,
+        addProperty: (String, String, KSType, String?, Boolean, Boolean) -> Unit,
     ) {
         // Add inherited properties from sealed parents that weren't in the constructor
         val sealedParents =
@@ -368,22 +372,37 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 .filter { it.modifiers.contains(Modifier.SEALED) }
                 .toList()
 
+        // The child's own declared properties, so an override that re-declares the annotation
+        // (e.g. `@get:JsonProperty` placed on the subclass's `override val`) takes precedence
+        // over the parent's — mirroring how the reflection-based introspector resolves overrides.
+        val childDeclaredProperties = decl.getDeclaredProperties().associateBy { it.simpleName.asString() }
+
         sealedParents.forEach { parent ->
-            parent.getDeclaredProperties().filter { it.isPublic() && !it.isIgnoredForSchema() }.forEach { prop ->
-                val kotlinName = prop.simpleName.asString()
-                if (kotlinName !in processedProperties) {
-                    val name = extractNameOverride(prop) ?: kotlinName
+            parent.getDeclaredProperties().filter { it.isPublic() && !it.isIgnoredForSchema() }.forEach { parentProp ->
+                val kotlinName = parentProp.simpleName.asString()
+                if (kotlinName !in processedKotlinNames) {
+                    val overridingProp = childDeclaredProperties[kotlinName]
+                    val effectiveProp = overridingProp ?: parentProp
+
+                    // Prefer the child override's own name override (covers a re-declared
+                    // `@get:JsonProperty`), falling back to the parent's — mirroring how the
+                    // reflection-based introspector resolves overrides.
+                    val name =
+                        overridingProp?.let { extractNameOverride(it) }
+                            ?: extractNameOverride(parentProp)
+                            ?: kotlinName
                     val description =
                         extractPropertyDescription(
-                            annotated = prop,
+                            annotated = effectiveProp,
                             propertyName = kotlinName,
                             parentKdoc = parent.docString,
                             kdocTagName = "property",
-                            elementKdocFallback = { prop.descriptionFromKdoc() },
+                            elementKdocFallback = { effectiveProp.descriptionFromKdoc() },
                         )
                     addProperty(
+                        kotlinName,
                         name,
-                        prop.type.resolve(),
+                        parentProp.type.resolve(),
                         description,
                         true, // Fixed value in the subclass
                         false, // KSP cannot get the value

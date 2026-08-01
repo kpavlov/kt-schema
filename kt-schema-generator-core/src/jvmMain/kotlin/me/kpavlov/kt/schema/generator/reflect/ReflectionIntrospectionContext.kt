@@ -296,18 +296,20 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                 .mapNotNull { it.classifier as? KClass<*> }
                 .filter { it.isSealed }
 
-        // Build a map of parent property descriptions and properties
+        // Build a map of parent property descriptions, name overrides and properties
         val parentPropertyDescriptions = mutableMapOf<String, String>()
+        val parentPropertyNameOverrides = mutableMapOf<String, String>()
         val parentProperties = mutableSetOf<String>()
         sealedParents.forEach { parent ->
             parent.members
                 .filterIsInstance<KProperty<*>>()
                 .forEach { prop ->
                     parentProperties.add(prop.name)
-                    val desc = extractDescription(prop.annotations)
-                    if (desc != null) {
-                        parentPropertyDescriptions[prop.name] = desc
-                    }
+                    // Use the full annotation set (incl. `@get:`-targeted) so idiomatic Jackson
+                    // placements like `@get:JsonProperty` on the parent are recognized too.
+                    val parentAnnotations = collectPropertyAnnotations(prop)
+                    extractDescription(parentAnnotations)?.let { parentPropertyDescriptions[prop.name] = it }
+                    extractNameOverride(parentAnnotations)?.let { parentPropertyNameOverrides[prop.name] = it }
                 }
         }
 
@@ -319,6 +321,12 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
 
         // Track which properties were processed from constructor
         val processedProperties = constructorProperties.map { it.name }.toMutableSet()
+
+        // Original (pre-rename) constructor parameter names, used to detect sealed-parent
+        // properties already satisfied via a renamed constructor override (see below) —
+        // `processedProperties` above holds the emitted/renamed names, not the declaration names.
+        val constructorParameterNames =
+            findPrimaryConstructor(klass)?.parameters?.mapNotNull { it.name }?.toSet().orEmpty()
 
         // If there are sealed parents, update descriptions to inherit from parent if needed
         if (sealedParents.isNotEmpty()) {
@@ -338,39 +346,23 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         requiredProperties += constructorRequired
 
         // Add inherited properties from sealed parents that weren't in the constructor
-        val inheritedPropertyNames = parentProperties - processedProperties
+        val inheritedPropertyNames = parentProperties - constructorParameterNames
         inheritedPropertyNames.forEach { propertyName ->
             // Find the property in the current class (inherited)
-            val property = findPropertyByName(klass, propertyName)
+            val property = findPropertyByName(klass, propertyName) ?: return@forEach
+            val extra =
+                buildExtraProperty(
+                    property = property,
+                    defaultValues = defaultValues,
+                    fallbackDescription = parentPropertyDescriptions[propertyName],
+                    fallbackNameOverride = parentPropertyNameOverrides[propertyName],
+                ) ?: return@forEach
 
-            if (property != null) {
-                val annotations = collectPropertyAnnotations(property)
-                // Skip properties marked with an ignore annotation (e.g. @JsonIgnore)
-                if (isSchemaIgnored(annotations)) return@forEach
-
-                // Name override (e.g. @SerialName, @JsonProperty), else the Kotlin property name
-                val emittedName = extractNameOverride(annotations) ?: propertyName
-                val typeRef = toRef(property.returnType)
-                val description = extractDescription(annotations) ?: parentPropertyDescriptions[propertyName]
-
-                // For inherited properties, try to get the fixed value from the instance
-                val fixedValue = defaultValues[propertyName]
-
-                properties +=
-                    Property(
-                        name = emittedName,
-                        type = typeRef,
-                        description = description,
-                        hasDefaultValue = fixedValue != null,
-                        defaultValue = fixedValue,
-                        isConstant = fixedValue != null,
-                    )
-
-                // Inherited properties with fixed values are required
-                requiredProperties += emittedName
-                processedProperties += propertyName
-                processedProperties += emittedName
-            }
+            properties += extra
+            // Inherited properties with fixed values are required
+            requiredProperties += extra.name
+            processedProperties += propertyName
+            processedProperties += extra.name
         }
 
         // Add public properties for objects (singletons) that weren't in the constructor or from parents
@@ -380,25 +372,12 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                 .filter { it.visibility == KVisibility.PUBLIC }
                 .forEach { prop ->
                     if (prop.name in processedProperties) return@forEach
-                    val annotations = collectPropertyAnnotations(prop)
-                    // Skip properties marked with an ignore annotation (e.g. @JsonIgnore)
-                    if (isSchemaIgnored(annotations)) return@forEach
+                    val extra = buildExtraProperty(prop, defaultValues) ?: return@forEach
 
-                    // Name override (e.g. @SerialName, @JsonProperty), else the Kotlin property name
-                    val emittedName = extractNameOverride(annotations) ?: prop.name
-                    val fixedValue = defaultValues[prop.name]
-                    properties +=
-                        Property(
-                            name = emittedName,
-                            type = toRef(prop.returnType),
-                            description = extractDescription(annotations),
-                            hasDefaultValue = fixedValue != null,
-                            defaultValue = fixedValue,
-                            isConstant = fixedValue != null,
-                        )
-                    requiredProperties += emittedName
+                    properties += extra
+                    requiredProperties += extra.name
                     processedProperties += prop.name
-                    processedProperties += emittedName
+                    processedProperties += extra.name
                 }
         }
 
@@ -408,6 +387,37 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             properties = properties,
             required = requiredProperties,
             description = extractDescription(klass.java.annotations.toList()),
+        )
+    }
+
+    /**
+     * Builds a [Property] for a property discovered outside the primary constructor — either
+     * inherited from a sealed parent or declared on a singleton object. Shared by both call
+     * sites in [createObjectNode] so ignore/name-override/description resolution stays in sync.
+     *
+     * @param fallbackDescription description to use when [property]'s own annotations have none
+     *   (e.g. inherited from the sealed parent's declaration)
+     * @param fallbackNameOverride name override to use when [property]'s own annotations have
+     *   none (e.g. declared only on the sealed parent's declaration)
+     * @return the built [Property], or null if [property] is annotated as ignored
+     */
+    private fun buildExtraProperty(
+        property: KProperty<*>,
+        defaultValues: Map<String, Any?>,
+        fallbackDescription: String? = null,
+        fallbackNameOverride: String? = null,
+    ): Property? {
+        val annotations = collectPropertyAnnotations(property)
+        if (isSchemaIgnored(annotations)) return null
+
+        val fixedValue = defaultValues[property.name]
+        return Property(
+            name = extractNameOverride(annotations) ?: fallbackNameOverride ?: property.name,
+            type = toRef(property.returnType),
+            description = extractDescription(annotations) ?: fallbackDescription,
+            hasDefaultValue = fixedValue != null,
+            defaultValue = fixedValue,
+            isConstant = fixedValue != null,
         )
     }
 
