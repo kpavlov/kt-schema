@@ -35,17 +35,18 @@ class ReflectionIntrospectorNullabilityTest {
     private val introspector = ReflectionClassIntrospector
 
     @Test
-    fun `type name matching Opt pattern is treated as nullable and excluded from required`() {
+    fun `type name matching Opt pattern is treated as nullable but stays required by default`() {
         val graph = introspector.introspect(WithOptTypeName::class)
         val rootRef = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
         val node = graph.nodes[rootRef.id].shouldBeInstanceOf<ObjectNode>()
 
-        node.required.shouldContainExactlyInAnyOrder(setOf("name"))
-        node.required shouldNotContain "email"
+        // No default `introspector.optional.type.names` pattern — matching a nullable-by-convention
+        // type name doesn't by itself exclude the property from `required`.
+        node.required.shouldContainExactlyInAnyOrder(setOf("name", "email"))
 
         val props = node.properties.associateBy { it.name }
         props.getValue("email").apply {
-            hasDefaultValue shouldBe true
+            hasDefaultValue shouldBe false
             type.nullable shouldBe true
         }
     }

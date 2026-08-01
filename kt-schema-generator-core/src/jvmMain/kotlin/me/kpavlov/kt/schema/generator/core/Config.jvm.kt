@@ -173,7 +173,7 @@ internal actual object Config {
     actual val optionalTypeNamePatterns: List<String> by lazy {
         loadConfiguration { properties ->
             parseListPropertyPreservingCase(properties, OPTIONAL_TYPE_NAMES_KEY)
-        } ?: DEFAULT_NULLABLE_TYPE_PATTERNS
+        } ?: emptyList()
     }
 
     private fun <T> loadConfiguration(extractor: (Properties) -> T): T? =

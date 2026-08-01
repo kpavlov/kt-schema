@@ -14,15 +14,9 @@ import me.kpavlov.kt.schema.Schema
 )
 annotation class Nullable
 
-// Type name matches the default `*Opt` glob pattern.
-data class EmailOpt(
-    val value: String,
-)
-
 @Schema
 data class NullableConvention(
     val name: String,
-    val email: EmailOpt,
     @Nullable
     val phone: String,
     @get:Nullable

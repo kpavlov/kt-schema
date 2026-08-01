@@ -279,9 +279,8 @@ class IntrospectionsTest {
         "JsonNodeOpt",
         "Opt",
     )
-    fun `recognizes type names matching the default Opt glob pattern`(name: String) {
+    fun `recognizes type names matching the default nullable Opt glob pattern`(name: String) {
         Introspections.isNullableTypeName(name) shouldBe true
-        Introspections.isOptionalTypeName(name) shouldBe true
     }
 
     @ParameterizedTest
@@ -293,7 +292,6 @@ class IntrospectionsTest {
     )
     fun `does not match type names that don't fit the Opt glob pattern`(name: String) {
         Introspections.isNullableTypeName(name) shouldBe false
-        Introspections.isOptionalTypeName(name) shouldBe false
     }
 
     @Test

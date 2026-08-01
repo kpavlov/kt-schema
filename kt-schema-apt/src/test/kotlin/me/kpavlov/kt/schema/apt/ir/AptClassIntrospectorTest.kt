@@ -381,7 +381,7 @@ class AptClassIntrospectorTest {
     }
 
     @Test
-    fun `should treat Opt-suffixed type name as nullable and exclude field from required`() {
+    fun `should treat Opt-suffixed type name as nullable but keep field required by default`() {
         val graph =
             graph(
                 root = "com.example.Contact",
@@ -398,7 +398,9 @@ class AptClassIntrospectorTest {
 
         val node = graph.rootNode()
         assertSoftly(node) {
-            required.shouldContainExactlyInAnyOrder(setOf("name"))
+            // No default `introspector.optional.type.names` pattern — matching a nullable-by-convention
+            // type name doesn't by itself exclude the property from `required`.
+            required.shouldContainExactlyInAnyOrder(setOf("name", "email"))
             val props = properties.associateBy { it.name }
             props.getValue("email").type.shouldBeInstanceOf<TypeRef.Ref> { ref ->
                 ref.id.value shouldBe "com.example.EmailOpt"

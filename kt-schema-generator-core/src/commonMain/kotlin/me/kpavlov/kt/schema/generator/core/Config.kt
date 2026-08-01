@@ -260,7 +260,9 @@ internal expect object Config {
      * Loaded lazily from the `introspector.optional.type.names` property in
      * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
      *
-     * Default value: *Opt
+     * Default value: (none) — unlike [nullableTypeNamePatterns], this convention is opt-in only,
+     * since a type-name-based default here would silently exclude too many unrelated classes from
+     * `required`.
      */
     val optionalTypeNamePatterns: List<String>
 }
