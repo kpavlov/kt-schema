@@ -2,6 +2,7 @@ package me.kpavlov.kt.schema.generator.core
 
 import me.kpavlov.kt.schema.generator.core.Config.descriptionAnnotationNames
 import me.kpavlov.kt.schema.generator.core.Config.nameAnnotationNames
+import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 
 /**
  * Default opaque type names used across all platforms.
@@ -14,28 +15,46 @@ internal val DEFAULT_OPAQUE_TYPE_NAMES: Set<String> =
         "kotlinx.serialization.json.JsonNull",
         // Jackson databind node hierarchy (Jackson 3.x `tools.jackson.databind`): abstract
         // tree types representing arbitrary JSON values — mapped to the empty schema `{}`.
+        // Concrete leaf/numeric-abstraction node types with a well-defined primitive shape are
+        // NOT here — see DEFAULT_PRIMITIVE_TYPE_KINDS below.
         "tools.jackson.databind.JsonNode",
         "tools.jackson.databind.node.ObjectNode",
         "tools.jackson.databind.node.ArrayNode",
         "tools.jackson.databind.node.ContainerNode",
         "tools.jackson.databind.node.ValueNode",
         "tools.jackson.databind.node.BaseJsonNode",
-        "tools.jackson.databind.node.StringNode",
-        "tools.jackson.databind.node.BooleanNode",
-        "tools.jackson.databind.node.BinaryNode",
         "tools.jackson.databind.node.NullNode",
         "tools.jackson.databind.node.MissingNode",
         "tools.jackson.databind.node.POJONode",
-        "tools.jackson.databind.node.NumericNode",
-        "tools.jackson.databind.node.NumericIntNode",
-        "tools.jackson.databind.node.NumericFPNode",
-        "tools.jackson.databind.node.IntNode",
-        "tools.jackson.databind.node.LongNode",
-        "tools.jackson.databind.node.ShortNode",
-        "tools.jackson.databind.node.DoubleNode",
-        "tools.jackson.databind.node.FloatNode",
-        "tools.jackson.databind.node.DecimalNode",
-        "tools.jackson.databind.node.BigIntegerNode",
+    )
+
+/**
+ * Fully qualified names of third-party types with a single well-defined JSON primitive shape,
+ * mapped to the [PrimitiveKind] they represent.
+ *
+ * A generic mechanism, not tied to any one framework — unlike [DEFAULT_OPAQUE_TYPE_NAMES] (types
+ * with no fixed shape, mapped to the empty schema `{}`), every type listed here always represents
+ * exactly one JSON primitive, so it resolves to the matching
+ * [PrimitiveNode][me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode] instead. Currently only
+ * populated with the leaf/numeric-abstraction types from Jackson's databind node hierarchy
+ * (`tools.jackson.databind.node`); other frameworks' fixed-shape wrapper types can be added the
+ * same way.
+ */
+internal val DEFAULT_PRIMITIVE_TYPE_KINDS: Map<String, PrimitiveKind> =
+    mapOf(
+        "tools.jackson.databind.node.StringNode" to PrimitiveKind.STRING,
+        "tools.jackson.databind.node.BinaryNode" to PrimitiveKind.STRING,
+        "tools.jackson.databind.node.BooleanNode" to PrimitiveKind.BOOLEAN,
+        "tools.jackson.databind.node.IntNode" to PrimitiveKind.INT,
+        "tools.jackson.databind.node.ShortNode" to PrimitiveKind.INT,
+        "tools.jackson.databind.node.LongNode" to PrimitiveKind.LONG,
+        "tools.jackson.databind.node.BigIntegerNode" to PrimitiveKind.LONG,
+        "tools.jackson.databind.node.NumericIntNode" to PrimitiveKind.LONG,
+        "tools.jackson.databind.node.DoubleNode" to PrimitiveKind.DOUBLE,
+        "tools.jackson.databind.node.FloatNode" to PrimitiveKind.FLOAT,
+        "tools.jackson.databind.node.DecimalNode" to PrimitiveKind.DOUBLE,
+        "tools.jackson.databind.node.NumericFPNode" to PrimitiveKind.DOUBLE,
+        "tools.jackson.databind.node.NumericNode" to PrimitiveKind.DOUBLE,
     )
 
 /**
@@ -53,6 +72,14 @@ internal val DEFAULT_OPAQUE_TYPE_NAMES: Set<String> =
  * effective list via the `introspector.opaque.type.names` property in `kt-schema.properties`.
  */
 public fun defaultOpaqueTypeNames(): Set<String> = DEFAULT_OPAQUE_TYPE_NAMES
+
+/**
+ * Canonical map of fully qualified third-party type names to the [PrimitiveKind] they represent
+ * (e.g. Jackson's `StringNode` -> `STRING`). Shared across the reflection and KSP introspectors so
+ * both resolve these fixed-shape types to the same concrete primitive schema instead of the opaque
+ * empty schema `{}` used for types with no fixed shape (see [defaultOpaqueTypeNames]).
+ */
+public fun defaultPrimitiveTypeKinds(): Map<String, PrimitiveKind> = DEFAULT_PRIMITIVE_TYPE_KINDS
 
 /**
  * Configuration for schema generation.

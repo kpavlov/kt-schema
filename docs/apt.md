@@ -12,6 +12,7 @@
   * [Extended example](#extended-example)
   * [Reading the resource at runtime](#reading-the-resource-at-runtime)
 * [Supported types](#supported-types)
+  * [Marking a property nullable/optional](#marking-a-property-nullableoptional)
 * [See Also](#see-also)
 
 <!--- END -->

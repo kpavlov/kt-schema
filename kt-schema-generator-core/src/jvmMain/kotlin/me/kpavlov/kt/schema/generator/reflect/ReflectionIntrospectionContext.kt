@@ -2,6 +2,7 @@ package me.kpavlov.kt.schema.generator.reflect
 
 import me.kpavlov.kt.schema.generator.core.Config
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
+import me.kpavlov.kt.schema.generator.core.defaultPrimitiveTypeKinds
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
 import me.kpavlov.kt.schema.generator.core.ir.Discriminator
@@ -73,7 +74,8 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             return TypeRef.Inline(AnyNode(), nullable)
         }
 
-        // Try to convert to primitive type
+        // Try to convert to primitive type — either a Kotlin built-in or a known third-party
+        // type with a single well-defined JSON primitive shape (e.g. Jackson's StringNode).
         primitiveKindFor(klass)?.let { primitiveKind ->
             val ref = TypeRef.Inline(PrimitiveNode(primitiveKind), nullable)
             if (!nullable) typeRefCache[type] = ref
@@ -101,7 +103,9 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         isMarkedNullable || Introspections.isNullableTypeName(klass.simpleName)
 
     /**
-     * Checks and maps a Kotlin primitive class to its corresponding [PrimitiveKind].
+     * Checks and maps a class to its corresponding [PrimitiveKind] — either a Kotlin built-in
+     * primitive, or a known third-party type with a single well-defined JSON primitive shape
+     * (currently Jackson's databind leaf/numeric-abstraction node types, e.g. StringNode, IntNode).
      * Returns null if the class is not a supported primitive type.
      */
     private fun primitiveKindFor(klass: KClass<*>): PrimitiveKind? =
@@ -113,7 +117,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             Float::class -> PrimitiveKind.FLOAT
             Double::class -> PrimitiveKind.DOUBLE
             Char::class -> PrimitiveKind.STRING
-            else -> null
+            else -> PRIMITIVE_TYPE_KINDS[klass.qualifiedName]
         }
 
     /**
@@ -555,4 +559,11 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         return properties to requiredProperties
     }
 
+    private companion object {
+        /**
+         * Fully qualified third-party type names mapped to the [PrimitiveKind] they represent
+         * (e.g. Jackson's `StringNode` -> `STRING`).
+         */
+        val PRIMITIVE_TYPE_KINDS: Map<String, PrimitiveKind> = defaultPrimitiveTypeKinds()
+    }
 }

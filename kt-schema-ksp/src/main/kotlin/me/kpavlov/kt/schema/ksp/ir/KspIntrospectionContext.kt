@@ -9,6 +9,7 @@ import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Nullability
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.defaultOpaqueTypeNames
+import me.kpavlov.kt.schema.generator.core.defaultPrimitiveTypeKinds
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
@@ -32,11 +33,13 @@ import me.kpavlov.kt.schema.generator.core.ir.withNullable
  * Resolution strategy (applied in order):
  * 1. Basic types (primitives and collections) via [resolveBasicTypeOrNull]
  * 2. JSON collection types ([kotlinx.serialization.json.JsonObject]/[kotlinx.serialization.json.JsonArray]) → inline [MapNode]/[ListNode]
- * 3. Opaque JSON types (kotlinx.serialization.json and Jackson databind node hierarchy) → [AnyNode] → empty schema `{}`
- * 4. Generic type parameters and unknowns -> kotlin.Any via [handleAnyFallback]
- * 5. Sealed class hierarchies -> PolymorphicNode via [handleSealedClass]
- * 6. Enum classes -> EnumNode via [handleEnum]
- * 7. Regular objects/classes -> ObjectNode via [handleObjectOrClass]
+ * 3. Third-party types with a well-defined JSON primitive shape (e.g. Jackson's `StringNode`, `IntNode`) → [PrimitiveNode] via [resolvePrimitiveTypeKindOrNull]
+ * 4. Opaque JSON types (kotlinx.serialization.json and the rest of the Jackson databind node
+ *    hierarchy) → [AnyNode] → empty schema `{}`
+ * 5. Generic type parameters and unknowns -> kotlin.Any via [handleAnyFallback]
+ * 6. Sealed class hierarchies -> PolymorphicNode via [handleSealedClass]
+ * 7. Enum classes -> EnumNode via [handleEnum]
+ * 8. Regular objects/classes -> ObjectNode via [handleObjectOrClass]
  */
 @OptIn(InternalSchemaGeneratorApi::class)
 @Suppress("TooManyFunctions")
@@ -62,6 +65,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         return requireNotNull(
             resolveBasicTypeOrNull(type)
                 ?: resolveJsonCollectionTypeOrNull(type)
+                ?: resolvePrimitiveTypeKindOrNull(type)
                 ?: resolveOpaqueTypeOrNull(type)
                 ?: handleAnyFallback(type)
                 ?: handleSealedClass(type, nullable)
@@ -93,9 +97,14 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     private fun resolveBasicTypeOrNull(type: KSType): TypeRef? {
         val nullable = type.effectiveNullable()
 
-        // Try primitive types first, then collections, using elvis operator chain
+        // Try primitive types first, then collections, using elvis operator chain.
+        // KspTypeMappers.collectionTypeRefOrNull computes its own nullable flag from native KSP
+        // nullability only, so re-apply the outer `nullable` (which also folds in the
+        // type-name-pattern convention) on top of whatever it returns.
         return KspTypeMappers.primitiveFor(type)?.let { TypeRef.Inline(it, nullable) }
-            ?: KspTypeMappers.collectionTypeRefOrNull(type, ::toRef)
+            ?: KspTypeMappers.collectionTypeRefOrNull(type, ::toRef)?.let { ref ->
+                if (nullable) ref.withNullable(true) else ref
+            }
     }
 
     /**
@@ -152,6 +161,17 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         } else {
             null
         }
+    }
+
+    /**
+     * Checks whether [type] is a known third-party type with a single well-defined JSON
+     * primitive shape (e.g. Jackson's `StringNode`, `IntNode`) and maps it to the matching
+     * [PrimitiveNode] — unlike the types with no fixed shape handled by [resolveOpaqueTypeOrNull].
+     */
+    private fun resolvePrimitiveTypeKindOrNull(type: KSType): TypeRef? {
+        val nullable = type.effectiveNullable()
+        val qualifiedName = type.declaration.qualifiedName?.asString() ?: return null
+        return PRIMITIVE_TYPE_KINDS[qualifiedName]?.let { TypeRef.Inline(PrimitiveNode(it), nullable) }
     }
 
     /**
@@ -374,7 +394,13 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                     extractNameOverride(p) ?: property?.let { extractNameOverride(it) } ?: kotlinName
                 val description = extractConstructorParamDescription(p, kotlinName, decl.docString, property)
                 val (typeRef, hasDefault) =
-                    resolvePropertyTypeAndOptionality(p.type.resolve(), p.hasDefault, p, property)
+                    resolvePropertyTypeAndOptionality(
+                        p.type.resolve(),
+                        p.hasDefault,
+                        p,
+                        property,
+                        property?.getter,
+                    )
                 addProperty(kotlinName, propertyName, typeRef, description, hasDefault)
             }
         } else {
@@ -392,7 +418,12 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                             elementKdocFallback = { prop.descriptionFromKdoc() },
                         )
                     val (typeRef, hasDefault) =
-                        resolvePropertyTypeAndOptionality(prop.type.resolve(), nativeHasDefault = false, prop)
+                        resolvePropertyTypeAndOptionality(
+                            prop.type.resolve(),
+                            nativeHasDefault = false,
+                            prop,
+                            prop.getter,
+                        )
                     addProperty(kotlinName, propertyName, typeRef, description, hasDefault)
                 }
         }
@@ -443,7 +474,9 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                         effectiveProp.type.resolve(),
                         nativeHasDefault = true,
                         parentProp,
+                        parentProp.getter,
                         overridingProp,
+                        overridingProp?.getter,
                     )
                 addProperty(
                     kotlinName,
@@ -463,5 +496,11 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
          * and should be treated as opaque (mapped to [AnyNode] → empty schema `{}`).
          */
         val OPAQUE_TYPE_NAMES: Set<String> = defaultOpaqueTypeNames()
+
+        /**
+         * Fully qualified third-party type names mapped to the [PrimitiveKind] they represent
+         * (e.g. Jackson's `StringNode` -> `STRING`).
+         */
+        val PRIMITIVE_TYPE_KINDS: Map<String, PrimitiveKind> = defaultPrimitiveTypeKinds()
     }
 }

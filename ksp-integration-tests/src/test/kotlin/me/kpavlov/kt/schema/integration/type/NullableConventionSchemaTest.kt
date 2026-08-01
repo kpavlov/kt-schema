@@ -9,7 +9,7 @@ import kotlin.test.Test
  */
 class NullableConventionSchemaTest {
     @Test
-    fun `generates schema marking Opt-suffixed type and Nullable-annotated property as nullable`() {
+    fun `Opt-suffixed type and param- and getter-targeted Nullable-annotated properties as nullable`() {
         val schema = NullableConvention::class.jsonSchemaString
 
         // language=json
@@ -37,9 +37,10 @@ class NullableConventionSchemaTest {
                     { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.EmailOpt" }
                   ]
                 },
-                "phone": { "type": ["string", "null"] }
+                "phone": { "type": ["string", "null"] },
+                "fax": { "type": ["string", "null"] }
               },
-              "required": ["name", "email", "phone"],
+              "required": ["name", "email", "phone", "fax"],
               "additionalProperties": false
             }
             """.trimIndent()
