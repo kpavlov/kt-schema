@@ -17,8 +17,10 @@ dependencies {
     implementation(libs.kotest.assertions.json)
 
     dokka(project(":kt-schema-annotations"))
-    "dokka"(project(":kt-schema-generator-core"))
-    "dokka"(project(":kt-schema-generator-json"))
+    dokka(project(":kt-schema-generator-core"))
+    dokka(project(":kt-schema-generator-json"))
+    dokka(project(":kt-schema-apt"))
+    dokka(project(":kt-schema-ksp"))
     dokka(project(":kt-schema-json"))
 }
 
