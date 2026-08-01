@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.2"
+agp = "9.3.1"
 assertj = "3.27.7"
 detekt = "2.0.0-alpha.5"
 dokka = "2.2.0"
