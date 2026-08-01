@@ -14,6 +14,7 @@ import me.kpavlov.kt.schema.generator.core.ir.Property
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.withNullable
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
@@ -34,9 +35,11 @@ import javax.lang.model.util.Types
  *
  * Supports Java records, plain classes and interfaces with primitive/boxed/String fields,
  * nested references, collections (`List`/`Set`/`Collection`/`Iterable`), maps (`Map`),
- * arrays, `Object` and upper-bounded type variables. Reference types are treated as
- * non-nullable/required: Java has no notion of optionality/default values, so every property
- * is required.
+ * arrays, `Object` and upper-bounded type variables. Java has no notion of nullability or
+ * optionality/default values, so every property is non-nullable/required by default — except
+ * where marked nullable/optional by convention (a type-name glob pattern, e.g. `*Opt`, or a
+ * `@Nullable`-style annotation; see [Introspections.isNullableTypeName]/[Introspections.isNullableAnnotation]
+ * and their optional-marker counterparts).
  *
  * A fresh context is created per root type so `$defs` stay scoped to the types reachable
  * from that root; [nodeCache] memoizes built nodes across roots so nested types shared
@@ -54,13 +57,16 @@ internal class AptIntrospectionContext(
     //region Type conversion
 
     override fun toRef(type: TypeMirror): TypeRef {
-        primitiveKindFor(type)?.let { return TypeRef.Inline(PrimitiveNode(it)) }
-        return when (type.kind) {
-            TypeKind.ARRAY -> handleArray(type)
-            TypeKind.TYPEVAR -> handleTypeVariable(type)
-            TypeKind.DECLARED -> handleDeclared(type as DeclaredType) ?: handleReferenceType(type)
-            else -> handleReferenceType(type)
-        }
+        val nullable = isNullableByTypeName(type)
+        val ref =
+            primitiveKindFor(type)?.let { TypeRef.Inline(PrimitiveNode(it)) }
+                ?: when (type.kind) {
+                    TypeKind.ARRAY -> handleArray(type)
+                    TypeKind.TYPEVAR -> handleTypeVariable(type)
+                    TypeKind.DECLARED -> handleDeclared(type as DeclaredType) ?: handleReferenceType(type)
+                    else -> handleReferenceType(type)
+                }
+        return if (nullable) ref.withNullable(true) else ref
     }
 
     /**
@@ -258,9 +264,14 @@ internal class AptIntrospectionContext(
                     // Skip components marked with an ignore annotation (e.g. @JsonIgnore)
                     if (isIgnored(targets)) return@forEach
                     val propertyName = nameOverrideFor(targets) ?: name
-                    required += propertyName
+                    val componentType = component.asType()
+                    // Optional by convention (type-name pattern or @Nullable-style annotation) —
+                    // excluded from `required`, the same way a Kotlin default value is handled.
+                    if (!isOptionalByTypeName(componentType) && !isOptionalAnnotated(targets)) {
+                        required += propertyName
+                    }
                     val description = recordComponentDescription(component, field)
-                    props += toProperty(propertyName, component.asType(), description)
+                    props += toProperty(propertyName, componentType, description, targets)
                 }
 
                 objectNode(element, props, required)
@@ -289,8 +300,11 @@ internal class AptIntrospectionContext(
                         // Skip fields marked with an ignore annotation (e.g. @JsonIgnore)
                         if (isIgnored(listOf(field))) return@forEach
                         val propertyName = nameOverrideFor(listOf(field)) ?: name
-                        required += propertyName
-                        props += toProperty(propertyName, field.asType(), extractDescription(field))
+                        val fieldType = field.asType()
+                        if (!isOptionalByTypeName(fieldType) && !isOptionalAnnotated(listOf(field))) {
+                            required += propertyName
+                        }
+                        props += toProperty(propertyName, fieldType, extractDescription(field), listOf(field))
                     }
 
                 objectNode(element, props, required)
@@ -320,8 +334,11 @@ internal class AptIntrospectionContext(
                         // Skip accessors marked with an ignore annotation (e.g. @JsonIgnore)
                         if (isIgnored(listOf(method))) return@forEach
                         val name = nameOverrideFor(listOf(method)) ?: propertyName(method.simpleName.toString())
-                        required += name
-                        props += toProperty(name, method.returnType, extractDescription(method))
+                        val returnType = method.returnType
+                        if (!isOptionalByTypeName(returnType) && !isOptionalAnnotated(listOf(method))) {
+                            required += name
+                        }
+                        props += toProperty(name, returnType, extractDescription(method), listOf(method))
                     }
 
                 objectNode(element, props, required)
@@ -425,10 +442,11 @@ internal class AptIntrospectionContext(
         name: String,
         type: TypeMirror,
         description: String?,
+        annotationTargets: List<Element> = emptyList(),
     ): Property =
         Property(
             name = name,
-            type = toRef(type),
+            type = toRef(type).let { if (isNullableAnnotated(annotationTargets)) it.withNullable(true) else it },
             description = description,
         )
 
@@ -523,6 +541,52 @@ internal class AptIntrospectionContext(
                 qualifiedName = annotationElement.qualifiedName.toString(),
             )
         }
+
+    /**
+     * Returns `true` if any of the given annotation targets carries a recognized nullable
+     * marker (e.g. `@Nullable`).
+     */
+    private fun isNullableAnnotated(targets: List<Element>): Boolean =
+        targets.any(::isNullableAnnotation)
+
+    private fun isNullableAnnotation(element: Element): Boolean =
+        element.annotationMirrors.any { mirror ->
+            val annotationElement = mirror.annotationType.asElement() as TypeElement
+            Introspections.isNullableAnnotation(
+                simpleName = annotationElement.simpleName.toString(),
+                qualifiedName = annotationElement.qualifiedName.toString(),
+            )
+        }
+
+    /**
+     * Returns `true` if any of the given annotation targets carries a recognized optional
+     * marker (e.g. `@Nullable`).
+     */
+    private fun isOptionalAnnotated(targets: List<Element>): Boolean =
+        targets.any(::isOptionalAnnotation)
+
+    private fun isOptionalAnnotation(element: Element): Boolean =
+        element.annotationMirrors.any { mirror ->
+            val annotationElement = mirror.annotationType.asElement() as TypeElement
+            Introspections.isOptionalAnnotation(
+                simpleName = annotationElement.simpleName.toString(),
+                qualifiedName = annotationElement.qualifiedName.toString(),
+            )
+        }
+
+    /**
+     * Checks whether [type]'s simple class name matches a configured nullable-type-name glob
+     * pattern (e.g. `*Opt`).
+     */
+    private fun isNullableByTypeName(type: TypeMirror): Boolean =
+        Introspections.isNullableTypeName(asTypeElement(type)?.simpleName?.toString())
+
+    /**
+     * Checks whether [type]'s simple class name matches a configured optional-type-name glob
+     * pattern (e.g. `*Opt`).
+     */
+    private fun isOptionalByTypeName(type: TypeMirror): Boolean =
+        Introspections.isOptionalTypeName(asTypeElement(type)?.simpleName?.toString())
 
     //endregion
 }

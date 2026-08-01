@@ -14,6 +14,10 @@ private const val IGNORE_NAMES_KEY = "introspector.annotations.ignore.names"
 private const val NAME_NAMES_KEY = "introspector.annotations.name.names"
 private const val NAME_ATTRIBUTES_KEY = "introspector.annotations.name.attributes"
 private const val OPAQUE_TYPE_NAMES_KEY = "introspector.opaque.type.names"
+private const val NULLABLE_ANNOTATION_NAMES_KEY = "introspector.annotations.nullable.names"
+private const val NULLABLE_TYPE_PATTERNS_KEY = "introspector.types.nullable.patterns"
+private const val OPTIONAL_ANNOTATION_NAMES_KEY = "introspector.annotations.optional.names"
+private const val OPTIONAL_TYPE_PATTERNS_KEY = "introspector.types.optional.patterns"
 
 /**
  * Default fallback values if configuration loading fails
@@ -63,6 +67,22 @@ private val DEFAULT_NAME_ANNOTATION_NAMES =
 private val DEFAULT_NAME_VALUE_ATTRIBUTES =
     listOf(
         "value",
+    )
+
+/**
+ * Default fallback values if configuration loading fails
+ */
+private val DEFAULT_NULLABLE_ANNOTATION_NAMES =
+    listOf(
+        "nullable",
+    )
+
+/**
+ * Default fallback values if configuration loading fails
+ */
+private val DEFAULT_NULLABLE_TYPE_PATTERNS =
+    listOf(
+        "*Opt",
     )
 
 private val logger = KotlinLogging.logger {}
@@ -132,6 +152,30 @@ internal actual object Config {
         } ?: DEFAULT_OPAQUE_TYPE_NAMES
     }
 
+    actual val nullableAnnotationNames: List<String> by lazy {
+        loadConfiguration { properties ->
+            parseListProperty(properties, NULLABLE_ANNOTATION_NAMES_KEY)
+        } ?: DEFAULT_NULLABLE_ANNOTATION_NAMES
+    }
+
+    actual val nullableTypeNamePatterns: List<String> by lazy {
+        loadConfiguration { properties ->
+            parseListPropertyPreservingCase(properties, NULLABLE_TYPE_PATTERNS_KEY)
+        } ?: DEFAULT_NULLABLE_TYPE_PATTERNS
+    }
+
+    actual val optionalAnnotationNames: List<String> by lazy {
+        loadConfiguration { properties ->
+            parseListProperty(properties, OPTIONAL_ANNOTATION_NAMES_KEY)
+        } ?: DEFAULT_NULLABLE_ANNOTATION_NAMES
+    }
+
+    actual val optionalTypeNamePatterns: List<String> by lazy {
+        loadConfiguration { properties ->
+            parseListPropertyPreservingCase(properties, OPTIONAL_TYPE_PATTERNS_KEY)
+        } ?: DEFAULT_NULLABLE_TYPE_PATTERNS
+    }
+
     private fun <T> loadConfiguration(extractor: (Properties) -> T): T? =
         try {
             val properties = loadProperties()
@@ -183,6 +227,31 @@ internal actual object Config {
             .map { it.trim() }
             .filter { it.isNotEmpty() }
             .map { name -> if ('.' in name) name else name.lowercase() }
+            .distinct()
+            .also { list ->
+                require(list.isNotEmpty()) {
+                    "Property '$key' in $CONFIG_FILE_NAME resulted in empty list after parsing"
+                }
+            }
+    }
+
+    /**
+     * Parses a comma-separated list property, preserving the original case of every entry.
+     * Used for glob patterns matched against class simple names, which are case-sensitive.
+     */
+    private fun parseListPropertyPreservingCase(
+        properties: Properties,
+        key: String,
+    ): List<String> {
+        val value = properties.getProperty(key)
+        require(!value.isNullOrBlank()) {
+            "Required property '$key' is missing or empty in $CONFIG_FILE_NAME"
+        }
+
+        return value
+            .split(',')
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
             .distinct()
             .also { list ->
                 require(list.isNotEmpty()) {

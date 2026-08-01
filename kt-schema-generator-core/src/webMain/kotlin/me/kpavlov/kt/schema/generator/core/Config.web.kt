@@ -13,4 +13,12 @@ internal actual object Config {
         get() = listOf("value")
     actual val opaqueTypeNames: Set<String>
         get() = DEFAULT_OPAQUE_TYPE_NAMES
+    actual val nullableAnnotationNames: List<String>
+        get() = listOf("Nullable")
+    actual val nullableTypeNamePatterns: List<String>
+        get() = listOf("*Opt")
+    actual val optionalAnnotationNames: List<String>
+        get() = listOf("Nullable")
+    actual val optionalTypeNamePatterns: List<String>
+        get() = listOf("*Opt")
 }

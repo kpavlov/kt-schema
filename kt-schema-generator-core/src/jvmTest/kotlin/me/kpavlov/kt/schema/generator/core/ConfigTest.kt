@@ -53,4 +53,24 @@ class ConfigTest {
             shouldContain("com.fasterxml.jackson.annotation.JsonTypeName")
         }
     }
+
+    @Test
+    fun `loads nullable annotation names from properties`() {
+        Config.nullableAnnotationNames shouldContain "nullable"
+    }
+
+    @Test
+    fun `loads optional annotation names from properties`() {
+        Config.optionalAnnotationNames shouldContain "nullable"
+    }
+
+    @Test
+    fun `loads nullable type name patterns from properties preserving case`() {
+        Config.nullableTypeNamePatterns shouldContain "*Opt"
+    }
+
+    @Test
+    fun `loads optional type name patterns from properties preserving case`() {
+        Config.optionalTypeNamePatterns shouldContain "*Opt"
+    }
 }

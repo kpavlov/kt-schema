@@ -1,10 +1,12 @@
 package me.kpavlov.kt.schema.generator.reflect
 
 import me.kpavlov.kt.schema.generator.core.Config
+import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
 import me.kpavlov.kt.schema.generator.core.ir.Discriminator
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
+import me.kpavlov.kt.schema.generator.core.ir.Introspections
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
@@ -15,6 +17,7 @@ import me.kpavlov.kt.schema.generator.core.ir.Property
 import me.kpavlov.kt.schema.generator.core.ir.SubtypeRef
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.withNullable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
@@ -25,6 +28,7 @@ import kotlin.reflect.full.createType
  * Reflection-based introspection context based on [KType].
  * Only supports [KClass] classifiers for introspection, generics are not supported.
  */
+@OptIn(InternalSchemaGeneratorApi::class)
 @Suppress("TooManyFunctions")
 internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>() {
     /**
@@ -47,7 +51,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
     @Suppress("ReturnCount")
     override fun toRef(type: KType): TypeRef {
         val klass = type.klass
-        val nullable = type.isMarkedNullable
+        val nullable = type.effectiveNullable()
 
         // Check cache first
         typeRefCache[type]?.let { cachedRef ->
@@ -87,6 +91,14 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
     }
 
     //region KClass type matchers
+
+    /**
+     * Whether [this] type should be treated as nullable — either natively (Kotlin `?`) or by
+     * convention (its resolved class's simple name matches a configured nullable-type-name
+     * glob pattern, e.g. `*Opt`).
+     */
+    private fun KType.effectiveNullable(): Boolean =
+        isMarkedNullable || Introspections.isNullableTypeName(klass.simpleName)
 
     /**
      * Checks and maps a Kotlin primitive class to its corresponding [PrimitiveKind].
@@ -159,8 +171,8 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                 ?.let { toRef(it) }
                 ?: TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING), false)
 
-        val ref = TypeRef.Inline(ListNode(elementRef), type.isMarkedNullable)
-        if (!type.isMarkedNullable) typeRefCache[type] = ref
+        val ref = TypeRef.Inline(ListNode(elementRef), type.effectiveNullable())
+        if (!type.effectiveNullable()) typeRefCache[type] = ref
         return ref
     }
 
@@ -190,8 +202,8 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                 ?.let { toRef(it) }
                 ?: TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING), false)
 
-        val ref = TypeRef.Inline(MapNode(keyRef, valueRef), type.isMarkedNullable)
-        if (!type.isMarkedNullable) typeRefCache[type] = ref
+        val ref = TypeRef.Inline(MapNode(keyRef, valueRef), type.effectiveNullable())
+        if (!type.effectiveNullable()) typeRefCache[type] = ref
         return ref
     }
 
@@ -205,8 +217,8 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             createEnumNode(type.klass)
         }
 
-        val ref = TypeRef.Ref(id, type.isMarkedNullable)
-        if (!type.isMarkedNullable) typeRefCache[type] = ref
+        val ref = TypeRef.Ref(id, type.effectiveNullable())
+        if (!type.effectiveNullable()) typeRefCache[type] = ref
         return ref
     }
 
@@ -221,8 +233,8 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             createObjectNode(klass)
         }
 
-        val ref = TypeRef.Ref(id, type.isMarkedNullable)
-        if (!type.isMarkedNullable) typeRefCache[type] = ref
+        val ref = TypeRef.Ref(id, type.effectiveNullable())
+        if (!type.effectiveNullable()) typeRefCache[type] = ref
         return ref
     }
 
@@ -244,8 +256,8 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             polymorphicNode
         }
 
-        val ref = TypeRef.Ref(id, type.isMarkedNullable)
-        if (!type.isMarkedNullable) typeRefCache[type] = ref
+        val ref = TypeRef.Ref(id, type.effectiveNullable())
+        if (!type.effectiveNullable()) typeRefCache[type] = ref
         return ref
     }
 
@@ -411,12 +423,20 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         val annotations = collectPropertyAnnotations(property)
         if (isSchemaIgnored(annotations)) return null
 
+        val typeRef =
+            toRef(property.returnType).let {
+                if (isNullableAnnotated(annotations)) it.withNullable(true) else it
+            }
         val fixedValue = defaultValues[property.name]
+        val hasDefaultValue =
+            fixedValue != null ||
+                isOptionalTypeName(property.returnType.klass) ||
+                isOptionalAnnotated(annotations)
         return Property(
             name = extractNameOverride(annotations) ?: fallbackNameOverride ?: property.name,
-            type = toRef(property.returnType),
+            type = typeRef,
             description = extractDescription(annotations) ?: fallbackDescription,
-            hasDefaultValue = fixedValue != null,
+            hasDefaultValue = hasDefaultValue,
             defaultValue = fixedValue,
             isConstant = fixedValue != null,
         )
@@ -488,7 +508,6 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
 
         constructor?.parameters?.forEach { param ->
             val kotlinName = param.name ?: return@forEach
-            val hasDefault = param.isOptional
 
             // Collect annotations from the parameter, property, getter, and backing field
             val annotations = collectConstructorAnnotations(klass, kotlinName, param.annotations)
@@ -500,10 +519,22 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             val propertyName = extractNameOverride(annotations) ?: kotlinName
 
             val propertyType = param.type
-            val typeRef = toRef(propertyType)
+            val typeRef =
+                toRef(propertyType).let {
+                    if (isNullableAnnotated(annotations)) it.withNullable(true) else it
+                }
+
+            // A property is optional (excluded from `required`) when it has a Kotlin default
+            // value, or when it's marked nullable/optional by convention (type-name pattern or
+            // `@Nullable`-style annotation) — the latter mainly matters for front ends without
+            // native default-value support, but applies uniformly here for consistency.
+            val hasDefault =
+                param.isOptional ||
+                    isOptionalTypeName(propertyType.klass) ||
+                    isOptionalAnnotated(annotations)
 
             // Get the actual default value if available
-            val defaultValue = if (hasDefault) defaultValues[kotlinName] else null
+            val defaultValue = if (param.isOptional) defaultValues[kotlinName] else null
 
             properties +=
                 Property(

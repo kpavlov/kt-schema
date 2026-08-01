@@ -1,5 +1,6 @@
 package me.kpavlov.kt.schema.generator.json.serialization
 
+import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
 import me.kpavlov.kt.schema.generator.core.ir.Discriminator
@@ -14,6 +15,7 @@ import me.kpavlov.kt.schema.generator.core.ir.Property
 import me.kpavlov.kt.schema.generator.core.ir.SubtypeRef
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.withNullable
 import me.kpavlov.kt.schema.generator.json.SerialSchemaIgnore
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PolymorphicKind
@@ -34,6 +36,7 @@ import kotlinx.serialization.descriptors.PrimitiveKind as SerialPrimitiveKind
  *
  * @property json The [Json] configuration used to extract discriminator settings for polymorphic types
  */
+@OptIn(InternalSchemaGeneratorApi::class)
 @Suppress("TooManyFunctions")
 internal class SerializationIntrospectionContext(
     private val json: Json,
@@ -534,13 +537,4 @@ internal class SerializationIntrospectionContext(
             .filterIsInstance<JsonClassDiscriminator>()
             .firstOrNull()
             ?.discriminator ?: json.configuration.classDiscriminator
-
-    /**
-     * Returns a new [TypeRef] with the specified nullable flag.
-     */
-    private fun TypeRef.withNullable(nullable: Boolean): TypeRef =
-        when (this) {
-            is TypeRef.Inline -> copy(nullable = nullable)
-            is TypeRef.Ref -> copy(nullable = nullable)
-        }
 }
