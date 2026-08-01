@@ -1,5 +1,7 @@
 package me.kpavlov.kt.schema.generator.core.ir
 
+import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
+
 /** A graph of discovered types plus the root type reference used to emit schemas. */
 public data class TypeGraph(
     val root: TypeRef,
@@ -29,6 +31,19 @@ public sealed interface TypeRef {
         override val nullable: Boolean = false,
     ) : TypeRef
 }
+
+/**
+ * Returns a copy of this [TypeRef] with the specified nullable flag.
+ * Shared across introspection front ends (reflection, KSP, APT, kotlinx.serialization) so
+ * conventions layered on top of native nullability (e.g. `@Nullable`-style annotations,
+ * type-name patterns) all go through the same code path.
+ */
+@InternalSchemaGeneratorApi
+public fun TypeRef.withNullable(nullable: Boolean): TypeRef =
+    when (this) {
+        is TypeRef.Inline -> copy(nullable = nullable)
+        is TypeRef.Ref -> copy(nullable = nullable)
+    }
 
 /** Base node for all kinds supported by the schema IR. */
 public sealed interface TypeNode {

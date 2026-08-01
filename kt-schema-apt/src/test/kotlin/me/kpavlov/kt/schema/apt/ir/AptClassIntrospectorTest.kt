@@ -348,6 +348,65 @@ class AptClassIntrospectorTest {
         }
     }
 
+    @Test
+    fun `should treat Nullable-annotated field as nullable and exclude it from required`() {
+        val graph =
+            graph(
+                root = "com.example.Contact",
+                """
+                    package com.example;
+
+                    public @interface Nullable {}
+                """.trimIndent(),
+                javaClass(
+                    "com.example",
+                    "Contact",
+                    """
+                        public String name;
+                        @Nullable
+                        public String phone;
+                    """.trimIndent(),
+                ),
+            )
+
+        val node = graph.rootNode()
+        assertSoftly(node) {
+            required.shouldContainExactlyInAnyOrder(setOf("name"))
+            val props = properties.associateBy { it.name }
+            props.getValue("phone").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+                inline.node.shouldBeInstanceOf<PrimitiveNode> { prim -> prim.kind shouldBe PrimitiveKind.STRING }
+                inline.nullable shouldBe true
+            }
+        }
+    }
+
+    @Test
+    fun `should treat Opt-suffixed type name as nullable and exclude field from required`() {
+        val graph =
+            graph(
+                root = "com.example.Contact",
+                javaClass("com.example", "EmailOpt", "public String value;"),
+                javaClass(
+                    "com.example",
+                    "Contact",
+                    """
+                        public String name;
+                        public EmailOpt email;
+                    """.trimIndent(),
+                ),
+            )
+
+        val node = graph.rootNode()
+        assertSoftly(node) {
+            required.shouldContainExactlyInAnyOrder(setOf("name"))
+            val props = properties.associateBy { it.name }
+            props.getValue("email").type.shouldBeInstanceOf<TypeRef.Ref> { ref ->
+                ref.id.value shouldBe "com.example.EmailOpt"
+                ref.nullable shouldBe true
+            }
+        }
+    }
+
     //endregion
 
     //region helpers

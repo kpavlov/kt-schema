@@ -41,7 +41,9 @@ See [Java Annotation Processor Guide](https://github.com/kpavlov/kt-schema/blob/
 
 - Only Java `record`s are supported as root/nested types; enums, sealed hierarchies, generics,
   collections/maps, and ordinary classes aren't yet
-- Reference-typed record components are always non-nullable/required — no `@Nullable` support yet
+- Reference-typed record components are non-nullable/required by default; mark one nullable/optional via
+  a `@Nullable`-style annotation or a type-name glob pattern (default `*Opt`) — see
+  [Java Annotation Processor Guide](https://github.com/kpavlov/kt-schema/blob/main/docs/apt.md)
 - No `include`/`exclude`/`withSchemaObject`/`visibility`/`enabled` options (available in `kt-schema-ksp`)
 
 # Package me.kpavlov.kt.schema.apt

@@ -141,6 +141,37 @@ public object Introspections {
 
     //endregion
 
+    //region Nullable / optional config
+
+    private val nullableNames: AnnotationNameSets by lazy {
+        splitByFqn(Config.nullableAnnotationNames)
+    }
+
+    private val optionalNames: AnnotationNameSets by lazy {
+        splitByFqn(Config.optionalAnnotationNames)
+    }
+
+    private val nullableTypeNamePatterns: List<Regex> by lazy {
+        compileGlobs(Config.nullableTypeNamePatterns)
+    }
+
+    private val optionalTypeNamePatterns: List<Regex> by lazy {
+        compileGlobs(Config.optionalTypeNamePatterns)
+    }
+
+    /**
+     * Compiles glob patterns (`*` matches any substring) into anchored, case-sensitive [Regex]es.
+     */
+    private fun compileGlobs(patterns: List<String>): List<Regex> =
+        patterns.map { pattern ->
+            pattern
+                .split("*")
+                .joinToString(".*") { Regex.escape(it) }
+                .let { Regex("^$it$") }
+        }
+
+    //endregion
+
     /**
      * Extracts the description text from an annotation if it matches a recognized description annotation.
      *
@@ -207,6 +238,74 @@ public object Introspections {
         } else {
             null
         }
+
+    /**
+     * Checks whether the given annotation is recognized as a nullable marker (e.g. `@Nullable`).
+     *
+     * A property carrying a matching annotation is treated as if its type were nullable, the
+     * same way Kotlin's `?` is handled — mainly useful for front ends without native nullable
+     * types (e.g. Java/APT).
+     *
+     * Simple annotation names are matched **case-insensitively**; fully qualified names are matched
+     * **case-sensitively** (exact match).
+     *
+     * @param simpleName The simple name of the annotation (e.g., "Nullable")
+     * @param qualifiedName The fully qualified name of the annotation, or null if unavailable
+     * @return `true` if the annotation is recognized as a nullable marker
+     */
+    @JvmStatic
+    public fun isNullableAnnotation(
+        simpleName: String,
+        qualifiedName: String? = null,
+    ): Boolean = matchesAnnotation(simpleName, qualifiedName, nullableNames)
+
+    /**
+     * Checks whether the given annotation is recognized as an optional marker.
+     *
+     * A property carrying a matching annotation is excluded from the emitted schema's `required`
+     * array, the same way a Kotlin default value is handled — mainly useful for front ends
+     * without native default-value support (e.g. Java/APT).
+     *
+     * Simple annotation names are matched **case-insensitively**; fully qualified names are matched
+     * **case-sensitively** (exact match).
+     *
+     * @param simpleName The simple name of the annotation (e.g., "Nullable")
+     * @param qualifiedName The fully qualified name of the annotation, or null if unavailable
+     * @return `true` if the annotation is recognized as an optional marker
+     */
+    @JvmStatic
+    public fun isOptionalAnnotation(
+        simpleName: String,
+        qualifiedName: String? = null,
+    ): Boolean = matchesAnnotation(simpleName, qualifiedName, optionalNames)
+
+    /**
+     * Checks whether [simpleName] (a type's simple class name) matches a configured
+     * nullable-type-name glob pattern (e.g. `*Opt`).
+     *
+     * A matching property type is treated as nullable, the same way Kotlin's `?` is handled.
+     * Matching is case-sensitive.
+     *
+     * @param simpleName The simple name of the resolved property type, or null if unavailable
+     * @return `true` if [simpleName] matches a configured nullable-type-name pattern
+     */
+    @JvmStatic
+    public fun isNullableTypeName(simpleName: String?): Boolean =
+        simpleName != null && nullableTypeNamePatterns.any { it.matches(simpleName) }
+
+    /**
+     * Checks whether [simpleName] (a type's simple class name) matches a configured
+     * optional-type-name glob pattern (e.g. `*Opt`).
+     *
+     * A matching property is excluded from the emitted schema's `required` array, the same way
+     * a Kotlin default value is handled. Matching is case-sensitive.
+     *
+     * @param simpleName The simple name of the resolved property type, or null if unavailable
+     * @return `true` if [simpleName] matches a configured optional-type-name pattern
+     */
+    @JvmStatic
+    public fun isOptionalTypeName(simpleName: String?): Boolean =
+        simpleName != null && optionalTypeNamePatterns.any { it.matches(simpleName) }
 
     /**
      * Extracts the first non-empty string value from annotation arguments whose key matches

@@ -2,10 +2,12 @@ package me.kpavlov.kt.schema.ksp.ir
 
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.isPublic
+import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Nullability
+import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.defaultOpaqueTypeNames
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
@@ -16,6 +18,7 @@ import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.Property
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.withNullable
 
 /**
  * Shared introspection context for KSP-based introspectors.
@@ -35,6 +38,7 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeRef
  * 6. Enum classes -> EnumNode via [handleEnum]
  * 7. Regular objects/classes -> ObjectNode via [handleObjectOrClass]
  */
+@OptIn(InternalSchemaGeneratorApi::class)
 @Suppress("TooManyFunctions")
 internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     /**
@@ -52,7 +56,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
      * @throws IllegalArgumentException if the type cannot be handled by any handler
      */
     override fun toRef(type: KSType): TypeRef {
-        val nullable = type.nullability == Nullability.NULLABLE
+        val nullable = type.effectiveNullable()
 
         // Try each handler in order, using elvis operator chain for single return
         return requireNotNull(
@@ -69,6 +73,13 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     }
 
     /**
+     * Whether this type should be treated as nullable — either natively (Kotlin `?`) or by
+     * convention (its declaration's simple name matches a configured nullable-type-name glob
+     * pattern, e.g. `*Opt`).
+     */
+    private fun KSType.effectiveNullable(): Boolean = nullability == Nullability.NULLABLE || isNullableByTypeName()
+
+    /**
      * Attempts to resolve basic types (primitives and collections) to TypeRef.
      *
      * This is the shared prefix logic used by both KspClassIntrospector and KspFunctionIntrospector
@@ -80,7 +91,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
      * @return TypeRef if this is a primitive or collection type, null otherwise
      */
     private fun resolveBasicTypeOrNull(type: KSType): TypeRef? {
-        val nullable = type.nullability == Nullability.NULLABLE
+        val nullable = type.effectiveNullable()
 
         // Try primitive types first, then collections, using elvis operator chain
         return KspTypeMappers.primitiveFor(type)?.let { TypeRef.Inline(it, nullable) }
@@ -102,7 +113,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
      * so we construct the IR nodes directly rather than walking supertypes.
      */
     private fun resolveJsonCollectionTypeOrNull(type: KSType): TypeRef? {
-        val nullable = type.nullability == Nullability.NULLABLE
+        val nullable = type.effectiveNullable()
         val qn = type.declaration.qualifiedName?.asString() ?: return null
         return when (qn) {
             "kotlinx.serialization.json.JsonObject" -> {
@@ -134,7 +145,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
      * [AnyNode] → empty schema `{}`.
      */
     private fun resolveOpaqueTypeOrNull(type: KSType): TypeRef? {
-        val nullable = type.nullability == Nullability.NULLABLE
+        val nullable = type.effectiveNullable()
         val qualifiedName = type.declaration.qualifiedName?.asString() ?: return null
         return if (qualifiedName in OPAQUE_TYPE_NAMES) {
             TypeRef.Inline(AnyNode(), nullable)
@@ -153,7 +164,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
      * @return [TypeRef.Inline] wrapping [AnyNode] if fallback is needed, null otherwise
      */
     private fun handleAnyFallback(type: KSType): TypeRef? {
-        val nullable = type.nullability == Nullability.NULLABLE
+        val nullable = type.effectiveNullable()
         val declAnyFallback = type.declaration !is KSClassDeclaration || type.declaration.qualifiedName == null
         if (!declAnyFallback) return null
 
@@ -300,13 +311,13 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
             fun addProperty(
                 kotlinName: String,
                 name: String,
-                type: KSType,
+                type: TypeRef,
                 description: String?,
                 hasDefaultValue: Boolean,
                 isConstant: Boolean = false,
             ) {
                 if (!hasDefaultValue || isConstant) required += name
-                props += createProperty(name, toRef(type), description, hasDefaultValue, isConstant)
+                props += createProperty(name, type, description, hasDefaultValue, isConstant)
                 processedKotlinNames += kotlinName
             }
 
@@ -325,9 +336,30 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         return TypeRef.Ref(id, nullable)
     }
 
+    /**
+     * Resolves a property's [TypeRef] and effective "has default value" flag, folding in the
+     * nullable/optional convention (type-name pattern or `@Nullable`-style annotation) on top of
+     * [nativeHasDefault] (a Kotlin default-value expression, or `true` for an inherited
+     * sealed-parent property with a fixed value).
+     *
+     * @param annotationSources annotated declarations to check for the convention annotation
+     *   (e.g. both a constructor parameter and its corresponding property)
+     */
+    private fun resolvePropertyTypeAndOptionality(
+        resolvedType: KSType,
+        nativeHasDefault: Boolean,
+        vararg annotationSources: KSAnnotated?,
+    ): Pair<TypeRef, Boolean> {
+        val nullableAnnotated = annotationSources.any { it?.isNullableAnnotated() == true }
+        val optionalAnnotated = annotationSources.any { it?.isOptionalAnnotated() == true }
+        val typeRef = toRef(resolvedType).let { if (nullableAnnotated) it.withNullable(true) else it }
+        val hasDefault = nativeHasDefault || resolvedType.isOptionalByTypeName() || optionalAnnotated
+        return typeRef to hasDefault
+    }
+
     private fun extractConstructorOrProperties(
         decl: KSClassDeclaration,
-        addProperty: (String, String, KSType, String?, Boolean) -> Unit,
+        addProperty: (String, String, TypeRef, String?, Boolean) -> Unit,
     ) {
         val declaredProperties = decl.getDeclaredProperties().associateBy { it.simpleName.asString() }
         // Prefer primary constructor parameters for data classes; fall back to public properties
@@ -341,7 +373,9 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 val propertyName =
                     extractNameOverride(p) ?: property?.let { extractNameOverride(it) } ?: kotlinName
                 val description = extractConstructorParamDescription(p, kotlinName, decl.docString, property)
-                addProperty(kotlinName, propertyName, p.type.resolve(), description, p.hasDefault)
+                val (typeRef, hasDefault) =
+                    resolvePropertyTypeAndOptionality(p.type.resolve(), p.hasDefault, p, property)
+                addProperty(kotlinName, propertyName, typeRef, description, hasDefault)
             }
         } else {
             declaredProperties.values
@@ -357,7 +391,9 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                             kdocTagName = "property",
                             elementKdocFallback = { prop.descriptionFromKdoc() },
                         )
-                    addProperty(kotlinName, propertyName, prop.type.resolve(), description, false)
+                    val (typeRef, hasDefault) =
+                        resolvePropertyTypeAndOptionality(prop.type.resolve(), nativeHasDefault = false, prop)
+                    addProperty(kotlinName, propertyName, typeRef, description, hasDefault)
                 }
         }
     }
@@ -365,7 +401,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     private fun extractInheritedSealedProperties(
         decl: KSClassDeclaration,
         processedKotlinNames: Set<String>,
-        addProperty: (String, String, KSType, String?, Boolean, Boolean) -> Unit,
+        addProperty: (String, String, TypeRef, String?, Boolean, Boolean) -> Unit,
     ) {
         // Add inherited properties from sealed parents that weren't in the constructor
         val sealedParents =
@@ -382,34 +418,41 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         sealedParents.forEach { parent ->
             parent.getDeclaredProperties().filter { it.isPublic() && !it.isIgnoredForSchema() }.forEach { parentProp ->
                 val kotlinName = parentProp.simpleName.asString()
-                if (kotlinName !in processedKotlinNames) {
-                    val overridingProp = childDeclaredProperties[kotlinName]
-                    val effectiveProp = overridingProp ?: parentProp
+                if (kotlinName in processedKotlinNames) return@forEach
 
-                    // Prefer the child override's own name override (covers a re-declared
-                    // `@get:JsonProperty`), falling back to the parent's — mirroring how the
-                    // reflection-based introspector resolves overrides.
-                    val name =
-                        overridingProp?.let { extractNameOverride(it) }
-                            ?: extractNameOverride(parentProp)
-                            ?: kotlinName
-                    val description =
-                        extractPropertyDescription(
-                            annotated = effectiveProp,
-                            propertyName = kotlinName,
-                            parentKdoc = parent.docString,
-                            kdocTagName = "property",
-                            elementKdocFallback = { effectiveProp.descriptionFromKdoc() },
-                        )
-                    addProperty(
-                        kotlinName,
-                        name,
-                        parentProp.type.resolve(),
-                        description,
-                        true, // Fixed value in the subclass
-                        false, // KSP cannot get the value
+                val overridingProp = childDeclaredProperties[kotlinName]
+                val effectiveProp = overridingProp ?: parentProp
+
+                // Prefer the child override's own name override (covers a re-declared
+                // `@get:JsonProperty`), falling back to the parent's — mirroring how the
+                // reflection-based introspector resolves overrides.
+                val name =
+                    overridingProp?.let { extractNameOverride(it) }
+                        ?: extractNameOverride(parentProp)
+                        ?: kotlinName
+                val description =
+                    extractPropertyDescription(
+                        annotated = effectiveProp,
+                        propertyName = kotlinName,
+                        parentKdoc = parent.docString,
+                        kdocTagName = "property",
+                        elementKdocFallback = { effectiveProp.descriptionFromKdoc() },
                     )
-                }
+                val (typeRef, _) =
+                    resolvePropertyTypeAndOptionality(
+                        parentProp.type.resolve(),
+                        nativeHasDefault = true,
+                        parentProp,
+                        overridingProp,
+                    )
+                addProperty(
+                    kotlinName,
+                    name,
+                    typeRef,
+                    description,
+                    true, // Fixed value in the subclass
+                    false, // KSP cannot get the value
+                )
             }
         }
     }

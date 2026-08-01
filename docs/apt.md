@@ -285,8 +285,8 @@ try (InputStream in = Person.class.getClassLoader()
 
 ## Supported types
 
-- Java `record`s — components map to required properties (Java records have no notion of optional/default
-  values, so every component is required)
+- Java `record`s — components map to required properties by default (Java records have no notion of
+  optional/default values); mark a component nullable/optional via convention — see below
 - Plain Java `class`es — non-static fields map to required properties, treated the same way as records
 - Java `interface`s — no-arg methods map to required properties, named per the JavaBeans convention
   (`getName()` → `name`, `isActive()` → `active`, and a bare `name()` accessor stays `name`)
@@ -302,8 +302,21 @@ try (InputStream in = Person.class.getClassLoader()
 Not yet supported: enums and sealed class hierarchies (polymorphic `oneOf` with discriminators). Processing an
 unsupported type fails the build with a descriptive error rather than emitting an incomplete schema.
 
-> [!NOTE]
-> Reference-typed components are always treated as non-nullable/required — there's no `@Nullable` support yet.
+### Marking a property nullable/optional
+
+Java has no `?` type syntax and no default-value expressions, so every property is non-nullable/required by
+default. Two conventions mark a property nullable *and* excluded from `required`, the same way Kotlin's `?`
+or a default value is handled:
+
+- **Type-name glob pattern** — a field/component whose *type's* simple class name matches a configured
+  pattern (`*` = any substring; default `*Opt`), e.g. a type literally named `EmailOpt`.
+- **`@Nullable` annotation** — a field/component/accessor annotated with a marker annotation (default
+  simple name `Nullable`, matched case-insensitively regardless of package — so `javax.annotation.Nullable`,
+  `jakarta.annotation.Nullable`, `org.jetbrains.annotations.Nullable`, etc. all work out of the box).
+
+Both are configurable via `kt-schema.properties` (`introspector.types.nullable.patterns`,
+`introspector.types.optional.patterns`, `introspector.annotations.nullable.names`,
+`introspector.annotations.optional.names`).
 
 ## See Also
 

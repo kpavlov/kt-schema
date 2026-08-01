@@ -172,4 +172,66 @@ internal expect object Config {
      *                tools.jackson.databind.JsonNode and its node hierarchy
      */
     val opaqueTypeNames: Set<String>
+
+    /**
+     * Ordered list of lowercase annotation simple names recognized as nullable markers
+     * (e.g. `@Nullable`). A property carrying one of these annotations is treated as if its
+     * type were nullable (`type: [T, "null"]` in the emitted schema), the same way Kotlin's `?`
+     * is handled — primarily useful for front ends without native nullable types (e.g. Java/APT).
+     *
+     * Matching follows the same rules as [ignoreAnnotationNames]: simple names case-insensitive,
+     * FQNs (containing a dot) case-sensitive. A single simple-name entry like `"Nullable"` already
+     * matches `javax.annotation.Nullable`, `jakarta.annotation.Nullable`,
+     * `org.jetbrains.annotations.Nullable`, `org.jspecify.annotations.Nullable`, etc., since they
+     * all share that simple name.
+     *
+     * Loaded lazily from the `introspector.annotations.nullable.names` property in
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
+     *
+     * Default value: Nullable
+     */
+    val nullableAnnotationNames: List<String>
+
+    /**
+     * Glob patterns (`*` matches any substring) matched against a property's resolved type's
+     * simple class name. A match marks the property nullable, the same way Kotlin's `?` is
+     * handled — e.g. a type literally named `EmailOpt` matches the default pattern `*Opt`.
+     *
+     * Case-sensitive: class names are case-sensitive by convention.
+     *
+     * Loaded lazily from the `introspector.types.nullable.patterns` property in
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
+     *
+     * Default value: *Opt
+     */
+    val nullableTypeNamePatterns: List<String>
+
+    /**
+     * Ordered list of lowercase annotation simple names recognized as optional markers.
+     * A property carrying one of these annotations is excluded from the emitted schema's
+     * `required` array, the same way a Kotlin default value is handled — primarily useful for
+     * front ends without native default-value support (e.g. Java/APT).
+     *
+     * Matching follows the same rules as [ignoreAnnotationNames].
+     *
+     * Loaded lazily from the `introspector.annotations.optional.names` property in
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
+     *
+     * Default value: Nullable
+     */
+    val optionalAnnotationNames: List<String>
+
+    /**
+     * Glob patterns (`*` matches any substring) matched against a property's resolved type's
+     * simple class name. A match excludes the property from the emitted schema's `required`
+     * array, the same way a Kotlin default value is handled.
+     *
+     * Case-sensitive: class names are case-sensitive by convention.
+     *
+     * Loaded lazily from the `introspector.types.optional.patterns` property in
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
+     *
+     * Default value: *Opt
+     */
+    val optionalTypeNamePatterns: List<String>
 }

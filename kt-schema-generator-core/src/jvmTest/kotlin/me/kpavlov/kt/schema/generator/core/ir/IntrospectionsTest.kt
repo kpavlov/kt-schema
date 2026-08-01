@@ -235,4 +235,72 @@ class IntrospectionsTest {
     }
 
     //endregion
+
+    //region Nullable / optional annotation recognition
+
+    @ParameterizedTest
+    @CsvSource(
+        "Nullable",
+        "nullable",
+        "NULLABLE",
+    )
+    fun `recognizes nullable annotations by simple name case-insensitively`(name: String) {
+        Introspections.isNullableAnnotation(name) shouldBe true
+        Introspections.isOptionalAnnotation(name) shouldBe true
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "NotNull",
+        "Nonnull",
+        "Description",
+        "UnknownAnnotation",
+    )
+    fun `does not match unrecognized annotation names as nullable or optional`(name: String) {
+        Introspections.isNullableAnnotation(name) shouldBe false
+        Introspections.isOptionalAnnotation(name) shouldBe false
+    }
+
+    @Test
+    fun `simple-name nullable annotation still matches when qualifiedName is provided`() {
+        Introspections.isNullableAnnotation(
+            simpleName = "Nullable",
+            qualifiedName = "javax.annotation.Nullable",
+        ) shouldBe true
+    }
+
+    //endregion
+
+    //region Nullable / optional type-name pattern matching
+
+    @ParameterizedTest
+    @CsvSource(
+        "EmailOpt",
+        "JsonNodeOpt",
+        "Opt",
+    )
+    fun `recognizes type names matching the default Opt glob pattern`(name: String) {
+        Introspections.isNullableTypeName(name) shouldBe true
+        Introspections.isOptionalTypeName(name) shouldBe true
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "Email",
+        "Optional",
+        "emailopt",
+        "EMAILOPT",
+    )
+    fun `does not match type names that don't fit the Opt glob pattern`(name: String) {
+        Introspections.isNullableTypeName(name) shouldBe false
+        Introspections.isOptionalTypeName(name) shouldBe false
+    }
+
+    @Test
+    fun `type-name pattern matching returns false for null simpleName`() {
+        Introspections.isNullableTypeName(null) shouldBe false
+        Introspections.isOptionalTypeName(null) shouldBe false
+    }
+
+    //endregion
 }
