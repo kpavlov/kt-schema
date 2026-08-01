@@ -267,11 +267,10 @@ internal class AptIntrospectionContext(
                     val componentType = component.asType()
                     // Optional by convention (type-name pattern or @Nullable-style annotation) —
                     // excluded from `required`, the same way a Kotlin default value is handled.
-                    if (!isOptionalByTypeName(componentType) && !isOptionalAnnotated(targets)) {
-                        required += propertyName
-                    }
+                    val optional = isOptionalByTypeName(componentType) || isOptionalAnnotated(targets)
+                    if (!optional) required += propertyName
                     val description = recordComponentDescription(component, field)
-                    props += toProperty(propertyName, componentType, description, targets)
+                    props += toProperty(propertyName, componentType, description, targets, optional)
                 }
 
                 objectNode(element, props, required)
@@ -301,10 +300,10 @@ internal class AptIntrospectionContext(
                         if (isIgnored(listOf(field))) return@forEach
                         val propertyName = nameOverrideFor(listOf(field)) ?: name
                         val fieldType = field.asType()
-                        if (!isOptionalByTypeName(fieldType) && !isOptionalAnnotated(listOf(field))) {
-                            required += propertyName
-                        }
-                        props += toProperty(propertyName, fieldType, extractDescription(field), listOf(field))
+                        val optional = isOptionalByTypeName(fieldType) || isOptionalAnnotated(listOf(field))
+                        if (!optional) required += propertyName
+                        props +=
+                            toProperty(propertyName, fieldType, extractDescription(field), listOf(field), optional)
                     }
 
                 objectNode(element, props, required)
@@ -335,10 +334,9 @@ internal class AptIntrospectionContext(
                         if (isIgnored(listOf(method))) return@forEach
                         val name = nameOverrideFor(listOf(method)) ?: propertyName(method.simpleName.toString())
                         val returnType = method.returnType
-                        if (!isOptionalByTypeName(returnType) && !isOptionalAnnotated(listOf(method))) {
-                            required += name
-                        }
-                        props += toProperty(name, returnType, extractDescription(method), listOf(method))
+                        val optional = isOptionalByTypeName(returnType) || isOptionalAnnotated(listOf(method))
+                        if (!optional) required += name
+                        props += toProperty(name, returnType, extractDescription(method), listOf(method), optional)
                     }
 
                 objectNode(element, props, required)
@@ -443,11 +441,13 @@ internal class AptIntrospectionContext(
         type: TypeMirror,
         description: String?,
         annotationTargets: List<Element> = emptyList(),
+        optional: Boolean = false,
     ): Property =
         Property(
             name = name,
             type = toRef(type).let { if (isNullableAnnotated(annotationTargets)) it.withNullable(true) else it },
             description = description,
+            hasDefaultValue = optional,
         )
 
     private fun objectNode(

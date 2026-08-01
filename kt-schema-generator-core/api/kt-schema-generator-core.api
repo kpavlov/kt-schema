@@ -110,6 +110,12 @@ public final class me/kpavlov/kt/schema/generator/core/ir/Introspections {
 	public static final fun getNameOverride (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
 	public static final fun isIgnoreAnnotation (Ljava/lang/String;Ljava/lang/String;)Z
 	public static synthetic fun isIgnoreAnnotation$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Z
+	public static final fun isNullableAnnotation (Ljava/lang/String;Ljava/lang/String;)Z
+	public static synthetic fun isNullableAnnotation$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Z
+	public static final fun isNullableTypeName (Ljava/lang/String;)Z
+	public static final fun isOptionalAnnotation (Ljava/lang/String;Ljava/lang/String;)Z
+	public static synthetic fun isOptionalAnnotation$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Z
+	public static final fun isOptionalTypeName (Ljava/lang/String;)Z
 }
 
 public final class me/kpavlov/kt/schema/generator/core/ir/ListNode : me/kpavlov/kt/schema/generator/core/ir/TypeNode {
@@ -260,6 +266,10 @@ public final class me/kpavlov/kt/schema/generator/core/ir/TypeGraph {
 	public final fun getRoot ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/TypeGraphKt {
+	public static final fun withNullable (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Z)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
 }
 
 public abstract interface class me/kpavlov/kt/schema/generator/core/ir/TypeGraphTransformer {
