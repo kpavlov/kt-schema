@@ -370,12 +370,13 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
 
         sealedParents.forEach { parent ->
             parent.getDeclaredProperties().filter { it.isPublic() && !it.isIgnoredForSchema() }.forEach { prop ->
-                val name = prop.simpleName.asString()
-                if (name !in processedProperties) {
+                val kotlinName = prop.simpleName.asString()
+                if (kotlinName !in processedProperties) {
+                    val name = extractNameOverride(prop) ?: kotlinName
                     val description =
                         extractPropertyDescription(
                             annotated = prop,
-                            propertyName = name,
+                            propertyName = kotlinName,
                             parentKdoc = parent.docString,
                             kdocTagName = "property",
                             elementKdocFallback = { prop.descriptionFromKdoc() },

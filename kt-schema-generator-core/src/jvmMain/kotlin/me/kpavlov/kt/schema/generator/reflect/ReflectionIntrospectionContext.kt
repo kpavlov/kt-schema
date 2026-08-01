@@ -343,16 +343,22 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             // Find the property in the current class (inherited)
             val property = findPropertyByName(klass, propertyName)
 
-            if (property != null && !isSchemaIgnored(collectPropertyAnnotations(property))) {
+            if (property != null) {
+                val annotations = collectPropertyAnnotations(property)
+                // Skip properties marked with an ignore annotation (e.g. @JsonIgnore)
+                if (isSchemaIgnored(annotations)) return@forEach
+
+                // Name override (e.g. @SerialName, @JsonProperty), else the Kotlin property name
+                val emittedName = extractNameOverride(annotations) ?: propertyName
                 val typeRef = toRef(property.returnType)
-                val description = parentPropertyDescriptions[propertyName]
+                val description = extractDescription(annotations) ?: parentPropertyDescriptions[propertyName]
 
                 // For inherited properties, try to get the fixed value from the instance
                 val fixedValue = defaultValues[propertyName]
 
                 properties +=
                     Property(
-                        name = propertyName,
+                        name = emittedName,
                         type = typeRef,
                         description = description,
                         hasDefaultValue = fixedValue != null,
@@ -361,8 +367,9 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                     )
 
                 // Inherited properties with fixed values are required
-                requiredProperties += propertyName
+                requiredProperties += emittedName
                 processedProperties += propertyName
+                processedProperties += emittedName
             }
         }
 
@@ -372,20 +379,26 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                 .filterIsInstance<KProperty<*>>()
                 .filter { it.visibility == KVisibility.PUBLIC }
                 .forEach { prop ->
-                    if (prop.name !in processedProperties && !isSchemaIgnored(collectPropertyAnnotations(prop))) {
-                        val fixedValue = defaultValues[prop.name]
-                        properties +=
-                            Property(
-                                name = prop.name,
-                                type = toRef(prop.returnType),
-                                description = extractDescription(prop.annotations),
-                                hasDefaultValue = fixedValue != null,
-                                defaultValue = fixedValue,
-                                isConstant = fixedValue != null,
-                            )
-                        requiredProperties += prop.name
-                        processedProperties += prop.name
-                    }
+                    if (prop.name in processedProperties) return@forEach
+                    val annotations = collectPropertyAnnotations(prop)
+                    // Skip properties marked with an ignore annotation (e.g. @JsonIgnore)
+                    if (isSchemaIgnored(annotations)) return@forEach
+
+                    // Name override (e.g. @SerialName, @JsonProperty), else the Kotlin property name
+                    val emittedName = extractNameOverride(annotations) ?: prop.name
+                    val fixedValue = defaultValues[prop.name]
+                    properties +=
+                        Property(
+                            name = emittedName,
+                            type = toRef(prop.returnType),
+                            description = extractDescription(annotations),
+                            hasDefaultValue = fixedValue != null,
+                            defaultValue = fixedValue,
+                            isConstant = fixedValue != null,
+                        )
+                    requiredProperties += emittedName
+                    processedProperties += prop.name
+                    processedProperties += emittedName
                 }
         }
 

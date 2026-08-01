@@ -2,6 +2,7 @@ package me.kpavlov.kt.schema.generator.reflect
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonPropertyDescription
 import com.fasterxml.jackson.annotation.JsonTypeName
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldNotContain
@@ -116,6 +117,28 @@ class ReflectionIntrospectorTest {
 
         @get:JsonIgnore
         val internalToken: String = "hidden-singleton"
+    }
+
+    @Suppress("unused")
+    data class JacksonGetterAnnotatedUser(
+        @get:JsonProperty("user_login") val userName: String,
+        @get:JsonProperty("email_address")
+        @get:JsonPropertyDescription("The user's email address") val emailAddress: String = "n/a",
+        @get:JsonIgnore val sessionToken: String = "token",
+    )
+
+    @Suppress("unused")
+    sealed interface JacksonDocument {
+        val id: String
+    }
+
+    @Suppress("unused")
+    class JacksonReport(
+        val body: String,
+    ) : JacksonDocument {
+        @get:JsonProperty("document_id")
+        @get:JsonPropertyDescription("The document identifier")
+        override val id: String = "r-1"
     }
 
     private val introspector = ReflectionClassIntrospector
@@ -393,6 +416,35 @@ class ReflectionIntrospectorTest {
         subtypeIds.shouldContainExactlyInAnyOrder(setOf("car", "truck"))
 
         polyNode.discriminator.mapping?.keys shouldBe setOf("car", "truck")
+    }
+
+    @Test
+    fun `honors getter-targeted Jackson name override description and ignore`() {
+        val graph = introspector.introspect(JacksonGetterAnnotatedUser::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+
+        node.properties.map { it.name } shouldBe listOf("user_login", "email_address")
+        node.properties.associateBy { it.name }.getValue("email_address").description shouldBe
+            "The user's email address"
+        node.required shouldBe setOf("user_login")
+        node.properties.map { it.name } shouldNotContain "sessionToken"
+    }
+
+    @Test
+    fun `applies Jackson annotations to inherited sealed properties`() {
+        val graph = introspector.introspect(JacksonReport::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+
+        node.properties.map { it.name } shouldBe listOf("body", "document_id")
+        node.properties.associateBy { it.name }.getValue("document_id").apply {
+            description shouldBe "The document identifier"
+            hasDefaultValue shouldBe true
+        }
+        node.required shouldBe setOf("body", "document_id")
     }
 
     @Test
