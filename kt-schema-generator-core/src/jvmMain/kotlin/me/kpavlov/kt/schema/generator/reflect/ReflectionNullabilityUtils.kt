@@ -5,7 +5,7 @@ import kotlin.reflect.KClass
 
 /**
  * Checks whether the given list of annotations contains a recognized nullable marker
- * (e.g., `@Optional`).
+ * (e.g., `@Nullable`).
  *
  * @see [Introspections.isNullableAnnotation]
  */
@@ -17,7 +17,7 @@ internal fun isNullableAnnotated(annotations: List<Annotation>): Boolean =
 
 /**
  * Checks whether the given list of annotations contains a recognized optional marker
- * (e.g., `@Nullable`).
+ * (e.g., `@Optional`).
  *
  * @see [Introspections.isOptionalAnnotation]
  */

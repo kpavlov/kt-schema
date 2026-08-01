@@ -306,16 +306,21 @@ unsupported type fails the build with a descriptive error rather than emitting a
 ### Marking a property nullable/optional
 
 Java has no `?` type syntax and no default-value expressions, so every property is non-nullable/required by
-default. Two conventions mark a property nullable *and* excluded from `required`, the same way Kotlin's `?`
-or a default value is handled:
+default. Two independent conventions cover the two concerns — nullable and optional are not the same thing
+and don't imply each other:
 
-- **Type-name glob pattern** — a field/component whose *type's* simple class name matches a configured
-  pattern (`*` = any substring; default `*Opt`), e.g. a type literally named `EmailOpt`.
-- **`@Nullable` annotation** — a field/component/accessor annotated with a marker annotation (default
-  simple name `Nullable`, matched case-insensitively regardless of package — so `javax.annotation.Nullable`,
-  `jakarta.annotation.Nullable`, `org.jetbrains.annotations.Nullable`, etc. all work out of the box).
+- **Nullable** — marks a property's *type* nullable (adds `"null"` to its `type`), the same way Kotlin's `?`
+  is handled, but leaves it in `required`:
+  - **Type-name glob pattern** — a field/component whose *type's* simple class name matches a configured
+    pattern (`*` = any substring; default `*Opt`), e.g. a type literally named `EmailOpt`.
+  - **`@Nullable` annotation** — a field/component/accessor annotated with a marker annotation (default
+    simple name `Nullable`, matched case-insensitively regardless of package — so `javax.annotation.Nullable`,
+    `jakarta.annotation.Nullable`, `org.jetbrains.annotations.Nullable`, etc. all work out of the box).
+- **Optional** — excludes a property from `required`, the same way a Kotlin default value is handled, but
+  doesn't affect its type's nullability. Matched the same way as the nullable convention (type-name glob
+  pattern or marker annotation, e.g. `@Optional`), via a separate, opt-in-only configuration with no default.
 
-Both are configurable via `kt-schema.properties` (`introspector.nullable.type.names`,
+Both conventions are configurable via `kt-schema.properties` (`introspector.nullable.type.names`,
 `introspector.optional.type.names`, `introspector.annotations.nullable.names`,
 `introspector.annotations.optional.names`) — every one of these accepts a comma-separated list of
 glob patterns (`*`/`?`), not just exact names.

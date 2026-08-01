@@ -544,7 +544,7 @@ internal class AptIntrospectionContext(
 
     /**
      * Returns `true` if any of the given annotation targets carries a recognized nullable
-     * marker (e.g. `@Optional`).
+     * marker (e.g. `@Nullable`).
      */
     private fun isNullableAnnotated(targets: List<Element>): Boolean =
         targets.any(::isNullableAnnotation)
@@ -560,7 +560,7 @@ internal class AptIntrospectionContext(
 
     /**
      * Returns `true` if any of the given annotation targets carries a recognized optional
-     * marker (e.g. `@Nullable`).
+     * marker (e.g. `@Optional`).
      */
     private fun isOptionalAnnotated(targets: List<Element>): Boolean =
         targets.any(::isOptionalAnnotation)
