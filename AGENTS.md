@@ -33,11 +33,10 @@
 - JVM tests only unless asked otherwise.
 - Backtick test names: `` fun `should do X`() ``.
 - No KDocs on tests.
-- JSON assertions: `schema shouldEqualJson """...""".trimIndent()`
+- JSON assertions: `schema shouldEqualJson """...""".trimIndent()` — no brittle whitespace.
 - `$` in raw strings: use `$$"""` or `${'$'}` escaping.
 - Verify both `KClass<T>.jsonSchemaString` and `KClass<T>.jsonSchema`.
 - `// language=json` before multiline JSON blocks.
-- Use `shouldEqualJson` — no brittle whitespace assertions.
 - Cover: primitives, enums, nullables, lists/maps, nested, generics, `@Description`.
 - Non-annotated classes must not gain generated extensions.
 - Libraries: `kotlin-test`, `mockk`, `kotest-assertions` (infix `shouldBe`).
