@@ -15,9 +15,9 @@ private const val NAME_NAMES_KEY = "introspector.annotations.name.names"
 private const val NAME_ATTRIBUTES_KEY = "introspector.annotations.name.attributes"
 private const val OPAQUE_TYPE_NAMES_KEY = "introspector.opaque.type.names"
 private const val NULLABLE_ANNOTATION_NAMES_KEY = "introspector.annotations.nullable.names"
-private const val NULLABLE_TYPE_PATTERNS_KEY = "introspector.types.nullable.patterns"
+private const val NULLABLE_TYPE_NAMES_KEY = "introspector.nullable.type.names"
 private const val OPTIONAL_ANNOTATION_NAMES_KEY = "introspector.annotations.optional.names"
-private const val OPTIONAL_TYPE_PATTERNS_KEY = "introspector.types.optional.patterns"
+private const val OPTIONAL_TYPE_NAMES_KEY = "introspector.optional.type.names"
 
 /**
  * Default fallback values if configuration loading fails
@@ -160,7 +160,7 @@ internal actual object Config {
 
     actual val nullableTypeNamePatterns: List<String> by lazy {
         loadConfiguration { properties ->
-            parseListPropertyPreservingCase(properties, NULLABLE_TYPE_PATTERNS_KEY)
+            parseListPropertyPreservingCase(properties, NULLABLE_TYPE_NAMES_KEY)
         } ?: DEFAULT_NULLABLE_TYPE_PATTERNS
     }
 
@@ -172,7 +172,7 @@ internal actual object Config {
 
     actual val optionalTypeNamePatterns: List<String> by lazy {
         loadConfiguration { properties ->
-            parseListPropertyPreservingCase(properties, OPTIONAL_TYPE_PATTERNS_KEY)
+            parseListPropertyPreservingCase(properties, OPTIONAL_TYPE_NAMES_KEY)
         } ?: DEFAULT_NULLABLE_TYPE_PATTERNS
     }
 

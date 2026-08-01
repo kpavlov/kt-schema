@@ -314,9 +314,10 @@ or a default value is handled:
   simple name `Nullable`, matched case-insensitively regardless of package — so `javax.annotation.Nullable`,
   `jakarta.annotation.Nullable`, `org.jetbrains.annotations.Nullable`, etc. all work out of the box).
 
-Both are configurable via `kt-schema.properties` (`introspector.types.nullable.patterns`,
-`introspector.types.optional.patterns`, `introspector.annotations.nullable.names`,
-`introspector.annotations.optional.names`).
+Both are configurable via `kt-schema.properties` (`introspector.nullable.type.names`,
+`introspector.optional.type.names`, `introspector.annotations.nullable.names`,
+`introspector.annotations.optional.names`) — every one of these accepts a comma-separated list of
+glob patterns (`*`/`?`), not just exact names.
 
 ## See Also
 

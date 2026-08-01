@@ -80,7 +80,8 @@ public fun defaultOpaqueTypeNames(): Set<String> = DEFAULT_OPAQUE_TYPE_NAMES
  */
 internal expect object Config {
     /**
-     * Ordered list of lowercase annotation simple names recognized as description providers.
+     * Ordered list of lowercase annotation simple-name glob patterns recognized as description
+     * providers (e.g. `"Json*"` matches `JsonPropertyDescription`, `JsonClassDescription`, etc.).
      *
      * Annotations are matched case-insensitively by their simple name only (not fully qualified name).
      * This allows recognition of description annotations from multiple frameworks (kt-schema,
@@ -113,7 +114,7 @@ internal expect object Config {
     val descriptionValueAttributes: List<String>
 
     /**
-     * Ordered list of lowercase annotation simple names recognized as ignore markers.
+     * Ordered list of lowercase annotation simple-name glob patterns recognized as ignore markers.
      *
      * Classes annotated with any of these annotations are excluded from schema generation
      * (e.g., sealed subtypes omitted from polymorphic `oneOf` schemas).
@@ -126,10 +127,11 @@ internal expect object Config {
     val ignoreAnnotationNames: List<String>
 
     /**
-     * Ordered list of annotation names recognized as name-override providers (e.g., `@SerialName`).
+     * Ordered list of annotation name glob patterns recognized as name-override providers
+     * (e.g., `@SerialName`).
      *
-     * Names containing a dot (`.`) are treated as fully qualified names and matched
-     * **case-sensitively** against the annotation's qualified name. Names without a dot
+     * Patterns containing a dot (`.`) are treated as fully qualified names and matched
+     * **case-sensitively** against the annotation's qualified name. Patterns without a dot
      * are matched **case-insensitively** against the annotation's simple name.
      *
      * Loaded lazily from the `introspector.annotations.name.names` property in
@@ -199,7 +201,7 @@ internal expect object Config {
      *
      * Case-sensitive: class names are case-sensitive by convention.
      *
-     * Loaded lazily from the `introspector.types.nullable.patterns` property in
+     * Loaded lazily from the `introspector.nullable.type.names` property in
      * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
      *
      * Default value: *Opt
@@ -228,7 +230,7 @@ internal expect object Config {
      *
      * Case-sensitive: class names are case-sensitive by convention.
      *
-     * Loaded lazily from the `introspector.types.optional.patterns` property in
+     * Loaded lazily from the `introspector.optional.type.names` property in
      * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
      *
      * Default value: *Opt

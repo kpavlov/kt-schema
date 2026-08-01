@@ -54,7 +54,7 @@
 - Nullable refs: `oneOf: [{ "$ref": "..." }, { "type": "null" }]`.
 - Root schema: `$id`, `$defs`, `$ref`.
 - Small functions, small reversible changes.
-- `git mv` for moving files. Never commit or push.
+- `git mv` for moving files. Never commit or push unattended — only when the user explicitly asks, in that moment; not as a reflexive/autonomous step after finishing work.
 
 ## Workflow
 
