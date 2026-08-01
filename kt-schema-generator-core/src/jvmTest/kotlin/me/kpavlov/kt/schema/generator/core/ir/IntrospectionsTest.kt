@@ -244,9 +244,9 @@ class IntrospectionsTest {
         "nullable",
         "NULLABLE",
     )
-    fun `recognizes nullable annotations by simple name case-insensitively`(name: String) {
+    fun `recognizes nullable but not optional annotations by default`(name: String) {
         Introspections.isNullableAnnotation(name) shouldBe true
-        Introspections.isOptionalAnnotation(name) shouldBe true
+        Introspections.isOptionalAnnotation(name) shouldBe false
     }
 
     @ParameterizedTest

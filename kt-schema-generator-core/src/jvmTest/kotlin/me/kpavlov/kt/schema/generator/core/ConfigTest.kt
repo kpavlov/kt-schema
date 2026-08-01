@@ -60,8 +60,8 @@ class ConfigTest {
     }
 
     @Test
-    fun `loads optional annotation names from properties`() {
-        Config.optionalAnnotationNames shouldContain "nullable"
+    fun `has no optional annotation names by default`() {
+        Config.optionalAnnotationNames shouldBe emptyList()
     }
 
     @Test

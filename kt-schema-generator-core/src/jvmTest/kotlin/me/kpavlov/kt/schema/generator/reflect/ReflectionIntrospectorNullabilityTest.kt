@@ -1,7 +1,6 @@
 package me.kpavlov.kt.schema.generator.reflect
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
-import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
@@ -11,8 +10,8 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import kotlin.test.Test
 
 class ReflectionIntrospectorNullabilityTest {
-    // Local marker annotation matching the default `nullableAnnotationNames`/`optionalAnnotationNames`
-    // config ("Nullable") by simple name — mirrors javax.annotation.Nullable, jakarta.annotation.Nullable, etc.
+    // Local marker annotation matching the default `nullableAnnotationNames` config ("Nullable")
+    // by simple name — mirrors javax.annotation.Nullable, jakarta.annotation.Nullable, etc.
     @Target(AnnotationTarget.FIELD, AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
     annotation class Nullable
 
@@ -52,17 +51,16 @@ class ReflectionIntrospectorNullabilityTest {
     }
 
     @Test
-    fun `Nullable annotated property is treated as nullable and excluded from required`() {
+    fun `Nullable annotated property is treated as nullable but remains required`() {
         val graph = introspector.introspect(WithNullableAnnotation::class)
         val rootRef = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
         val node = graph.nodes[rootRef.id].shouldBeInstanceOf<ObjectNode>()
 
-        node.required.shouldContainExactlyInAnyOrder(setOf("name"))
-        node.required shouldNotContain "phone"
+        node.required.shouldContainExactlyInAnyOrder(setOf("name", "phone"))
 
         val props = node.properties.associateBy { it.name }
         props.getValue("phone").apply {
-            hasDefaultValue shouldBe true
+            hasDefaultValue shouldBe false
             type.nullable shouldBe true
             type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
                 inline.node.shouldBeInstanceOf<PrimitiveNode> { prim ->

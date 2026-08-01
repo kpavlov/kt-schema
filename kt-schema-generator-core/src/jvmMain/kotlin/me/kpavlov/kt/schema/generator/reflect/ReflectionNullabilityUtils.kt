@@ -5,7 +5,7 @@ import kotlin.reflect.KClass
 
 /**
  * Checks whether the given list of annotations contains a recognized nullable marker
- * (e.g., `@Nullable`).
+ * (e.g., `@Optional`).
  *
  * @see [Introspections.isNullableAnnotation]
  */

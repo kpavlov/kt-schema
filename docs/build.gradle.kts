@@ -26,6 +26,13 @@ detekt {
     ignoreFailures = true
 }
 
+kotlin {
+    compilerOptions {
+        javaParameters = true
+        freeCompilerArgs.addAll("-Xannotation-default-target=param-property")
+    }
+}
+
 dokka {
     moduleName.set("kt-schema")
 

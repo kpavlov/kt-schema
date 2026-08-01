@@ -21,7 +21,7 @@ internal fun KSAnnotated.isNullableAnnotated(): Boolean =
     }
 
 /**
- * Checks whether the symbol is annotated with a recognized optional marker (e.g. `@Nullable`).
+ * Checks whether the symbol is annotated with a recognized optional marker (e.g. `@Optional`).
  *
  * Recognition is delegated to [Introspections.isOptionalAnnotation], which performs
  * matching against a configurable set loaded from `kt-schema.properties`.
