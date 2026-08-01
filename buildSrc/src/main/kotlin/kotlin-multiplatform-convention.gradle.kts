@@ -102,6 +102,11 @@ kotlin {
         tvosSimulatorArm64()
         tvosArm64()
 
+        wasmWasi {
+            binaries.library()
+            nodejs()
+        }
+
         // Tier 3
         mingwX64()
         // androidNativeArm32()
@@ -115,6 +120,11 @@ kotlin {
 tasks.named("detekt").configure {
     dependsOn("detektMainJvm", "detektTestJvm")
 }
+
+// wasmWasi has no kotest artifacts published for it; keep main compilation but skip tests.
+// ponytail: disables test compile/run instead of restructuring source sets across modules; revisit if kotest adds wasmWasi support.
+tasks.matching { it.name == "compileTestKotlinWasmWasi" || it.name == "wasmWasiNodeTest" }
+    .configureEach { enabled = false }
 
 tasks.withType<JavaCompile> {
     // Preserve constructor parameter names in Java
