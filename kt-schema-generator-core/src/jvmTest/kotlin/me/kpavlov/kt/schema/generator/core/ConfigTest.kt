@@ -68,9 +68,4 @@ class ConfigTest {
     fun `loads nullable type name patterns from properties preserving case`() {
         Config.nullableTypeNamePatterns shouldContain "*Opt"
     }
-
-    @Test
-    fun `loads optional type name patterns from properties preserving case`() {
-        Config.optionalTypeNamePatterns shouldContain "*Opt"
-    }
 }

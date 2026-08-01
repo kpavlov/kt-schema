@@ -20,5 +20,5 @@ internal actual object Config {
     actual val optionalAnnotationNames: List<String>
         get() = listOf("Nullable")
     actual val optionalTypeNamePatterns: List<String>
-        get() = listOf("*Opt")
+        get() = emptyList()
 }
