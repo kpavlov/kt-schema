@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.koog.agents.tools)
     implementation(platform(libs.jackson.bom))
     implementation(libs.jackson.annotations)
+    implementation(libs.jackson.databind)
     implementation(libs.langchain4j.core)
 
     testImplementation(kotlin("test"))

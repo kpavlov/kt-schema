@@ -63,7 +63,8 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             return TypeRef.Inline(AnyNode(), nullable)
         }
 
-        // kotlinx.serialization.json opaque types: treated as any JSON value — emit empty schema {}
+        // Opaque types (kotlinx.serialization.json and Jackson databind node hierarchy):
+        // treated as any JSON value — emit empty schema {}
         if (klass.qualifiedName in Config.opaqueTypeNames) {
             return TypeRef.Inline(AnyNode(), nullable)
         }

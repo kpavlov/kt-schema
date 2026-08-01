@@ -8,11 +8,45 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
+import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
+import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
+import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.BaseJsonNode
+import tools.jackson.databind.node.BigIntegerNode
+import tools.jackson.databind.node.BinaryNode
+import tools.jackson.databind.node.BooleanNode
+import tools.jackson.databind.node.ContainerNode
+import tools.jackson.databind.node.DecimalNode
+import tools.jackson.databind.node.DoubleNode
+import tools.jackson.databind.node.FloatNode
+import tools.jackson.databind.node.IntNode
+import tools.jackson.databind.node.LongNode
+import tools.jackson.databind.node.MissingNode
+import tools.jackson.databind.node.NullNode
+import tools.jackson.databind.node.NumericFPNode
+import tools.jackson.databind.node.NumericIntNode
+import tools.jackson.databind.node.NumericNode
+import tools.jackson.databind.node.ObjectNode as JacksonObjectNode
+import tools.jackson.databind.node.POJONode
+import tools.jackson.databind.node.ShortNode
+import tools.jackson.databind.node.StringNode
+import tools.jackson.databind.node.ValueNode
+import kotlin.reflect.KType
+import kotlin.reflect.KTypeProjection
+import kotlin.reflect.full.createType
 import kotlin.test.Test
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ReflectionIntrospectorJacksonTest {
     @Suppress("unused")
     data class JacksonAnnotatedUser(
@@ -202,4 +236,62 @@ class ReflectionIntrospectorJacksonTest {
         node.properties.map { it.name } shouldNotContain "internalToken"
         node.required shouldNotContain "internalToken"
     }
+
+    //region Jackson databind node types
+
+    @ParameterizedTest(name = "{0} (nullable={1}) -> {2}")
+    @MethodSource("jacksonNodeTypeCases")
+    fun `introspects jackson databind node types`(
+        type: KType,
+        nullable: Boolean,
+        expectedNode: TypeNode,
+    ) {
+        // Constructed directly (rather than via ReflectionClassIntrospector) so bare Jackson
+        // KTypes can be resolved without declaring a one-field wrapper class per node type.
+        val context = ReflectionIntrospectionContext()
+
+        val ref = context.toRef(type)
+
+        val inline = ref.shouldBeInstanceOf<TypeRef.Inline>()
+        inline.node shouldBe expectedNode
+        inline.nullable shouldBe nullable
+        // None of the Jackson node types create named nodes in the graph
+        context.nodes.keys.none { it.value.startsWith("tools.jackson.databind") } shouldBe true
+    }
+
+    fun jacksonNodeTypeCases() =
+        listOf(
+            // Arbitrary/unknown-shape types stay opaque -> emit `{}`
+            Arguments.of(JsonNode::class.createType(), false, AnyNode()),
+            Arguments.of(JsonNode::class.createType(nullable = true), true, AnyNode()),
+            Arguments.of(JacksonObjectNode::class.createType(), false, AnyNode()),
+            Arguments.of(ArrayNode::class.createType(), false, AnyNode()),
+            Arguments.of(ValueNode::class.createType(), false, AnyNode()),
+            Arguments.of(BaseJsonNode::class.createType(), false, AnyNode()),
+            Arguments.of(POJONode::class.createType(), false, AnyNode()),
+            Arguments.of(MissingNode::class.createType(), false, AnyNode()),
+            // ContainerNode<T : ContainerNode<T>> is self-bounded generic, so createType()
+            // needs an explicit star projection rather than the default empty argument list.
+            Arguments.of(ContainerNode::class.createType(listOf(KTypeProjection.STAR)), false, AnyNode()),
+            // NullNode is deliberately left opaque: a dedicated `{"type": "null"}` schema would
+            // need a new PrimitiveKind.NULL handled in both JSON Schema transformers.
+            Arguments.of(NullNode::class.createType(), false, AnyNode()),
+            // Concrete/abstract leaf value types resolve to their real PrimitiveKind
+            Arguments.of(StringNode::class.createType(), false, PrimitiveNode(PrimitiveKind.STRING)),
+            Arguments.of(BinaryNode::class.createType(), false, PrimitiveNode(PrimitiveKind.STRING)),
+            Arguments.of(BooleanNode::class.createType(), false, PrimitiveNode(PrimitiveKind.BOOLEAN)),
+            Arguments.of(IntNode::class.createType(), false, PrimitiveNode(PrimitiveKind.INT)),
+            Arguments.of(IntNode::class.createType(nullable = true), true, PrimitiveNode(PrimitiveKind.INT)),
+            Arguments.of(ShortNode::class.createType(), false, PrimitiveNode(PrimitiveKind.INT)),
+            Arguments.of(LongNode::class.createType(), false, PrimitiveNode(PrimitiveKind.LONG)),
+            Arguments.of(BigIntegerNode::class.createType(), false, PrimitiveNode(PrimitiveKind.LONG)),
+            Arguments.of(NumericIntNode::class.createType(), false, PrimitiveNode(PrimitiveKind.LONG)),
+            Arguments.of(DoubleNode::class.createType(), false, PrimitiveNode(PrimitiveKind.DOUBLE)),
+            Arguments.of(FloatNode::class.createType(), false, PrimitiveNode(PrimitiveKind.FLOAT)),
+            Arguments.of(DecimalNode::class.createType(), false, PrimitiveNode(PrimitiveKind.DOUBLE)),
+            Arguments.of(NumericFPNode::class.createType(), false, PrimitiveNode(PrimitiveKind.DOUBLE)),
+            Arguments.of(NumericNode::class.createType(), false, PrimitiveNode(PrimitiveKind.DOUBLE)),
+        )
+
+    //endregion
 }

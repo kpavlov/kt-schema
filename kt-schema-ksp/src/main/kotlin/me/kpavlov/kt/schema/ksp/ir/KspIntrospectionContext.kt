@@ -28,8 +28,8 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeRef
  *
  * Resolution strategy (applied in order):
  * 1. Basic types (primitives and collections) via [resolveBasicTypeOrNull]
- * 2. JSON collection types ([JsonObject]/[JsonArray]) → inline [MapNode]/[ListNode]
- * 3. Opaque JSON types ([JsonElement]/[JsonPrimitive]/[JsonNull]) → [AnyNode] → empty schema `{}`
+ * 2. JSON collection types ([kotlinx.serialization.json.JsonObject]/[kotlinx.serialization.json.JsonArray]) → inline [MapNode]/[ListNode]
+ * 3. Opaque JSON types (kotlinx.serialization.json and Jackson databind node hierarchy) → [AnyNode] → empty schema `{}`
  * 4. Generic type parameters and unknowns -> kotlin.Any via [handleAnyFallback]
  * 5. Sealed class hierarchies -> PolymorphicNode via [handleSealedClass]
  * 6. Enum classes -> EnumNode via [handleEnum]
@@ -89,12 +89,13 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
 
     /**
      * Maps the built-in `kotlinx.serialization.json` collection-like types
-     * ([JsonObject], [JsonArray]) to their proper inline schema representations.
+     * ([kotlinx.serialization.json.JsonObject], [kotlinx.serialization.json.JsonArray]) to their proper inline
+     * schema representations.
+     * - [kotlinx.serialization.json.JsonObject] implements
+     *    [Map] → [MapNode] → `{ "type": "object", "additionalProperties": {} }`
+     * - [kotlinx.serialization.json.JsonArray] implements [List] → [ListNode] → `{ "type": "array" }`
      *
-     * - [JsonObject] implements [Map] → [MapNode] → `{ "type": "object", "additionalProperties": {} }`
-     * - [JsonArray] implements [List] → [ListNode] → `{ "type": "array" }`
-     *
-     * The element/value types are [AnyNode] (matching the opaque handling of [JsonElement]),
+     * The element/value types are [AnyNode] (matching the opaque handling of [kotlinx.serialization.json.JsonElement]),
      * so they produce no `$ref`/`$defs` and remain inline.
      *
      * KSP cannot reliably resolve the supertype type-arguments of external library classes,
@@ -128,8 +129,9 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     }
 
     /**
-     * Checks whether [type] is a known opaque type (e.g., [kotlinx.serialization.json] types
-     * with incompatible class structures) and maps it to [AnyNode] → empty schema `{}`.
+     * Checks whether [type] is a known opaque type (e.g., [kotlinx.serialization.json] types or the
+     * Jackson databind node hierarchy, all with incompatible class structures) and maps it to
+     * [AnyNode] → empty schema `{}`.
      */
     private fun resolveOpaqueTypeOrNull(type: KSType): TypeRef? {
         val nullable = type.nullability == Nullability.NULLABLE

@@ -422,6 +422,7 @@ sealed-type processing pipeline, so the generator maps them directly to an empty
 - `kotlinx.serialization.json.JsonElement` → `{}`
 - `kotlinx.serialization.json.JsonPrimitive` → `{}`
 - `kotlinx.serialization.json.JsonNull` → `{}`
+- `tools.jackson.databind.JsonNode` and the rest of the Jackson databind node hierarchy → `{}`
 
 `JsonObject` fields are handled correctly as typed maps without any special configuration — their
 value type `JsonElement` is already opaque, so the emitted schema is `{"type": "object", "additionalProperties": {}}`.

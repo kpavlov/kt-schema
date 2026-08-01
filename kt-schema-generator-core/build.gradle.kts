@@ -49,6 +49,7 @@ kotlin {
                 implementation(libs.mockk)
                 implementation(dependencies.platform(libs.jackson.bom))
                 implementation(libs.jackson.annotations)
+                implementation(libs.jackson.databind)
                 runtimeOnly(libs.slf4j.simple)
             }
         }
