@@ -18,10 +18,14 @@ import kotlin.jvm.JvmStatic
  *
  * ## Annotation name matching
  *
- * Annotation names are matched in two ways depending on the configured name format:
+ * Every configured annotation name is a glob pattern (`*` matches any run of characters, `?` a
+ * single character; a plain literal name is just a pattern that matches itself), compiled via the
+ * shared [me.kpavlov.kt.schema.generator.core.globToRegex] matcher — the same one used by KSP's
+ * include/exclude package filters. Patterns are matched in two ways depending on their format:
  *
  * - **Simple names** (no dots): Matched **case-insensitively** against the annotation's simple name.
- *   Example: `"Description"` matches `@Description`, `@description`, `@DESCRIPTION`.
+ *   Example: `"Description"` matches `@Description`, `@description`, `@DESCRIPTION`; `"Json*"`
+ *   matches `@JsonIgnore`, `@JsonIgnoreType`, `@JsonProperty`, etc.
  * - **Fully qualified names** (contains dots): Matched **case-sensitively** against the annotation's
  *   qualified name. Example: `"kotlinx.serialization.SerialName"` matches only
  *   `@kotlinx.serialization.SerialName`, not a different `@SerialName` from another package.
@@ -60,51 +64,53 @@ import kotlin.jvm.JvmStatic
  */
 @InternalSchemaGeneratorApi
 public object Introspections {
-    //region Annotation name sets
+    //region Annotation name patterns
 
     /**
-     * Holds pre-split simple and FQN name sets for an annotation category.
+     * Holds pre-split simple-name and FQN glob patterns for an annotation category, compiled via
+     * the shared [globToRegex] matcher (the same one used by KSP's include/exclude package
+     * filters) — a plain literal name with no `*`/`?` is just a pattern that matches itself.
      *
-     * Simple names are stored lowercase for case-insensitive matching.
-     * FQN names are stored in original case for case-sensitive matching.
+     * Simple-name patterns are compiled lowercase for case-insensitive matching.
+     * FQN patterns preserve original case for case-sensitive matching.
      */
-    private data class AnnotationNameSets(
-        val simpleNames: Set<String>,
-        val fqnNames: Set<String>,
+    private data class AnnotationNamePatterns(
+        val simplePatterns: List<Regex>,
+        val fqnPatterns: List<Regex>,
     )
 
     /**
-     * Splits a list of annotation names into simple names (lowercase) and FQN names (exact case).
-     * Names containing a dot are treated as fully qualified names.
+     * Splits a list of annotation name glob patterns into simple-name patterns (lowercase) and
+     * FQN patterns (exact case). Patterns containing a dot are treated as fully qualified names.
      */
-    private fun splitByFqn(names: List<String>): AnnotationNameSets {
-        val simple = mutableSetOf<String>()
-        val fqn = mutableSetOf<String>()
+    private fun splitByFqn(names: List<String>): AnnotationNamePatterns {
+        val simple = mutableListOf<Regex>()
+        val fqn = mutableListOf<Regex>()
         for (name in names) {
-            if ('.' in name) fqn.add(name) else simple.add(name.lowercase())
+            if ('.' in name) fqn.add(globToRegex(name)) else simple.add(globToRegex(name.lowercase()))
         }
-        return AnnotationNameSets(simple, fqn)
+        return AnnotationNamePatterns(simple, fqn)
     }
 
     /**
-     * Checks whether an annotation matches a set of recognized names.
+     * Checks whether an annotation matches a set of recognized name patterns.
      *
-     * Simple names are matched case-insensitively against [simpleName].
-     * FQN names are matched case-sensitively against [qualifiedName].
+     * Simple-name patterns are matched case-insensitively against [simpleName].
+     * FQN patterns are matched case-sensitively against [qualifiedName].
      */
     private fun matchesAnnotation(
         simpleName: String,
         qualifiedName: String?,
-        nameSets: AnnotationNameSets,
+        patterns: AnnotationNamePatterns,
     ): Boolean =
-        simpleName.lowercase() in nameSets.simpleNames ||
-            (qualifiedName != null && qualifiedName in nameSets.fqnNames)
+        patterns.simplePatterns.any { it.matches(simpleName.lowercase()) } ||
+            (qualifiedName != null && patterns.fqnPatterns.any { it.matches(qualifiedName) })
 
     //endregion
 
     //region Description annotation config
 
-    private val descriptionNames: AnnotationNameSets by lazy {
+    private val descriptionNames: AnnotationNamePatterns by lazy {
         splitByFqn(Config.descriptionAnnotationNames)
     }
 
@@ -120,7 +126,7 @@ public object Introspections {
 
     //region Ignore annotation config
 
-    private val ignoreNames: AnnotationNameSets by lazy {
+    private val ignoreNames: AnnotationNamePatterns by lazy {
         splitByFqn(Config.ignoreAnnotationNames)
     }
 
@@ -128,7 +134,7 @@ public object Introspections {
 
     //region Name-override annotation config
 
-    private val nameNames: AnnotationNameSets by lazy {
+    private val nameNames: AnnotationNamePatterns by lazy {
         splitByFqn(Config.nameAnnotationNames)
     }
 
@@ -144,11 +150,11 @@ public object Introspections {
 
     //region Nullable / optional config
 
-    private val nullableNames: AnnotationNameSets by lazy {
+    private val nullableNames: AnnotationNamePatterns by lazy {
         splitByFqn(Config.nullableAnnotationNames)
     }
 
-    private val optionalNames: AnnotationNameSets by lazy {
+    private val optionalNames: AnnotationNamePatterns by lazy {
         splitByFqn(Config.optionalAnnotationNames)
     }
 
