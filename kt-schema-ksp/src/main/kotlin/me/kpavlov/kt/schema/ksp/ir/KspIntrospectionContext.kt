@@ -440,7 +440,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                     )
                 val (typeRef, _) =
                     resolvePropertyTypeAndOptionality(
-                        parentProp.type.resolve(),
+                        effectiveProp.type.resolve(),
                         nativeHasDefault = true,
                         parentProp,
                         overridingProp,

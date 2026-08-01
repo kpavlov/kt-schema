@@ -2,6 +2,7 @@ package me.kpavlov.kt.schema.generator.core.ir
 
 import me.kpavlov.kt.schema.generator.core.Config
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
+import me.kpavlov.kt.schema.generator.core.globToRegex
 import me.kpavlov.kt.schema.generator.core.ir.Introspections.getDescriptionFromAnnotation
 import me.kpavlov.kt.schema.generator.core.ir.Introspections.getNameOverride
 import me.kpavlov.kt.schema.generator.core.ir.Introspections.isIgnoreAnnotation
@@ -152,23 +153,12 @@ public object Introspections {
     }
 
     private val nullableTypeNamePatterns: List<Regex> by lazy {
-        compileGlobs(Config.nullableTypeNamePatterns)
+        Config.nullableTypeNamePatterns.map(::globToRegex)
     }
 
     private val optionalTypeNamePatterns: List<Regex> by lazy {
-        compileGlobs(Config.optionalTypeNamePatterns)
+        Config.optionalTypeNamePatterns.map(::globToRegex)
     }
-
-    /**
-     * Compiles glob patterns (`*` matches any substring) into anchored, case-sensitive [Regex]es.
-     */
-    private fun compileGlobs(patterns: List<String>): List<Regex> =
-        patterns.map { pattern ->
-            pattern
-                .split("*")
-                .joinToString(".*") { Regex.escape(it) }
-                .let { Regex("^$it$") }
-        }
 
     //endregion
 
