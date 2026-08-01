@@ -10,6 +10,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.javaMethod
 import kotlin.reflect.jvm.kotlinFunction
 
@@ -40,6 +41,36 @@ internal fun findPropertyByName(
     klass.members
         .filterIsInstance<KProperty<*>>()
         .firstOrNull { it.name == propertyName }
+
+/**
+ * Collects all annotations relevant to a property: its own annotations, its getter's,
+ * and its backing Java field's.
+ *
+ * This covers all common use-site targets (e.g. `@property:`, `@get:`, `@field:`) so
+ * annotations like `@JsonProperty` and `@JsonIgnore` are recognized regardless of
+ * where the compiler places them.
+ */
+internal fun collectPropertyAnnotations(property: KProperty<*>): List<Annotation> =
+    property.annotations +
+        property.getter.annotations +
+        property.javaField?.annotations.orEmpty()
+
+/**
+ * Collects all annotations relevant to a constructor property, from the constructor
+ * parameter, the Kotlin property, its getter, and its backing Java field.
+ *
+ * This covers all common use-site targets (e.g. `@param:`, `@property:`, `@get:`,
+ * `@field:`) so annotations like `@JsonProperty` and `@JsonIgnore` are recognized
+ * regardless of where the compiler places them.
+ */
+internal fun collectConstructorAnnotations(
+    klass: KClass<*>,
+    propertyName: String,
+    paramAnnotations: List<Annotation>,
+): List<Annotation> {
+    val property = findPropertyByName(klass, propertyName)
+    return paramAnnotations + property?.let(::collectPropertyAnnotations).orEmpty()
+}
 
 /**
  * Checks whether the given list of annotations contains a recognized ignore marker

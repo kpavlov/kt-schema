@@ -31,7 +31,7 @@ class CompanySchemaTest {
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "name": {
+                    "company_name": {
                       "type": "string",
                       "description": "Name of the company"
                     },
@@ -40,7 +40,7 @@ class CompanySchemaTest {
                       "description": "Year the company was founded"
                     }
                   },
-                  "required": ["name", "founded"],
+                  "required": ["company_name", "founded"],
                   "additionalProperties": false,
                   "description": "A company with a name and a founding year."
                 }

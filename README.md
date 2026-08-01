@@ -1188,9 +1188,26 @@ The library automatically recognizes these description annotations by default:
 | `com.fasterxml.jackson.annotation.JsonClassDescription`    | `JsonClassDescription`    | Jackson           | `@JsonClassDescription("User model")` |
 | `dev.langchain4j.model.output.structured.P`                | `P`                       | LangChain4j       | `@P("Search query")`                  |
 
+Beyond descriptions, kt-schema also recognizes **name overrides** and **ignore markers** by default:
+
+**Name overrides** — matched by **fully qualified name** (case-sensitive):
+
+| Annotation                                      | Maps to                                                        |
+|-------------------------------------------------|----------------------------------------------------------------|
+| `com.fasterxml.jackson.annotation.JsonProperty` | property **name** in `properties`/`required`                   |
+| `com.fasterxml.jackson.annotation.JsonTypeName` | polymorphic subtype name (`$defs` key + discriminator `const`) |
+
+**Ignore markers** — matched by **simple name** (case-insensitive), regardless of package:
+
+| Annotation                 | Maps to                                     |
+|----------------------------|---------------------------------------------|
+| `JsonIgnore` (any package) | excludes the property/field from the schema |
+
 ### How It Works
 
-The introspector matches annotations by their **simple name only**, not the fully qualified name. This means:
+Each annotation category (description, name-override, ignore) is configured with its own list of recognized names.
+Within a list, entries containing a dot are matched **case-sensitively** against the fully qualified name; entries
+without a dot are matched **case-insensitively** against the simple name. This means:
 
 - ✅ No code changes needed to generate schemas from existing annotated classes
 - ✅ Can migrate between annotation libraries without modifying code
@@ -1198,7 +1215,8 @@ The introspector matches annotations by their **simple name only**, not the full
 - ✅ Use your preferred annotation library while still getting schema generation
 
 > [!NOTE]
-> Multi-framework annotation recognition applies to the **KSP processor** and **reflection-based generators**.
+> Multi-framework annotation recognition applies to the **KSP processor**, the **Java APT processor**
+> (via `AptIntrospectionContext`, which recognizes the same Jackson defaults), and **reflection-based generators**.
 > The serialization-based generator (`SerializationClassJsonSchemaGenerator`) can only access annotations marked
 > with `@SerialInfo` — see [Custom description extraction](docs/serializable.md#custom-description-extraction) for details.
 
@@ -1213,8 +1231,8 @@ By default, the library recognizes:
 
 **Description annotations**: Description, LLMDescription, JsonPropertyDescription, JsonClassDescription, P
 **Description attributes**: value, description
-**Ignore annotations**: SchemaIgnore, SerialSchemaIgnore, JsonIgnoreType
-**Name-override annotations**: kotlinx.serialization.SerialName (matched by fully qualified name)
+**Ignore annotations**: SchemaIgnore, SerialSchemaIgnore, JsonIgnoreType, JsonIgnore
+**Name-override annotations**: kotlinx.serialization.SerialName, com.fasterxml.jackson.annotation.JsonProperty, com.fasterxml.jackson.annotation.JsonTypeName
 **Name-override attributes**: value
 
 > [!NOTE]

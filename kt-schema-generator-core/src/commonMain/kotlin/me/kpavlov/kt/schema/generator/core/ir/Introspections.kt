@@ -34,7 +34,7 @@ import kotlin.jvm.JvmStatic
  * - `introspector.annotations.description.attributes`: Comma-separated list of annotation parameter
  *   names that contain description text (e.g., "value,description")
  * - `introspector.annotations.ignore.names`: Comma-separated list of annotation names
- *   to recognize as ignore markers (e.g., "SchemaIgnore,JsonIgnoreType")
+ *   to recognize as ignore markers (e.g., "SchemaIgnore,JsonIgnoreType,JsonIgnore")
  * - `introspector.annotations.name.names`: Comma-separated list of annotation names
  *   to recognize as name-override providers (e.g., "kotlinx.serialization.SerialName")
  * - `introspector.annotations.name.attributes`: Comma-separated list of annotation parameter

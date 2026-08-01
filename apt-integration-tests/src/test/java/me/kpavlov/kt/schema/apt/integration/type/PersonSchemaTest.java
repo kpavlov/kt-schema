@@ -31,7 +31,7 @@ class PersonSchemaTest {
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {
-                    "firstName": {
+                    "given_name": {
                       "type": "string",
                       "description": "Given name of the person"
                     },
@@ -44,7 +44,7 @@ class PersonSchemaTest {
                       "description": "Age of the person in years"
                     }
                   },
-                  "required": ["firstName", "lastName", "age"],
+                  "required": ["given_name", "lastName", "age"],
                   "additionalProperties": false,
                   "description": "A person with a first and last name and age."
                 }

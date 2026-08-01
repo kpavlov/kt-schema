@@ -323,29 +323,36 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         decl: KSClassDeclaration,
         addProperty: (String, KSType, String?, Boolean) -> Unit,
     ) {
+        val declaredProperties = decl.getDeclaredProperties().associateBy { it.simpleName.asString() }
         // Prefer primary constructor parameters for data classes; fall back to public properties
         val params = decl.primaryConstructor?.parameters.orEmpty()
         if (params.isNotEmpty()) {
             params.forEach { p ->
                 val kotlinName = p.name?.asString() ?: return@forEach
-                val propertyName = extractNameOverride(p) ?: kotlinName
-                val description = extractConstructorParamDescription(p, kotlinName, decl.docString)
+                val property = declaredProperties[kotlinName]
+                // Skip properties marked with an ignore annotation (e.g. @JsonIgnore)
+                if (p.isSchemaIgnored() || property?.isIgnoredForSchema() == true) return@forEach
+                val propertyName =
+                    extractNameOverride(p) ?: property?.let { extractNameOverride(it) } ?: kotlinName
+                val description = extractConstructorParamDescription(p, kotlinName, decl.docString, property)
                 addProperty(propertyName, p.type.resolve(), description, p.hasDefault)
             }
         } else {
-            decl.getDeclaredProperties().filter { it.isPublic() }.forEach { prop ->
-                val kotlinName = prop.simpleName.asString()
-                val propertyName = extractNameOverride(prop) ?: kotlinName
-                val description =
-                    extractPropertyDescription(
-                        annotated = prop,
-                        propertyName = kotlinName,
-                        parentKdoc = decl.docString,
-                        kdocTagName = "property",
-                        elementKdocFallback = { prop.descriptionFromKdoc() },
-                    )
-                addProperty(propertyName, prop.type.resolve(), description, false)
-            }
+            declaredProperties.values
+                .filter { it.isPublic() && !it.isIgnoredForSchema() }
+                .forEach { prop ->
+                    val kotlinName = prop.simpleName.asString()
+                    val propertyName = extractNameOverride(prop) ?: kotlinName
+                    val description =
+                        extractPropertyDescription(
+                            annotated = prop,
+                            propertyName = kotlinName,
+                            parentKdoc = decl.docString,
+                            kdocTagName = "property",
+                            elementKdocFallback = { prop.descriptionFromKdoc() },
+                        )
+                    addProperty(propertyName, prop.type.resolve(), description, false)
+                }
         }
     }
 
@@ -362,7 +369,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 .toList()
 
         sealedParents.forEach { parent ->
-            parent.getDeclaredProperties().filter { it.isPublic() }.forEach { prop ->
+            parent.getDeclaredProperties().filter { it.isPublic() && !it.isIgnoredForSchema() }.forEach { prop ->
                 val name = prop.simpleName.asString()
                 if (name !in processedProperties) {
                     val description =

@@ -1,6 +1,7 @@
 package me.kpavlov.kt.schema.ksp.ir
 
 import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import me.kpavlov.kt.schema.generator.core.ir.Introspections
 
 /**
@@ -21,3 +22,14 @@ internal fun KSAnnotated.isSchemaIgnored(): Boolean =
         val qualifiedName = declaration.qualifiedName?.asString()
         Introspections.isIgnoreAnnotation(simpleName, qualifiedName)
     }
+
+/**
+ * Checks whether the property or its getter carries a recognized ignore annotation.
+ *
+ * Covers `@get:` use-site targets (e.g. `@get:JsonIgnore`), the idiomatic
+ * Jackson-Kotlin placement for ignored properties.
+ *
+ * @return `true` if the property or its getter is recognized as an ignore marker
+ */
+internal fun KSPropertyDeclaration.isIgnoredForSchema(): Boolean =
+    isSchemaIgnored() || getter?.isSchemaIgnored() == true

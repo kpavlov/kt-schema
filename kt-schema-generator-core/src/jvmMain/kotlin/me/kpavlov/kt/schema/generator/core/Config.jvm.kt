@@ -44,6 +44,7 @@ private val DEFAULT_IGNORE_NAMES =
         "schemaignore",
         "serialschemaignore",
         "jsonignoretype",
+        "jsonignore",
     )
 
 /**
@@ -52,6 +53,8 @@ private val DEFAULT_IGNORE_NAMES =
 private val DEFAULT_NAME_ANNOTATION_NAMES =
     listOf(
         "kotlinx.serialization.SerialName",
+        "com.fasterxml.jackson.annotation.JsonProperty",
+        "com.fasterxml.jackson.annotation.JsonTypeName",
     )
 
 /**

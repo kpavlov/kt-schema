@@ -1,5 +1,6 @@
 package me.kpavlov.kt.schema.generator.core
 
+import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.shouldBe
@@ -32,5 +33,24 @@ class ConfigTest {
     fun `all values are normalized to lowercase`() {
         Config.descriptionAnnotationNames.all { it == it.lowercase() } shouldBe true
         Config.descriptionValueAttributes.all { it == it.lowercase() } shouldBe true
+    }
+
+    @Test
+    fun `loads ignore annotation names from properties`() {
+        assertSoftly(Config.ignoreAnnotationNames) {
+            shouldContain("schemaignore")
+            shouldContain("serialschemaignore")
+            shouldContain("jsonignoretype")
+            shouldContain("jsonignore")
+        }
+    }
+
+    @Test
+    fun `loads name override annotation names from properties`() {
+        assertSoftly(Config.nameAnnotationNames) {
+            shouldContain("kotlinx.serialization.SerialName")
+            shouldContain("com.fasterxml.jackson.annotation.JsonProperty")
+            shouldContain("com.fasterxml.jackson.annotation.JsonTypeName")
+        }
     }
 }
