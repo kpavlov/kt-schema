@@ -3,7 +3,7 @@ agp = "8.13.2"
 assertj = "3.27.7"
 detekt = "2.0.0-alpha.5"
 dokka = "2.2.0"
-jackson = "2.18.9" # pin it
+jackson = "3.2.1" # pin it
 junit = "6.1.2"
 junit-pioneer = "2.3.0"
 koog = "0.6.4"
@@ -24,8 +24,9 @@ assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 kotlin-logging = { group = "io.github.oshai", name = "kotlin-logging", version.ref = "logging" }
 dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 gradle-maven-publish-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "vanniktechMavenPublish" }
-jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-bom = { module = "tools.jackson:jackson-bom", version.ref = "jackson" }
+jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations" }
+jackson-databind = { module = "tools.jackson.core:jackson-databind" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
