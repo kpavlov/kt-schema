@@ -154,7 +154,7 @@ internal actual object Config {
 
     actual val nullableAnnotationNames: List<String> by lazy {
         loadConfiguration { properties ->
-            parseListProperty(properties, NULLABLE_ANNOTATION_NAMES_KEY)
+            parseListPropertyPreservingFqnCase(properties, NULLABLE_ANNOTATION_NAMES_KEY)
         } ?: DEFAULT_NULLABLE_ANNOTATION_NAMES
     }
 
@@ -166,7 +166,7 @@ internal actual object Config {
 
     actual val optionalAnnotationNames: List<String> by lazy {
         loadConfiguration { properties ->
-            parseListProperty(properties, OPTIONAL_ANNOTATION_NAMES_KEY, allowEmpty = true)
+            parseListPropertyPreservingFqnCase(properties, OPTIONAL_ANNOTATION_NAMES_KEY, allowEmpty = true)
         } ?: emptyList()
     }
 
@@ -218,8 +218,10 @@ internal actual object Config {
     private fun parseListPropertyPreservingFqnCase(
         properties: Properties,
         key: String,
+        allowEmpty: Boolean = false,
     ): List<String> {
         val value = properties.getProperty(key)
+        if (allowEmpty && value.isNullOrBlank()) return emptyList()
         require(!value.isNullOrBlank()) {
             "Required property '$key' is missing or empty in $CONFIG_FILE_NAME"
         }

@@ -62,6 +62,7 @@ class ConfigTest {
     @Test
     fun `has no optional annotation names by default`() {
         Config.optionalAnnotationNames shouldBe emptyList()
+        Config.optionalTypeNamePatterns shouldBe emptyList()
     }
 
     @Test
