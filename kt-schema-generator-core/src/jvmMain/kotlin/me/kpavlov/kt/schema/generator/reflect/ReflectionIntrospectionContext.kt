@@ -377,7 +377,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
 
             properties += extra
             // Inherited properties with fixed values are required; a property that's also
-            // optional by convention (type-name pattern or `@Nullable`-style annotation) and
+            // optional by convention (type-name pattern or explicit optional annotation) and
             // has no fixed value is excluded, the same way a Kotlin default value is handled.
             if (!extra.hasDefaultValue || extra.isConstant) requiredProperties += extra.name
             processedProperties += propertyName

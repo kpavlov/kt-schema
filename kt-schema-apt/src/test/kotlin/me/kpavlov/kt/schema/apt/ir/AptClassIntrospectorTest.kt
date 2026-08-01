@@ -349,7 +349,7 @@ class AptClassIntrospectorTest {
     }
 
     @Test
-    fun `should treat Nullable-annotated field as nullable and exclude it from required`() {
+    fun `should treat Nullable-annotated field as nullable but keep it required`() {
         val graph =
             graph(
                 root = "com.example.Contact",
@@ -371,7 +371,7 @@ class AptClassIntrospectorTest {
 
         val node = graph.rootNode()
         assertSoftly(node) {
-            required.shouldContainExactlyInAnyOrder(setOf("name"))
+            required.shouldContainExactlyInAnyOrder(setOf("name", "phone"))
             val props = properties.associateBy { it.name }
             props.getValue("phone").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
                 inline.node.shouldBeInstanceOf<PrimitiveNode> { prim -> prim.kind shouldBe PrimitiveKind.STRING }

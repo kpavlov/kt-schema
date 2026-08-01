@@ -246,7 +246,8 @@ internal expect object Config {
      * Loaded lazily from the `introspector.annotations.optional.names` property in
      * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
      *
-     * Default value: Nullable
+     * Default value: (none). Configure this explicitly when an annotation represents an
+     * omitted property rather than a nullable value.
      */
     val optionalAnnotationNames: List<String>
 

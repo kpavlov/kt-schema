@@ -18,7 +18,7 @@ internal actual object Config {
     actual val nullableTypeNamePatterns: List<String>
         get() = listOf("*Opt")
     actual val optionalAnnotationNames: List<String>
-        get() = listOf("Nullable")
+        get() = emptyList()
     actual val optionalTypeNamePatterns: List<String>
         get() = emptyList()
 }

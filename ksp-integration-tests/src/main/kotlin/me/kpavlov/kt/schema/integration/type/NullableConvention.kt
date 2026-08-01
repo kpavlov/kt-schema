@@ -3,8 +3,8 @@ package me.kpavlov.kt.schema.integration.type
 import me.kpavlov.kt.schema.Schema
 
 /**
- * Local marker annotation matching the default `nullableAnnotationNames`/`optionalAnnotationNames`
- * config ("Nullable") by simple name — mirrors javax.annotation.Nullable, jakarta.annotation.Nullable, etc.
+ * Local marker annotation matching the default `nullableAnnotationNames` config ("Nullable") by
+ * simple name — mirrors javax.annotation.Nullable, jakarta.annotation.Nullable, etc.
  */
 @Target(
     AnnotationTarget.FIELD,
