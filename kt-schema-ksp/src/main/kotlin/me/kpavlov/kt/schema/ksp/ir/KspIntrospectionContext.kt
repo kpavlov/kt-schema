@@ -234,7 +234,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
 
             val sealedNameOverride = extractNameOverride(decl)
             me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode(
-                baseName = sealedNameOverride ?: decl.simpleName.asString(),
+                name = sealedNameOverride ?: decl.simpleName.asString(),
                 subtypes = subtypes,
                 discriminator =
                     me.kpavlov.kt.schema.generator.core.ir.Discriminator(

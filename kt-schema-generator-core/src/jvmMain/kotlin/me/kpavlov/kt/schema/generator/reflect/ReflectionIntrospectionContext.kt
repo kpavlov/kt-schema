@@ -457,7 +457,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         sealedSubclasses: List<KClass<*>>,
     ): PolymorphicNode {
         val nameOverride = extractNameOverride(klass.java.annotations.toList())
-        val baseName = nameOverride ?: klass.simpleName ?: "UnknownSealed"
+        val name = nameOverride ?: klass.simpleName ?: "UnknownSealed"
 
         val subtypes =
             sealedSubclasses.map { subclass ->
@@ -473,7 +473,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             }
 
         return PolymorphicNode(
-            baseName = baseName,
+            name = name,
             subtypes = subtypes,
             discriminator =
                 Discriminator(

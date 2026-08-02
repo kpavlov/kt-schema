@@ -237,15 +237,15 @@ final class me.kpavlov.kt.schema.generator.core.ir/ObjectNode : me.kpavlov.kt.sc
     final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.toString|toString(){}[0]
 }
 
-final class me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode|null[0]
+final class me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode : me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode { // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode|null[0]
     constructor <init>(kotlin/String, kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/SubtypeRef>, me.kpavlov.kt.schema.generator.core.ir/Discriminator, kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.<init>|<init>(kotlin.String;kotlin.collections.List<me.kpavlov.kt.schema.generator.core.ir.SubtypeRef>;me.kpavlov.kt.schema.generator.core.ir.Discriminator;kotlin.String?){}[0]
 
-    final val baseName // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.baseName|{}baseName[0]
-        final fun <get-baseName>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.baseName.<get-baseName>|<get-baseName>(){}[0]
     final val description // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.description|{}description[0]
         final fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.description.<get-description>|<get-description>(){}[0]
     final val discriminator // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.discriminator|{}discriminator[0]
         final fun <get-discriminator>(): me.kpavlov.kt.schema.generator.core.ir/Discriminator // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.discriminator.<get-discriminator>|<get-discriminator>(){}[0]
+    final val name // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.name|{}name[0]
+        final fun <get-name>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.name.<get-name>|<get-name>(){}[0]
     final val subtypes // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.subtypes|{}subtypes[0]
         final fun <get-subtypes>(): kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/SubtypeRef> // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.subtypes.<get-subtypes>|<get-subtypes>(){}[0]
 

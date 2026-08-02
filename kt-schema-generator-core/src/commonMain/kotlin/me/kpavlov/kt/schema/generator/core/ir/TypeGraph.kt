@@ -55,11 +55,14 @@ public sealed interface TypeNode {
  * A named type node.
  *
  * Contract of [name]:
- * - The reflection, KSP, and APT front ends populate it with the `@JsonTypeName` override when
- *   present, otherwise with the fully qualified type name. The serialization front end uses the
- *   raw `@SerialName` value without the FQN fallback.
- * - It is descriptive only: `$ref`/`$id` emission and short-name resolution are driven by
- *   [TypeId] via [TypeGraph.jsonTypeNames] and never read [name] directly.
+ * - Populated for classes, enums, and sealed/polymorphic hierarchies alike. The reflection, KSP,
+ *   and APT front ends populate it with the `@JsonTypeName` override when present, otherwise with
+ *   the declared type name. The serialization front end uses the raw `@SerialName` value without
+ *   an FQN fallback.
+ * - It is descriptive only: `$ref`/`$id` emission and short-name resolution for nodes reachable
+ *   via [TypeId] are driven by [TypeGraph.jsonTypeNames] and never read [name] directly. The sole
+ *   exception is an inline (anonymous, `TypeId`-less) root node, which has no `TypeId` to resolve
+ *   against [TypeGraph.jsonTypeNames] — schema emitters may fall back to [name] there.
  */
 public sealed interface NamedTypeNode : TypeNode {
     public val name: String
@@ -109,11 +112,11 @@ public data class AnyNode(
 
 /** Polymorphic node for sealed/open hierarchies. */
 public data class PolymorphicNode(
-    val baseName: String,
+    override val name: String,
     val subtypes: List<SubtypeRef>,
     val discriminator: Discriminator,
     override val description: String? = null,
-) : TypeNode
+) : NamedTypeNode
 
 /** Property of an object. */
 public data class Property(

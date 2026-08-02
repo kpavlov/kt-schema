@@ -42,7 +42,7 @@ class TypeGraphToJsonSchemaTransformerTest {
             )
         val polyNode =
             PolymorphicNode(
-                baseName = "Base",
+                name = "Base",
                 subtypes = listOf(SubtypeRef(goodId), SubtypeRef(badId)),
                 discriminator = Discriminator(name = "type"),
             )
@@ -112,7 +112,7 @@ class TypeGraphToJsonSchemaTransformerTest {
             )
         val shapeNode =
             PolymorphicNode(
-                baseName = "Shape",
+                name = "Shape",
                 subtypes = listOf(SubtypeRef(circleId), SubtypeRef(squareId)),
                 discriminator = Discriminator(name = "type"),
             )
@@ -394,7 +394,7 @@ class TypeGraphToJsonSchemaTransformerTest {
             )
         val shapeNode =
             PolymorphicNode(
-                baseName = "com.example.Shape",
+                name = "com.example.Shape",
                 subtypes = listOf(SubtypeRef(circleId), SubtypeRef(squareId)),
                 discriminator = Discriminator(name = "type"),
             )
@@ -485,13 +485,13 @@ class TypeGraphToJsonSchemaTransformerTest {
             )
         val resultANode =
             PolymorphicNode(
-                baseName = "me.ResultA",
+                name = "me.ResultA",
                 subtypes = listOf(SubtypeRef(successAId)),
                 discriminator = Discriminator(name = "type"),
             )
         val resultBNode =
             PolymorphicNode(
-                baseName = "me.ResultB",
+                name = "me.ResultB",
                 subtypes = listOf(SubtypeRef(successBId)),
                 discriminator = Discriminator(name = "type"),
             )

@@ -320,7 +320,7 @@ internal class SerializationIntrospectionContext(
             // Create the polymorphic node
             val node =
                 PolymorphicNode(
-                    baseName = descriptor.serialName,
+                    name = descriptor.serialName,
                     subtypes = subtypes,
                     discriminator = discriminator,
                     description = extractDescription(descriptor),
