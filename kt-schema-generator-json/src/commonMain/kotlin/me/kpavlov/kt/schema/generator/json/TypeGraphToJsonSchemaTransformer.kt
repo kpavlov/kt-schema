@@ -586,11 +586,11 @@ public class TypeGraphToJsonSchemaTransformer
             // Convert each subtype via ensureNodeInDefinitions, then inject discriminator
             val subtypeRefs =
                 node.subtypes.map { subtypeRef ->
-                    val typeName = jsonTypeNames.getValue(subtypeRef.id)
                     val subtypeNode =
                         checkNotNull(graph.nodes[subtypeRef.id]) {
-                            "Subtype '$typeName' not found in type graph"
+                            "Subtype '${subtypeRef.id.value}' not found in type graph"
                         }
+                    val typeName = jsonTypeNames.getValue(subtypeRef.id)
 
                     // Register subtype through the shared cycle-safe path
                     ensureNodeInDefinitions(subtypeRef.id, subtypeNode, graph, jsonTypeNames, definitions)

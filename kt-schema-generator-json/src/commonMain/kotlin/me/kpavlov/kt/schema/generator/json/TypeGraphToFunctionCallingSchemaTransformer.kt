@@ -193,7 +193,7 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                 }
 
                 is TypeRef.Ref -> {
-                    require(depth <= MAX_NESTING_DEPTH) {
+                    require(depth < MAX_NESTING_DEPTH) {
                         "Type nesting exceeds $MAX_NESTING_DEPTH levels at '${typeRef.id.value}'. " +
                             "Recursive or too deeply nested types cannot be represented in a " +
                             "function-calling schema because all types are inlined."
@@ -416,9 +416,9 @@ public class TypeGraphToFunctionCallingSchemaTransformer
             // Get a list of subtype definitions
             val subtypeDefs =
                 node.subtypes.map { subtypeRef ->
+                    val subtypeDefinition = convertTypeRef(subtypeRef.ref, graph, jsonTypeNames, depth)
                     val typeName = jsonTypeNames.getValue(subtypeRef.id)
-
-                    convertTypeRef(subtypeRef.ref, graph, jsonTypeNames, depth)
+                    subtypeDefinition
                         .let { definition ->
                             @Suppress("UseCheckOrError")
                             definition as? ObjectPropertyDefinition
