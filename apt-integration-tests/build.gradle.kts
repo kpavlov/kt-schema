@@ -16,6 +16,7 @@ dependencies {
 
     testImplementation(libs.junit.jupiter.api)
     testImplementation(libs.junit.jupiter.params)
+    testImplementation(libs.json.unit.assertj)
     testImplementation(libs.assertj.core)
     testImplementation(libs.jackson.databind)
     testImplementation(platform(libs.junit.bom))

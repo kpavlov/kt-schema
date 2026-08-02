@@ -1,13 +1,12 @@
 package me.kpavlov.kt.schema.apt.integration.type;
 
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 
 /**
  * Verifies the kt-schema-apt processor generates a JSON Schema resource for a Java
@@ -18,14 +17,10 @@ class PersonSchemaTest {
     private static final String RESOURCE_PATH =
             "META-INF/kt-schema/schemas/me/kpavlov/kt/schema/apt/integration/type/Person.json";
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
     @Test
     void shouldGenerateCompleteSchemaWithAllRequiredFields() throws IOException {
-        JsonNode actual = readGeneratedSchema();
-
         // language=json
-        JsonNode expected = MAPPER.readTree("""
+        assertThatJson(readGeneratedSchema()).isEqualTo("""
                 {
                   "$id": "me.kpavlov.kt.schema.apt.integration.type.Person",
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -49,14 +44,14 @@ class PersonSchemaTest {
                   "description": "A person with a first and last name and age."
                 }
                 """);
-
-        assertThat(actual).isEqualTo(expected);
     }
 
-    private JsonNode readGeneratedSchema() throws IOException {
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream(RESOURCE_PATH)) {
-            assertThat(input).as("generated schema resource: %s", RESOURCE_PATH).isNotNull();
-            return MAPPER.readTree(input);
+    private static String readGeneratedSchema() throws IOException {
+        try (InputStream input = PersonSchemaTest.class.getClassLoader().getResourceAsStream(RESOURCE_PATH)) {
+            if (input == null) {
+                throw new IllegalStateException("Missing generated schema resource: " + RESOURCE_PATH);
+            }
+            return new String(input.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
 }
