@@ -77,6 +77,7 @@ sync:
 examples:
 	@echo "📖 Running examples..."
 	@(cd examples/gradle-google-ksp && rm -rf kotlin-js-store && ./gradlew clean build --no-daemon --rerun-tasks)
+	@(cd examples/maven-java && rm -rf target && mvn package --no-transfer-progress)
 	@(cd examples/maven-ksp && rm -rf target && mvn package --no-transfer-progress)
 	@echo "✅ Examples complete!"
 
