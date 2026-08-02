@@ -36,21 +36,21 @@ class CatalogSchemaTest {
                       "type": "array",
                       "description": "Addresses in the catalog",
                       "items": {
-                        "$ref": "#/$defs/me.kpavlov.kt.schema.apt.integration.type.Address"
+                        "$ref": "#/$defs/Address"
                       }
                     },
                     "byCity": {
                       "type": "object",
                       "description": "Addresses grouped by city",
                       "additionalProperties": {
-                        "$ref": "#/$defs/me.kpavlov.kt.schema.apt.integration.type.Address"
+                        "$ref": "#/$defs/Address"
                       }
                     }
                   },
                   "additionalProperties": false,
                   "required": ["addresses", "byCity"],
                   "$defs": {
-                    "me.kpavlov.kt.schema.apt.integration.type.Address": {
+                    "Address": {
                       "type": "object",
                       "properties": {
                         "city": {

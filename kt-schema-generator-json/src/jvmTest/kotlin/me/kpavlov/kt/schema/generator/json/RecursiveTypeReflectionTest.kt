@@ -1,8 +1,10 @@
 package me.kpavlov.kt.schema.generator.json
 
 import io.kotest.assertions.json.shouldEqualJson
+import io.kotest.matchers.string.shouldContain
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 class RecursiveTypeReflectionTest {
     //region Test models
@@ -31,6 +33,11 @@ class RecursiveTypeReflectionTest {
         val value: String,
         val next: LinkedNode?,
     )
+
+    object RecursiveFunction {
+        @Suppress("unused")
+        fun process(node: LinkedNode): String = node.value
+    }
 
     //endregion
 
@@ -124,25 +131,38 @@ class RecursiveTypeReflectionTest {
                   ]
                 }
               },
-              "required": ["value", "next"],
-              "additionalProperties": false,
-              "$defs": {
-                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.LinkedNode": {
-                  "type": "object",
-                  "properties": {
-                    "value": { "type": "string" },
-                    "next": {
-                      "oneOf": [
-                        { "type": "null" },
-                        { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.LinkedNode" }
-                      ]
-                    }
-                  },
                   "required": ["value", "next"],
-                  "additionalProperties": false
+                  "additionalProperties": false,
+                  "$defs": {
+                    "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.LinkedNode": {
+                      "type": "object",
+                      "properties": {
+                        "value": { "type": "string" },
+                        "next": {
+                          "oneOf": [
+                            { "type": "null" },
+                            { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.LinkedNode" }
+                          ]
+                        }
+                      },
+                      "required": ["value", "next"],
+                      "additionalProperties": false
+                    }
+                  }
                 }
-              }
+                """.trimIndent()
+    }
+
+    @Test
+    fun `should throw instead of stack overflowing for self-referencing type in function-calling schema`() {
+        val functionGenerator = ReflectionFunctionCallingSchemaGenerator.Default
+
+        val exception =
+            assertFailsWith<IllegalArgumentException> {
+                functionGenerator.generateSchema(RecursiveFunction::process)
             }
-            """.trimIndent()
+
+        exception.message shouldContain "Type nesting exceeds 8 levels"
+        exception.message shouldContain "cannot be represented in a function-calling schema"
     }
 }

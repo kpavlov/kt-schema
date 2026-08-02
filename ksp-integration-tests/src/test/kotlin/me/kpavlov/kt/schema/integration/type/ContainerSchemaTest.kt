@@ -16,7 +16,7 @@ class ContainerSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.integration.type.Container",
+              "$id": "Container",
               "description": "A generic container that wraps content with optional metadata.",
               "type": "object",
               "properties": {

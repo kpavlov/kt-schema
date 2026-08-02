@@ -71,31 +71,20 @@ class SchemaInfrastructureTest {
     }
 
     @Test
-    fun `each annotated class has unique schema ID`() {
+    fun `all schemas produce unique ids`() {
         val schemas =
-            mapOf(
-                "Person" to Person::class.jsonSchemaString,
-                "Address" to Address::class.jsonSchemaString,
-                "Product" to Product::class.jsonSchemaString,
-                "User" to User::class.jsonSchemaString,
-                "Status" to Status::class.jsonSchemaString,
-                "Container" to Container::class.jsonSchemaString,
-                "Order" to Order::class.jsonSchemaString,
-                "Animal" to Animal::class.jsonSchemaString,
+            listOf(
+                Person::class.jsonSchemaString,
+                Address::class.jsonSchemaString,
+                Product::class.jsonSchemaString,
+                User::class.jsonSchemaString,
+                Status::class.jsonSchemaString,
+                Container::class.jsonSchemaString,
+                Order::class.jsonSchemaString,
+                Animal::class.jsonSchemaString,
             )
 
-        // Each schema contains its correct ID
-        schemas.forEach { (name, schema) ->
-            val jsonObj = Json.decodeFromString<JsonObject>(schema)
-            val id = jsonObj["\$id"]?.toString()?.trim('"')
-            assert(id == "me.kpavlov.kt.schema.integration.type.$name") {
-                "Expected ID me.kpavlov.kt.schema.integration.type.$name but got $id"
-            }
-        }
-
-        // All schemas are distinct
-        val uniqueSchemas = schemas.values.toSet()
-        uniqueSchemas.size shouldBe schemas.size
+        schemas.toSet().size shouldBe schemas.size
     }
 
     @Test

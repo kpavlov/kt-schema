@@ -10,6 +10,7 @@ import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
+import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.json.AdditionalPropertiesSchema
@@ -39,6 +40,13 @@ import me.kpavlov.kt.schema.json.StringPropertyDefinition
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.jvm.JvmOverloads
 import me.kpavlov.kt.schema.generator.json.FunctionCallingSchemaConfig.Companion.Default as DefaultConfig
+
+/**
+ * Function schemas inline all types, so cyclic type graphs (e.g. a self-referencing `Node` type)
+ * cannot be represented. The depth guard bounds nesting and turns a cycle into a clear error
+ * instead of a `StackOverflowError`.
+ */
+private const val MAX_NESTING_DEPTH = 8
 
 /**
  * Transforms a [TypeGraph] into a [FunctionCallingSchema] for tool/function schema representation.
@@ -77,8 +85,9 @@ public class TypeGraphToFunctionCallingSchemaTransformer
         public override fun transform(
             graph: TypeGraph,
             rootName: String,
-        ): FunctionCallingSchema =
-            when (val rootRef = graph.root) {
+        ): FunctionCallingSchema {
+            val jsonTypeNames = graph.jsonTypeNames()
+            return when (val rootRef = graph.root) {
                 is TypeRef.Ref -> {
                     val node =
                         graph.nodes[rootRef.id]
@@ -88,7 +97,7 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                             )
 
                     when (node) {
-                        is ObjectNode -> convertObjectNodeToToolSchema(node, graph)
+                        is ObjectNode -> convertObjectNodeToToolSchema(node, graph, jsonTypeNames)
 
                         else -> throw IllegalArgumentException(
                             "Root node must be ObjectNode for tool schema, got: ${node::class.simpleName}",
@@ -102,38 +111,21 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                     )
                 }
             }
+        }
 
         @Suppress("CyclomaticComplexMethod")
         private fun convertObjectNodeToToolSchema(
             node: ObjectNode,
             graph: TypeGraph,
+            jsonTypeNames: Map<TypeId, String>,
         ): FunctionCallingSchema {
-            val requiredFields =
-                if (config.strictMode) {
-                    node.properties.map { it.name }
-                } else if (config.respectDefaultPresence) {
-                    if (config.requireNullableFields) {
-                        node.properties
-                            .filter { it.name in node.required || it.type.nullable || it.isConstant }
-                            .map { it.name }
-                    } else {
-                        // Use the required set from the ObjectNode (respects DefaultPresence)
-                        node.required.toList()
-                    }
-                } else if (config.requireNullableFields) {
-                    // All properties are required (legacy strict mode from JsonSchemaConfig)
-                    node.properties.map { it.name }
-                } else {
-                    // Only non-nullable properties are required
-                    node.properties.filter { !it.type.nullable || it.isConstant }.map { it.name }
-                }
-
+            val requiredFields = requiredFieldNames(node)
             val requiredSet = requiredFields.toSet()
             val properties =
                 node.properties.associate { property ->
                     val isRequired = property.name in requiredSet
                     val finalDef =
-                        convertTypeRef(property.type, graph)
+                        convertTypeRef(property.type, graph, jsonTypeNames, depth = 0)
                             .let { def -> property.description?.let { setDescription(def, it) } ?: def }
                             .let { def ->
                                 when {
@@ -169,24 +161,50 @@ public class TypeGraphToFunctionCallingSchemaTransformer
             )
         }
 
-        // FIXME throw on recursive polymorphism since defs are not allowed for function calling
+        private fun requiredFieldNames(node: ObjectNode): List<String> =
+            if (config.strictMode) {
+                node.properties.map { it.name }
+            } else if (config.respectDefaultPresence) {
+                if (config.requireNullableFields) {
+                    node.properties
+                        .filter { it.name in node.required || it.type.nullable || it.isConstant }
+                        .map { it.name }
+                } else {
+                    // Use the required set from the ObjectNode (respects DefaultPresence)
+                    node.required.toList()
+                }
+            } else if (config.requireNullableFields) {
+                // All properties are required (legacy strict mode from JsonSchemaConfig)
+                node.properties.map { it.name }
+            } else {
+                // Only non-nullable properties are required
+                node.properties.filter { !it.type.nullable || it.isConstant }.map { it.name }
+            }
+
         private fun convertTypeRef(
             typeRef: TypeRef,
             graph: TypeGraph,
+            jsonTypeNames: Map<TypeId, String>,
+            depth: Int,
         ): PropertyDefinition =
             when (typeRef) {
                 is TypeRef.Inline -> {
-                    convertInlineNode(typeRef.node, typeRef.nullable, graph)
+                    convertInlineNode(typeRef.node, typeRef.nullable, graph, jsonTypeNames, depth)
                 }
 
                 is TypeRef.Ref -> {
+                    require(depth < MAX_NESTING_DEPTH) {
+                        "Type nesting exceeds $MAX_NESTING_DEPTH levels at '${typeRef.id.value}'. " +
+                            "Recursive or too deeply nested types cannot be represented in a " +
+                            "function-calling schema because all types are inlined."
+                    }
                     val node =
                         checkNotNull(graph.nodes[typeRef.id]) {
                             "Type reference '${typeRef.id.value}' not found in type graph. " +
                                 "This indicates a bug in the introspector - all referenced types " +
                                 "should be present in the graph's nodes map."
                         }
-                    convertNode(node, typeRef.nullable, graph)
+                    convertNode(node, typeRef.nullable, graph, jsonTypeNames, depth + 1)
                 }
             }
 
@@ -194,6 +212,8 @@ public class TypeGraphToFunctionCallingSchemaTransformer
             node: TypeNode,
             nullable: Boolean,
             graph: TypeGraph,
+            jsonTypeNames: Map<TypeId, String>,
+            depth: Int,
         ): PropertyDefinition =
             when (node) {
                 is PrimitiveNode -> {
@@ -206,11 +226,11 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                 }
 
                 is ListNode -> {
-                    convertList(node, nullable, graph)
+                    convertList(node, nullable, graph, jsonTypeNames, depth)
                 }
 
                 is MapNode -> {
-                    convertMap(node, nullable, graph)
+                    convertMap(node, nullable, graph, jsonTypeNames, depth)
                 }
 
                 else -> {
@@ -225,6 +245,8 @@ public class TypeGraphToFunctionCallingSchemaTransformer
             node: TypeNode,
             nullable: Boolean,
             graph: TypeGraph,
+            jsonTypeNames: Map<TypeId, String>,
+            depth: Int,
         ): PropertyDefinition =
             when (node) {
                 is PrimitiveNode -> {
@@ -236,7 +258,7 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                 }
 
                 is ObjectNode -> {
-                    convertObject(node, nullable, graph)
+                    convertObject(node, nullable, graph, jsonTypeNames, depth)
                 }
 
                 is EnumNode -> {
@@ -244,15 +266,15 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                 }
 
                 is ListNode -> {
-                    convertList(node, nullable, graph)
+                    convertList(node, nullable, graph, jsonTypeNames, depth)
                 }
 
                 is MapNode -> {
-                    convertMap(node, nullable, graph)
+                    convertMap(node, nullable, graph, jsonTypeNames, depth)
                 }
 
                 is PolymorphicNode -> {
-                    convertPolymorphic(node, nullable, graph)
+                    convertPolymorphic(node, nullable, graph, jsonTypeNames, depth)
                 }
             }
 
@@ -299,32 +321,16 @@ public class TypeGraphToFunctionCallingSchemaTransformer
             node: ObjectNode,
             nullable: Boolean,
             graph: TypeGraph,
+            jsonTypeNames: Map<TypeId, String>,
+            depth: Int,
         ): PropertyDefinition {
-            val requiredFields =
-                if (config.strictMode) {
-                    node.properties.map { it.name }
-                } else if (config.respectDefaultPresence) {
-                    if (config.requireNullableFields) {
-                        node.properties
-                            .filter { it.name in node.required || it.type.nullable || it.isConstant }
-                            .map { it.name }
-                    } else {
-                        node.required.toList()
-                    }
-                } else if (config.requireNullableFields) {
-                    // All properties are required (legacy strict mode from JsonSchemaConfig)
-                    node.properties.map { it.name }
-                } else {
-                    // Only non-nullable properties are required
-                    node.properties.filter { !it.type.nullable || it.isConstant }.map { it.name }
-                }
-
+            val requiredFields = requiredFieldNames(node)
             val requiredSet = requiredFields.toSet()
             val properties =
                 node.properties.associate { property ->
                     val isRequired = property.name in requiredSet
                     val finalDef =
-                        convertTypeRef(property.type, graph)
+                        convertTypeRef(property.type, graph, jsonTypeNames, depth)
                             .let { def -> property.description?.let { setDescription(def, it) } ?: def }
                             .let { def ->
                                 when {
@@ -372,8 +378,10 @@ public class TypeGraphToFunctionCallingSchemaTransformer
             node: ListNode,
             nullable: Boolean,
             graph: TypeGraph,
+            jsonTypeNames: Map<TypeId, String>,
+            depth: Int,
         ): PropertyDefinition {
-            val items = convertTypeRef(node.element, graph)
+            val items = convertTypeRef(node.element, graph, jsonTypeNames, depth)
             return ArrayPropertyDefinition(
                 type = if (nullable) ARRAY_OR_NULL_TYPE else ARRAY_TYPE,
                 description = node.description,
@@ -386,8 +394,10 @@ public class TypeGraphToFunctionCallingSchemaTransformer
             node: MapNode,
             nullable: Boolean,
             graph: TypeGraph,
+            jsonTypeNames: Map<TypeId, String>,
+            depth: Int,
         ): PropertyDefinition {
-            val valuePropertyDef = convertTypeRef(node.value, graph)
+            val valuePropertyDef = convertTypeRef(node.value, graph, jsonTypeNames, depth)
             return ObjectPropertyDefinition(
                 type = if (nullable) OBJECT_OR_NULL_TYPE else OBJECT_TYPE,
                 description = node.description,
@@ -400,13 +410,15 @@ public class TypeGraphToFunctionCallingSchemaTransformer
             node: PolymorphicNode,
             nullable: Boolean,
             graph: TypeGraph,
+            jsonTypeNames: Map<TypeId, String>,
+            depth: Int,
         ): PropertyDefinition {
             // Get a list of subtype definitions
             val subtypeDefs =
                 node.subtypes.map { subtypeRef ->
-                    val typeName = subtypeRef.id.value
-
-                    convertTypeRef(subtypeRef.ref, graph)
+                    val subtypeDefinition = convertTypeRef(subtypeRef.ref, graph, jsonTypeNames, depth)
+                    val typeName = jsonTypeNames.getValue(subtypeRef.id)
+                    subtypeDefinition
                         .let { definition ->
                             @Suppress("UseCheckOrError")
                             definition as? ObjectPropertyDefinition

@@ -161,7 +161,7 @@ internal class SerializationIntrospectionContext(
         withCycleDetection(descriptor, id) {
             val entries = (0 until descriptor.elementsCount).map { descriptor.getElementName(it) }
             EnumNode(
-                name = descriptor.serialName,
+                name = descriptor.unwrapSerialName().removeSuffix("?"),
                 entries = entries,
                 description = extractDescription(descriptor),
             )
@@ -241,7 +241,7 @@ internal class SerializationIntrospectionContext(
             }
 
             ObjectNode(
-                name = descriptor.serialName,
+                name = descriptor.unwrapSerialName().removeSuffix("?"),
                 properties = properties,
                 required = required,
                 description = extractDescription(descriptor),
@@ -320,7 +320,7 @@ internal class SerializationIntrospectionContext(
             // Create the polymorphic node
             val node =
                 PolymorphicNode(
-                    baseName = descriptor.serialName,
+                    name = descriptor.unwrapSerialName(),
                     subtypes = subtypes,
                     discriminator = discriminator,
                     description = extractDescription(descriptor),
@@ -382,8 +382,9 @@ internal class SerializationIntrospectionContext(
     }
 
     /**
-     * True when [descriptor] has the compiler-generated sealed wrapper shape:
-     * element[0] named `type` (the discriminator) and element[1] named `value` (the subtype holder).
+     * True when [kotlinx.serialization.builtins.LongAsStringSerializer.descriptor]
+     * has the compiler-generated sealed wrapper shape: element[0] named `type` (the discriminator)
+     * and element[1] named `value` (the subtype holder).
      */
     private fun SerialDescriptor.isStandardSealedWrapper(): Boolean =
         elementsCount >= 2 &&
@@ -463,7 +464,7 @@ internal class SerializationIntrospectionContext(
 
         withCycleDetection(descriptor, id) {
             ObjectNode(
-                name = descriptor.serialName,
+                name = descriptor.unwrapSerialName().removeSuffix("?"),
                 properties = emptyList(),
                 required = emptySet(),
                 description = extractDescription(descriptor),

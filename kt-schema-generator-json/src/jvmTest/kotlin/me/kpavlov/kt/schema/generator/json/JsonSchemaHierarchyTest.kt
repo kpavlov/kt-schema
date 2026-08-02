@@ -217,8 +217,8 @@ class JsonSchemaHierarchyTest {
         val schema = generatorWithDiscriminator.generateSchema(Animal::class)
 
         // The OpenAPI discriminator mapping key MUST equal the "type" const value in each subtype.
-        // Both the mapping key and the const value use the fully qualified class name so that
-        // clients can dispatch correctly. The mapping value is the $ref path to the $defs entry.
+        // Both the mapping key and the const value use the fully qualified class names so
+        // that clients can dispatch correctly. The mapping value is the $ref path to the $defs entry.
         // language=json
         val expectedSchema = $$"""
         {

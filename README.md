@@ -566,6 +566,7 @@ import me.kpavlov.kt.schema.Schema
 import me.kpavlov.kt.schema.Description
 import me.kpavlov.kt.schema.generator.json.ReflectionClassJsonSchemaGenerator
 import me.kpavlov.kt.schema.json.encodeToString
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.json.Json
 -->
 
@@ -585,6 +586,8 @@ sealed class Animal {
         override val name: String,
     ) : Animal()
 
+    // @SerialName overrides the emitted type name for this subtype only (see below)
+    @SerialName("Cat")
     @Schema(withSchemaObject = true)
     data class Cat(
         @Description("Animal's name")
@@ -621,19 +624,19 @@ println(schema.encodeToString(Json { prettyPrint = true }))
     "additionalProperties": false,
     "oneOf": [
         {
-            "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.Animal.Cat"
+            "$ref": "#/$defs/Cat"
         },
         {
             "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.Animal.Dog"
         }
     ],
     "$defs": {
-        "me.kpavlov.kt.schema.integration.type.Animal.Cat": {
+        "Cat": {
             "type": "object",
             "properties": {
                 "type": {
                     "type": "string",
-                    "const": "me.kpavlov.kt.schema.integration.type.Animal.Cat"
+                    "const": "Cat"
                 },
                 "name": {
                     "type": "string",
@@ -673,7 +676,8 @@ println(schema.encodeToString(Json { prettyPrint = true }))
 **Key features:**
 
 - **`oneOf` with `$ref`**: Each sealed subclass is stored in `$defs` and referenced via `$ref`
-- **Fully qualified names**: `$defs` keys and discriminator `const` values use fully qualified class names (e.g., `com.example.Animal.Cat`) to avoid collisions across packages
+- **Fully qualified names by default**: `$defs` keys and discriminator `const` values use fully qualified class names (e.g., `com.example.Animal.Dog`) to avoid collisions across packages
+- **Name overrides**: a subtype annotated with `@SerialName`/`@JsonTypeName` (or another recognized name-override annotation) uses that short name instead of its FQN — like `Cat` above, overridden via `@SerialName("Cat")`
 - **Discriminator property**: A `type` field with a `const` value is automatically added to each subtype for runtime dispatch
 - **Property inheritance**: Base class properties are included in each subtype
 - **Type safety**: Each subtype gets its own schema definition

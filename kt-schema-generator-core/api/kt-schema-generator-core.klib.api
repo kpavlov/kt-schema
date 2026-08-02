@@ -51,6 +51,11 @@ abstract interface <#A: kotlin/Any?, #B: kotlin/Any?> me.kpavlov.kt.schema.gener
     abstract fun transform(me.kpavlov.kt.schema.generator.core.ir/TypeGraph, kotlin/String): #A // me.kpavlov.kt.schema.generator.core.ir/TypeGraphTransformer.transform|transform(me.kpavlov.kt.schema.generator.core.ir.TypeGraph;kotlin.String){}[0]
 }
 
+sealed interface me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode|null[0]
+    abstract val name // me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode.name|{}name[0]
+        abstract fun <get-name>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode.name.<get-name>|<get-name>(){}[0]
+}
+
 sealed interface me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/TypeNode|null[0]
     abstract val description // me.kpavlov.kt.schema.generator.core.ir/TypeNode.description|{}description[0]
         abstract fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/TypeNode.description.<get-description>|<get-description>(){}[0]
@@ -156,7 +161,7 @@ final class me.kpavlov.kt.schema.generator.core.ir/Discriminator { // me.kpavlov
     final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Discriminator.toString|toString(){}[0]
 }
 
-final class me.kpavlov.kt.schema.generator.core.ir/EnumNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/EnumNode|null[0]
+final class me.kpavlov.kt.schema.generator.core.ir/EnumNode : me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode { // me.kpavlov.kt.schema.generator.core.ir/EnumNode|null[0]
     constructor <init>(kotlin/String, kotlin.collections/List<kotlin/String>, kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/EnumNode.<init>|<init>(kotlin.String;kotlin.collections.List<kotlin.String>;kotlin.String?){}[0]
 
     final val description // me.kpavlov.kt.schema.generator.core.ir/EnumNode.description|{}description[0]
@@ -210,7 +215,7 @@ final class me.kpavlov.kt.schema.generator.core.ir/MapNode : me.kpavlov.kt.schem
     final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/MapNode.toString|toString(){}[0]
 }
 
-final class me.kpavlov.kt.schema.generator.core.ir/ObjectNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/ObjectNode|null[0]
+final class me.kpavlov.kt.schema.generator.core.ir/ObjectNode : me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode { // me.kpavlov.kt.schema.generator.core.ir/ObjectNode|null[0]
     constructor <init>(kotlin/String, kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Property>, kotlin.collections/Set<kotlin/String>, kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.<init>|<init>(kotlin.String;kotlin.collections.List<me.kpavlov.kt.schema.generator.core.ir.Property>;kotlin.collections.Set<kotlin.String>;kotlin.String?){}[0]
 
     final val description // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.description|{}description[0]
@@ -232,15 +237,15 @@ final class me.kpavlov.kt.schema.generator.core.ir/ObjectNode : me.kpavlov.kt.sc
     final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.toString|toString(){}[0]
 }
 
-final class me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode|null[0]
+final class me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode : me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode { // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode|null[0]
     constructor <init>(kotlin/String, kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/SubtypeRef>, me.kpavlov.kt.schema.generator.core.ir/Discriminator, kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.<init>|<init>(kotlin.String;kotlin.collections.List<me.kpavlov.kt.schema.generator.core.ir.SubtypeRef>;me.kpavlov.kt.schema.generator.core.ir.Discriminator;kotlin.String?){}[0]
 
-    final val baseName // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.baseName|{}baseName[0]
-        final fun <get-baseName>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.baseName.<get-baseName>|<get-baseName>(){}[0]
     final val description // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.description|{}description[0]
         final fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.description.<get-description>|<get-description>(){}[0]
     final val discriminator // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.discriminator|{}discriminator[0]
         final fun <get-discriminator>(): me.kpavlov.kt.schema.generator.core.ir/Discriminator // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.discriminator.<get-discriminator>|<get-discriminator>(){}[0]
+    final val name // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.name|{}name[0]
+        final fun <get-name>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.name.<get-name>|<get-name>(){}[0]
     final val subtypes // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.subtypes|{}subtypes[0]
         final fun <get-subtypes>(): kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/SubtypeRef> // me.kpavlov.kt.schema.generator.core.ir/PolymorphicNode.subtypes.<get-subtypes>|<get-subtypes>(){}[0]
 
@@ -336,19 +341,6 @@ final class me.kpavlov.kt.schema.generator.core.ir/TypeGraph { // me.kpavlov.kt.
     final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeGraph.toString|toString(){}[0]
 }
 
-final class me.kpavlov.kt.schema.generator.core.ir/TypeId { // me.kpavlov.kt.schema.generator.core.ir/TypeId|null[0]
-    constructor <init>(kotlin/String) // me.kpavlov.kt.schema.generator.core.ir/TypeId.<init>|<init>(kotlin.String){}[0]
-
-    final val value // me.kpavlov.kt.schema.generator.core.ir/TypeId.value|{}value[0]
-        final fun <get-value>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.value.<get-value>|<get-value>(){}[0]
-
-    final fun component1(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.component1|component1(){}[0]
-    final fun copy(kotlin/String = ...): me.kpavlov.kt.schema.generator.core.ir/TypeId // me.kpavlov.kt.schema.generator.core.ir/TypeId.copy|copy(kotlin.String){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeId.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/TypeId.hashCode|hashCode(){}[0]
-    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.toString|toString(){}[0]
-}
-
 final class me.kpavlov.kt.schema.generator.core/GlobMatcher { // me.kpavlov.kt.schema.generator.core/GlobMatcher|null[0]
     constructor <init>(kotlin.collections/List<kotlin/String>, kotlin.collections/List<kotlin/String>) // me.kpavlov.kt.schema.generator.core/GlobMatcher.<init>|<init>(kotlin.collections.List<kotlin.String>;kotlin.collections.List<kotlin.String>){}[0]
 
@@ -360,6 +352,17 @@ final class me.kpavlov.kt.schema.generator.core/GlobMatcher { // me.kpavlov.kt.s
     final fun matches(kotlin/String): kotlin/Boolean // me.kpavlov.kt.schema.generator.core/GlobMatcher.matches|matches(kotlin.String){}[0]
     final fun matchesExclude(kotlin/String): kotlin/Boolean // me.kpavlov.kt.schema.generator.core/GlobMatcher.matchesExclude|matchesExclude(kotlin.String){}[0]
     final fun matchesInclude(kotlin/String): kotlin/Boolean // me.kpavlov.kt.schema.generator.core/GlobMatcher.matchesInclude|matchesInclude(kotlin.String){}[0]
+}
+
+final value class me.kpavlov.kt.schema.generator.core.ir/TypeId { // me.kpavlov.kt.schema.generator.core.ir/TypeId|null[0]
+    constructor <init>(kotlin/String) // me.kpavlov.kt.schema.generator.core.ir/TypeId.<init>|<init>(kotlin.String){}[0]
+
+    final val value // me.kpavlov.kt.schema.generator.core.ir/TypeId.value|{}value[0]
+        final fun <get-value>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.value.<get-value>|<get-value>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeId.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/TypeId.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.toString|toString(){}[0]
 }
 
 final object me.kpavlov.kt.schema.generator.core.ir/Introspections { // me.kpavlov.kt.schema.generator.core.ir/Introspections|null[0]

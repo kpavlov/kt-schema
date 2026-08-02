@@ -1,6 +1,7 @@
 package me.kpavlov.kt.schema.generator.core.ir
 
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
+import kotlin.jvm.JvmInline
 
 /** A graph of discovered types plus the root type reference used to emit schemas. */
 public data class TypeGraph(
@@ -9,11 +10,10 @@ public data class TypeGraph(
 )
 
 /** A stable identifier for a type definition used for deduplication and $ref linking. */
-public data class TypeId(
-    val value: String,
-) {
-    override fun toString(): String = value
-}
+@JvmInline
+public value class TypeId(
+    public val value: String,
+)
 
 /** Reference to a type: either inline node or reference by [TypeId]. */
 public sealed interface TypeRef {
@@ -50,6 +50,22 @@ public sealed interface TypeNode {
     public val description: String?
 }
 
+/**
+ * A named type node.
+ *
+ * Contract of [name]:
+ * - Populated for classes, enums, and sealed/polymorphic hierarchies alike. The reflection, KSP,
+ *   and APT front ends populate it with the `@JsonTypeName` override when present, otherwise with
+ *   the declared type name. The serialization front end uses the raw `@SerialName` value without
+ *   an FQN fallback.
+ * - `$ref`/`$id`/`$defs` emission for nodes reachable via [TypeId] is driven by [name] through
+ *   [TypeGraph.jsonTypeNames], which falls back to the [TypeId] value only when two different
+ *   nodes resolve to the same [name] (e.g. two distinct types sharing the same override).
+ */
+public sealed interface NamedTypeNode : TypeNode {
+    public val name: String
+}
+
 /** Primitive kinds supported by the IR. */
 public enum class PrimitiveKind { STRING, BOOLEAN, INT, LONG, FLOAT, DOUBLE }
 
@@ -61,18 +77,18 @@ public data class PrimitiveNode(
 
 /** Enum node with symbolic entries. */
 public data class EnumNode(
-    val name: String,
+    override val name: String,
     val entries: List<String>,
     override val description: String? = null,
-) : TypeNode
+) : NamedTypeNode
 
 /** Object node with named properties and required set. */
 public data class ObjectNode(
-    val name: String,
+    override val name: String,
     val properties: List<Property>,
     val required: Set<String>,
     override val description: String? = null,
-) : TypeNode
+) : NamedTypeNode
 
 /** List/array node. */
 public data class ListNode(
@@ -94,11 +110,11 @@ public data class AnyNode(
 
 /** Polymorphic node for sealed/open hierarchies. */
 public data class PolymorphicNode(
-    val baseName: String,
+    override val name: String,
     val subtypes: List<SubtypeRef>,
     val discriminator: Discriminator,
     override val description: String? = null,
-) : TypeNode
+) : NamedTypeNode
 
 /** Property of an object. */
 public data class Property(
