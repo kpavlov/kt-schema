@@ -2,6 +2,7 @@ package me.kpavlov.kt.schema.generator.json
 
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import me.kpavlov.kt.schema.generator.core.ir.Discriminator
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
@@ -200,9 +201,9 @@ class TypeGraphToJsonSchemaTransformerTest {
     }
 
     @Test
-    fun `short type name drives defs key and ref`() {
-        // The short (simple) type name drives $defs and $ref; a name override stored in
-        // ObjectNode.name (e.g. @JsonTypeName) is not used for these structural names.
+    fun `node name is used verbatim for id defs key and ref`() {
+        // NamedTypeNode.name drives $id/$defs/$ref directly: the FQN when the front end found no
+        // override annotation, or the override value (e.g. from @JsonTypeName) when it did.
         val orgChartId = TypeId("com.example.orgchart.OrgChart")
         val orgChartNode =
             ObjectNode(
@@ -219,7 +220,8 @@ class TypeGraphToJsonSchemaTransformerTest {
         val compensationId = TypeId("com.example.orgchart.Compensation")
         val compensationNode =
             ObjectNode(
-                name = "compensation",
+                // Simulates a `@JsonTypeName("Compensation")` override.
+                name = "Compensation",
                 properties =
                     listOf(
                         Property(
@@ -244,7 +246,7 @@ class TypeGraphToJsonSchemaTransformerTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "OrgChart",
+              "$id": "com.example.orgchart.OrgChart",
               "type": "object",
               "properties": {
                 "compensation": {
@@ -268,109 +270,14 @@ class TypeGraphToJsonSchemaTransformerTest {
     }
 
     @Test
-    fun `simple name in node name uses the short type name`() {
-        val rootId = TypeId("com.example.Root")
-        val rootNode =
-            ObjectNode(
-                name = "com.example.Root",
-                properties = listOf(Property(name = "circle", type = TypeRef.Ref(TypeId("com.example.Circle")))),
-                required = setOf("circle"),
-            )
-        val circleId = TypeId("com.example.Circle")
-        val circleNode =
-            ObjectNode(
-                name = "Circle",
-                properties =
-                    listOf(
-                        Property(
-                            name = "radius",
-                            type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.DOUBLE)),
-                        ),
-                    ),
-                required = setOf("radius"),
-            )
-
-        val graph =
-            TypeGraph(
-                root = TypeRef.Ref(rootId),
-                nodes = mapOf(rootId to rootNode, circleId to circleNode),
-            )
-
-        val schema = transformer.transform(graph, "com.example.Root")
-        val schemaJson = schema.encodeToString(json)
-
-        schemaJson shouldEqualJson
-            // language=JSON
-            $$"""
-            {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "Root",
-              "type": "object",
-              "properties": {
-                "circle": {
-                  "$ref": "#/$defs/Circle"
-                }
-              },
-              "required": ["circle"],
-              "additionalProperties": false,
-              "$defs": {
-                "Circle": {
-                  "type": "object",
-                  "properties": {
-                    "radius": { "type": "number" }
-                  },
-                  "required": ["radius"],
-                  "additionalProperties": false
-                }
-              }
-            }
-            """.trimIndent()
-    }
-
-    @Test
-    fun `root type uses short name in id`() {
-        val paymentId = TypeId("com.example.Payment")
-        val paymentNode =
-            ObjectNode(
-                name = "payment",
-                properties = listOf(Property(name = "amount", type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.INT)))),
-                required = setOf("amount"),
-            )
-
-        val graph =
-            TypeGraph(
-                root = TypeRef.Ref(paymentId),
-                nodes = mapOf(paymentId to paymentNode),
-            )
-
-        val schema = transformer.transform(graph, "com.example.Payment")
-        val schemaJson = schema.encodeToString(json)
-
-        schemaJson shouldEqualJson
-            // language=JSON
-            $$"""
-            {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "Payment",
-              "type": "object",
-              "properties": {
-                "amount": { "type": "integer" }
-              },
-              "required": ["amount"],
-              "additionalProperties": false
-            }
-            """.trimIndent()
-    }
-
-    @Test
-    fun `polymorphic subtype uses short name for defs key ref and discriminator const`() {
+    fun `polymorphic subtype name is used verbatim for defs key ref and discriminator const`() {
         val shapeId = TypeId("com.example.Shape")
         val circleId = TypeId("com.example.Circle")
         val squareId = TypeId("com.example.Square")
 
         val circleNode =
             ObjectNode(
-                name = "circle",
+                name = "com.example.Circle",
                 properties =
                     listOf(
                         Property(
@@ -382,7 +289,7 @@ class TypeGraphToJsonSchemaTransformerTest {
             )
         val squareNode =
             ObjectNode(
-                name = "square",
+                name = "com.example.Square",
                 properties =
                     listOf(
                         Property(
@@ -418,32 +325,32 @@ class TypeGraphToJsonSchemaTransformerTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "Shape",
+              "$id": "com.example.Shape",
               "type": "object",
               "additionalProperties": false,
               "oneOf": [
-                { "$ref": "#/$defs/Circle" },
-                { "$ref": "#/$defs/Square" }
+                { "$ref": "#/$defs/com.example.Circle" },
+                { "$ref": "#/$defs/com.example.Square" }
               ],
               "$defs": {
-                "Circle": {
+                "com.example.Circle": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Circle"
+                      "const": "com.example.Circle"
                     },
                     "radius": { "type": "number" }
                   },
                   "required": ["type", "radius"],
                   "additionalProperties": false
                 },
-                "Square": {
+                "com.example.Square": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Square"
+                      "const": "com.example.Square"
                     },
                     "side": { "type": "number" }
                   },
@@ -456,18 +363,18 @@ class TypeGraphToJsonSchemaTransformerTest {
     }
 
     @Test
-    fun `colliding short names fall back to fully qualified ids`() {
-        // ResultA.Success and ResultB.Success share the short name "Success" — the fully
-        // qualified id must be used to keep $defs keys unambiguous.
-        val rootId = TypeId("me.ApiResponse")
-        val resultAId = TypeId("me.ResultA")
-        val resultBId = TypeId("me.ResultB")
-        val successAId = TypeId("me.ResultA.Success")
-        val successBId = TypeId("me.ResultB.Success")
+    fun `colliding override names fall back to fully qualified ids`() {
+        // ResultA.Success and ResultB.Success are both annotated e.g. @JsonTypeName("Success") —
+        // the fully qualified id must be used to keep $defs keys unambiguous.
+        val rootId = TypeId("com.example.ApiResponse")
+        val resultAId = TypeId("com.example.ResultA")
+        val resultBId = TypeId("com.example.ResultB")
+        val successAId = TypeId("com.example.ResultA.Success")
+        val successBId = TypeId("com.example.ResultB.Success")
 
         val successANode =
             ObjectNode(
-                name = "me.ResultA.Success",
+                name = "Success",
                 properties =
                     listOf(
                         Property(
@@ -479,25 +386,25 @@ class TypeGraphToJsonSchemaTransformerTest {
             )
         val successBNode =
             ObjectNode(
-                name = "me.ResultB.Success",
+                name = "Success",
                 properties = listOf(Property(name = "code", type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.INT)))),
                 required = setOf("code"),
             )
         val resultANode =
             PolymorphicNode(
-                name = "me.ResultA",
+                name = "com.example.ResultA",
                 subtypes = listOf(SubtypeRef(successAId)),
                 discriminator = Discriminator(name = "type"),
             )
         val resultBNode =
             PolymorphicNode(
-                name = "me.ResultB",
+                name = "com.example.ResultB",
                 subtypes = listOf(SubtypeRef(successBId)),
                 discriminator = Discriminator(name = "type"),
             )
         val rootNode =
             ObjectNode(
-                name = "me.ApiResponse",
+                name = "com.example.ApiResponse",
                 properties =
                     listOf(
                         Property(name = "resultA", type = TypeRef.Ref(resultAId)),
@@ -519,7 +426,7 @@ class TypeGraphToJsonSchemaTransformerTest {
                     ),
             )
 
-        val schema = transformer.transform(graph, "me.ApiResponse")
+        val schema = transformer.transform(graph, "com.example.ApiResponse")
         val schemaJson = schema.encodeToString(json)
 
         schemaJson shouldEqualJson
@@ -527,43 +434,43 @@ class TypeGraphToJsonSchemaTransformerTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "ApiResponse",
+              "$id": "com.example.ApiResponse",
               "type": "object",
               "properties": {
-                "resultA": { "$ref": "#/$defs/ResultA" },
-                "resultB": { "$ref": "#/$defs/ResultB" }
+                "resultA": { "$ref": "#/$defs/com.example.ResultA" },
+                "resultB": { "$ref": "#/$defs/com.example.ResultB" }
               },
               "required": ["resultA", "resultB"],
               "additionalProperties": false,
               "$defs": {
-                "ResultA": {
+                "com.example.ResultA": {
                   "oneOf": [
-                    { "$ref": "#/$defs/me.ResultA.Success" }
+                    { "$ref": "#/$defs/com.example.ResultA.Success" }
                   ]
                 },
-                "ResultB": {
+                "com.example.ResultB": {
                   "oneOf": [
-                    { "$ref": "#/$defs/me.ResultB.Success" }
+                    { "$ref": "#/$defs/com.example.ResultB.Success" }
                   ]
                 },
-                "me.ResultA.Success": {
+                "com.example.ResultA.Success": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "me.ResultA.Success"
+                      "const": "com.example.ResultA.Success"
                     },
                     "value": { "type": "string" }
                   },
                   "required": ["type", "value"],
                   "additionalProperties": false
                 },
-                "me.ResultB.Success": {
+                "com.example.ResultB.Success": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "me.ResultB.Success"
+                      "const": "com.example.ResultB.Success"
                     },
                     "code": { "type": "integer" }
                   },
@@ -573,6 +480,36 @@ class TypeGraphToJsonSchemaTransformerTest {
               }
             }
             """.trimIndent()
+    }
+
+    @Test
+    fun `jsonTypeNames falls back names that collide with another node's id after a prior fallback`() {
+        // X and Y both override to "Bar" and must fall back to their own ids.
+        // W's own name happens to equal X's id, which only becomes a problem once X
+        // falls back to it - a second resolution pass is required to catch it.
+        val xId = TypeId("com.example.X")
+        val yId = TypeId("com.example.Y")
+        val wId = TypeId("com.example.W")
+
+        fun node(name: String) =
+            ObjectNode(name = name, properties = emptyList(), required = emptySet())
+
+        val graph =
+            TypeGraph(
+                root = TypeRef.Ref(wId),
+                nodes =
+                    mapOf(
+                        xId to node("Bar"),
+                        yId to node("Bar"),
+                        wId to node("com.example.X"),
+                    ),
+            )
+
+        val names = graph.jsonTypeNames()
+
+        names[xId] shouldBe "com.example.X"
+        names[yId] shouldBe "com.example.Y"
+        names[wId] shouldBe "com.example.W"
     }
 }
 

@@ -94,7 +94,7 @@ class KDocParametersTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "UserProfile",
+              "$id": "me.kpavlov.kt.schema.integration.kdoc.UserProfile",
               "description": "User profile with basic information.",
               "type": "object",
               "properties": {
@@ -126,7 +126,7 @@ class KDocParametersTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "AppConfig",
+              "$id": "me.kpavlov.kt.schema.integration.kdoc.AppConfig",
               "description": "Configuration for the application.",
               "type": "object",
               "properties": {
@@ -158,7 +158,7 @@ class KDocParametersTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "Product",
+              "$id": "me.kpavlov.kt.schema.integration.kdoc.Product",
               "description": "Product information.",
               "type": "object",
               "properties": {
@@ -224,7 +224,7 @@ class KDocParametersTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "ApiResponse",
+              "$id": "me.kpavlov.kt.schema.integration.kdoc.ApiResponse",
               "description": "Response with mixed description sources.\nDemonstrates fallback chain: annotation > @param tag > @property tag",
               "type": "object",
               "properties": {
@@ -256,7 +256,7 @@ class KDocParametersTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "FieldsExample",
+              "$id": "me.kpavlov.kt.schema.integration.kdoc.FieldsExample",
               "description": "Class with properties declared in body (fields).\nDemonstrates field-level KDoc extraction.",
               "type": "object",
               "properties": {

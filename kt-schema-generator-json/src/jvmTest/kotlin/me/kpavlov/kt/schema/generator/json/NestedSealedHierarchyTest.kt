@@ -44,65 +44,65 @@ class NestedSealedHierarchyTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "Delivery",
+              "$id": "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Delivery",
               "type": "object",
               "properties": {
                 "vehicle": {
                   "oneOf": [
                     { "type": "null" },
-                    { "$ref": "#/$defs/Vehicle" }
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle" }
                   ]
                 }
               },
               "required": ["vehicle"],
               "additionalProperties": false,
               "$defs": {
-                "Vehicle": {
+                "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle": {
                   "oneOf": [
-                    { "$ref": "#/$defs/Bicycle" },
-                    { "$ref": "#/$defs/Motorized" }
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Bicycle" },
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized" }
                   ]
                 },
-                "Bicycle": {
+                "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Bicycle": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Bicycle"
+                      "const": "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Bicycle"
                     },
                     "gears": { "type": "integer" }
                   },
                   "required": ["type", "gears"],
                   "additionalProperties": false
                 },
-                "Car": {
+                "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized.Car": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Car"
+                      "const": "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized.Car"
                     },
                     "doors": { "type": "integer" }
                   },
                   "required": ["type", "doors"],
                   "additionalProperties": false
                 },
-                "Truck": {
+                "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized.Truck": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Truck"
+                      "const": "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized.Truck"
                     },
                     "payload": { "type": "number" }
                   },
                   "required": ["type", "payload"],
                   "additionalProperties": false
                 },
-                "Motorized": {
+                "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized": {
                   "oneOf": [
-                    { "$ref": "#/$defs/Car" },
-                    { "$ref": "#/$defs/Truck" }
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized.Car" },
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized.Truck" }
                   ]
                 }
               }
@@ -119,54 +119,54 @@ class NestedSealedHierarchyTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "Vehicle",
+              "$id": "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle",
               "type": "object",
               "additionalProperties": false,
               "oneOf": [
-                { "$ref": "#/$defs/Bicycle" },
-                { "$ref": "#/$defs/Motorized" }
+                { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Bicycle" },
+                { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized" }
               ],
               "$defs": {
-                "Bicycle": {
+                "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Bicycle": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Bicycle"
+                      "const": "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Bicycle"
                     },
                     "gears": { "type": "integer" }
                   },
                   "required": ["type", "gears"],
                   "additionalProperties": false
                 },
-                "Car": {
+                "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized.Car": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Car"
+                      "const": "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized.Car"
                     },
                     "doors": { "type": "integer" }
                   },
                   "required": ["type", "doors"],
                   "additionalProperties": false
                 },
-                "Truck": {
+                "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized.Truck": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Truck"
+                      "const": "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized.Truck"
                     },
                     "payload": { "type": "number" }
                   },
                   "required": ["type", "payload"],
                   "additionalProperties": false
                 },
-                "Motorized": {
+                "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized": {
                   "oneOf": [
-                    { "$ref": "#/$defs/Car" },
-                    { "$ref": "#/$defs/Truck" }
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized.Car" },
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized.Truck" }
                   ]
                 }
               }

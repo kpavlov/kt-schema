@@ -341,19 +341,6 @@ final class me.kpavlov.kt.schema.generator.core.ir/TypeGraph { // me.kpavlov.kt.
     final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeGraph.toString|toString(){}[0]
 }
 
-final class me.kpavlov.kt.schema.generator.core.ir/TypeId { // me.kpavlov.kt.schema.generator.core.ir/TypeId|null[0]
-    constructor <init>(kotlin/String) // me.kpavlov.kt.schema.generator.core.ir/TypeId.<init>|<init>(kotlin.String){}[0]
-
-    final val value // me.kpavlov.kt.schema.generator.core.ir/TypeId.value|{}value[0]
-        final fun <get-value>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.value.<get-value>|<get-value>(){}[0]
-
-    final fun component1(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.component1|component1(){}[0]
-    final fun copy(kotlin/String = ...): me.kpavlov.kt.schema.generator.core.ir/TypeId // me.kpavlov.kt.schema.generator.core.ir/TypeId.copy|copy(kotlin.String){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeId.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/TypeId.hashCode|hashCode(){}[0]
-    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.toString|toString(){}[0]
-}
-
 final class me.kpavlov.kt.schema.generator.core/GlobMatcher { // me.kpavlov.kt.schema.generator.core/GlobMatcher|null[0]
     constructor <init>(kotlin.collections/List<kotlin/String>, kotlin.collections/List<kotlin/String>) // me.kpavlov.kt.schema.generator.core/GlobMatcher.<init>|<init>(kotlin.collections.List<kotlin.String>;kotlin.collections.List<kotlin.String>){}[0]
 
@@ -365,6 +352,17 @@ final class me.kpavlov.kt.schema.generator.core/GlobMatcher { // me.kpavlov.kt.s
     final fun matches(kotlin/String): kotlin/Boolean // me.kpavlov.kt.schema.generator.core/GlobMatcher.matches|matches(kotlin.String){}[0]
     final fun matchesExclude(kotlin/String): kotlin/Boolean // me.kpavlov.kt.schema.generator.core/GlobMatcher.matchesExclude|matchesExclude(kotlin.String){}[0]
     final fun matchesInclude(kotlin/String): kotlin/Boolean // me.kpavlov.kt.schema.generator.core/GlobMatcher.matchesInclude|matchesInclude(kotlin.String){}[0]
+}
+
+final value class me.kpavlov.kt.schema.generator.core.ir/TypeId { // me.kpavlov.kt.schema.generator.core.ir/TypeId|null[0]
+    constructor <init>(kotlin/String) // me.kpavlov.kt.schema.generator.core.ir/TypeId.<init>|<init>(kotlin.String){}[0]
+
+    final val value // me.kpavlov.kt.schema.generator.core.ir/TypeId.value|{}value[0]
+        final fun <get-value>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.value.<get-value>|<get-value>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeId.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/TypeId.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeId.toString|toString(){}[0]
 }
 
 final object me.kpavlov.kt.schema.generator.core.ir/Introspections { // me.kpavlov.kt.schema.generator.core.ir/Introspections|null[0]

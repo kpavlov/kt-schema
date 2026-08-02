@@ -56,49 +56,49 @@ class RecursiveTypeReflectionTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "Tree",
+              "$id": "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.Tree",
               "type": "object",
               "properties": {
                 "root": {
-                  "$ref": "#/$defs/TreeNode"
+                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode"
                 }
               },
               "required": ["root"],
               "additionalProperties": false,
               "$defs": {
-                "TreeNode": {
+                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode": {
                   "oneOf": [
-                    { "$ref": "#/$defs/Branch" },
-                    { "$ref": "#/$defs/Leaf" }
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode.Branch" },
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode.Leaf" }
                   ]
                 },
-                "Branch": {
+                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode.Branch": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Branch"
+                      "const": "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode.Branch"
                     },
                     "id": { "type": "string" },
                     "left": {
                       "oneOf": [
                         { "type": "null" },
-                        { "$ref": "#/$defs/TreeNode" }
+                        { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode" }
                       ]
                     },
                     "right": {
-                      "$ref": "#/$defs/TreeNode"
+                      "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode"
                     }
                   },
                   "required": ["type", "id", "left", "right"],
                   "additionalProperties": false
                 },
-                "Leaf": {
+                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode.Leaf": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Leaf"
+                      "const": "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode.Leaf"
                     },
                     "id": { "type": "string" },
                     "value": { "type": "string" }
@@ -120,28 +120,28 @@ class RecursiveTypeReflectionTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "LinkedNode",
+              "$id": "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.LinkedNode",
               "type": "object",
               "properties": {
                 "value": { "type": "string" },
                 "next": {
                   "oneOf": [
                     { "type": "null" },
-                    { "$ref": "#/$defs/LinkedNode" }
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.LinkedNode" }
                   ]
                 }
               },
                   "required": ["value", "next"],
                   "additionalProperties": false,
                   "$defs": {
-                    "LinkedNode": {
+                    "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.LinkedNode": {
                       "type": "object",
                       "properties": {
                         "value": { "type": "string" },
                         "next": {
                           "oneOf": [
                             { "type": "null" },
-                            { "$ref": "#/$defs/LinkedNode" }
+                            { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.LinkedNode" }
                           ]
                         }
                       },

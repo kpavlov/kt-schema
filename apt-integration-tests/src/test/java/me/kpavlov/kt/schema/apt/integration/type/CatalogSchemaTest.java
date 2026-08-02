@@ -28,7 +28,7 @@ class CatalogSchemaTest {
         JsonNode expected = MAPPER.readTree("""
                 {
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "$id": "Catalog",
+                  "$id": "me.kpavlov.kt.schema.apt.integration.type.Catalog",
                   "description": "A catalog of addresses.",
                   "type": "object",
                   "properties": {

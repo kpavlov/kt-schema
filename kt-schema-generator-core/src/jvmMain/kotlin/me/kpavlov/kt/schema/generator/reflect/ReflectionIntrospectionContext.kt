@@ -293,7 +293,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         }
         val nameOverride = extractNameOverride(klass.java.annotations.toList())
         return EnumNode(
-            name = nameOverride ?: klass.simpleName ?: "UnknownEnum",
+            name = nameOverride ?: klass.qualifiedName ?: klass.simpleName ?: "UnknownEnum",
             entries = entries,
             description = extractDescription(klass.java.annotations.toList()),
         )
@@ -402,7 +402,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
 
         val nameOverride = extractNameOverride(klass.java.annotations.toList())
         return ObjectNode(
-            name = nameOverride ?: klass.simpleName ?: "UnknownClass",
+            name = nameOverride ?: klass.qualifiedName ?: klass.simpleName ?: "UnknownClass",
             properties = properties,
             required = requiredProperties,
             description = extractDescription(klass.java.annotations.toList()),
@@ -457,7 +457,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         sealedSubclasses: List<KClass<*>>,
     ): PolymorphicNode {
         val nameOverride = extractNameOverride(klass.java.annotations.toList())
-        val name = nameOverride ?: klass.simpleName ?: "UnknownSealed"
+        val name = nameOverride ?: klass.qualifiedName ?: klass.simpleName ?: "UnknownSealed"
 
         val subtypes =
             sealedSubclasses.map { subclass ->

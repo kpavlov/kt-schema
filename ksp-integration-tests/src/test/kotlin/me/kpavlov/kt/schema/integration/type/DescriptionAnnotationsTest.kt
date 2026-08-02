@@ -19,7 +19,7 @@ class DescriptionAnnotationsTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "Product",
+              "$id": "me.kpavlov.kt.schema.integration.type.Product",
               "description": "A purchasable product with pricing and inventory info.",
               "type": "object",
               "properties": {

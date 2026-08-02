@@ -18,7 +18,7 @@ class NullableConventionSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "NullableConvention",
+              "$id": "me.kpavlov.kt.schema.integration.type.NullableConvention",
               "type": "object",
               "properties": {
                 "name": { "type": "string" },

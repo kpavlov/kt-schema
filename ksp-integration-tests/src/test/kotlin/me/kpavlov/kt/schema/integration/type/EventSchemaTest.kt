@@ -17,26 +17,26 @@ class EventSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "Event",
+              "$id": "me.kpavlov.kt.schema.integration.type.Event",
               "description": "An application event",
               "type": "object",
               "additionalProperties": false,
               "oneOf": [
                 {
-                  "$ref": "#/$defs/Click"
+                  "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.Event.Click"
                 },
                 {
-                  "$ref": "#/$defs/PageView"
+                  "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.Event.PageView"
                 }
               ],
               "$defs": {
-                "Click": {
+                "me.kpavlov.kt.schema.integration.type.Event.Click": {
                   "type": "object",
                   "description": "User clicked on an element",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Click"
+                      "const": "me.kpavlov.kt.schema.integration.type.Event.Click"
                     },
                     "timestamp": {
                       "type": "integer"
@@ -58,13 +58,13 @@ class EventSchemaTest {
                   ],
                   "additionalProperties": false
                 },
-                "PageView": {
+                "me.kpavlov.kt.schema.integration.type.Event.PageView": {
                   "type": "object",
                   "description": "Page was viewed",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "PageView"
+                      "const": "me.kpavlov.kt.schema.integration.type.Event.PageView"
                     },
                     "timestamp": {
                       "type": "integer"

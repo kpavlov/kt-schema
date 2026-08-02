@@ -16,7 +16,7 @@ class JacksonShapeSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "JacksonShape",
+              "$id": "me.kpavlov.kt.schema.integration.type.JacksonShape",
               "description": "A shape described with Jackson @JsonTypeName annotations.",
               "type": "object",
               "additionalProperties": false,

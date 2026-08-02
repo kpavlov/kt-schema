@@ -17,7 +17,7 @@ class JacksonModelSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "JacksonModel",
+              "$id": "me.kpavlov.kt.schema.integration.type.JacksonModel",
               "description": "A purchasable product using Jackson annotations.",
               "type": "object",
               "properties": {

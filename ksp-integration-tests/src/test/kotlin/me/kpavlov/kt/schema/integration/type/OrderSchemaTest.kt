@@ -17,7 +17,7 @@ class OrderSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "Order",
+              "$id": "me.kpavlov.kt.schema.integration.type.Order",
               "description": "An order placed by a customer containing multiple items.",
               "type": "object",
               "properties": {
@@ -26,22 +26,22 @@ class OrderSchemaTest {
                   "description": "Unique order identifier"
                 },
                 "customer": {
-                  "$ref": "#/$defs/Person",
+                  "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.Person",
                   "description": "The customer who placed the order"
                 },
                 "shippingAddress": {
-                  "$ref": "#/$defs/Address",
+                  "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.Address",
                   "description": "Destination address for shipment"
                 },
                 "items": {
                   "type": "array",
                   "description": "List of items included in the order",
                   "items": {
-                    "$ref": "#/$defs/Product"
+                    "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.Product"
                   }
                 },
                 "status": {
-                  "$ref": "#/$defs/Status",
+                  "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.Status",
                   "description": "Current status of the order"
                 }
               },
@@ -54,7 +54,7 @@ class OrderSchemaTest {
                 "status"
               ],
               "$defs": {
-                "Person": {
+                "me.kpavlov.kt.schema.integration.type.Person": {
                   "type": "object",
                   "description": "A person with a first and last name and age.",
                   "properties": {
@@ -78,7 +78,7 @@ class OrderSchemaTest {
                   ],
                   "additionalProperties": false
                 },
-                "Address": {
+                "me.kpavlov.kt.schema.integration.type.Address": {
                   "type": "object",
                   "description": "A postal address for deliveries and billing.",
                   "properties": {
@@ -107,7 +107,7 @@ class OrderSchemaTest {
                   ],
                   "additionalProperties": false
                 },
-                "Product": {
+                "me.kpavlov.kt.schema.integration.type.Product": {
                   "type": "object",
                   "description": "A purchasable product with pricing and inventory info.",
                   "properties": {
@@ -152,7 +152,7 @@ class OrderSchemaTest {
                   ],
                   "additionalProperties": false
                 },
-                "Status": {
+                "me.kpavlov.kt.schema.integration.type.Status": {
                   "type": "string",
                   "description": "Current lifecycle status of an entity.",
                   "enum": [

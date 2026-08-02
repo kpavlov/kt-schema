@@ -27,7 +27,7 @@ class CompanySchemaTest {
         // language=json
         JsonNode expected = MAPPER.readTree("""
                 {
-                  "$id": "Company",
+                  "$id": "me.kpavlov.kt.schema.apt.integration.type.Company",
                   "$schema": "https://json-schema.org/draft/2020-12/schema",
                   "type": "object",
                   "properties": {

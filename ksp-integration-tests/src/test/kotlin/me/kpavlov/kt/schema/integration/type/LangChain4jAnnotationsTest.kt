@@ -20,7 +20,7 @@ class LangChain4jAnnotationsTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "LangChain4jModel",
+              "$id": "me.kpavlov.kt.schema.integration.type.LangChain4jModel",
               "description": "A purchasable product using LangChain4j annotations.",
               "type": "object",
               "properties": {

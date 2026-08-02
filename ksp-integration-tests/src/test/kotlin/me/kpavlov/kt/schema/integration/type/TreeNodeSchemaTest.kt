@@ -13,32 +13,32 @@ class TreeNodeSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "Tree",
+              "$id": "me.kpavlov.kt.schema.integration.type.Tree",
               "description": "A tree with a root node",
               "type": "object",
               "properties": {
                 "root": {
                   "description": "The root node",
-                  "$ref": "#/$defs/TreeNode"
+                  "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.TreeNode"
                 }
               },
               "required": ["root"],
               "additionalProperties": false,
               "$defs": {
-                "TreeNode": {
+                "me.kpavlov.kt.schema.integration.type.TreeNode": {
                   "description": "A node in a tree structure",
                   "oneOf": [
-                    { "$ref": "#/$defs/Branch" },
-                    { "$ref": "#/$defs/Leaf" }
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.TreeNode.Branch" },
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.TreeNode.Leaf" }
                   ]
                 },
-                "Branch": {
+                "me.kpavlov.kt.schema.integration.type.TreeNode.Branch": {
                   "type": "object",
                   "description": "A branch node with recursive children",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Branch"
+                      "const": "me.kpavlov.kt.schema.integration.type.TreeNode.Branch"
                     },
                     "id": {
                       "type": "string",
@@ -47,25 +47,25 @@ class TreeNodeSchemaTest {
                     "left": {
                       "oneOf": [
                         { "type": "null" },
-                        { "$ref": "#/$defs/TreeNode" }
+                        { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.TreeNode" }
                       ],
                       "description": "Optional left child"
                     },
                     "right": {
-                      "$ref": "#/$defs/TreeNode",
+                      "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.TreeNode",
                       "description": "Right child"
                     }
                   },
                   "required": ["type", "id", "left", "right"],
                   "additionalProperties": false
                 },
-                "Leaf": {
+                "me.kpavlov.kt.schema.integration.type.TreeNode.Leaf": {
                   "type": "object",
                   "description": "A leaf node containing a value",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Leaf"
+                      "const": "me.kpavlov.kt.schema.integration.type.TreeNode.Leaf"
                     },
                     "id": {
                       "type": "string",
@@ -93,29 +93,29 @@ class TreeNodeSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "TreeNode",
+              "$id": "me.kpavlov.kt.schema.integration.type.TreeNode",
               "description": "A node in a tree structure",
               "type": "object",
               "additionalProperties": false,
               "oneOf": [
-                { "$ref": "#/$defs/Branch" },
-                { "$ref": "#/$defs/Leaf" }
+                { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.TreeNode.Branch" },
+                { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.TreeNode.Leaf" }
               ],
               "$defs": {
-                "TreeNode": {
+                "me.kpavlov.kt.schema.integration.type.TreeNode": {
                   "description": "A node in a tree structure",
                   "oneOf": [
-                    { "$ref": "#/$defs/Branch" },
-                    { "$ref": "#/$defs/Leaf" }
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.TreeNode.Branch" },
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.TreeNode.Leaf" }
                   ]
                 },
-                "Branch": {
+                "me.kpavlov.kt.schema.integration.type.TreeNode.Branch": {
                   "type": "object",
                   "description": "A branch node with recursive children",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Branch"
+                      "const": "me.kpavlov.kt.schema.integration.type.TreeNode.Branch"
                     },
                     "id": {
                       "type": "string",
@@ -124,25 +124,25 @@ class TreeNodeSchemaTest {
                     "left": {
                       "oneOf": [
                         { "type": "null" },
-                        { "$ref": "#/$defs/TreeNode" }
+                        { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.TreeNode" }
                       ],
                       "description": "Optional left child"
                     },
                     "right": {
-                      "$ref": "#/$defs/TreeNode",
+                      "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.TreeNode",
                       "description": "Right child"
                     }
                   },
                   "required": ["type", "id", "left", "right"],
                   "additionalProperties": false
                 },
-                "Leaf": {
+                "me.kpavlov.kt.schema.integration.type.TreeNode.Leaf": {
                   "type": "object",
                   "description": "A leaf node containing a value",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "Leaf"
+                      "const": "me.kpavlov.kt.schema.integration.type.TreeNode.Leaf"
                     },
                     "id": {
                       "type": "string",

@@ -103,7 +103,7 @@ class JsonSchemaGeneratorTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "TestClass",
+              "$id": "me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestClass",
               "description": "A test class",
               "type": "object",
               "properties": {
@@ -150,32 +150,32 @@ class JsonSchemaGeneratorTest {
                   }
                 },
                 "nestedProperty": {
-                  "$ref": "#/$defs/NestedProperty",
+                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.NestedProperty",
                   "description": "A custom nested property"
                 },
                 "nestedListProperty": {
                   "type": "array",
                   "default": [],
                   "items": {
-                    "$ref": "#/$defs/NestedProperty"
+                    "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.NestedProperty"
                   }
                 },
                 "nestedMapProperty": {
                   "type": "object",
                   "default": {},
                   "additionalProperties": {
-                    "$ref": "#/$defs/NestedProperty"
+                    "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.NestedProperty"
                   }
                 },
                 "polymorphicProperty": {
-                  "$ref": "#/$defs/TestClosedPolymorphism",
+                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestClosedPolymorphism",
                   "description": "A custom polymorphic property"
                 },
                 "enumProperty": {
-                  "$ref": "#/$defs/TestEnum"
+                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestEnum"
                 },
                 "objectProperty": {
-                  "$ref": "#/$defs/TestObject"
+                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestObject"
                 }
               },
               "additionalProperties": false,
@@ -188,7 +188,7 @@ class JsonSchemaGeneratorTest {
                 "booleanNullableProperty"
               ],
               "$defs": {
-                "NestedProperty": {
+                "me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.NestedProperty": {
                   "type": "object",
                   "description": "Nested property class",
                   "properties": {
@@ -198,18 +198,18 @@ class JsonSchemaGeneratorTest {
                   "required": ["foo", "bar"],
                   "additionalProperties": false
                 },
-                "TestClosedPolymorphism": {
+                "me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestClosedPolymorphism": {
                   "oneOf": [
-                    { "$ref": "#/$defs/SubClass1" },
-                    { "$ref": "#/$defs/SubClass2" }
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestClosedPolymorphism.SubClass1" },
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestClosedPolymorphism.SubClass2" }
                   ]
                 },
-                "SubClass1": {
+                "me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestClosedPolymorphism.SubClass1": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "SubClass1"
+                      "const": "me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestClosedPolymorphism.SubClass1"
                     },
                     "id": { "type": "string" },
                     "property1": { "type": "string" }
@@ -217,12 +217,12 @@ class JsonSchemaGeneratorTest {
                   "required": ["type", "id", "property1"],
                   "additionalProperties": false
                 },
-                "SubClass2": {
+                "me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestClosedPolymorphism.SubClass2": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "SubClass2"
+                      "const": "me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestClosedPolymorphism.SubClass2"
                     },
                     "id": { "type": "string" },
                     "property2": { "type": "integer" }
@@ -230,11 +230,11 @@ class JsonSchemaGeneratorTest {
                   "required": ["type", "id", "property2"],
                   "additionalProperties": false
                 },
-                "TestEnum": {
+                "me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestEnum": {
                   "type": "string",
                   "enum": ["One", "Two"]
                 },
-                "TestObject": {
+                "me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestObject": {
                   "type": "object",
                   "properties": {},
                   "required": [],
@@ -254,7 +254,7 @@ class JsonSchemaGeneratorTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "SerialDescribedClass",
+              "$id": "me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.SerialDescribedClass",
               "description": "Reflection-discovered class described via @SerialDescription",
               "type": "object",
               "properties": {
@@ -274,7 +274,7 @@ class JsonSchemaGeneratorTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "BuiltInJsonTypes",
+              "$id": "me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.BuiltInJsonTypes",
               "type": "object",
               "properties": {
                 "objProp": {

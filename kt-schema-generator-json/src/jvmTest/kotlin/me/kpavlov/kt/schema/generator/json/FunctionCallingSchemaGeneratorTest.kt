@@ -404,7 +404,7 @@ class FunctionCallingSchemaGeneratorTest {
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "const": "SubClass1"
+                                "const": "me.kpavlov.kt.schema.generator.json.FunctionCallingSchemaGeneratorTest.TestClosedPolymorphism.SubClass1"
                               },
                               "id": {
                                 "type": "string"
@@ -425,7 +425,7 @@ class FunctionCallingSchemaGeneratorTest {
                             "properties": {
                               "type": {
                                 "type": "string",
-                                "const": "SubClass2"
+                                "const": "me.kpavlov.kt.schema.generator.json.FunctionCallingSchemaGeneratorTest.TestClosedPolymorphism.SubClass2"
                               },
                               "id": {
                                 "type": "string"

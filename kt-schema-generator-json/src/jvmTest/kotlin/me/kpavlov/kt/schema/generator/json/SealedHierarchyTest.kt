@@ -22,20 +22,20 @@ class SealedHierarchyTest {
             $$"""
                 {
                    "$schema": "https://json-schema.org/draft/2020-12/schema",
-                   "$id": "ExampleA",
+                   "$id": "me.kpavlov.kt.schema.generator.json.ExampleA",
                    "type": "object",
                    "additionalProperties": false,
                    "oneOf": [
                      {
-                       "$ref": "#/$defs/ExampleB"
+                       "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.ExampleA.ExampleB"
                      }
                    ],
                    "$defs": {
-                     "ExampleB": {
+                     "me.kpavlov.kt.schema.generator.json.ExampleA.ExampleB": {
                        "type": "object",
                        "properties": {
                          "type": {
-                           "const": "ExampleB",
+                           "const": "me.kpavlov.kt.schema.generator.json.ExampleA.ExampleB",
                            "type": "string"
                          },
                          "someProp": {

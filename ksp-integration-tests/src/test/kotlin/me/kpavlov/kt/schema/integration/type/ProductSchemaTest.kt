@@ -16,7 +16,7 @@ class ProductSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "Product",
+              "$id": "me.kpavlov.kt.schema.integration.type.Product",
               "type": "object",
               "properties": {
                 "id": {

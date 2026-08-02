@@ -1,7 +1,7 @@
 package me.kpavlov.kt.schema.generator.core.ir
 
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
-import me.kpavlov.kt.schema.generator.core.ir.TypeNode
+import kotlin.jvm.JvmInline
 
 /** A graph of discovered types plus the root type reference used to emit schemas. */
 public data class TypeGraph(
@@ -10,11 +10,10 @@ public data class TypeGraph(
 )
 
 /** A stable identifier for a type definition used for deduplication and $ref linking. */
-public data class TypeId(
-    val value: String,
-) {
-    override fun toString(): String = value
-}
+@JvmInline
+public value class TypeId(
+    public val value: String,
+)
 
 /** Reference to a type: either inline node or reference by [TypeId]. */
 public sealed interface TypeRef {
@@ -59,10 +58,9 @@ public sealed interface TypeNode {
  *   and APT front ends populate it with the `@JsonTypeName` override when present, otherwise with
  *   the declared type name. The serialization front end uses the raw `@SerialName` value without
  *   an FQN fallback.
- * - It is descriptive only: `$ref`/`$id` emission and short-name resolution for nodes reachable
- *   via [TypeId] are driven by [TypeGraph.jsonTypeNames] and never read [name] directly. The sole
- *   exception is an inline (anonymous, `TypeId`-less) root node, which has no `TypeId` to resolve
- *   against [TypeGraph.jsonTypeNames] — schema emitters may fall back to [name] there.
+ * - `$ref`/`$id`/`$defs` emission for nodes reachable via [TypeId] is driven by [name] through
+ *   [TypeGraph.jsonTypeNames], which falls back to the [TypeId] value only when two different
+ *   nodes resolve to the same [name] (e.g. two distinct types sharing the same override).
  */
 public sealed interface NamedTypeNode : TypeNode {
     public val name: String
