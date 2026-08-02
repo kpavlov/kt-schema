@@ -29,7 +29,7 @@ class StrictSchemaGeneratorTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.MixedRequiredOptional",
+              "$id": "MixedRequiredOptional",
               "description": "Mixed required and optional",
               "type": "object",
               "properties": {
@@ -55,7 +55,7 @@ class StrictSchemaGeneratorTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.Address",
+              "$id": "Address",
               "description": "Nested object",
               "type": "object",
               "properties": {

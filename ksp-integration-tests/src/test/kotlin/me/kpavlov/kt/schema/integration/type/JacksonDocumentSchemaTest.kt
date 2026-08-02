@@ -13,7 +13,7 @@ class JacksonDocumentSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.integration.type.JacksonReport",
+              "$id": "JacksonReport",
               "type": "object",
               "properties": {
                 "body": {
@@ -41,7 +41,7 @@ class JacksonDocumentSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.integration.type.JacksonNote",
+              "$id": "JacksonNote",
               "type": "object",
               "properties": {
                 "body": {
@@ -69,7 +69,7 @@ class JacksonDocumentSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.integration.type.JacksonEntry",
+              "$id": "JacksonEntry",
               "type": "object",
               "properties": {
                 "entry_id": {

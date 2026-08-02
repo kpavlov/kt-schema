@@ -13,24 +13,24 @@ class SealedInheritanceTest {
             $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "me.kpavlov.kt.schema.integration.type.SealedBase",
+                "$id": "SealedBase",
                 "type": "object",
                 "additionalProperties": false,
                 "oneOf": [
                     {
-                        "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.SealedBase.SubclassA"
+                        "$ref": "#/$defs/SubclassA"
                     },
                     {
-                        "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.SealedBase.SubclassB"
+                        "$ref": "#/$defs/SubclassB"
                     }
                 ],
                 "$defs": {
-                    "me.kpavlov.kt.schema.integration.type.SealedBase.SubclassA": {
+                    "SubclassA": {
                         "type": "object",
                         "properties": {
                             "type": {
                                 "type": "string",
-                                "const": "me.kpavlov.kt.schema.integration.type.SealedBase.SubclassA"
+                                "const": "SubclassA"
                             },
                             "propA": {
                                 "type": "integer",
@@ -48,12 +48,12 @@ class SealedInheritanceTest {
                         ],
                         "additionalProperties": false
                     },
-                    "me.kpavlov.kt.schema.integration.type.SealedBase.SubclassB": {
+                    "SubclassB": {
                         "type": "object",
                         "properties": {
                             "type": {
                                 "type": "string",
-                                "const": "me.kpavlov.kt.schema.integration.type.SealedBase.SubclassB"
+                                "const": "SubclassB"
                             },
                             "baseProp": {
                                 "type": "string",

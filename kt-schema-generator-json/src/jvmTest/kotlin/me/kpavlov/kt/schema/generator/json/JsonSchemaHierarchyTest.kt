@@ -52,26 +52,26 @@ class JsonSchemaHierarchyTest {
             $$"""
         {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
-          "$id": "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal",
+          "$id": "Animal",
           "description": "Represents an animal",
           "type": "object",
           "additionalProperties": false,
           "oneOf": [
             {
-              "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Cat"
+              "$ref": "#/$defs/Cat"
             },
             {
-              "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Dog"
+              "$ref": "#/$defs/Dog"
             }
           ],
           "$defs": {
-            "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Cat": {
+            "Cat": {
               "type": "object",
               "description": "Represents a cat",
               "properties": {
                 "type": {
                   "type": "string",
-                  "const": "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Cat"
+                  "const": "Cat"
                 },
                 "name": {
                   "type": "string",
@@ -94,13 +94,13 @@ class JsonSchemaHierarchyTest {
               ],
               "additionalProperties": false
             },
-            "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Dog": {
+            "Dog": {
               "type": "object",
               "description": "Represents a dog",
               "properties": {
                 "type": {
                   "type": "string",
-                  "const": "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Dog"
+                  "const": "Dog"
                 },
                 "name": {
                   "type": "string",
@@ -145,14 +145,14 @@ class JsonSchemaHierarchyTest {
             $$"""
         {
           "$schema": "https://json-schema.org/draft/2020-12/schema",
-          "$id": "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.AnimalContainer",
+          "$id": "AnimalContainer",
           "description": "Container with nullable animal",
           "type": "object",
           "properties": {
             "animal": {
               "oneOf": [
                 { "type": "null" },
-                { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal" }
+                { "$ref": "#/$defs/Animal" }
               ],
               "description": "Optional animal"
             }
@@ -160,20 +160,20 @@ class JsonSchemaHierarchyTest {
           "additionalProperties": false,
           "required": [ "animal" ],
           "$defs": {
-            "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal": {
+            "Animal": {
               "oneOf": [
-                { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Cat" },
-                { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Dog" }
+                { "$ref": "#/$defs/Cat" },
+                { "$ref": "#/$defs/Dog" }
               ],
               "description": "Represents an animal"
             },
-            "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Cat": {
+            "Cat": {
               "type": "object",
               "description": "Represents a cat",
               "properties": {
                 "type": {
                   "type": "string",
-                  "const": "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Cat"
+                  "const": "Cat"
                 },
                 "name": { "type": "string", "description": "Animal's name" },
                 "color": { "type": "string", "description": "Cat's color" },
@@ -182,13 +182,13 @@ class JsonSchemaHierarchyTest {
               "required": [ "type", "name", "color", "lives" ],
               "additionalProperties": false
             },
-            "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Dog": {
+            "Dog": {
               "type": "object",
               "description": "Represents a dog",
               "properties": {
                 "type": {
                   "type": "string",
-                  "const": "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Dog"
+                  "const": "Dog"
                 },
                 "name": { "type": "string", "description": "Animal's name" },
                 "breed": { "type": "string", "description": "Dog's breed" },
@@ -223,33 +223,33 @@ class JsonSchemaHierarchyTest {
         val expectedSchema = $$"""
         {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal",
+              "$id": "Animal",
               "type": "object",
               "additionalProperties": false,
               "description": "Represents an animal",
               "oneOf": [
                 {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Cat"
+                  "$ref": "#/$defs/Cat"
                 },
                 {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Dog"
+                  "$ref": "#/$defs/Dog"
                 }
               ],
               "discriminator": {
                 "propertyName": "type",
                 "mapping": {
-                  "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Cat": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Cat",
-                  "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Dog": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Dog"
+                  "Cat": "#/$defs/Cat",
+                  "Dog": "#/$defs/Dog"
                 }
               },
               "$defs": {
-                "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Cat": {
+                "Cat": {
                   "type": "object",
                   "description": "Represents a cat",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Cat"
+                      "const": "Cat"
                     },
                     "name": {
                       "type": "string",
@@ -268,13 +268,13 @@ class JsonSchemaHierarchyTest {
                   "required": ["type", "name", "color"],
                   "additionalProperties": false
                 },
-                "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Dog": {
+                "Dog": {
                   "type": "object",
                   "description": "Represents a dog",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Dog"
+                      "const": "Dog"
                     },
                     "name": {
                       "type": "string",

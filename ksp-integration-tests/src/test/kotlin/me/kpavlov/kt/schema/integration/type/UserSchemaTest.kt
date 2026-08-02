@@ -15,7 +15,7 @@ class UserSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.integration.type.User",
+              "$id": "User",
               "description": "A user model",
               "type": "object",
               "properties": {

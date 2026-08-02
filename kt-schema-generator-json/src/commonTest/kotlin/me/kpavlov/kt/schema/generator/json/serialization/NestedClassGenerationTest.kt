@@ -101,7 +101,7 @@ class NestedClassGenerationTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.serialization.NestedClassGenerationTest.Feedback",
+              "$id": "Feedback",
               "type": "object",
               "properties": {
                 "orders": {
@@ -110,7 +110,7 @@ class NestedClassGenerationTest {
                       "type": "null"
                     },
                     {
-                      "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.serialization.NestedClassGenerationTest.Orders"
+                      "$ref": "#/$defs/Orders"
                     }
                   ]
                 },
@@ -120,7 +120,7 @@ class NestedClassGenerationTest {
                       "type": "null"
                     },
                     {
-                      "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.serialization.NestedClassGenerationTest.Orders"
+                      "$ref": "#/$defs/Orders"
                     }
                   ]
                 }
@@ -131,7 +131,7 @@ class NestedClassGenerationTest {
                 "initiallyGeneratedOrders"
               ],
               "$defs": {
-                "me.kpavlov.kt.schema.generator.json.serialization.NestedClassGenerationTest.Orders": {
+                "Orders": {
                   "type": "object",
                   "properties": {
                     "items": {

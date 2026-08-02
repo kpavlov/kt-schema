@@ -1,8 +1,10 @@
 package me.kpavlov.kt.schema.generator.json
 
 import io.kotest.assertions.json.shouldEqualJson
+import io.kotest.matchers.string.shouldContain
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 class RecursiveTypeReflectionTest {
     //region Test models
@@ -32,6 +34,11 @@ class RecursiveTypeReflectionTest {
         val next: LinkedNode?,
     )
 
+    object RecursiveFunction {
+        @Suppress("unused")
+        fun process(node: LinkedNode): String = node.value
+    }
+
     //endregion
 
     private val generator =
@@ -49,49 +56,49 @@ class RecursiveTypeReflectionTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.Tree",
+              "$id": "Tree",
               "type": "object",
               "properties": {
                 "root": {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode"
+                  "$ref": "#/$defs/TreeNode"
                 }
               },
               "required": ["root"],
               "additionalProperties": false,
               "$defs": {
-                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode": {
+                "TreeNode": {
                   "oneOf": [
-                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode.Branch" },
-                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode.Leaf" }
+                    { "$ref": "#/$defs/Branch" },
+                    { "$ref": "#/$defs/Leaf" }
                   ]
                 },
-                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode.Branch": {
+                "Branch": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode.Branch"
+                      "const": "Branch"
                     },
                     "id": { "type": "string" },
                     "left": {
                       "oneOf": [
                         { "type": "null" },
-                        { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode" }
+                        { "$ref": "#/$defs/TreeNode" }
                       ]
                     },
                     "right": {
-                      "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode"
+                      "$ref": "#/$defs/TreeNode"
                     }
                   },
                   "required": ["type", "id", "left", "right"],
                   "additionalProperties": false
                 },
-                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode.Leaf": {
+                "Leaf": {
                   "type": "object",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.TreeNode.Leaf"
+                      "const": "Leaf"
                     },
                     "id": { "type": "string" },
                     "value": { "type": "string" }
@@ -113,36 +120,49 @@ class RecursiveTypeReflectionTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.LinkedNode",
+              "$id": "LinkedNode",
               "type": "object",
               "properties": {
                 "value": { "type": "string" },
                 "next": {
                   "oneOf": [
                     { "type": "null" },
-                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.LinkedNode" }
+                    { "$ref": "#/$defs/LinkedNode" }
                   ]
                 }
               },
-              "required": ["value", "next"],
-              "additionalProperties": false,
-              "$defs": {
-                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.LinkedNode": {
-                  "type": "object",
-                  "properties": {
-                    "value": { "type": "string" },
-                    "next": {
-                      "oneOf": [
-                        { "type": "null" },
-                        { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.LinkedNode" }
-                      ]
-                    }
-                  },
                   "required": ["value", "next"],
-                  "additionalProperties": false
+                  "additionalProperties": false,
+                  "$defs": {
+                    "LinkedNode": {
+                      "type": "object",
+                      "properties": {
+                        "value": { "type": "string" },
+                        "next": {
+                          "oneOf": [
+                            { "type": "null" },
+                            { "$ref": "#/$defs/LinkedNode" }
+                          ]
+                        }
+                      },
+                      "required": ["value", "next"],
+                      "additionalProperties": false
+                    }
+                  }
                 }
-              }
+                """.trimIndent()
+    }
+
+    @Test
+    fun `should throw instead of stack overflowing for self-referencing type in function-calling schema`() {
+        val functionGenerator = ReflectionFunctionCallingSchemaGenerator.Default
+
+        val exception =
+            assertFailsWith<IllegalArgumentException> {
+                functionGenerator.generateSchema(RecursiveFunction::process)
             }
-            """.trimIndent()
+
+        exception.message shouldContain "Type nesting exceeds 8 levels"
+        exception.message shouldContain "cannot be represented in a function-calling schema"
     }
 }

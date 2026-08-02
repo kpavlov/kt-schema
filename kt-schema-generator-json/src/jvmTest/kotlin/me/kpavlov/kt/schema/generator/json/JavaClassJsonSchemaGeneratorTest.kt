@@ -24,7 +24,7 @@ class JavaClassJsonSchemaGeneratorTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.test.JavaTestClass",
+              "$id": "JavaTestClass",
               "description": "Class Description",
               "type": "object",
               "properties": {
@@ -71,29 +71,29 @@ class JavaClassJsonSchemaGeneratorTest {
                   }
                 },
                 "nestedProperty": {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.test.JavaTestClass.NestedProperty",
+                  "$ref": "#/$defs/NestedProperty",
                   "description": "A nested property"
                 },
                 "nestedListProperty": {
                   "type": "array",
                   "description": "A list of nested properties",
                   "items": {
-                    "$ref": "#/$defs/me.kpavlov.kt.schema.generator.test.JavaTestClass.NestedProperty"
+                    "$ref": "#/$defs/NestedProperty"
                   }
                 },
                 "nestedMapProperty": {
                   "type": "object",
                   "description": "A map of nested properties",
                   "additionalProperties": {
-                    "$ref": "#/$defs/me.kpavlov.kt.schema.generator.test.JavaTestClass.NestedProperty"
+                    "$ref": "#/$defs/NestedProperty"
                   }
                 },
                 "enumProperty": {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.test.JavaTestClass.TestEnum",
+                  "$ref": "#/$defs/TestEnum",
                   "description": "An enum property"
                 },
                 "recordProperty": {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.test.JavaTestClass.ProblemDescription",
+                  "$ref": "#/$defs/ProblemDescription",
                   "description": "Simple record property"
                 }
               },
@@ -115,7 +115,7 @@ class JavaClassJsonSchemaGeneratorTest {
                 "recordProperty"
               ],
               "$defs": {
-                "me.kpavlov.kt.schema.generator.test.JavaTestClass.NestedProperty": {
+                "NestedProperty": {
                   "type": "object",
                   "description": "Nested property class",
                   "properties": {
@@ -125,11 +125,11 @@ class JavaClassJsonSchemaGeneratorTest {
                   "required": ["foo", "bar"],
                   "additionalProperties": false
                 },
-                "me.kpavlov.kt.schema.generator.test.JavaTestClass.TestEnum": {
+                "TestEnum": {
                   "type": "string",
                   "enum": ["One", "Two"]
                 },
-                "me.kpavlov.kt.schema.generator.test.JavaTestClass.ProblemDescription": {
+                "ProblemDescription": {
                   "type": "object",
                   "description": "Record description",
                   "properties": {

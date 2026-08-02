@@ -16,7 +16,7 @@ class KoogModelSchemaTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.integration.type.KoogModel",
+              "$id": "KoogModel",
               "description": "A purchasable product with pricing and inventory info.",
               "type": "object",
               "properties": {

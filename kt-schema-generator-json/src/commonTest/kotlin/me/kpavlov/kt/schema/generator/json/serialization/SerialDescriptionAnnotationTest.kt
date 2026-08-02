@@ -33,7 +33,7 @@ class SerialDescriptionAnnotationTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.serialization.SerialDescriptionAnnotationTest.DescribedClass",
+              "$id": "DescribedClass",
               "description": "A described class",
               "type": "object",
               "properties": {
@@ -60,19 +60,19 @@ class SerialDescriptionAnnotationTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.serialization.SerialDescriptionAnnotationTest.OuterClass",
+              "$id": "OuterClass",
               "description": "Outer class",
               "type": "object",
               "properties": {
                 "nested": {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.serialization.SerialDescriptionAnnotationTest.DescribedClass",
+                  "$ref": "#/$defs/DescribedClass",
                   "description": "Nested reference"
                 }
               },
               "required": ["nested"],
               "additionalProperties": false,
               "$defs": {
-                "me.kpavlov.kt.schema.generator.json.serialization.SerialDescriptionAnnotationTest.DescribedClass": {
+                "DescribedClass": {
                   "description": "A described class",
                   "type": "object",
                   "properties": {

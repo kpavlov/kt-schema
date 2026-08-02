@@ -123,7 +123,7 @@ class SerializationClassJsonSchemaGeneratorTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.serialization.TestClass",
+              "$id": "TestClass",
               "description": "A test class",
               "type": "object",
               "properties": {
@@ -177,7 +177,7 @@ class SerializationClassJsonSchemaGeneratorTest {
                 },
                 "nestedProperty": {
                   "description": "A custom nested property",
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.NestedProperty"
+                  "$ref": "#/$defs/NestedProperty"
                 },
                 "nestedNullableProperty": {
                   "oneOf": [
@@ -185,7 +185,7 @@ class SerializationClassJsonSchemaGeneratorTest {
                       "type": "null"
                     },
                     {
-                      "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.NestedProperty"
+                      "$ref": "#/$defs/NestedProperty"
                     }
                   ],
                   "description": "A custom nested nullable property"
@@ -194,7 +194,7 @@ class SerializationClassJsonSchemaGeneratorTest {
                   "type": "array",
                   "description": "A list of nested properties",
                   "items": {
-                    "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.NestedProperty"
+                    "$ref": "#/$defs/NestedProperty"
                   }
                 },
                 "nestedNullableListProperty": {
@@ -204,14 +204,14 @@ class SerializationClassJsonSchemaGeneratorTest {
                   ],
                   "description": "A custom nested nullable list property",
                   "items": {
-                    "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.NestedProperty"
+                    "$ref": "#/$defs/NestedProperty"
                   }
                 },
                 "nestedMapProperty": {
                   "type": "object",
                   "description": "A map of nested properties",
                   "additionalProperties": {
-                    "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.NestedProperty"
+                    "$ref": "#/$defs/NestedProperty"
                   }
                 },
                 "polymorphicProperty": {
@@ -219,11 +219,11 @@ class SerializationClassJsonSchemaGeneratorTest {
                   "$ref": "#/$defs/TestClosedPolymorphism"
                 },
                 "enumProperty": {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.TestEnum",
+                  "$ref": "#/$defs/TestEnum",
                   "description": "An enum property"
                 },
                 "objectProperty": {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.TestObject",
+                  "$ref": "#/$defs/TestObject",
                   "description": "A test object property"
                 },
                 "inlineValueClass": {
@@ -248,7 +248,7 @@ class SerializationClassJsonSchemaGeneratorTest {
                 "booleanNullableProperty"
               ],
               "$defs": {
-                "me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.NestedProperty": {
+                "NestedProperty": {
                   "type": "object",
                   "description": "Nested property class",
                   "properties": {
@@ -271,20 +271,20 @@ class SerializationClassJsonSchemaGeneratorTest {
                   "description": "A closed polymorphism",
                   "oneOf": [
                     {
-                      "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.TestClosedPolymorphism.SubClass1"
+                      "$ref": "#/$defs/SubClass1"
                     },
                     {
-                      "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.TestClosedPolymorphism.SubClass2"
+                      "$ref": "#/$defs/SubClass2"
                     }
                   ]
                 },
-                "me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.TestClosedPolymorphism.SubClass1": {
+                "SubClass1": {
                   "type": "object",
                   "description": "First subclass",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.TestClosedPolymorphism.SubClass1"
+                      "const": "SubClass1"
                     },
                     "id": {
                       "type": "string",
@@ -302,13 +302,13 @@ class SerializationClassJsonSchemaGeneratorTest {
                   ],
                   "additionalProperties": false
                 },
-                "me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.TestClosedPolymorphism.SubClass2": {
+                "SubClass2": {
                   "type": "object",
                   "description": "Second subclass",
                   "properties": {
                     "type": {
                       "type": "string",
-                      "const": "me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.TestClosedPolymorphism.SubClass2"
+                      "const": "SubClass2"
                     },
                     "id": {
                       "type": "string",
@@ -326,7 +326,7 @@ class SerializationClassJsonSchemaGeneratorTest {
                   ],
                   "additionalProperties": false
                 },
-                "me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.TestEnum": {
+                "TestEnum": {
                   "type": "string",
                   "description": "A test enum",
                   "enum": [
@@ -334,7 +334,7 @@ class SerializationClassJsonSchemaGeneratorTest {
                     "Two"
                   ]
                 },
-                "me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.TestObject": {
+                "TestObject": {
                   "type": "object",
                   "description": "A test data object",
                   "properties": {},
@@ -662,7 +662,7 @@ class SerializationClassJsonSchemaGeneratorTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGeneratorTest.WithDescribedInlineValueClass",
+              "$id": "WithDescribedInlineValueClass",
               "type": "object",
               "properties": {
                 "distance": {

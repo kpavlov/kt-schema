@@ -15,7 +15,7 @@ class StatusSchemaTest {
         schema shouldEqualJson
             $$"""
             {
-              "$id": "me.kpavlov.kt.schema.integration.type.Status",
+              "$id": "Status",
               "$schema": "https://json-schema.org/draft/2020-12/schema",
               "type": "string",
               "enum": ["ACTIVE", "INACTIVE", "PENDING"],

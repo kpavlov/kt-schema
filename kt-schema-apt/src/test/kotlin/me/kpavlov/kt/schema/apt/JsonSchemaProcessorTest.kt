@@ -43,7 +43,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Person") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Person",
+                "$id": "Person",
                 "type": "object",
                 "properties": {
                     "name": { "type": "string" },
@@ -98,7 +98,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Foo") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Foo",
+                "$id": "Foo",
                 "type": "object",
                 "properties": {
                     "name": {
@@ -136,7 +136,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Person") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Person",
+                "$id": "Person",
                 "type": "object",
                 "properties": {
                     "name": { "type": "string" },
@@ -169,7 +169,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Person") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Person",
+                "$id": "Person",
                 "type": "object",
                 "properties": {
                     "name": { "type": "string" },
@@ -290,19 +290,19 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Person") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Person",
+                "$id": "Person",
                 "type": "object",
                 "properties": {
                     "name": { "type": "string" },
                     "age": { "type": "integer" },
                     "address": {
-                        "$ref": "#/$defs/com.example.Address"
+                        "$ref": "#/$defs/Address"
                     }
                 },
                 "additionalProperties": false,
                 "required": ["name", "age", "address"],
                 "$defs": {
-                    "com.example.Address": {
+                    "Address": {
                         "type": "object",
                         "properties": {
                             "city": { "type": "string" },
@@ -319,7 +319,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Address") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Address",
+                "$id": "Address",
                 "type": "object",
                 "properties": {
                     "city": { "type": "string" },
@@ -376,29 +376,29 @@ class JsonSchemaProcessorTest {
         val expectedSchema = $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Order",
+                "$id": "Order",
                 "type": "object",
                 "properties": {
                     "item": {
-                        "$ref": "#/$defs/com.example.LineItem"
+                        "$ref": "#/$defs/LineItem"
                     }
                 },
                 "additionalProperties": false,
                 "required": ["item"],
                 "$defs": {
-                    "com.example.LineItem": {
+                    "LineItem": {
                         "type": "object",
                         "properties": {
                             "sku": { "type": "string" },
                             "quantity": { "type": "integer" },
                             "vendor": {
-                                "$ref": "#/$defs/com.example.Vendor"
+                                "$ref": "#/$defs/Vendor"
                             }
                         },
                         "additionalProperties": false,
                         "required": ["sku", "quantity", "vendor"]
                     },
-                    "com.example.Vendor": {
+                    "Vendor": {
                         "type": "object",
                         "properties": {
                             "name": { "type": "string" },
@@ -417,29 +417,29 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Invoice") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Invoice",
+                "$id": "Invoice",
                 "type": "object",
                 "properties": {
                     "item": {
-                        "$ref": "#/$defs/com.example.LineItem"
+                        "$ref": "#/$defs/LineItem"
                     }
                 },
                 "additionalProperties": false,
                 "required": ["item"],
                 "$defs": {
-                    "com.example.LineItem": {
+                    "LineItem": {
                         "type": "object",
                         "properties": {
                             "sku": { "type": "string" },
                             "quantity": { "type": "integer" },
                             "vendor": {
-                                "$ref": "#/$defs/com.example.Vendor"
+                                "$ref": "#/$defs/Vendor"
                             }
                         },
                         "additionalProperties": false,
                         "required": ["sku", "quantity", "vendor"]
                     },
-                    "com.example.Vendor": {
+                    "Vendor": {
                         "type": "object",
                         "properties": {
                             "name": { "type": "string" },
@@ -488,7 +488,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Order") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Order",
+                "$id": "Order",
                 "type": "object",
                 "properties": {
                     "tags": {
@@ -510,13 +510,13 @@ class JsonSchemaProcessorTest {
                         }
                     },
                     "address": {
-                        "$ref": "#/$defs/com.example.Address"
+                        "$ref": "#/$defs/Address"
                     }
                 },
                 "additionalProperties": false,
                 "required": ["tags", "counts", "values", "address"],
                 "$defs": {
-                    "com.example.Address": {
+                    "Address": {
                         "type": "object",
                         "properties": {
                             "city": {
@@ -554,7 +554,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Bundle") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Bundle",
+                "$id": "Bundle",
                 "type": "object",
                 "properties": {
                     "tags": {
@@ -596,7 +596,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.ArraysHolder") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.ArraysHolder",
+                "$id": "ArraysHolder",
                 "type": "object",
                 "properties": {
                     "matrix": {
@@ -639,7 +639,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Nested") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Nested",
+                "$id": "Nested",
                 "type": "object",
                 "properties": {
                     "matrix": {
@@ -696,7 +696,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Wrapper") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Wrapper",
+                "$id": "Wrapper",
                 "type": "object",
                 "properties": {
                     "payload": {}
@@ -727,17 +727,17 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Box") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Box",
+                "$id": "Box",
                 "type": "object",
                 "properties": {
                     "value": {
-                        "$ref": "#/$defs/java.lang.Number"
+                        "$ref": "#/$defs/Number"
                     }
                 },
                 "additionalProperties": false,
                 "required": ["value"],
                 "$defs": {
-                    "java.lang.Number": {
+                    "Number": {
                         "type": "object",
                         "properties": {},
                         "required": [],
@@ -768,7 +768,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Box") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Box",
+                "$id": "Box",
                 "type": "object",
                 "properties": {
                     "value": {}
@@ -806,7 +806,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Order") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Order",
+                "$id": "Order",
                 "type": "object",
                 "properties": {
                     "names": {
@@ -858,7 +858,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Catalog") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Catalog",
+                "$id": "Catalog",
                 "type": "object",
                 "properties": {
                     $$propertySchema
@@ -866,7 +866,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["$$requiredProperty"],
                 "$defs": {
-                    "com.example.Address": {
+                    "Address": {
                         "type": "object",
                         "properties": {
                             "city": {
@@ -913,7 +913,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Company") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Company",
+                "$id": "Company",
                 "type": "object",
                 "properties": {
                     "name": { "type": "string" },
@@ -952,7 +952,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Person") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Person",
+                "$id": "Person",
                 "type": "object",
                 "properties": {
                     "name": {
@@ -1000,7 +1000,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Resource") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Resource",
+                "$id": "Resource",
                 "type": "object",
                 "properties": {
                     "name": { "type": "string" },
@@ -1042,7 +1042,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Product") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Product",
+                "$id": "Product",
                 "type": "object",
                 "properties": {
                     "name": { "type": "string" },
@@ -1078,7 +1078,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.sub.sub.DeepRecord") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.sub.sub.DeepRecord",
+                "$id": "DeepRecord",
                 "type": "object",
                 "properties": {
                     "value": { "type": "string" }
@@ -1130,7 +1130,7 @@ class JsonSchemaProcessorTest {
         outputDir.readSchema("com.example.Scalars") shouldEqualJson $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Scalars",
+                "$id": "Scalars",
                 "type": "object",
                 "properties": {
                     "value": { "type": "$$expectedJsonType" }
@@ -1260,7 +1260,7 @@ class JsonSchemaProcessorTest {
                     "addresses": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/$defs/com.example.Address"
+                            "$ref": "#/$defs/Address"
                         }
                     }
                 """.trimIndent(),
@@ -1273,7 +1273,7 @@ class JsonSchemaProcessorTest {
                     "addresses": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/$defs/com.example.Address"
+                            "$ref": "#/$defs/Address"
                         }
                     }
                 """.trimIndent(),
@@ -1286,7 +1286,7 @@ class JsonSchemaProcessorTest {
                     "byCity": {
                         "type": "object",
                         "additionalProperties": {
-                            "$ref": "#/$defs/com.example.Address"
+                            "$ref": "#/$defs/Address"
                         }
                     }
                 """.trimIndent(),

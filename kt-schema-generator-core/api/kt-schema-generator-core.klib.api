@@ -51,6 +51,11 @@ abstract interface <#A: kotlin/Any?, #B: kotlin/Any?> me.kpavlov.kt.schema.gener
     abstract fun transform(me.kpavlov.kt.schema.generator.core.ir/TypeGraph, kotlin/String): #A // me.kpavlov.kt.schema.generator.core.ir/TypeGraphTransformer.transform|transform(me.kpavlov.kt.schema.generator.core.ir.TypeGraph;kotlin.String){}[0]
 }
 
+sealed interface me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode|null[0]
+    abstract val name // me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode.name|{}name[0]
+        abstract fun <get-name>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode.name.<get-name>|<get-name>(){}[0]
+}
+
 sealed interface me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/TypeNode|null[0]
     abstract val description // me.kpavlov.kt.schema.generator.core.ir/TypeNode.description|{}description[0]
         abstract fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/TypeNode.description.<get-description>|<get-description>(){}[0]
@@ -156,7 +161,7 @@ final class me.kpavlov.kt.schema.generator.core.ir/Discriminator { // me.kpavlov
     final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Discriminator.toString|toString(){}[0]
 }
 
-final class me.kpavlov.kt.schema.generator.core.ir/EnumNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/EnumNode|null[0]
+final class me.kpavlov.kt.schema.generator.core.ir/EnumNode : me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode { // me.kpavlov.kt.schema.generator.core.ir/EnumNode|null[0]
     constructor <init>(kotlin/String, kotlin.collections/List<kotlin/String>, kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/EnumNode.<init>|<init>(kotlin.String;kotlin.collections.List<kotlin.String>;kotlin.String?){}[0]
 
     final val description // me.kpavlov.kt.schema.generator.core.ir/EnumNode.description|{}description[0]
@@ -210,7 +215,7 @@ final class me.kpavlov.kt.schema.generator.core.ir/MapNode : me.kpavlov.kt.schem
     final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/MapNode.toString|toString(){}[0]
 }
 
-final class me.kpavlov.kt.schema.generator.core.ir/ObjectNode : me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov.kt.schema.generator.core.ir/ObjectNode|null[0]
+final class me.kpavlov.kt.schema.generator.core.ir/ObjectNode : me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode { // me.kpavlov.kt.schema.generator.core.ir/ObjectNode|null[0]
     constructor <init>(kotlin/String, kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Property>, kotlin.collections/Set<kotlin/String>, kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.<init>|<init>(kotlin.String;kotlin.collections.List<me.kpavlov.kt.schema.generator.core.ir.Property>;kotlin.collections.Set<kotlin.String>;kotlin.String?){}[0]
 
     final val description // me.kpavlov.kt.schema.generator.core.ir/ObjectNode.description|{}description[0]

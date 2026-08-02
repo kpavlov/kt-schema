@@ -88,8 +88,8 @@ class SchemaInfrastructureTest {
         schemas.forEach { (name, schema) ->
             val jsonObj = Json.decodeFromString<JsonObject>(schema)
             val id = jsonObj["\$id"]?.toString()?.trim('"')
-            assert(id == "me.kpavlov.kt.schema.integration.type.$name") {
-                "Expected ID me.kpavlov.kt.schema.integration.type.$name but got $id"
+            assert(id == name) {
+                "Expected ID $name but got $id"
             }
         }
 

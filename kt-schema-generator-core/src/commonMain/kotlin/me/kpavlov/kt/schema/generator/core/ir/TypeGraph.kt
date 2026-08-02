@@ -1,6 +1,7 @@
 package me.kpavlov.kt.schema.generator.core.ir
 
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
+import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 
 /** A graph of discovered types plus the root type reference used to emit schemas. */
 public data class TypeGraph(
@@ -50,6 +51,20 @@ public sealed interface TypeNode {
     public val description: String?
 }
 
+/**
+ * A named type node.
+ *
+ * Contract of [name]:
+ * - The reflection, KSP, and APT front ends populate it with the `@JsonTypeName` override when
+ *   present, otherwise with the fully qualified type name. The serialization front end uses the
+ *   raw `@SerialName` value without the FQN fallback.
+ * - It is descriptive only: `$ref`/`$id` emission and short-name resolution are driven by
+ *   [TypeId] via [TypeGraph.jsonTypeNames] and never read [name] directly.
+ */
+public sealed interface NamedTypeNode : TypeNode {
+    public val name: String
+}
+
 /** Primitive kinds supported by the IR. */
 public enum class PrimitiveKind { STRING, BOOLEAN, INT, LONG, FLOAT, DOUBLE }
 
@@ -61,18 +76,18 @@ public data class PrimitiveNode(
 
 /** Enum node with symbolic entries. */
 public data class EnumNode(
-    val name: String,
+    override val name: String,
     val entries: List<String>,
     override val description: String? = null,
-) : TypeNode
+) : NamedTypeNode
 
 /** Object node with named properties and required set. */
 public data class ObjectNode(
-    val name: String,
+    override val name: String,
     val properties: List<Property>,
     val required: Set<String>,
     override val description: String? = null,
-) : TypeNode
+) : NamedTypeNode
 
 /** List/array node. */
 public data class ListNode(

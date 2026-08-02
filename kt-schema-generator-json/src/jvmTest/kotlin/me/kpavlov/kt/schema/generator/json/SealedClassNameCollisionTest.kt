@@ -78,15 +78,15 @@ class SealedClassNameCollisionTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.SealedClassNameCollisionTest.ApiResponse",
+              "$id": "ApiResponse",
               "description": "Container with both result types",
               "type": "object",
               "properties": {
                 "resultA": {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.SealedClassNameCollisionTest.ResultA"
+                  "$ref": "#/$defs/ResultA"
                 },
                 "resultB": {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.SealedClassNameCollisionTest.ResultB"
+                  "$ref": "#/$defs/ResultB"
                 }
               },
               "additionalProperties": false,
@@ -95,7 +95,7 @@ class SealedClassNameCollisionTest {
                 "resultB"
               ],
               "$defs": {
-                "me.kpavlov.kt.schema.generator.json.SealedClassNameCollisionTest.ResultA": {
+                "ResultA": {
                   "oneOf": [
                     { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.SealedClassNameCollisionTest.ResultA.Success" },
                     { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.SealedClassNameCollisionTest.ResultA.Unknown" }
@@ -135,7 +135,7 @@ class SealedClassNameCollisionTest {
                   ],
                   "additionalProperties": false
                 },
-                "me.kpavlov.kt.schema.generator.json.SealedClassNameCollisionTest.ResultB": {
+                "ResultB": {
                   "oneOf": [
                     { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.SealedClassNameCollisionTest.ResultB.Success" },
                     { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.SealedClassNameCollisionTest.ResultB.Unknown" }

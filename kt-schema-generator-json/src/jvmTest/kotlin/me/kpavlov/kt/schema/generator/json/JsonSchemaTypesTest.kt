@@ -26,7 +26,7 @@ class JsonSchemaTypesTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.WithNumericTypes",
+              "$id": "WithNumericTypes",
               "description": "Class with numeric types",
               "type": "object",
               "properties": {
@@ -95,12 +95,12 @@ class JsonSchemaTypesTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.WithEnum",
+              "$id": "WithEnum",
               "description": "Class with enum",
               "type": "object",
               "properties": {
                 "status": {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Status",
+                  "$ref": "#/$defs/Status",
                   "description": "Status"
                 },
                 "optStatus": {
@@ -109,7 +109,7 @@ class JsonSchemaTypesTest {
                       "type": "null"
                     },
                     {
-                      "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Status"
+                      "$ref": "#/$defs/Status"
                     }
                   ],
                   "description": "Optional status"
@@ -120,7 +120,7 @@ class JsonSchemaTypesTest {
                 "status"
               ],
               "$defs": {
-                "me.kpavlov.kt.schema.generator.json.Status": {
+                "Status": {
                   "type": "string",
                   "enum": [
                     "ACTIVE",
@@ -144,7 +144,7 @@ class JsonSchemaTypesTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.WithCollections",
+              "$id": "WithCollections",
               "description": "Class with collections",
               "type": "object",
               "properties": {
@@ -201,7 +201,7 @@ class JsonSchemaTypesTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.ListOfNested",
+              "$id": "ListOfNested",
               "description": "List of nested",
               "type": "object",
               "properties": {
@@ -209,7 +209,7 @@ class JsonSchemaTypesTest {
                   "type": "array",
                   "description": "Items",
                   "items": {
-                    "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Address"
+                    "$ref": "#/$defs/Address"
                   }
                 },
                 "optionalItems": {
@@ -219,7 +219,7 @@ class JsonSchemaTypesTest {
                   ],
                   "description": "Optional items",
                   "items": {
-                    "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Address"
+                    "$ref": "#/$defs/Address"
                   }
                 }
               },
@@ -228,7 +228,7 @@ class JsonSchemaTypesTest {
               ],
               "additionalProperties": false,
               "$defs": {
-                "me.kpavlov.kt.schema.generator.json.Address": {
+                "Address": {
                   "type": "object",
                   "description": "Nested object",
                   "properties": {
@@ -252,7 +252,7 @@ class JsonSchemaTypesTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.MapOfNested",
+              "$id": "MapOfNested",
               "description": "Map of nested",
               "type": "object",
               "properties": {
@@ -260,21 +260,21 @@ class JsonSchemaTypesTest {
                   "type": "object",
                   "description": "Data",
                   "additionalProperties": {
-                    "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Address"
+                    "$ref": "#/$defs/Address"
                   }
                 },
                 "optionalData": {
                   "type": ["object", "null"],
                   "description": "Optional data",
                   "additionalProperties": {
-                    "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Address"
+                    "$ref": "#/$defs/Address"
                   }
                 }
               },
               "required": ["data"],
               "additionalProperties": false,
               "$defs": {
-                "me.kpavlov.kt.schema.generator.json.Address": {
+                "Address": {
                   "type": "object",
                   "description": "Nested object",
                   "properties": {
@@ -300,7 +300,7 @@ class JsonSchemaTypesTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.WithNested",
+              "$id": "WithNested",
               "description": "Class with nested object",
               "type": "object",
               "properties": {
@@ -309,7 +309,7 @@ class JsonSchemaTypesTest {
                   "description": "Name"
                 },
                 "address": {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Address",
+                  "$ref": "#/$defs/Address",
                   "description": "Address"
                 },
                 "optAddress": {
@@ -318,7 +318,7 @@ class JsonSchemaTypesTest {
                       "type": "null"
                     },
                     {
-                      "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Address"
+                      "$ref": "#/$defs/Address"
                     }
                   ],
                   "description": "Optional address"
@@ -330,7 +330,7 @@ class JsonSchemaTypesTest {
                 "address"
               ],
               "$defs": {
-                "me.kpavlov.kt.schema.generator.json.Address": {
+                "Address": {
                   "type": "object",
                   "description": "Nested object",
                   "properties": {
@@ -363,12 +363,12 @@ class JsonSchemaTypesTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.DeepNested",
+              "$id": "DeepNested",
               "description": "Deep nested structure",
               "type": "object",
               "properties": {
                 "level1": {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Level1",
+                  "$ref": "#/$defs/Level1",
                   "description": "Level 1"
                 }
               },
@@ -377,12 +377,12 @@ class JsonSchemaTypesTest {
                 "level1"
               ],
               "$defs": {
-                "me.kpavlov.kt.schema.generator.json.Level1": {
+                "Level1": {
                   "type": "object",
                   "description": "Level 1",
                   "properties": {
                     "level2": {
-                      "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Level2",
+                      "$ref": "#/$defs/Level2",
                       "description": "Level 2"
                     },
                     "value": {
@@ -396,7 +396,7 @@ class JsonSchemaTypesTest {
                   ],
                   "additionalProperties": false
                 },
-                "me.kpavlov.kt.schema.generator.json.Level2": {
+                "Level2": {
                   "type": "object",
                   "description": "Level 2",
                   "properties": {
@@ -405,7 +405,7 @@ class JsonSchemaTypesTest {
                       "description": "Value"
                     },
                     "level3": {
-                      "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Level3",
+                      "$ref": "#/$defs/Level3",
                       "description": "Level 3"
                     },
                     "optional": {
@@ -422,7 +422,7 @@ class JsonSchemaTypesTest {
                   ],
                   "additionalProperties": false
                 },
-                "me.kpavlov.kt.schema.generator.json.Level3": {
+                "Level3": {
                   "type": "object",
                   "description": "Level 3",
                   "properties": {
@@ -452,7 +452,7 @@ class JsonSchemaTypesTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.MixedRequiredOptional",
+              "$id": "MixedRequiredOptional",
               "description": "Mixed required and optional",
               "type": "object",
               "properties": {
@@ -507,7 +507,7 @@ class JsonSchemaTypesTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.EmptyClass",
+              "$id": "EmptyClass",
               "description": "Empty class",
               "type": "object",
               "properties": {
@@ -533,7 +533,7 @@ class JsonSchemaTypesTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.SingleRequired",
+              "$id": "SingleRequired",
               "description": "Single required field",
               "type": "object",
               "properties": {
@@ -561,7 +561,7 @@ class JsonSchemaTypesTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.MixedRequiredOptional",
+              "$id": "MixedRequiredOptional",
               "description": "Mixed required and optional",
               "type": "object",
               "properties": {
@@ -618,7 +618,7 @@ class JsonSchemaTypesTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.PersonWithOptionals",
+              "$id": "PersonWithOptionals",
               "description": "Person with various optional fields",
               "type": "object",
               "properties": {
@@ -679,7 +679,7 @@ class JsonSchemaTypesTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.WithAnyProperties",
+              "$id": "WithAnyProperties",
               "description": "Class with Any typed properties",
               "type": "object",
               "properties": {
@@ -705,7 +705,7 @@ class JsonSchemaTypesTest {
         schema shouldEqualJson $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.JsonSchemaTypesTest.ObjectWithProps",
+              "$id": "ObjectWithProps",
               "type": "object",
               "properties": {
                 "foo": {
