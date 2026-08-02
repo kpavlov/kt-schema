@@ -40,7 +40,7 @@ class PersonSchemaTest {
                       "description": "Family name of the person"
                     },
                     "age": {
-                      "type": "integer",
+                      "type": ["integer","null"],
                       "description": "Age of the person in years"
                     }
                   },

@@ -4,6 +4,7 @@ assertj = "3.27.7"
 detekt = "2.0.0-alpha.5"
 dokka = "2.2.0"
 jackson = "3.2.1" # pin it
+jspecify = "1.0.1"
 junit = "6.1.2"
 junit-pioneer = "2.3.0"
 koog = "0.6.4"
@@ -36,6 +37,7 @@ junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version.ref = "jun
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 koog-agents-tools = { module = "ai.koog:agents-tools", version.ref = "koog" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 kotest-assertions-json = { module = "io.kotest:kotest-assertions-json", version.ref = "kotest" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }

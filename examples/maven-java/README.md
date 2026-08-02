@@ -20,6 +20,7 @@ expected JSON using JUnit 6 and JsonUnit.
 - Collections: `List`/`Set` become `array` with `items`, `Map` becomes `object` with `additionalProperties`
 - Nested types land in `$defs` and are referenced with `$ref`, deduplicated
 - Self- and mutual recursion produce cyclic `$ref`s back into `$defs`
+- JSpecify `@Nullable` marks a property nullable without making it optional
 
 ## Domain model
 
@@ -42,6 +43,23 @@ public interface Employee {
 - `ContactInfo`, `Address` — records; `ContactInfo` holds a `List<Address>` of nested records.
 - `Compensation` — plain class with a `@JsonIgnore` field.
 - `Department` — record referencing `Employee`, making the two schemas mutually recursive.
+
+## Nullable properties
+
+The example uses JSpecify's `@Nullable` on interface return types:
+
+```java
+import org.jspecify.annotations.Nullable;
+
+public interface Employee {
+    @Nullable
+    Employee getManager();
+    // ... other properties
+}
+```
+
+The generated `manager` property accepts `null` and stays in the schema's `required` list. This preserves the
+contract: a manager value is always present, but may be `null`.
 
 ## Generated output
 
