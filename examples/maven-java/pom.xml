@@ -15,7 +15,7 @@
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
-        <kt-schema.version>0.8.0</kt-schema.version>
+        <kt-schema.version>0.8.1</kt-schema.version>
         <jackson.version>3.2.1</jackson.version>
         <junit.version>6.1.2</junit.version>
         <assertj.version>3.27.7</assertj.version>
