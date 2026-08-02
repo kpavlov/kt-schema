@@ -68,12 +68,12 @@ class OrgChartSchemaTest {
                       "description": "Compensation package of the employee"
                     },
                     "department": {
-                      "$ref": "#/$defs/com.example.orgchart.Department",
-                      "description": "Department the employee belongs to"
+                      "description": "Department the employee belongs to",
+                      "oneOf": [{"type":"null"}, {"$ref":"#/$defs/com.example.orgchart.Department"}]
                     },
                     "manager": {
-                      "$ref": "#/$defs/com.example.orgchart.Employee",
-                      "description": "Direct reporting manager of the employee"
+                      "description": "Direct reporting manager of the employee",
+                      "oneOf":[{"type":"null"},{"$ref":"#/$defs/com.example.orgchart.Employee"}]
                     },
                     "reports": {
                       "type": "array",
