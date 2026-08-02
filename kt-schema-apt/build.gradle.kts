@@ -26,6 +26,7 @@ kotlin {
         runtimeOnly(libs.slf4j.simple)
 
         testImplementation(libs.junit.jupiter.params)
+        testImplementation(libs.jspecify)
         testImplementation(libs.kotest.assertions.core)
         testImplementation(libs.kotest.assertions.json)
         testImplementation(libs.kotlin.test)

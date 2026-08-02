@@ -11,12 +11,12 @@ java {
 dependencies {
     implementation(platform(libs.jackson.bom))
     implementation(libs.jackson.annotations)
+    implementation(libs.jspecify)
     annotationProcessor(project(":kt-schema-apt"))
 
     testImplementation(libs.junit.jupiter.api)
     testImplementation(libs.junit.jupiter.params)
     testImplementation(libs.assertj.core)
-    testImplementation(platform(libs.jackson.bom))
     testImplementation(libs.jackson.databind)
     testImplementation(platform(libs.junit.bom))
     testRuntimeOnly(libs.junit.jupiter.engine)

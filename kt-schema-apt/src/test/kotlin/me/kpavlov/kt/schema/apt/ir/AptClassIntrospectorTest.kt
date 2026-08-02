@@ -44,15 +44,15 @@ class AptClassIntrospectorTest {
                     "com.example",
                     "Company",
                     """
-                        private String name;
-                        private int founded;
-                        private boolean active;
-                        private static final String VERSION = "1.0";
-                        public Company(String name, int founded, boolean active) {
-                            this.name = name;
-                            this.founded = founded;
-                            this.active = active;
-                        }
+                    private String name;
+                    private int founded;
+                    private boolean active;
+                    private static final String VERSION = "1.0";
+                    public Company(String name, int founded, boolean active) {
+                        this.name = name;
+                        this.founded = founded;
+                        this.active = active;
+                    }
                     """.trimIndent(),
                 ),
             )
@@ -105,15 +105,20 @@ class AptClassIntrospectorTest {
                     "com.example",
                     "Scalars",
                     """
-                        private $javaType value;
-                        public Scalars($javaType value) {
-                            this.value = value;
-                        }
+                    private $javaType value;
+                    public Scalars($javaType value) {
+                        this.value = value;
+                    }
                     """.trimIndent(),
                 ),
             )
 
-        graph.rootNode().properties.single().type.shouldBePrimitive(PrimitiveKind.valueOf(expectedKind))
+        graph
+            .rootNode()
+            .properties
+            .single()
+            .type
+            .shouldBePrimitive(PrimitiveKind.valueOf(expectedKind))
     }
 
     @Test
@@ -125,16 +130,16 @@ class AptClassIntrospectorTest {
                     "com.example",
                     "Address",
                     """
-                        public String city;
-                        public String street;
+                    public String city;
+                    public String street;
                     """.trimIndent(),
                 ),
                 javaClass(
                     "com.example",
                     "Person",
                     """
-                        public String name;
-                        public Address address;
+                    public String name;
+                    public Address address;
                     """.trimIndent(),
                 ),
             )
@@ -179,9 +184,9 @@ class AptClassIntrospectorTest {
                     "com.example",
                     "Bundle",
                     """
-                        public java.util.List<String> names;
-                        public java.util.Set<Integer> scores;
-                        public java.util.Collection<Double> ratios;
+                    public java.util.List<String> names;
+                    public java.util.Set<Integer> scores;
+                    public java.util.Collection<Double> ratios;
                     """.trimIndent(),
                 ),
             )
@@ -228,10 +233,10 @@ class AptClassIntrospectorTest {
                     "com.example",
                     "ArraysHolder",
                     """
-                        public String[] names;
-                        public int[] counts;
-                        public Integer[] boxed;
-                        public double[][] matrix;
+                    public String[] names;
+                    public int[] counts;
+                    public Integer[] boxed;
+                    public double[][] matrix;
                     """.trimIndent(),
                 ),
             )
@@ -257,9 +262,9 @@ class AptClassIntrospectorTest {
                     "com.example",
                     "Nested",
                     """
-                        public java.util.List<java.util.List<String>> matrix;
-                        public java.util.Map<String, java.util.List<Integer>> grouped;
-                        public java.util.List<java.util.Map<String, java.lang.Boolean>> flags;
+                    public java.util.List<java.util.List<String>> matrix;
+                    public java.util.Map<String, java.util.List<Integer>> grouped;
+                    public java.util.List<java.util.Map<String, java.lang.Boolean>> flags;
                     """.trimIndent(),
                 ),
             )
@@ -297,7 +302,12 @@ class AptClassIntrospectorTest {
                 javaClass("com.example", "Catalog", "public $fieldDeclaration;"),
             )
 
-        val fieldType = graph.rootNode().properties.single().type
+        val fieldType =
+            graph
+                .rootNode()
+                .properties
+                .single()
+                .type
         assertFieldType(fieldType)
 
         graph.nodes.keys.any { it.value == "com.example.Address" } shouldBe true
@@ -354,19 +364,74 @@ class AptClassIntrospectorTest {
             graph(
                 root = "com.example.Contact",
                 """
-                    package com.example;
+                package com.example;
 
-                    public @interface Nullable {}
+                public @interface Nullable {}
                 """.trimIndent(),
                 javaClass(
                     "com.example",
                     "Contact",
                     """
-                        public String name;
-                        @Nullable
-                        public String phone;
+                    public String name;
+                    @Nullable
+                    public String phone;
                     """.trimIndent(),
                 ),
+            )
+
+        val node = graph.rootNode()
+        assertSoftly(node) {
+            required.shouldContainExactlyInAnyOrder(setOf("name", "phone"))
+            val props = properties.associateBy { it.name }
+            props.getValue("phone").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+                inline.node.shouldBeInstanceOf<PrimitiveNode> { prim -> prim.kind shouldBe PrimitiveKind.STRING }
+                inline.nullable shouldBe true
+            }
+        }
+    }
+
+    @Test
+    fun `should treat TYPE_USE Nullable annotation on field type as nullable`() {
+        val graph =
+            graph(
+                root = "com.example.Contact",
+                typeUseNullable(),
+                javaClass(
+                    "com.example",
+                    "Contact",
+                    """
+                    public String name;
+                    public @Nullable String phone;
+                    """.trimIndent(),
+                ),
+            )
+
+        val node = graph.rootNode()
+        assertSoftly(node) {
+            required.shouldContainExactlyInAnyOrder(setOf("name", "phone"))
+            val props = properties.associateBy { it.name }
+            props.getValue("phone").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+                inline.node.shouldBeInstanceOf<PrimitiveNode> { prim -> prim.kind shouldBe PrimitiveKind.STRING }
+                inline.nullable shouldBe true
+            }
+        }
+    }
+
+    @Test
+    fun `should treat TYPE_USE Nullable annotation on interface accessor return type as nullable`() {
+        val graph =
+            graph(
+                root = "com.example.Contact",
+                typeUseNullable(),
+                """
+                package com.example;
+
+                public interface Contact {
+                    String name();
+
+                    @org.jspecify.annotations.Nullable String phone();
+                }
+                """.trimIndent(),
             )
 
         val node = graph.rootNode()
@@ -390,8 +455,8 @@ class AptClassIntrospectorTest {
                     "com.example",
                     "Contact",
                     """
-                        public String name;
-                        public EmailOpt email;
+                    public String name;
+                    public EmailOpt email;
                     """.trimIndent(),
                 ),
             )
@@ -449,8 +514,9 @@ class AptClassIntrospectorTest {
         root: String,
         vararg sources: String,
     ): TypeGraph {
-        val compiler = ToolProvider.getSystemJavaCompiler()
-            ?: error("No system Java compiler available — run on JDK, not JRE")
+        val compiler =
+            ToolProvider.getSystemJavaCompiler()
+                ?: error("No system Java compiler available — run on JDK, not JRE")
 
         val rootDir = Files.createTempDirectory("kt-schema-apt-test")
         val outputDir = rootDir.resolve("classes").also { Files.createDirectories(it) }
@@ -513,25 +579,43 @@ class AptClassIntrospectorTest {
         packageName: String,
         className: String,
         members: String,
-    ): String = """
+    ): String =
+        """
         package $packageName;
 
         public class $className {
         $members
         }
-    """.trimIndent()
+        """.trimIndent()
 
     private fun javaRecord(
         packageName: String,
         declaration: String,
-    ): String = """
+    ): String =
+        """
         package $packageName;
 
         public record $declaration {}
-    """.trimIndent()
+        """.trimIndent()
+
+    /**
+     * Mirrors JSpecify's `@Nullable`, whose `@Target(TYPE_USE)` keeps it a pure type
+     * annotation invisible to `Element.getAnnotationMirrors()`.
+     */
+    private fun typeUseNullable(): String =
+        """
+        package com.example;
+
+        import java.lang.annotation.ElementType;
+        import java.lang.annotation.Target;
+
+        @Target(ElementType.TYPE_USE)
+        public @interface Nullable {}
+        """.trimIndent()
 
     private fun TypeGraph.rootNode(): ObjectNode =
-        root.shouldBeInstanceOf<TypeRef.Ref>()
+        root
+            .shouldBeInstanceOf<TypeRef.Ref>()
             .let { nodes.getValue(it.id) }
             .shouldBeInstanceOf<ObjectNode>()
 

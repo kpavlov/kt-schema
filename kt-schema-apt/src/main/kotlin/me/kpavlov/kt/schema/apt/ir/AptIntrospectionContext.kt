@@ -15,6 +15,7 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
+import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
@@ -445,7 +446,11 @@ internal class AptIntrospectionContext(
     ): Property =
         Property(
             name = name,
-            type = toRef(type).let { if (isNullableAnnotated(annotationTargets)) it.withNullable(true) else it },
+            type =
+                toRef(type).let {
+                    val nullable = isNullableAnnotated(annotationTargets) || type.isNullableTypeAnnotated()
+                    if (nullable) it.withNullable(true) else it
+                },
             description = description,
             hasDefaultValue = optional,
         )
@@ -550,13 +555,18 @@ internal class AptIntrospectionContext(
         targets.any(::isNullableAnnotation)
 
     private fun isNullableAnnotation(element: Element): Boolean =
-        element.annotationMirrors.any { mirror ->
-            val annotationElement = mirror.annotationType.asElement() as TypeElement
-            Introspections.isNullableAnnotation(
-                simpleName = annotationElement.simpleName.toString(),
-                qualifiedName = annotationElement.qualifiedName.toString(),
-            )
-        }
+        element.annotationMirrors.any(::isNullableAnnotationMirror)
+
+    private fun TypeMirror.isNullableTypeAnnotated(): Boolean =
+        annotationMirrors.any(::isNullableAnnotationMirror)
+
+    private fun isNullableAnnotationMirror(mirror: AnnotationMirror): Boolean {
+        val annotationElement = mirror.annotationType.asElement() as TypeElement
+        return Introspections.isNullableAnnotation(
+            simpleName = annotationElement.simpleName.toString(),
+            qualifiedName = annotationElement.qualifiedName.toString(),
+        )
+    }
 
     /**
      * Returns `true` if any of the given annotation targets carries a recognized optional

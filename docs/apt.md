@@ -313,9 +313,10 @@ and don't imply each other:
   is handled, but leaves it in `required`:
   - **Type-name glob pattern** — a field/component whose *type's* simple class name matches a configured
     pattern (`*` = any substring; default `*Opt`), e.g. a type literally named `EmailOpt`.
-  - **`@Nullable` annotation** — a field/component/accessor annotated with a marker annotation (default
-    simple name `Nullable`, matched case-insensitively regardless of package — so `javax.annotation.Nullable`,
-    `jakarta.annotation.Nullable`, `org.jetbrains.annotations.Nullable`, etc. all work out of the box).
+  - **`@Nullable` annotation** — a field/component/accessor or its type annotated with a marker annotation
+    (default simple name `Nullable`, matched case-insensitively regardless of package — so
+    `org.jspecify.annotations.Nullable`, `javax.annotation.Nullable`, `jakarta.annotation.Nullable`,
+    `org.jetbrains.annotations.Nullable`, etc. all work out of the box).
 - **Optional** — excludes a property from `required`, the same way a Kotlin default value is handled, but
   doesn't affect its type's nullability. Matched the same way as the nullable convention (type-name glob
   pattern or marker annotation, e.g. `@Optional`), via a separate, opt-in-only configuration with no default.
@@ -324,6 +325,17 @@ Both conventions are configurable via `kt-schema.properties` (`introspector.null
 `introspector.optional.type.names`, `introspector.annotations.nullable.names`,
 `introspector.annotations.optional.names`) — every one of these accepts a comma-separated list of
 glob patterns (`*`/`?`), not just exact names.
+
+For example, use JSpecify to accept `null` while keeping the property required:
+
+```java
+import org.jspecify.annotations.Nullable;
+
+public record Person(String name, @Nullable String middleName) {
+}
+```
+
+`middleName` is emitted with `"type": ["string", "null"]` and remains in `required`.
 
 ## See Also
 
