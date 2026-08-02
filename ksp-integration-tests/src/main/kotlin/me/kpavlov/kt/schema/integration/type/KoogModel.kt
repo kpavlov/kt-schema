@@ -6,10 +6,10 @@ import me.kpavlov.kt.schema.Schema
 /**
  * Model with optional fields and different types
  */
-@LLMDescription(description = "A purchasable product with pricing and inventory info.")
+@LLMDescription("A purchasable product with pricing and inventory info.")
 @Schema
 data class KoogModel(
-    @LLMDescription(description = "Unique identifier for the product")
+    @LLMDescription("Unique identifier for the product")
     val id: Long,
     @LLMDescription("Human-readable product name")
     val name: String,
@@ -17,7 +17,7 @@ data class KoogModel(
     val description: String?,
     @LLMDescription("Unit price expressed as a decimal number")
     val price: Double,
-    @LLMDescription(description = "Whether the product is currently in stock")
+    @LLMDescription("Whether the product is currently in stock")
     val inStock: Boolean = true,
     @LLMDescription("List of tags for categorization and search")
     val tags: List<String> = emptyList(),
