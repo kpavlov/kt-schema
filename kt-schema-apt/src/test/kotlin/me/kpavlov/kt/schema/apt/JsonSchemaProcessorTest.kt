@@ -231,6 +231,126 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
+        val tagSource = """
+            package com.example;
+
+            public @interface Tag {}
+        """.trimIndent()
+
+        // language=java
+        val itemSource = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Item(Tag tag) {}
+        """.trimIndent()
+
+        val exception =
+            assertFailsWith<IllegalStateException> {
+                compile(listOf(tagSource, itemSource), tempDir)
+            }
+
+        assertSoftly(exception) {
+            message shouldContain "Unsupported type for kt-schema-apt"
+            message shouldContain "com.example.Tag"
+        }
+    }
+
+    @Test
+    fun `should fail the build when an enum has no constants`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public enum Empty {
+            }
+        """.trimIndent()
+
+        val exception =
+            assertFailsWith<IllegalStateException> {
+                compile(source, tempDir)
+            }
+
+        assertSoftly(exception) {
+            message shouldContain "com.example.Empty"
+            message shouldContain "no constants"
+        }
+    }
+
+    @Test
+    fun `should generate schema for annotated enum`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public enum Color {
+                RED, GREEN, BLUE
+            }
+        """.trimIndent()
+
+        val outputDir = compile(source, tempDir)
+
+        // language=json
+        outputDir.readSchema("com.example.Color") shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Color",
+                "type": "string",
+                "enum": ["RED", "GREEN", "BLUE"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should generate schema for unannotated enum via root package and include options`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source = """
+            package com.example;
+
+            public enum Color {
+                RED, GREEN, BLUE
+            }
+        """.trimIndent()
+
+        val outputDir = compile(
+            source = source,
+            tempDir = tempDir,
+            options = listOf(
+                "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
+                "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
+            ),
+        )
+
+        // language=json
+        outputDir.readSchema("com.example.Color") shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Color",
+                "type": "string",
+                "enum": ["RED", "GREEN", "BLUE"]
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should generate schema for record referencing an enum field`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
         val colorSource = """
             package com.example;
 
@@ -249,15 +369,105 @@ class JsonSchemaProcessorTest {
             public record Car(Color color) {}
         """.trimIndent()
 
-        val exception =
-            assertFailsWith<IllegalStateException> {
-                compile(listOf(colorSource, carSource), tempDir)
-            }
+        val outputDir = compile(listOf(colorSource, carSource), tempDir)
 
-        assertSoftly(exception) {
-            message shouldContain "Unsupported type for kt-schema-apt"
-            message shouldContain "com.example.Color"
-        }
+        // language=json
+        outputDir.readSchema("com.example.Car") shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Car",
+                "type": "object",
+                "properties": {
+                    "color": { "$ref": "#/$defs/com.example.Color" }
+                },
+                "additionalProperties": false,
+                "required": ["color"],
+                "$defs": {
+                    "com.example.Color": {
+                        "type": "string",
+                        "enum": ["RED", "GREEN", "BLUE"]
+                    }
+                }
+            }
+        """.trimIndent()
+    }
+
+    @Test
+    fun `should generate schemas for enum field shared by multiple roots`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val colorSource = """
+            package com.example;
+
+            public enum Color {
+                RED, GREEN, BLUE
+            }
+        """.trimIndent()
+
+        // language=java
+        val carSource = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Car(Color color) {}
+        """.trimIndent()
+
+        // language=java
+        val bikeSource = """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Bike(Color color) {}
+        """.trimIndent()
+
+        val outputDir = compile(listOf(colorSource, carSource, bikeSource), tempDir)
+
+        // language=json
+        val expectedSchema = $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Car",
+                "type": "object",
+                "properties": {
+                    "color": { "$ref": "#/$defs/com.example.Color" }
+                },
+                "additionalProperties": false,
+                "required": ["color"],
+                "$defs": {
+                    "com.example.Color": {
+                        "type": "string",
+                        "enum": ["RED", "GREEN", "BLUE"]
+                    }
+                }
+            }
+        """.trimIndent()
+
+        outputDir.readSchema("com.example.Car") shouldEqualJson expectedSchema
+
+        // language=json
+        outputDir.readSchema("com.example.Bike") shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Bike",
+                "type": "object",
+                "properties": {
+                    "color": { "$ref": "#/$defs/com.example.Color" }
+                },
+                "additionalProperties": false,
+                "required": ["color"],
+                "$defs": {
+                    "com.example.Color": {
+                        "type": "string",
+                        "enum": ["RED", "GREEN", "BLUE"]
+                    }
+                }
+            }
+        """.trimIndent()
     }
 
     @Test
@@ -1177,12 +1387,7 @@ class JsonSchemaProcessorTest {
                 ),
             ),
             Arguments.of(
-                "type is an annotated enum",
-                annotatedEnum,
-                emptyList<String>(),
-            ),
-            Arguments.of(
-                "type is an enum under root package",
+                "unannotated enum under root package without include glob",
                 plainEnum,
                 listOf(
                     "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
@@ -1220,18 +1425,6 @@ class JsonSchemaProcessorTest {
         package com.example;
 
         public record Person(String name) {}
-    """.trimIndent()
-
-    // language=java
-    private val annotatedEnum = """
-        package com.example;
-
-        import me.kpavlov.kt.schema.Schema;
-
-        @Schema
-        public enum Color {
-            RED, GREEN, BLUE
-        }
     """.trimIndent()
 
     // language=java

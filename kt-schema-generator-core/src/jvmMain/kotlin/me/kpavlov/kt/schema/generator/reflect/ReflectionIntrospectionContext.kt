@@ -216,12 +216,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      */
     private fun handleEnumType(type: KType): TypeRef {
         val id = createTypeId(type.klass)
-
-        withCycleDetection(type, id) {
-            createEnumNode(type.klass)
-        }
-
-        val ref = TypeRef.Ref(id, type.effectiveNullable())
+        val ref = namedRef(type, id, type.effectiveNullable()) { createEnumNode(type.klass) }
         if (!type.effectiveNullable()) typeRefCache[type] = ref
         return ref
     }

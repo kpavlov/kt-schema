@@ -12,6 +12,7 @@ import me.kpavlov.kt.schema.generator.core.defaultOpaqueTypeNames
 import me.kpavlov.kt.schema.generator.core.defaultPrimitiveTypeKinds
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
+import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
@@ -266,7 +267,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         val decl = type.enumClassDeclOrNull() ?: return null
         val id = decl.typeId()
 
-        withCycleDetection(type, id) {
+        return namedRef(type, id, nullable) {
             val entries =
                 decl.declarations
                     .filterIsInstance<KSClassDeclaration>()
@@ -275,14 +276,12 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                     .toList()
 
             val nameOverride = extractNameOverride(decl)
-            me.kpavlov.kt.schema.generator.core.ir.EnumNode(
+            EnumNode(
                 name = nameOverride ?: decl.qualifiedName?.asString() ?: decl.simpleName.asString(),
                 entries = entries,
                 description = extractDescription(decl) { decl.descriptionFromKdoc() },
             )
         }
-
-        return TypeRef.Ref(id, nullable)
     }
 
     /**

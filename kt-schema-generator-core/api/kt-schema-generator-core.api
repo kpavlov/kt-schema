@@ -67,6 +67,8 @@ public abstract class me/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionCo
 	public final fun getNodes ()Ljava/util/Map;
 	protected final fun getTypeRefCache ()Ljava/util/Map;
 	protected final fun getVisitingTypes ()Ljava/util/Set;
+	protected final fun namedRef-b1Ot--I (Ljava/lang/Object;Ljava/lang/String;ZLkotlin/jvm/functions/Function0;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;
+	public static synthetic fun namedRef-b1Ot--I$default (Lme/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionContext;Ljava/lang/Object;Ljava/lang/String;ZLkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;
 	public abstract fun toRef (Ljava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
 	protected final fun withCycleDetection-EEGM9QQ (Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Z
 }

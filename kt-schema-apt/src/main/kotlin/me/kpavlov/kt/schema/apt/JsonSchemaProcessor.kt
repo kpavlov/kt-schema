@@ -95,7 +95,7 @@ public class JsonSchemaProcessor : AbstractProcessor() {
     /**
      * Discovers the types to process, mirroring the KSP processor's filtering:
      *
-     * 1. Only records, classes and interfaces are considered.
+     * 1. Only records, classes, interfaces and enums are considered.
      * 2. When [ROOT_PACKAGE_OPTION] is set, only types under that package (and its
      *    sub-packages) are considered; otherwise the whole module is scanned.
      * 3. A type is selected when it is annotated with `@Schema` or matches at least one
@@ -115,6 +115,7 @@ public class JsonSchemaProcessor : AbstractProcessor() {
         val fromRoots = roundEnv.rootElements.filterIsInstance<TypeElement>()
 
         return (annotated + fromRoots)
+            .asSequence()
             .filter { it.isSupported() }
             .filter { rootPackage == null || it.isUnderPackage(rootPackage) }
             .filter { it.isAnnotatedWithSchema() || globMatcher.matchesInclude(it.qualifiedName.toString()) }
@@ -123,10 +124,17 @@ public class JsonSchemaProcessor : AbstractProcessor() {
     }
 
     private fun TypeElement.isSupported(): Boolean =
-        kind == ElementKind.RECORD || kind == ElementKind.CLASS || kind == ElementKind.INTERFACE
+        kind == ElementKind.RECORD ||
+            kind == ElementKind.CLASS ||
+            kind == ElementKind.INTERFACE ||
+            kind == ElementKind.ENUM
 
     private fun TypeElement.isUnderPackage(rootPackage: String): Boolean {
-        val packageName = processingEnv.elementUtils.getPackageOf(this).qualifiedName.toString()
+        val packageName =
+            processingEnv.elementUtils
+                .getPackageOf(this)
+                .qualifiedName
+                .toString()
         return packageName == rootPackage || packageName.startsWith("$rootPackage.")
     }
 
