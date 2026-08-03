@@ -268,17 +268,24 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         val id = decl.typeId()
 
         return namedRef(type, id, nullable) {
-            val entries =
+            val constants =
                 decl.declarations
                     .filterIsInstance<KSClassDeclaration>()
                     .filter { it.classKind == com.google.devtools.ksp.symbol.ClassKind.ENUM_ENTRY }
-                    .map { entry -> extractNameOverride(entry) ?: entry.simpleName.asString() }
                     .toList()
+            var defaultValue: String? = null
+            val entries =
+                constants.map { entry ->
+                    val entryName = extractNameOverride(entry) ?: entry.simpleName.asString()
+                    if (defaultValue == null && entry.isEnumDefaultAnnotated()) defaultValue = entryName
+                    entryName
+                }
 
             val nameOverride = extractNameOverride(decl)
             EnumNode(
                 name = nameOverride ?: decl.qualifiedName?.asString() ?: decl.simpleName.asString(),
                 entries = entries,
+                defaultValue = defaultValue,
                 description = extractDescription(decl) { decl.descriptionFromKdoc() },
             )
         }
@@ -333,10 +340,11 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 type: TypeRef,
                 description: String?,
                 hasDefaultValue: Boolean,
+                defaultValue: String? = null,
                 isConstant: Boolean = false,
             ) {
                 if (!hasDefaultValue || isConstant) required += name
-                props += createProperty(name, type, description, hasDefaultValue, isConstant)
+                props += createProperty(name, type, description, hasDefaultValue, defaultValue, isConstant)
                 processedKotlinNames += kotlinName
             }
 
@@ -368,17 +376,19 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         resolvedType: KSType,
         nativeHasDefault: Boolean,
         vararg annotationSources: KSAnnotated?,
-    ): Pair<TypeRef, Boolean> {
+    ): Triple<TypeRef, Boolean, String?> {
         val nullableAnnotated = annotationSources.any { it?.isNullableAnnotated() == true }
         val optionalAnnotated = annotationSources.any { it?.isOptionalAnnotated() == true }
+        val defaultValue = annotationSources.firstNotNullOfOrNull { it?.let(::extractDefaultValueOverride) }
         val typeRef = toRef(resolvedType).let { if (nullableAnnotated) it.withNullable(true) else it }
-        val hasDefault = nativeHasDefault || resolvedType.isOptionalByTypeName() || optionalAnnotated
-        return typeRef to hasDefault
+        val hasDefault =
+            nativeHasDefault || resolvedType.isOptionalByTypeName() || optionalAnnotated || defaultValue != null
+        return Triple(typeRef, hasDefault, defaultValue)
     }
 
     private fun extractConstructorOrProperties(
         decl: KSClassDeclaration,
-        addProperty: (String, String, TypeRef, String?, Boolean) -> Unit,
+        addProperty: (String, String, TypeRef, String?, Boolean, String?) -> Unit,
     ) {
         val declaredProperties = decl.getDeclaredProperties().associateBy { it.simpleName.asString() }
         // Prefer primary constructor parameters for data classes; fall back to public properties
@@ -392,7 +402,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 val propertyName =
                     extractNameOverride(p) ?: property?.let { extractNameOverride(it) } ?: kotlinName
                 val description = extractConstructorParamDescription(p, kotlinName, decl.docString, property)
-                val (typeRef, hasDefault) =
+                val (typeRef, hasDefault, defaultValue) =
                     resolvePropertyTypeAndOptionality(
                         p.type.resolve(),
                         p.hasDefault,
@@ -400,7 +410,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                         property,
                         property?.getter,
                     )
-                addProperty(kotlinName, propertyName, typeRef, description, hasDefault)
+                addProperty(kotlinName, propertyName, typeRef, description, hasDefault, defaultValue)
             }
         } else {
             declaredProperties.values
@@ -416,14 +426,14 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                             kdocTagName = "property",
                             elementKdocFallback = { prop.descriptionFromKdoc() },
                         )
-                    val (typeRef, hasDefault) =
+                    val (typeRef, hasDefault, defaultValue) =
                         resolvePropertyTypeAndOptionality(
                             prop.type.resolve(),
                             nativeHasDefault = false,
                             prop,
                             prop.getter,
                         )
-                    addProperty(kotlinName, propertyName, typeRef, description, hasDefault)
+                    addProperty(kotlinName, propertyName, typeRef, description, hasDefault, defaultValue)
                 }
         }
     }
@@ -431,7 +441,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     private fun extractInheritedSealedProperties(
         decl: KSClassDeclaration,
         processedKotlinNames: Set<String>,
-        addProperty: (String, String, TypeRef, String?, Boolean, Boolean) -> Unit,
+        addProperty: (String, String, TypeRef, String?, Boolean, String?, Boolean) -> Unit,
     ) {
         // Add inherited properties from sealed parents that weren't in the constructor
         val sealedParents =
@@ -468,7 +478,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                         kdocTagName = "property",
                         elementKdocFallback = { effectiveProp.descriptionFromKdoc() },
                     )
-                val (typeRef, _) =
+                val (typeRef, _, _) =
                     resolvePropertyTypeAndOptionality(
                         effectiveProp.type.resolve(),
                         nativeHasDefault = true,
@@ -483,7 +493,8 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                     typeRef,
                     description,
                     true, // Fixed value in the subclass
-                    false, // KSP cannot get the value
+                    null, // KSP cannot get the value
+                    false, // isConstant: not marked const since the value can't be extracted
                 )
             }
         }

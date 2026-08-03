@@ -268,12 +268,15 @@ internal class AptIntrospectionContext(
                     if (isIgnored(targets)) return@forEach
                     val propertyName = nameOverrideFor(targets) ?: name
                     val componentType = component.asType()
-                    // Optional by convention (type-name pattern or @Nullable-style annotation) —
-                    // excluded from `required`, the same way a Kotlin default value is handled.
-                    val optional = isOptionalByTypeName(componentType) || isOptionalAnnotated(targets)
+                    val defaultValue = defaultValueFor(targets)
+                    // Optional by convention (type-name pattern, @Nullable-style annotation, or a
+                    // known default value) — excluded from `required`, the same way a Kotlin
+                    // default value is handled.
+                    val optional =
+                        isOptionalByTypeName(componentType) || isOptionalAnnotated(targets) || defaultValue != null
                     if (!optional) required += propertyName
                     val description = recordComponentDescription(component, field)
-                    props += toProperty(propertyName, componentType, description, targets, optional)
+                    props += toProperty(propertyName, componentType, description, targets, optional, defaultValue)
                 }
 
                 objectNode(element, props, required)
@@ -291,11 +294,17 @@ internal class AptIntrospectionContext(
 
         return namedRef(type, id) {
             buildOrGet(type, id) {
-                val entries =
+                val constants =
                     element.enclosedElements
                         .filterIsInstance<VariableElement>()
                         .filter { it.kind == ElementKind.ENUM_CONSTANT }
-                        .map { constant -> nameOverrideFor(listOf(constant)) ?: constant.simpleName.toString() }
+                var defaultValue: String? = null
+                val entries =
+                    constants.map { constant ->
+                        val entryName = nameOverrideFor(listOf(constant)) ?: constant.simpleName.toString()
+                        if (defaultValue == null && isEnumDefaultAnnotated(constant)) defaultValue = entryName
+                        entryName
+                    }
                 check(entries.isNotEmpty()) {
                     "Enum ${element.qualifiedName} has no constants; cannot generate a JSON Schema enum"
                 }
@@ -303,6 +312,7 @@ internal class AptIntrospectionContext(
                 EnumNode(
                     name = nameOverrideFor(listOf(element)) ?: element.qualifiedName.toString(),
                     entries = entries,
+                    defaultValue = defaultValue,
                     description = extractDescription(element),
                 )
             }
@@ -329,10 +339,21 @@ internal class AptIntrospectionContext(
                         if (isIgnored(listOf(field))) return@forEach
                         val propertyName = nameOverrideFor(listOf(field)) ?: name
                         val fieldType = field.asType()
-                        val optional = isOptionalByTypeName(fieldType) || isOptionalAnnotated(listOf(field))
+                        val defaultValue = defaultValueFor(listOf(field))
+                        val optional =
+                            isOptionalByTypeName(fieldType) ||
+                                isOptionalAnnotated(listOf(field)) ||
+                                defaultValue != null
                         if (!optional) required += propertyName
                         props +=
-                            toProperty(propertyName, fieldType, extractDescription(field), listOf(field), optional)
+                            toProperty(
+                                propertyName,
+                                fieldType,
+                                extractDescription(field),
+                                listOf(field),
+                                optional,
+                                defaultValue,
+                            )
                     }
 
                 objectNode(element, props, required)
@@ -363,9 +384,21 @@ internal class AptIntrospectionContext(
                         if (isIgnored(listOf(method))) return@forEach
                         val name = nameOverrideFor(listOf(method)) ?: propertyName(method.simpleName.toString())
                         val returnType = method.returnType
-                        val optional = isOptionalByTypeName(returnType) || isOptionalAnnotated(listOf(method))
+                        val defaultValue = defaultValueFor(listOf(method))
+                        val optional =
+                            isOptionalByTypeName(returnType) ||
+                                isOptionalAnnotated(listOf(method)) ||
+                                defaultValue != null
                         if (!optional) required += name
-                        props += toProperty(name, returnType, extractDescription(method), listOf(method), optional)
+                        props +=
+                            toProperty(
+                                name,
+                                returnType,
+                                extractDescription(method),
+                                listOf(method),
+                                optional,
+                                defaultValue,
+                            )
                     }
 
                 objectNode(element, props, required)
@@ -474,6 +507,7 @@ internal class AptIntrospectionContext(
         description: String?,
         annotationTargets: List<Element> = emptyList(),
         optional: Boolean = false,
+        defaultValue: String? = null,
     ): Property =
         Property(
             name = name,
@@ -484,6 +518,7 @@ internal class AptIntrospectionContext(
                 },
             description = description,
             hasDefaultValue = optional,
+            defaultValue = defaultValue,
         )
 
     private fun objectNode(
@@ -548,6 +583,27 @@ internal class AptIntrospectionContext(
     private fun nameOverrideFor(targets: List<Element>): String? =
         targets.firstNotNullOfOrNull(::extractNameOverride)
 
+    /**
+     * Returns the first default-value override (e.g. from `@JsonProperty(defaultValue = "...")`)
+     * found across the given annotation targets, in order, or null if none provides one.
+     */
+    private fun defaultValueFor(targets: List<Element>): String? =
+        targets.firstNotNullOfOrNull(::extractDefaultValueOverride)
+
+    private fun extractDefaultValueOverride(element: Element): String? =
+        element.annotationMirrors.firstNotNullOfOrNull { mirror ->
+            val annotationElement = mirror.annotationType.asElement() as TypeElement
+            val args =
+                mirror.elementValues.entries.map { (attribute, value) ->
+                    attribute.simpleName.toString() to value.value
+                }
+            Introspections.getDefaultValueFromAnnotation(
+                simpleName = annotationElement.simpleName.toString(),
+                qualifiedName = annotationElement.qualifiedName.toString(),
+                annotationArguments = args,
+            )
+        }
+
     private fun extractNameOverride(element: Element): String? =
         element.annotationMirrors.firstNotNullOfOrNull { mirror ->
             val annotationElement = mirror.annotationType.asElement() as TypeElement
@@ -610,6 +666,19 @@ internal class AptIntrospectionContext(
         element.annotationMirrors.any { mirror ->
             val annotationElement = mirror.annotationType.asElement() as TypeElement
             Introspections.isOptionalAnnotation(
+                simpleName = annotationElement.simpleName.toString(),
+                qualifiedName = annotationElement.qualifiedName.toString(),
+            )
+        }
+
+    /**
+     * Returns `true` if the given element carries a recognized enum-default-value marker
+     * (e.g. `@JsonEnumDefaultValue`).
+     */
+    private fun isEnumDefaultAnnotated(element: Element): Boolean =
+        element.annotationMirrors.any { mirror ->
+            val annotationElement = mirror.annotationType.asElement() as TypeElement
+            Introspections.isEnumDefaultAnnotation(
                 simpleName = annotationElement.simpleName.toString(),
                 qualifiedName = annotationElement.qualifiedName.toString(),
             )

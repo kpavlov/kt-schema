@@ -4,6 +4,7 @@ import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import me.kpavlov.kt.schema.generator.core.ir.Discriminator
+import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
@@ -510,6 +511,49 @@ class TypeGraphToJsonSchemaTransformerTest {
         names[xId] shouldBe "com.example.X"
         names[yId] shouldBe "com.example.Y"
         names[wId] shouldBe "com.example.W"
+    }
+
+    @Test
+    fun `enum node default value is emitted as default on its own defs schema`() {
+        val statusId = TypeId("Status")
+        val statusNode = EnumNode(name = "Status", entries = listOf("ACTIVE", "INACTIVE"), defaultValue = "ACTIVE")
+        val rootId = TypeId("Root")
+        val rootNode =
+            ObjectNode(
+                name = "Root",
+                properties = listOf(Property(name = "status", type = TypeRef.Ref(statusId))),
+                required = setOf("status"),
+            )
+        val graph =
+            TypeGraph(
+                root = TypeRef.Ref(rootId),
+                nodes = mapOf(rootId to rootNode, statusId to statusNode),
+            )
+
+        val schema = transformer.transform(graph, "Root")
+        val schemaJson = schema.encodeToString(json)
+
+        schemaJson shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "Root",
+              "type": "object",
+              "properties": {
+                "status": { "$ref": "#/$defs/Status" }
+              },
+              "required": ["status"],
+              "additionalProperties": false,
+              "$defs": {
+                "Status": {
+                  "type": "string",
+                  "enum": ["ACTIVE", "INACTIVE"],
+                  "default": "ACTIVE"
+                }
+              }
+            }
+            """.trimIndent()
     }
 }
 

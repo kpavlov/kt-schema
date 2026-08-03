@@ -1,5 +1,6 @@
 package me.kpavlov.kt.schema.generator.reflect
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
@@ -9,6 +10,7 @@ import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
+import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
@@ -126,6 +128,30 @@ class ReflectionIntrospectorJacksonTest {
         val label: String,
     ) : JacksonRecord()
 
+    @Suppress("unused")
+    enum class Priority {
+        LOW,
+
+        @JsonEnumDefaultValue
+        MEDIUM,
+        HIGH,
+    }
+
+    @Suppress("unused")
+    data class WithEnumDefault(
+        val priority: Priority,
+    )
+
+    @Suppress("unused")
+    data class WithAnnotationDefault(
+        @param:JsonProperty(defaultValue = "30") val timeout: Int,
+    )
+
+    @Suppress("unused")
+    data class WithRealDefaultPrecedence(
+        @param:JsonProperty(defaultValue = "IGNORED") val label: String = "REAL",
+    )
+
     private val introspector = ReflectionClassIntrospector
 
     @Test
@@ -235,6 +261,41 @@ class ReflectionIntrospectorJacksonTest {
 
         node.properties.map { it.name } shouldNotContain "internalToken"
         node.required shouldNotContain "internalToken"
+    }
+
+    @Test
+    fun `introspects enum default value from JsonEnumDefaultValue annotation`() {
+        val graph = introspector.introspect(WithEnumDefault::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+        val priorityRef = node.properties.first { it.name == "priority" }.type.shouldBeInstanceOf<TypeRef.Ref>()
+        val enumNode = graph.nodes[priorityRef.id].shouldBeInstanceOf<EnumNode>()
+
+        enumNode.defaultValue shouldBe "MEDIUM"
+    }
+
+    @Test
+    fun `populates property default value from JsonProperty defaultValue annotation`() {
+        val graph = introspector.introspect(WithAnnotationDefault::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+        val timeoutProp = node.properties.first { it.name == "timeout" }
+
+        timeoutProp.hasDefaultValue shouldBe true
+        timeoutProp.defaultValue shouldBe "30"
+        node.required shouldNotContain "timeout"
+    }
+
+    @Test
+    fun `real Kotlin default value takes precedence over JsonProperty defaultValue annotation`() {
+        val graph = introspector.introspect(WithRealDefaultPrecedence::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+
+        node.properties.first { it.name == "label" }.defaultValue shouldBe "REAL"
     }
 
     //region Jackson databind node types

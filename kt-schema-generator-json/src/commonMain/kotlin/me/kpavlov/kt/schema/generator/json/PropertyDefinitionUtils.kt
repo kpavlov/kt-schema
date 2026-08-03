@@ -2,6 +2,7 @@
 
 package me.kpavlov.kt.schema.generator.json
 
+import me.kpavlov.kt.schema.generator.core.ir.Property
 import me.kpavlov.kt.schema.json.AllOfPropertyDefinition
 import me.kpavlov.kt.schema.json.AnyOfPropertyDefinition
 import me.kpavlov.kt.schema.json.ArrayPropertyDefinition
@@ -47,7 +48,7 @@ internal fun setDefaultValue(
     propertyDef: PropertyDefinition,
     defaultValue: Any?,
 ): PropertyDefinition {
-    val jsonElement = toJsonElement(defaultValue) ?: return propertyDef
+    val jsonElement = toJsonElement(coerceToDeclaredType(propertyDef, defaultValue)) ?: return propertyDef
 
     return when (propertyDef) {
         is StringPropertyDefinition -> propertyDef.copy(default = jsonElement)
@@ -55,9 +56,50 @@ internal fun setDefaultValue(
         is BooleanPropertyDefinition -> propertyDef.copy(default = jsonElement)
         is ArrayPropertyDefinition -> propertyDef.copy(default = jsonElement)
         is ObjectPropertyDefinition -> propertyDef.copy(default = jsonElement)
+        is ReferencePropertyDefinition -> propertyDef.copy(default = jsonElement)
+        is OneOfPropertyDefinition -> propertyDef.copy(default = jsonElement)
         else -> propertyDef
     }
 }
+
+/**
+ * Coerces an annotation-sourced default value — always a raw `String`, e.g. from
+ * `@JsonProperty(defaultValue = "30")` — to match [propertyDef]'s declared JSON type, so `default`
+ * isn't emitted as a JSON string next to a numeric/boolean `type`. Values that are already
+ * natively typed (e.g. a real Kotlin default obtained via reflection) pass through unchanged.
+ *
+ * Falls back to the original string when it doesn't parse as the target type, so the default is
+ * still shown (in the wrong shape) rather than silently dropped.
+ */
+private fun coerceToDeclaredType(
+    propertyDef: PropertyDefinition,
+    value: Any?,
+): Any? {
+    if (value !is String) return value
+    return when (propertyDef) {
+        is NumericPropertyDefinition -> value.toLongOrNull() ?: value.toDoubleOrNull() ?: value
+        is BooleanPropertyDefinition -> value.toBooleanStrictOrNull() ?: value
+        else -> value
+    }
+}
+
+/**
+ * Applies a property's constant or default value to its definition, if applicable.
+ *
+ * A constant property gets its value emitted via `const`; a non-required property with a known
+ * default value gets it emitted via `default`. Shared by both the plain JSON Schema and function
+ * calling transformers.
+ */
+internal fun applyDefaultOrConst(
+    propertyDef: PropertyDefinition,
+    property: Property,
+    isRequired: Boolean,
+): PropertyDefinition =
+    when {
+        property.isConstant -> setConstValue(propertyDef, property.defaultValue)
+        !isRequired && property.defaultValue != null -> setDefaultValue(propertyDef, property.defaultValue)
+        else -> propertyDef
+    }
 
 /**
  * Sets the description on a property definition, if [PropertyDefinition] supports it.

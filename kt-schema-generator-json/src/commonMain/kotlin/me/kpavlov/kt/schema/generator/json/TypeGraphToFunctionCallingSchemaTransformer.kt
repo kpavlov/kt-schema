@@ -127,24 +127,7 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                     val finalDef =
                         convertTypeRef(property.type, graph, jsonTypeNames, depth = 0)
                             .let { def -> property.description?.let { setDescription(def, it) } ?: def }
-                            .let { def ->
-                                when {
-                                    property.isConstant -> {
-                                        setConstValue(def, property.defaultValue)
-                                    }
-
-                                    !isRequired && property.defaultValue != null -> {
-                                        setDefaultValue(
-                                            def,
-                                            property.defaultValue,
-                                        )
-                                    }
-
-                                    else -> {
-                                        def
-                                    }
-                                }
-                            }
+                            .let { def -> applyDefaultOrConst(def, property, isRequired) }
                     property.name to finalDef
                 }
 
@@ -332,24 +315,7 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                     val finalDef =
                         convertTypeRef(property.type, graph, jsonTypeNames, depth)
                             .let { def -> property.description?.let { setDescription(def, it) } ?: def }
-                            .let { def ->
-                                when {
-                                    property.isConstant -> {
-                                        setConstValue(def, property.defaultValue)
-                                    }
-
-                                    !isRequired && property.defaultValue != null -> {
-                                        setDefaultValue(
-                                            def,
-                                            property.defaultValue,
-                                        )
-                                    }
-
-                                    else -> {
-                                        def
-                                    }
-                                }
-                            }
+                            .let { def -> applyDefaultOrConst(def, property, isRequired) }
                     property.name to finalDef
                 }
 
@@ -366,13 +332,21 @@ public class TypeGraphToFunctionCallingSchemaTransformer
         private fun convertEnum(
             node: EnumNode,
             nullable: Boolean,
-        ): PropertyDefinition =
-            StringPropertyDefinition(
-                type = if (nullable) STRING_OR_NULL_TYPE else STRING_TYPE,
-                description = node.description,
-                nullable = null,
-                enum = node.entries,
-            )
+        ): PropertyDefinition {
+            val base =
+                StringPropertyDefinition(
+                    type = if (nullable) STRING_OR_NULL_TYPE else STRING_TYPE,
+                    description = node.description,
+                    nullable = null,
+                    enum = node.entries,
+                )
+            // OpenAI structured-output strict mode disallows the "default" keyword entirely.
+            return if (config.strictMode) {
+                base
+            } else {
+                node.defaultValue?.let { setDefaultValue(base, it) } ?: base
+            }
+        }
 
         private fun convertList(
             node: ListNode,

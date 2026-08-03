@@ -153,14 +153,20 @@ This library solves three key challenges:
 |:----------------------------------|:-------------------------------:|:--------------------------:|:----------------------------------------------:|:---------------------------------------------------:|
 | **Platforms**                     |       JVM + Multiplatform       |          JVM only          |              JVM + Multiplatform               |                      JVM only                       |
 | **When generated**                |          Compile-time           |        Compile-time        |                    Runtime                     |                       Runtime                       |
-| **Requires annotation processor** |            Yes (KSP)            |          Yes (APT)         |                       No                       |                         No                          |
+| **Requires annotation processor** |            Yes (KSP)            |         Yes (APT)          |                       No                       |                         No                          |
 | **Class must be `@Serializable`** |               No                |             No             |                      Yes                       |                         No                          |
-| **Annotate class with `@Schema`** |            Required             |    Not required¹           |                  Not required                  |                    Not required                     |
-| **KDoc extracted to description** |                ✅                |             ❌              |                       ❌                        |                          ❌                          |
-| **Extract default values**        |                ❌                |             ❌              |                       ❌                        |                          ✅                          |
-| **Third-party classes**           |                ❌                |             ❌              |            ✅ (only `@Serializable`)            |                   ✅ any JVM class                   |
+| **Annotate class with `@Schema`** |            Required             |       Not required¹        |                  Not required                  |                    Not required                     |
+| **KDoc extracted to description** |               ✅                |             ❌             |                       ❌                       |                         ❌                          |
+| **Extract default values**        |            Partial²             |          Partial²          |                       ❌                       |                         ✅                          |
+| **Third-party classes**           |               ❌                |             ❌             |           ✅ (only `@Serializable`)            |                  ✅ any JVM class                   |
 
 ¹ with the `rootPackage` option — see [Java Annotation Processor Guide](docs/apt.md#triggering-schema-generation).
+
+² via Jackson's `@JsonEnumDefaultValue`, placed on an enum constant — shown as `default` on that enum's own schema
+in the generated output. `@JsonProperty(defaultValue = "...")` is also recognized and populates the property
+internally, but neither processor's standard generated resource surfaces it, since both mark every property
+required regardless of default presence (KSP/APT can't evaluate a real Kotlin/Java default-value expression at
+compile time, unlike reflection) — see [Multi-Framework Annotation Support](#multi-framework-annotation-support).
 
 - **[Pick KSP](docs/ksp.md)** when you own the classes, want zero runtime overhead, and target Multiplatform or need KDoc
 in your schema.
@@ -1199,6 +1205,21 @@ Beyond descriptions, kt-schema also recognizes **name overrides** and **ignore m
 |----------------------------|---------------------------------------------|
 | `JsonIgnore` (any package) | excludes the property/field from the schema |
 
+**Default values** — matched by **fully qualified name** (case-sensitive); mainly useful for the KSP and Java APT
+processors, which can't evaluate a real Kotlin/Java default-value expression at compile time:
+
+| Annotation                                                       | Maps to                                                                                                     |
+|-------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| `com.fasterxml.jackson.annotation.JsonEnumDefaultValue`          | the enum constant it's placed on becomes that enum type's `default` (on the enum's own schema, in `$defs`)  |
+| `com.fasterxml.jackson.annotation.JsonProperty(defaultValue=..)` | the property's default value, internally                                                                    |
+
+> [!NOTE]
+> The `@JsonEnumDefaultValue`-derived `default` always appears in the generated output, since it's a property of
+> the enum's own schema. `@JsonProperty(defaultValue = "...")` is recognized and populates the property internally,
+> but doesn't appear in — or exclude the property from `required` in — the KSP/APT processors' standard generated
+> resource, since both mark every property required regardless of default presence. It does apply when building a
+> schema through `TypeGraphToJsonSchemaTransformer` with a non-strict `JsonSchemaConfig` yourself.
+
 ### How It Works
 
 Each annotation category (description, name-override, ignore) is configured with its own list of recognized names.
@@ -1230,6 +1251,9 @@ By default, the library recognizes:
 **Ignore annotations**: SchemaIgnore, SerialSchemaIgnore, JsonIgnoreType, JsonIgnore
 **Name-override annotations**: kotlinx.serialization.SerialName, com.fasterxml.jackson.annotation.JsonProperty, com.fasterxml.jackson.annotation.JsonTypeName
 **Name-override attributes**: value
+**Enum-default annotations**: com.fasterxml.jackson.annotation.JsonEnumDefaultValue
+**Default-value annotations**: com.fasterxml.jackson.annotation.JsonProperty
+**Default-value attributes**: defaultValue
 
 > [!NOTE]
 > Annotation names containing a dot (e.g., `kotlinx.serialization.SerialName`) are matched
@@ -1248,6 +1272,11 @@ introspector.annotations.description.attributes=value,description,text
 # Name-override annotations (use FQN for precise matching)
 introspector.annotations.name.names=kotlinx.serialization.SerialName
 introspector.annotations.name.attributes=value
+
+# Default-value annotations (use FQN for precise matching)
+introspector.annotations.enumDefault.names=com.fasterxml.jackson.annotation.JsonEnumDefaultValue
+introspector.annotations.defaultValue.names=com.fasterxml.jackson.annotation.JsonProperty
+introspector.annotations.defaultValue.attributes=defaultValue
 ```
 
 **Note**: The library falls back to built-in defaults if the configuration file is missing or cannot be loaded.

@@ -69,4 +69,15 @@ class ConfigTest {
     fun `loads nullable type name patterns from properties preserving case`() {
         Config.nullableTypeNamePatterns shouldContain "*Opt"
     }
+
+    @Test
+    fun `loads enum default annotation names from properties`() {
+        Config.enumDefaultAnnotationNames shouldContain "com.fasterxml.jackson.annotation.JsonEnumDefaultValue"
+    }
+
+    @Test
+    fun `loads default value annotation names and attributes from properties`() {
+        Config.defaultValueAnnotationNames shouldContain "com.fasterxml.jackson.annotation.JsonProperty"
+        Config.defaultValueAttributes shouldContain "defaultvalue"
+    }
 }

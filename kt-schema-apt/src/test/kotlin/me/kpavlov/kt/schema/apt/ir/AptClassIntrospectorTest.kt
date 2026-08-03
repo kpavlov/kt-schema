@@ -595,6 +595,59 @@ class AptClassIntrospectorTest {
         }
     }
 
+    @Test
+    fun `should mark JsonEnumDefaultValue-annotated constant as EnumNode default`() {
+        val graph =
+            graph(
+                root = "com.example.Color",
+                jacksonJsonEnumDefaultValue(),
+                // language=java
+                """
+                package com.example;
+
+                import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+
+                public enum Color {
+                    RED,
+                    @JsonEnumDefaultValue
+                    GREEN,
+                    BLUE
+                }
+                """.trimIndent(),
+            )
+
+        val rootRef = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        graph.nodes.getValue(rootRef.id).shouldBeInstanceOf<EnumNode> { enumNode ->
+            enumNode.defaultValue shouldBe "GREEN"
+        }
+    }
+
+    @Test
+    fun `should populate Property defaultValue from JsonProperty defaultValue-style annotation`() {
+        val graph =
+            graph(
+                root = "com.example.Car",
+                jacksonJsonProperty(),
+                javaClass(
+                    "com.example",
+                    "Car",
+                    """
+                    @com.fasterxml.jackson.annotation.JsonProperty(defaultValue = "30")
+                    public int timeout;
+                    """.trimIndent(),
+                ),
+            )
+
+        val node = graph.rootNode()
+        assertSoftly(node) {
+            required.shouldContainExactlyInAnyOrder(emptySet())
+            properties.single().apply {
+                hasDefaultValue shouldBe true
+                defaultValue shouldBe "30"
+            }
+        }
+    }
+
     //endregion
 
     //region helpers
@@ -784,7 +837,23 @@ class AptClassIntrospectorTest {
         package com.fasterxml.jackson.annotation;
 
         public @interface JsonProperty {
-            String value();
+            String value() default "";
+            String defaultValue() default "";
+        }
+        """.trimIndent()
+
+    /**
+     * Stand-in for Jackson's `@JsonEnumDefaultValue`, declared under its real FQN so
+     * [me.kpavlov.kt.schema.generator.core.ir.Introspections]'s enum-default matching recognizes
+     * it without depending on the real Jackson library from this module.
+     */
+    @Language("java")
+    private fun jacksonJsonEnumDefaultValue(): String =
+        // language=java
+        """
+        package com.fasterxml.jackson.annotation;
+
+        public @interface JsonEnumDefaultValue {
         }
         """.trimIndent()
 

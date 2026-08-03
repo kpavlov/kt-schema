@@ -484,20 +484,7 @@ public class TypeGraphToJsonSchemaTransformer
                             propertyDef
                         }
 
-                    val withDefaultOrConst =
-                        when {
-                            property.isConstant -> {
-                                setConstValue(withoutNullableIfRequired, property.defaultValue)
-                            }
-
-                            !isRequired && property.defaultValue != null -> {
-                                setDefaultValue(withoutNullableIfRequired, property.defaultValue)
-                            }
-
-                            else -> {
-                                withoutNullableIfRequired
-                            }
-                        }
+                    val withDefaultOrConst = applyDefaultOrConst(withoutNullableIfRequired, property, isRequired)
 
                     // Add description if available
                     val finalDef =
@@ -520,13 +507,16 @@ public class TypeGraphToJsonSchemaTransformer
         private fun convertEnum(
             node: EnumNode,
             nullable: Boolean,
-        ): PropertyDefinition =
-            StringPropertyDefinition(
-                type = if (nullable && config.useUnionTypes) STRING_OR_NULL_TYPE else STRING_TYPE,
-                description = node.description,
-                nullable = getNullableFlag(nullable),
-                enum = node.entries,
-            )
+        ): PropertyDefinition {
+            val base =
+                StringPropertyDefinition(
+                    type = if (nullable && config.useUnionTypes) STRING_OR_NULL_TYPE else STRING_TYPE,
+                    description = node.description,
+                    nullable = getNullableFlag(nullable),
+                    enum = node.entries,
+                )
+            return node.defaultValue?.let { setDefaultValue(base, it) } ?: base
+        }
 
         private fun convertList(
             node: ListNode,

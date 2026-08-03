@@ -266,4 +266,44 @@ internal expect object Config {
      * `required`.
      */
     val optionalTypeNamePatterns: List<String>
+
+    /**
+     * Annotation names recognized as enum-default-value markers (e.g. Jackson's
+     * `@JsonEnumDefaultValue`), placed on a single enum constant to mark it as that enum type's
+     * default value — emitted as the `default` keyword on the enum's own schema.
+     *
+     * Matching follows the same rules as [nameAnnotationNames]: simple names case-insensitive,
+     * FQNs (containing a dot) case-sensitive.
+     *
+     * Loaded lazily from the `introspector.annotations.enumDefault.names` property in
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
+     *
+     * Default value: com.fasterxml.jackson.annotation.JsonEnumDefaultValue
+     */
+    val enumDefaultAnnotationNames: List<String>
+
+    /**
+     * Annotation names recognized as default-value providers (e.g. Jackson's
+     * `@JsonProperty(defaultValue = "...")`), primarily useful for front ends without native
+     * default-value support (e.g. APT, KSP) — for reflection, a real Kotlin default value always
+     * takes precedence when both are present.
+     *
+     * Matching follows the same rules as [nameAnnotationNames].
+     *
+     * Loaded lazily from the `introspector.annotations.defaultValue.names` property in
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
+     *
+     * Default value: com.fasterxml.jackson.annotation.JsonProperty
+     */
+    val defaultValueAnnotationNames: List<String>
+
+    /**
+     * Ordered list of lowercase annotation parameter names that may contain default-value text.
+     *
+     * Loaded lazily from the `introspector.annotations.defaultValue.attributes` property in
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
+     *
+     * Default value: defaultValue
+     */
+    val defaultValueAttributes: List<String>
 }

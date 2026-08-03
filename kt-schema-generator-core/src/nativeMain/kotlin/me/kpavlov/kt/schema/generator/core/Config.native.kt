@@ -21,4 +21,10 @@ internal actual object Config {
         get() = emptyList()
     actual val optionalTypeNamePatterns: List<String>
         get() = emptyList()
+    actual val enumDefaultAnnotationNames: List<String>
+        get() = listOf("com.fasterxml.jackson.annotation.JsonEnumDefaultValue")
+    actual val defaultValueAnnotationNames: List<String>
+        get() = listOf("com.fasterxml.jackson.annotation.JsonProperty")
+    actual val defaultValueAttributes: List<String>
+        get() = listOf("defaultValue")
 }

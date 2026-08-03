@@ -163,8 +163,10 @@ final class me.kpavlov.kt.schema.generator.core.ir/Discriminator { // me.kpavlov
 }
 
 final class me.kpavlov.kt.schema.generator.core.ir/EnumNode : me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode { // me.kpavlov.kt.schema.generator.core.ir/EnumNode|null[0]
-    constructor <init>(kotlin/String, kotlin.collections/List<kotlin/String>, kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/EnumNode.<init>|<init>(kotlin.String;kotlin.collections.List<kotlin.String>;kotlin.String?){}[0]
+    constructor <init>(kotlin/String, kotlin.collections/List<kotlin/String>, kotlin/String? = ..., kotlin/String? = ...) // me.kpavlov.kt.schema.generator.core.ir/EnumNode.<init>|<init>(kotlin.String;kotlin.collections.List<kotlin.String>;kotlin.String?;kotlin.String?){}[0]
 
+    final val defaultValue // me.kpavlov.kt.schema.generator.core.ir/EnumNode.defaultValue|{}defaultValue[0]
+        final fun <get-defaultValue>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/EnumNode.defaultValue.<get-defaultValue>|<get-defaultValue>(){}[0]
     final val description // me.kpavlov.kt.schema.generator.core.ir/EnumNode.description|{}description[0]
         final fun <get-description>(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/EnumNode.description.<get-description>|<get-description>(){}[0]
     final val entries // me.kpavlov.kt.schema.generator.core.ir/EnumNode.entries|{}entries[0]
@@ -175,7 +177,8 @@ final class me.kpavlov.kt.schema.generator.core.ir/EnumNode : me.kpavlov.kt.sche
     final fun component1(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/EnumNode.component1|component1(){}[0]
     final fun component2(): kotlin.collections/List<kotlin/String> // me.kpavlov.kt.schema.generator.core.ir/EnumNode.component2|component2(){}[0]
     final fun component3(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/EnumNode.component3|component3(){}[0]
-    final fun copy(kotlin/String = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/String? = ...): me.kpavlov.kt.schema.generator.core.ir/EnumNode // me.kpavlov.kt.schema.generator.core.ir/EnumNode.copy|copy(kotlin.String;kotlin.collections.List<kotlin.String>;kotlin.String?){}[0]
+    final fun component4(): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/EnumNode.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/String? = ..., kotlin/String? = ...): me.kpavlov.kt.schema.generator.core.ir/EnumNode // me.kpavlov.kt.schema.generator.core.ir/EnumNode.copy|copy(kotlin.String;kotlin.collections.List<kotlin.String>;kotlin.String?;kotlin.String?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/EnumNode.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/EnumNode.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/EnumNode.toString|toString(){}[0]
@@ -367,8 +370,10 @@ final value class me.kpavlov.kt.schema.generator.core.ir/TypeId { // me.kpavlov.
 }
 
 final object me.kpavlov.kt.schema.generator.core.ir/Introspections { // me.kpavlov.kt.schema.generator.core.ir/Introspections|null[0]
+    final fun getDefaultValueFromAnnotation(kotlin/String, kotlin/String?, kotlin.collections/List<kotlin/Pair<kotlin/String, kotlin/Any?>>): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Introspections.getDefaultValueFromAnnotation|getDefaultValueFromAnnotation(kotlin.String;kotlin.String?;kotlin.collections.List<kotlin.Pair<kotlin.String,kotlin.Any?>>){}[0]
     final fun getDescriptionFromAnnotation(kotlin/String, kotlin/String?, kotlin.collections/List<kotlin/Pair<kotlin/String, kotlin/Any?>>): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Introspections.getDescriptionFromAnnotation|getDescriptionFromAnnotation(kotlin.String;kotlin.String?;kotlin.collections.List<kotlin.Pair<kotlin.String,kotlin.Any?>>){}[0]
     final fun getNameOverride(kotlin/String, kotlin/String?, kotlin.collections/List<kotlin/Pair<kotlin/String, kotlin/Any?>>): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Introspections.getNameOverride|getNameOverride(kotlin.String;kotlin.String?;kotlin.collections.List<kotlin.Pair<kotlin.String,kotlin.Any?>>){}[0]
+    final fun isEnumDefaultAnnotation(kotlin/String, kotlin/String? = ...): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Introspections.isEnumDefaultAnnotation|isEnumDefaultAnnotation(kotlin.String;kotlin.String?){}[0]
     final fun isIgnoreAnnotation(kotlin/String, kotlin/String? = ...): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Introspections.isIgnoreAnnotation|isIgnoreAnnotation(kotlin.String;kotlin.String?){}[0]
     final fun isNullableAnnotation(kotlin/String, kotlin/String? = ...): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Introspections.isNullableAnnotation|isNullableAnnotation(kotlin.String;kotlin.String?){}[0]
     final fun isNullableTypeName(kotlin/String?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Introspections.isNullableTypeName|isNullableTypeName(kotlin.String?){}[0]
