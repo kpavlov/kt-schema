@@ -226,8 +226,7 @@ kotlin {
 }
 ```
 
-For JVM-only projects and full configuration options, see *
-*[KSP Configuration Guide](docs/ksp.md)**.
+For JVM-only projects and full configuration options, see the [KSP Configuration Guide](docs/ksp.md).
 
 ## Runtime schema generation
 
