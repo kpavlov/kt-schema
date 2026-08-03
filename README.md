@@ -1,6 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/me.kpavlov.kt.schema/kt-schema-generator-core.svg?label=Maven%20Central)](https://central.sonatype.com/search?q=me.kpavlov.kt.schema%2Fkt-schema-*)
 [![Build with Gradle](https://github.com/kpavlov/kt-schema/actions/workflows/build.yml/badge.svg)](https://github.com/kpavlov/kt-schema/actions/workflows/build.yml)
-[![Docs](https://img.shields.io/badge/Docs-blue?logo=github)](https://kpavlov.github.io/kt-schema/)
+[![API Docs](https://img.shields.io/badge/API%20Docs-blue?logo=github)](https://kpavlov.github.io/kt-schema/api/)
 [![Examples](https://img.shields.io/badge/Examples-blue?logo=github)](https://github.com/kpavlov/kt-schema/tree/main/examples)
 [![License](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.2+-blueviolet.svg?logo=kotlin)](http://kotlinlang.org)
