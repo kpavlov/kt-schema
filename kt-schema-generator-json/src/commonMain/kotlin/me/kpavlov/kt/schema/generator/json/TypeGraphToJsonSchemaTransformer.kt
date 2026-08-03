@@ -187,6 +187,7 @@ public class TypeGraphToJsonSchemaTransformer
                 type = rootDefinition.type,
                 `enum` = rootDefinition.enum?.map { JsonPrimitive(it) },
                 description = rootDefinition.description,
+                default = rootDefinition.default,
                 properties = emptyMap(),
                 required = emptyList(),
                 additionalProperties = null,

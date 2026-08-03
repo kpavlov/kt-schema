@@ -1,5 +1,6 @@
 package me.kpavlov.kt.schema.generator.json
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
@@ -64,6 +65,36 @@ class PropertyDefinitionUtilsTest {
         setDefaultValue(numProp, "3.5") shouldBe numProp.copy(default = JsonPrimitive(3.5))
     }
 
+    @Test
+    fun `setDefaultValue coerces a whole-number decimal string to a JSON integer for integer properties`() {
+        val numProp = NumericPropertyDefinition(type = listOf("integer"))
+        setDefaultValue(numProp, "30.0") shouldBe numProp.copy(default = JsonPrimitive(30L))
+    }
+
+    @Test
+    fun `setDefaultValue throws when a non-integral annotation string is used for an integer property`() {
+        val numProp = NumericPropertyDefinition(type = listOf("integer"))
+        shouldThrow<IllegalArgumentException> { setDefaultValue(numProp, "3.5") }
+    }
+
+    @Test
+    fun `setDefaultValue throws when an annotation string is not a valid number`() {
+        val numProp = NumericPropertyDefinition(type = listOf("number"))
+        shouldThrow<IllegalArgumentException> { setDefaultValue(numProp, "not-a-number") }
+    }
+
+    @Test
+    fun `setDefaultValue throws when an annotation string is a non-finite number`() {
+        val numProp = NumericPropertyDefinition(type = listOf("number"))
+        shouldThrow<IllegalArgumentException> { setDefaultValue(numProp, "NaN") }
+    }
+
+    @Test
+    fun `setDefaultValue throws when an annotation string is not a valid boolean`() {
+        val boolProp = BooleanPropertyDefinition()
+        shouldThrow<IllegalArgumentException> { setDefaultValue(boolProp, "yes") }
+    }
+
     @ParameterizedTest
     @CsvSource(
         "true, true",
@@ -75,12 +106,6 @@ class PropertyDefinitionUtilsTest {
     ) {
         val boolProp = BooleanPropertyDefinition()
         setDefaultValue(boolProp, rawValue) shouldBe boolProp.copy(default = JsonPrimitive(expected))
-    }
-
-    @Test
-    fun `setDefaultValue falls back to the raw string when it does not parse as the target type`() {
-        val numProp = NumericPropertyDefinition(type = listOf("integer"))
-        setDefaultValue(numProp, "not-a-number") shouldBe numProp.copy(default = JsonPrimitive("not-a-number"))
     }
 
     private fun stringProperty(defaultValue: Any? = null, isConstant: Boolean = false): Property =

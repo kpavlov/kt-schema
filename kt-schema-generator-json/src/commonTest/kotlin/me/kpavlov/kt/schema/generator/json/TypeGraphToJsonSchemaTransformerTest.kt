@@ -555,6 +555,32 @@ class TypeGraphToJsonSchemaTransformerTest {
             }
             """.trimIndent()
     }
+
+    @Test
+    fun `root enum node default value is emitted as default on the root schema`() {
+        val statusId = TypeId("Status")
+        val statusNode = EnumNode(name = "Status", entries = listOf("ACTIVE", "INACTIVE"), defaultValue = "ACTIVE")
+        val graph =
+            TypeGraph(
+                root = TypeRef.Ref(statusId),
+                nodes = mapOf(statusId to statusNode),
+            )
+
+        val schema = transformer.transform(graph, "Status")
+        val schemaJson = schema.encodeToString(json)
+
+        schemaJson shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "Status",
+              "type": "string",
+              "enum": ["ACTIVE", "INACTIVE"],
+              "default": "ACTIVE"
+            }
+            """.trimIndent()
+    }
 }
 
 private infix fun String.shouldContainAny(candidates: List<String>) {

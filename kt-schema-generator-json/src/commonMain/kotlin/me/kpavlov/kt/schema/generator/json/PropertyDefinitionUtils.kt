@@ -10,6 +10,7 @@ import me.kpavlov.kt.schema.json.BooleanPropertyDefinition
 import me.kpavlov.kt.schema.json.BooleanSchemaDefinition
 import me.kpavlov.kt.schema.json.GenericPropertyDefinition
 import me.kpavlov.kt.schema.json.JsonSchema
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.NUMBER
 import me.kpavlov.kt.schema.json.NumericPropertyDefinition
 import me.kpavlov.kt.schema.json.ObjectPropertyDefinition
 import me.kpavlov.kt.schema.json.OneOfPropertyDefinition
@@ -22,6 +23,7 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.jvm.JvmName
+import kotlin.math.floor
 
 /**
  * Sets the const value on a property definition.
@@ -68,8 +70,10 @@ internal fun setDefaultValue(
  * isn't emitted as a JSON string next to a numeric/boolean `type`. Values that are already
  * natively typed (e.g. a real Kotlin default obtained via reflection) pass through unchanged.
  *
- * Falls back to the original string when it doesn't parse as the target type, so the default is
- * still shown (in the wrong shape) rather than silently dropped.
+ * @throws IllegalArgumentException if the string doesn't match [propertyDef]'s declared type,
+ * e.g. `"3.14"` on an `integer` property or `"maybe"` on a `boolean` property. A whole-number
+ * decimal string such as `"30.0"` is accepted for `integer` properties, per the JSON Schema
+ * rule that any zero-fractional-part number satisfies `type: integer`.
  */
 private fun coerceToDeclaredType(
     propertyDef: PropertyDefinition,
@@ -77,9 +81,33 @@ private fun coerceToDeclaredType(
 ): Any? {
     if (value !is String) return value
     return when (propertyDef) {
-        is NumericPropertyDefinition -> value.toLongOrNull() ?: value.toDoubleOrNull() ?: value
-        is BooleanPropertyDefinition -> value.toBooleanStrictOrNull() ?: value
+        is NumericPropertyDefinition -> coerceNumericDefault(propertyDef, value)
+        is BooleanPropertyDefinition ->
+            requireNotNull(value.toBooleanStrictOrNull()) {
+                "Annotation default '$value' is not a valid boolean for type ${propertyDef.type}"
+            }
         else -> value
+    }
+}
+
+private fun coerceNumericDefault(
+    propertyDef: NumericPropertyDefinition,
+    value: String,
+): Number {
+    val long = value.toLongOrNull()
+    if (long != null) return long
+
+    val double =
+        requireNotNull(value.toDoubleOrNull()?.takeIf { it.isFinite() }) {
+            "Annotation default '$value' is not a valid number for type ${propertyDef.type}"
+        }
+    return if (NUMBER in propertyDef.type) {
+        double
+    } else {
+        require(double == floor(double)) {
+            "Annotation default '$value' is not a valid integer for type ${propertyDef.type}"
+        }
+        double.toLong()
     }
 }
 
