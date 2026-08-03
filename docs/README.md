@@ -40,7 +40,6 @@ models are built and deployed.
 
 ### Developer experience
 
-- Provides an experimental Gradle plugin for KSP setup and generated-source wiring.
 - Provides a type-safe Kotlin DSL for programmatic JSON Schema construction.
 - Supports JVM, JavaScript/Wasm, and Kotlin/Native targets where the selected generation mode is available.
 
