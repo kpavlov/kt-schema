@@ -10,9 +10,9 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.util.Types
 
 /**
- * Java-APT-backed schema IR introspector. Supports records, plain classes and interfaces
- * with primitive/String/boxed field types, nested references, collections, maps, arrays
- * and upper-bounded type variables; enums and sealed/polymorphic hierarchies are not yet
+ * Java-APT-backed schema IR introspector. Supports records, plain classes, interfaces and
+ * enums, with primitive/String/boxed field types, nested references, collections, maps,
+ * arrays and upper-bounded type variables; sealed/polymorphic hierarchies are not yet
  * supported.
  *
  * A fresh [AptIntrospectionContext] is created per root so `$defs` stay scoped to the

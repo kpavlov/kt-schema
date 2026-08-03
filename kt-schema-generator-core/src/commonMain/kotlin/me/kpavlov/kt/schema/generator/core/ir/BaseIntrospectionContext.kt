@@ -82,4 +82,24 @@ public abstract class BaseIntrospectionContext<TType : Any> {
             visitingTypes -= type
         }
     }
+
+    /**
+     * Registers the [NamedTypeNode] built by [nodeBuilder] for [id] (idempotent via
+     * [withCycleDetection]) and returns a [TypeRef.Ref] to it.
+     *
+     * Named type nodes (enums, objects, polymorphic hierarchies) are always addressable by
+     * `$ref`, never inlined — encoding that contract in the return type keeps it enforced by
+     * the compiler instead of by convention repeated per front end. Currently used for enum
+     * registration across the reflection, KSP, APT and kotlinx.serialization front ends;
+     * object/polymorphic registration remains front-end-specific for now.
+     */
+    protected fun namedRef(
+        type: TType,
+        id: TypeId,
+        nullable: Boolean = false,
+        nodeBuilder: () -> NamedTypeNode,
+    ): TypeRef.Ref {
+        withCycleDetection(type, id, nodeBuilder)
+        return TypeRef.Ref(id, nullable)
+    }
 }

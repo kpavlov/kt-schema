@@ -4,6 +4,7 @@ package me.kpavlov.kt.schema.apt.ir
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
+import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.Introspections
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
@@ -34,7 +35,7 @@ import javax.lang.model.util.Types
 /**
  * Introspection context for the Java annotation-processor (JSR 269) front end.
  *
- * Supports Java records, plain classes and interfaces with primitive/boxed/String fields,
+ * Supports Java records, plain classes, interfaces and enums with primitive/boxed/String fields,
  * nested references, collections (`List`/`Set`/`Collection`/`Iterable`), maps (`Map`),
  * arrays, `Object` and upper-bounded type variables. Java has no notion of nullability or
  * optionality/default values, so every property is non-nullable/required by default — except
@@ -102,11 +103,12 @@ internal class AptIntrospectionContext(
 
     private fun handleReferenceType(type: TypeMirror): TypeRef =
         handleRecord(type)
+            ?: handleEnum(type)
             ?: handleClass(type)
             ?: handleInterface(type)
             ?: error(
                 "Unsupported type for kt-schema-apt " +
-                    "(only records, classes, interfaces, primitives, String, collections, maps and arrays " +
+                    "(only records, classes, interfaces, enums, primitives, String, collections, maps and arrays " +
                     "are supported): $type",
             )
 
@@ -281,6 +283,32 @@ internal class AptIntrospectionContext(
         return TypeRef.Ref(id)
     }
 
+    private fun handleEnum(type: TypeMirror): TypeRef? {
+        val element = asTypeElement(type)
+        if (element == null || element.kind != ElementKind.ENUM) return null
+
+        val id = TypeId(element.qualifiedName.toString())
+
+        return namedRef(type, id) {
+            buildOrGet(type, id) {
+                val entries =
+                    element.enclosedElements
+                        .filterIsInstance<VariableElement>()
+                        .filter { it.kind == ElementKind.ENUM_CONSTANT }
+                        .map { constant -> nameOverrideFor(listOf(constant)) ?: constant.simpleName.toString() }
+                check(entries.isNotEmpty()) {
+                    "Enum ${element.qualifiedName} has no constants; cannot generate a JSON Schema enum"
+                }
+
+                EnumNode(
+                    name = nameOverrideFor(listOf(element)) ?: element.qualifiedName.toString(),
+                    entries = entries,
+                    description = extractDescription(element),
+                )
+            }
+        }
+    }
+
     private fun handleClass(type: TypeMirror): TypeRef? {
         val element = asTypeElement(type)
         if (element == null || element.kind != ElementKind.CLASS) return null
@@ -386,30 +414,33 @@ internal class AptIntrospectionContext(
      * complete. Registration recurses through [toRef], which deduplicates via
      * [withCycleDetection], so shared subgraphs are registered exactly once per root.
      */
-    private fun buildOrGet(
+    private fun <T : TypeNode> buildOrGet(
         type: TypeMirror,
         id: TypeId,
-        builder: () -> TypeNode,
-    ): TypeNode {
+        builder: () -> T,
+    ): T {
         nodeCache[id]?.let { cached ->
             registerRefs(cached.node)
-            return cached.node
+            // Safe: id is always element.qualifiedName, and a qualified name has exactly one
+            // ElementKind, so the same id is never built with a different T.
+            @Suppress("UNCHECKED_CAST")
+            return cached.node as T
         }
         return builder().also { nodeCache[id] = CachedNode(type, it) }
     }
 
     /**
-     * Re-registers the types referenced by [node] into the current context. The apt front
-     * end only caches object nodes, so any other cached node kind is an unsupported
-     * invariant. References are registered through inline list/map nodes as well, so a
-     * cached `List<Shared>` property still pulls `Shared` into a fresh root's `$defs`.
+     * Re-registers the types referenced by [node] into the current context. Object nodes
+     * recurse into their properties; enum nodes are leaves with nothing to re-register. Any
+     * other cached node kind is an unsupported invariant. References are registered through
+     * inline list/map nodes as well, so a cached `List<Shared>` property still pulls `Shared`
+     * into a fresh root's `$defs`.
      */
     private fun registerRefs(node: TypeNode) {
-        val objectNode =
-            node as? ObjectNode
-                ?: error("Unsupported cached node kind $node; registerRefs must handle all node kinds")
-        objectNode.properties.forEach { property ->
-            registerRefs(property.type)
+        when (node) {
+            is ObjectNode -> node.properties.forEach { property -> registerRefs(property.type) }
+            is EnumNode -> Unit
+            else -> error("Unsupported cached node kind $node; registerRefs must handle all node kinds")
         }
     }
 

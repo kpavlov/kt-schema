@@ -34,7 +34,7 @@ Quick Links:
 
 **Generation Modes:**
 
-- **Compile-time (Java APT)**: Zero runtime overhead for plain Java records — no Kotlin required in your code
+- **Compile-time (Java APT)**: Zero runtime overhead for plain Java records, classes, interfaces and enums — no Kotlin required in your code
 - **Compile-time (KSP)**: Zero runtime overhead, multiplatform, for your annotated Kotlin classes
 - **Runtime (Reflection)**: JVM-only, for any class including third-party libraries
 - **Runtime (SerialDescriptor)**: Kotlin serializable classes, including open polymorphism via `SerializersModule`
@@ -170,7 +170,7 @@ This library solves three key challenges:
 in your schema.
 
 - **[Pick Java APT](docs/apt.md)** when your code is plain Java (no Kotlin) and you want zero runtime overhead.
-Currently supports Java records only.
+Supports Java records, classes, interfaces and enums.
 
 - **[Pick Serialization-based](docs/serializable.md)** when your classes are already `@Serializable` and you need
 Multiplatform support without a build-time processor.

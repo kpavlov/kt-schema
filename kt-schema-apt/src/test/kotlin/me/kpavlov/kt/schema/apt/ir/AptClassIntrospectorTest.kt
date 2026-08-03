@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import me.kpavlov.kt.schema.apt.JavaSources
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
+import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
@@ -14,6 +15,7 @@ import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
@@ -474,6 +476,125 @@ class AptClassIntrospectorTest {
         }
     }
 
+    @Test
+    fun `should introspect enum as EnumNode with entries in declaration order`() {
+        val graph =
+            graph(
+                root = "com.example.Color",
+                javaEnum("com.example", "Color", "RED, GREEN, BLUE"),
+            )
+
+        val rootRef = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        graph.nodes.getValue(rootRef.id).shouldBeInstanceOf<EnumNode> { enumNode ->
+            enumNode.entries shouldBe listOf("RED", "GREEN", "BLUE")
+        }
+    }
+
+    @Test
+    fun `should introspect enum field as ref to EnumNode`() {
+        val graph =
+            graph(
+                root = "com.example.Car",
+                javaEnum("com.example", "Color", "RED, GREEN, BLUE"),
+                javaClass("com.example", "Car", "public Color color;"),
+            )
+
+        graph.rootNode().properties.single().type.shouldBeInstanceOf<TypeRef.Ref> { ref ->
+            ref.id.value shouldBe "com.example.Color"
+            ref.nullable shouldBe false
+        }
+
+        graph.nodes.getValue(TypeId("com.example.Color")).shouldBeInstanceOf<EnumNode> { enumNode ->
+            enumNode.entries shouldBe listOf("RED", "GREEN", "BLUE")
+        }
+    }
+
+    @Test
+    fun `should treat Nullable-annotated enum field as nullable but keep it required`() {
+        val graph =
+            graph(
+                root = "com.example.Car",
+                // language=java
+                """
+                package com.example;
+
+                public @interface Nullable {}
+                """.trimIndent(),
+                javaEnum("com.example", "Color", "RED, GREEN, BLUE"),
+                javaClass(
+                    "com.example",
+                    "Car",
+                    """
+                    @Nullable
+                    public Color color;
+                    """.trimIndent(),
+                ),
+            )
+
+        val node = graph.rootNode()
+        assertSoftly(node) {
+            required.shouldContainExactlyInAnyOrder(setOf("color"))
+            properties.single().type.shouldBeInstanceOf<TypeRef.Ref> { ref ->
+                ref.id.value shouldBe "com.example.Color"
+                ref.nullable shouldBe true
+            }
+        }
+    }
+
+    @Test
+    fun `should override enum name from JsonTypeName-style annotation on the enum class`() {
+        val graph =
+            graph(
+                root = "com.example.Color",
+                jacksonJsonTypeName(),
+                // language=java
+                """
+                package com.example;
+
+                import com.fasterxml.jackson.annotation.JsonTypeName;
+
+                @JsonTypeName("ColorPalette")
+                public enum Color {
+                    RED, GREEN, BLUE
+                }
+                """.trimIndent(),
+            )
+
+        val rootRef = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        graph.nodes.getValue(rootRef.id).shouldBeInstanceOf<EnumNode> { enumNode ->
+            enumNode.name shouldBe "ColorPalette"
+        }
+    }
+
+    @Test
+    fun `should override enum entry names from JsonProperty-style annotation on enum constants`() {
+        val graph =
+            graph(
+                root = "com.example.Color",
+                jacksonJsonProperty(),
+                // language=java
+                """
+                package com.example;
+
+                import com.fasterxml.jackson.annotation.JsonProperty;
+
+                public enum Color {
+                    @JsonProperty("red")
+                    RED,
+                    @JsonProperty("green")
+                    GREEN,
+                    BLUE
+                }
+                """.trimIndent(),
+            )
+
+        val rootRef = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        graph.nodes.getValue(rootRef.id).shouldBeInstanceOf<EnumNode> { enumNode ->
+            // BLUE has no override, so it falls back to its raw constant name
+            enumNode.entries shouldBe listOf("red", "green", "BLUE")
+        }
+    }
+
     //endregion
 
     //region helpers
@@ -512,6 +633,7 @@ class AptClassIntrospectorTest {
 
     private fun graph(
         root: String,
+        @Language("java")
         vararg sources: String,
     ): TypeGraph {
         val compiler =
@@ -575,11 +697,13 @@ class AptClassIntrospectorTest {
         }
     }
 
+    @Language("java")
     private fun javaClass(
         packageName: String,
         className: String,
-        members: String,
+        @Language("java") members: String,
     ): String =
+        // language=java
         """
         package $packageName;
 
@@ -588,21 +712,40 @@ class AptClassIntrospectorTest {
         }
         """.trimIndent()
 
+    @Language("java")
     private fun javaRecord(
         packageName: String,
         declaration: String,
     ): String =
+        // language=java
         """
         package $packageName;
 
         public record $declaration {}
         """.trimIndent()
 
+    @Language("java")
+    private fun javaEnum(
+        packageName: String,
+        enumName: String,
+        constants: String,
+    ): String =
+        // language=java
+        """
+        package $packageName;
+
+        public enum $enumName {
+        $constants
+        }
+        """.trimIndent()
+
     /**
      * Mirrors JSpecify's `@Nullable`, whose `@Target(TYPE_USE)` keeps it a pure type
      * annotation invisible to `Element.getAnnotationMirrors()`.
      */
+    @Language("java")
     private fun typeUseNullable(): String =
+        // language=java
         """
         package com.example;
 
@@ -611,6 +754,38 @@ class AptClassIntrospectorTest {
 
         @Target(ElementType.TYPE_USE)
         public @interface Nullable {}
+        """.trimIndent()
+
+    /**
+     * Stand-in for Jackson's `@JsonTypeName`, declared under its real FQN so
+     * [me.kpavlov.kt.schema.generator.core.ir.Introspections]'s name-override matching
+     * recognizes it without depending on the real Jackson library from this module.
+     */
+    @Language("java")
+    private fun jacksonJsonTypeName(): String =
+        // language=java
+        """
+        package com.fasterxml.jackson.annotation;
+
+        public @interface JsonTypeName {
+            String value();
+        }
+        """.trimIndent()
+
+    /**
+     * Stand-in for Jackson's `@JsonProperty`, declared under its real FQN so
+     * [me.kpavlov.kt.schema.generator.core.ir.Introspections]'s name-override matching
+     * recognizes it without depending on the real Jackson library from this module.
+     */
+    @Language("java")
+    private fun jacksonJsonProperty(): String =
+        // language=java
+        """
+        package com.fasterxml.jackson.annotation;
+
+        public @interface JsonProperty {
+            String value();
+        }
         """.trimIndent()
 
     private fun TypeGraph.rootNode(): ObjectNode =

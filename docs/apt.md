@@ -17,7 +17,7 @@
 
 <!--- END -->
 
-Generate JSON Schema resources at compile time from plain Java records, classes and interfaces using the
+Generate JSON Schema resources at compile time from plain Java records, classes, interfaces and enums using the
 `kt-schema-apt` JSR 269 (`javax.annotation.processing`) processor — no Kotlin required in your own code.
 
 ## Setup
@@ -291,6 +291,7 @@ try (InputStream in = Person.class.getClassLoader()
 - Plain Java `class`es — non-static fields map to required properties, treated the same way as records
 - Java `interface`s — no-arg methods map to required properties, named per the JavaBeans convention
   (`getName()` → `name`, `isActive()` → `active`, and a bare `name()` accessor stays `name`)
+- Java `enum`s — emitted as `type: string` with an `enum` array listing the constants in declaration order
 - `String`, boxed and primitive numeric/boolean types
 - `Iterable`-derived collections (`List`, `Set`, `Collection`, custom subclasses) — emitted as `array` with
   `items` describing the element type
@@ -300,7 +301,7 @@ try (InputStream in = Person.class.getClassLoader()
 - Type variables: upper-bounded (`T extends Number`) resolve to their bound; unbounded (`T`) emit `{}`
 - Nested records/classes/interfaces, emitted as `$ref`/`$defs` and deduplicated, same as KSP
 
-Not yet supported: enums and sealed class hierarchies (polymorphic `oneOf` with discriminators). Processing an
+Not yet supported: sealed class hierarchies (polymorphic `oneOf` with discriminators). Processing an
 unsupported type fails the build with a descriptive error rather than emitting an incomplete schema.
 
 ### Marking a property nullable/optional

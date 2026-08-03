@@ -122,6 +122,7 @@ abstract class <#A: kotlin/Any> me.kpavlov.kt.schema.generator.core.ir/BaseIntro
         final fun <get-visitingTypes>(): kotlin.collections/MutableSet<#A> // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.visitingTypes.<get-visitingTypes>|<get-visitingTypes>(){}[0]
 
     abstract fun toRef(#A): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.toRef|toRef(1:0){}[0]
+    final fun namedRef(#A, me.kpavlov.kt.schema.generator.core.ir/TypeId, kotlin/Boolean = ..., kotlin/Function0<me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode>): me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.namedRef|namedRef(1:0;me.kpavlov.kt.schema.generator.core.ir.TypeId;kotlin.Boolean;kotlin.Function0<me.kpavlov.kt.schema.generator.core.ir.NamedTypeNode>){}[0]
     final fun withCycleDetection(#A, me.kpavlov.kt.schema.generator.core.ir/TypeId, kotlin/Function0<me.kpavlov.kt.schema.generator.core.ir/TypeNode>): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.withCycleDetection|withCycleDetection(1:0;me.kpavlov.kt.schema.generator.core.ir.TypeId;kotlin.Function0<me.kpavlov.kt.schema.generator.core.ir.TypeNode>){}[0]
 }
 

@@ -158,16 +158,15 @@ internal class SerializationIntrospectionContext(
     ): TypeRef {
         val id = descriptorId(descriptor)
 
-        withCycleDetection(descriptor, id) {
-            val entries = (0 until descriptor.elementsCount).map { descriptor.getElementName(it) }
-            EnumNode(
-                name = descriptor.unwrapSerialName().removeSuffix("?"),
-                entries = entries,
-                description = extractDescription(descriptor),
-            )
-        }
-
-        val ref = TypeRef.Ref(id, nullable)
+        val ref =
+            namedRef(descriptor, id, nullable) {
+                val entries = (0 until descriptor.elementsCount).map { descriptor.getElementName(it) }
+                EnumNode(
+                    name = descriptor.unwrapSerialName().removeSuffix("?"),
+                    entries = entries,
+                    description = extractDescription(descriptor),
+                )
+            }
         if (!nullable) typeRefCache[descriptor] = ref
         return ref
     }
