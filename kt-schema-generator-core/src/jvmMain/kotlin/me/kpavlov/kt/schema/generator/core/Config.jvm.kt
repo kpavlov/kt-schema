@@ -18,6 +18,9 @@ private const val NULLABLE_ANNOTATION_NAMES_KEY = "introspector.annotations.null
 private const val NULLABLE_TYPE_NAMES_KEY = "introspector.nullable.type.names"
 private const val OPTIONAL_ANNOTATION_NAMES_KEY = "introspector.annotations.optional.names"
 private const val OPTIONAL_TYPE_NAMES_KEY = "introspector.optional.type.names"
+private const val ENUM_DEFAULT_NAMES_KEY = "introspector.annotations.enumDefault.names"
+private const val DEFAULT_VALUE_NAMES_KEY = "introspector.annotations.defaultValue.names"
+private const val DEFAULT_VALUE_ATTRIBUTES_KEY = "introspector.annotations.defaultValue.attributes"
 
 /**
  * Default fallback values if configuration loading fails
@@ -83,6 +86,30 @@ private val DEFAULT_NULLABLE_ANNOTATION_NAMES =
 private val DEFAULT_NULLABLE_TYPE_PATTERNS =
     listOf(
         "*Opt",
+    )
+
+/**
+ * Default fallback values if configuration loading fails
+ */
+private val DEFAULT_ENUM_DEFAULT_ANNOTATION_NAMES =
+    listOf(
+        "com.fasterxml.jackson.annotation.JsonEnumDefaultValue",
+    )
+
+/**
+ * Default fallback values if configuration loading fails
+ */
+private val DEFAULT_DEFAULT_VALUE_ANNOTATION_NAMES =
+    listOf(
+        "com.fasterxml.jackson.annotation.JsonProperty",
+    )
+
+/**
+ * Default fallback values if configuration loading fails
+ */
+private val DEFAULT_DEFAULT_VALUE_ATTRIBUTES =
+    listOf(
+        "defaultValue",
     )
 
 private val logger = KotlinLogging.logger {}
@@ -174,6 +201,24 @@ internal actual object Config {
         loadConfiguration { properties ->
             parseListPropertyPreservingCase(properties, OPTIONAL_TYPE_NAMES_KEY, allowEmpty = true)
         } ?: emptyList()
+    }
+
+    actual val enumDefaultAnnotationNames: List<String> by lazy {
+        loadConfiguration { properties ->
+            parseListPropertyPreservingFqnCase(properties, ENUM_DEFAULT_NAMES_KEY)
+        } ?: DEFAULT_ENUM_DEFAULT_ANNOTATION_NAMES
+    }
+
+    actual val defaultValueAnnotationNames: List<String> by lazy {
+        loadConfiguration { properties ->
+            parseListPropertyPreservingFqnCase(properties, DEFAULT_VALUE_NAMES_KEY)
+        } ?: DEFAULT_DEFAULT_VALUE_ANNOTATION_NAMES
+    }
+
+    actual val defaultValueAttributes: List<String> by lazy {
+        loadConfiguration { properties ->
+            parseListProperty(properties, DEFAULT_VALUE_ATTRIBUTES_KEY)
+        } ?: DEFAULT_DEFAULT_VALUE_ATTRIBUTES
     }
 
     private fun <T> loadConfiguration(extractor: (Properties) -> T): T? =

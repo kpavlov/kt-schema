@@ -112,6 +112,36 @@ public fun extractNameOverride(annotations: List<Annotation>): String? =
     }
 
 /**
+ * Checks whether the given list of annotations contains a recognized enum-default-value marker
+ * (e.g., `@JsonEnumDefaultValue`), placed on a single enum constant.
+ *
+ * @see [Introspections.isEnumDefaultAnnotation]
+ */
+internal fun isEnumDefaultAnnotated(annotations: List<Annotation>): Boolean =
+    annotations.any { annotation ->
+        val javaClass = annotation.annotationClass.java
+        Introspections.isEnumDefaultAnnotation(javaClass.simpleName, javaClass.name)
+    }
+
+/**
+ * Extracts a default-value override from annotations (e.g., from `@JsonProperty(defaultValue = "...")`).
+ *
+ * Mainly useful for front ends without native default-value support; for reflection, a real
+ * Kotlin default value always takes precedence when both are present.
+ *
+ * @see [Introspections.getDefaultValueFromAnnotation]
+ */
+internal fun extractDefaultValueOverride(annotations: List<Annotation>): String? =
+    annotations.firstNotNullOfOrNull { annotation ->
+        val javaClass = annotation.annotationClass.java
+        Introspections.getDefaultValueFromAnnotation(
+            javaClass.simpleName,
+            javaClass.name,
+            buildAnnotationArgs(annotation),
+        )
+    }
+
+/**
  * Builds key-value pairs from an annotation's elements for use with [Introspections] methods.
  *
  * Uses Java reflection via [Class.getDeclaredMethods] to reliably access annotation elements,

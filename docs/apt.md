@@ -13,6 +13,7 @@
   * [Reading the resource at runtime](#reading-the-resource-at-runtime)
 * [Supported types](#supported-types)
   * [Jackson enum names](#jackson-enum-names)
+  * [Default values](#default-values)
   * [Marking a property nullable/optional](#marking-a-property-nullableoptional)
 * [See Also](#see-also)
 
@@ -325,6 +326,33 @@ public enum Priority {
 
 This produces a schema whose `$id` is `PriorityLevel` and whose `enum` is `["low", "medium", "high"]`,
 at `META-INF/kt-schema/schemas/com/example/Priority.json` for a `com.example.Priority` enum.
+
+### Default values
+
+Java has no default-parameter expressions to evaluate, but two Jackson annotations are recognized as an explicit,
+compile-time-visible substitute:
+
+```java
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public enum Priority {
+    LOW,
+    @JsonEnumDefaultValue MEDIUM,
+    HIGH
+}
+
+public record Job(Priority priority, @JsonProperty(defaultValue = "30") int timeoutSeconds) {}
+```
+
+`@JsonEnumDefaultValue`, placed on one enum constant, marks it as that enum's `default` — always shown on the
+enum's own schema in `$defs`, since it describes the *type*, not any one property using it. `@JsonProperty(defaultValue = "...")`
+populates the property's default internally, but — like every property here — `kt-schema-apt`'s generated resource
+always marks it required and never shows the `default` keyword for it, since Java has no reliable way to know
+whether a value truly behaves as optional. Both are configurable via `kt-schema.properties`
+(`introspector.annotations.enumDefault.names`, `introspector.annotations.defaultValue.names`,
+`introspector.annotations.defaultValue.attributes`) — see
+[Multi-Framework Annotation Support](../README.md#multi-framework-annotation-support).
 
 ### Marking a property nullable/optional
 

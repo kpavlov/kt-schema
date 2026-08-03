@@ -147,14 +147,17 @@ internal fun extractConstructorParamDescription(
  * @param type Property type reference
  * @param description Property description (from annotations or KDoc)
  * @param hasDefaultValue Whether the property has a default value
+ * @param defaultValue The property's default value, if known. KSP cannot extract a Kotlin
+ *   default-value expression at compile-time, so this is only ever populated from an
+ *   annotation (e.g. `@JsonProperty(defaultValue = "...")`).
  * @param isConstant Whether the property is constant (fixed value)
- * @return Property instance with defaultValue set to null (KSP limitation)
  */
 internal fun createProperty(
     name: String,
     type: TypeRef,
     description: String?,
     hasDefaultValue: Boolean,
+    defaultValue: String? = null,
     isConstant: Boolean = false,
 ): Property =
     Property(
@@ -162,6 +165,6 @@ internal fun createProperty(
         type = type,
         description = description,
         hasDefaultValue = hasDefaultValue,
-        defaultValue = null, // KSP cannot extract default values at compile-time
+        defaultValue = defaultValue,
         isConstant = isConstant,
     )

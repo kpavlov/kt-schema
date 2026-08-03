@@ -63,6 +63,7 @@ import kotlin.jvm.JvmStatic
  * @see Config
  */
 @InternalSchemaGeneratorApi
+@Suppress("TooManyFunctions") // one recognition function per annotation category, by design
 public object Introspections {
     //region Annotation name patterns
 
@@ -165,6 +166,25 @@ public object Introspections {
     private val optionalTypeNamePatterns: List<Regex> by lazy {
         Config.optionalTypeNamePatterns.map(::globToRegex)
     }
+
+    //endregion
+
+    //region Enum default / default value config
+
+    private val enumDefaultNames: AnnotationNamePatterns by lazy {
+        splitByFqn(Config.enumDefaultAnnotationNames)
+    }
+
+    private val defaultValueNames: AnnotationNamePatterns by lazy {
+        splitByFqn(Config.defaultValueAnnotationNames)
+    }
+
+    /**
+     * Ordered list of lowercase annotation parameter names that may contain default-value text.
+     *
+     * @see Config.defaultValueAttributes
+     */
+    private val defaultValueAttributes: List<String> = Config.defaultValueAttributes
 
     //endregion
 
@@ -302,6 +322,50 @@ public object Introspections {
     @JvmStatic
     public fun isOptionalTypeName(simpleName: String?): Boolean =
         simpleName != null && optionalTypeNamePatterns.any { it.matches(simpleName) }
+
+    /**
+     * Checks whether the given annotation is recognized as an enum-default-value marker
+     * (e.g. Jackson's `@JsonEnumDefaultValue`), placed on a single enum constant to mark it as
+     * that enum type's default value.
+     *
+     * Simple annotation names are matched **case-insensitively**; fully qualified names are matched
+     * **case-sensitively** (exact match).
+     *
+     * @param simpleName The simple name of the annotation (e.g., "JsonEnumDefaultValue")
+     * @param qualifiedName The fully qualified name of the annotation, or null if unavailable
+     * @return `true` if the annotation is recognized as an enum-default-value marker
+     */
+    @JvmStatic
+    public fun isEnumDefaultAnnotation(
+        simpleName: String,
+        qualifiedName: String? = null,
+    ): Boolean = matchesAnnotation(simpleName, qualifiedName, enumDefaultNames)
+
+    /**
+     * Extracts the default-value text from an annotation if it matches a recognized
+     * default-value annotation (e.g., `@JsonProperty(defaultValue = "...")`).
+     *
+     * Simple annotation names are matched **case-insensitively**; fully qualified names are matched
+     * **case-sensitively** (exact match).
+     *
+     * @param simpleName The simple name of the annotation (e.g., "JsonProperty")
+     * @param qualifiedName The fully qualified name of the annotation
+     *   (e.g., "com.fasterxml.jackson.annotation.JsonProperty"), or null if unavailable
+     * @param annotationArguments List of key-value pairs representing the annotation's parameters
+     * @return The default value if found, or null if the annotation is not recognized or
+     *         contains no matching default-value parameter
+     */
+    @JvmStatic
+    public fun getDefaultValueFromAnnotation(
+        simpleName: String,
+        qualifiedName: String?,
+        annotationArguments: List<Pair<String, Any?>>,
+    ): String? =
+        if (matchesAnnotation(simpleName, qualifiedName, defaultValueNames)) {
+            extractFirstStringAttribute(annotationArguments, defaultValueAttributes)
+        } else {
+            null
+        }
 
     /**
      * Extracts the first non-empty string value from annotation arguments whose key matches

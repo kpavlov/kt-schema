@@ -1,6 +1,11 @@
 package me.kpavlov.kt.schema.generator.json
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
+import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
+import me.kpavlov.kt.schema.generator.core.ir.Property
+import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.json.AllOfPropertyDefinition
 import me.kpavlov.kt.schema.json.AnyOfPropertyDefinition
 import me.kpavlov.kt.schema.json.ArrayPropertyDefinition
@@ -20,6 +25,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -36,6 +42,98 @@ class PropertyDefinitionUtilsTest {
         setDefaultValue(boolProp, true) shouldBe boolProp.copy(default = JsonPrimitive(true))
 
         setDefaultValue(stringProp, null) shouldBe stringProp.copy(default = JsonNull)
+    }
+
+    @Test
+    fun `setDefaultValue should handle Reference and OneOf definitions`() {
+        val refProp = ReferencePropertyDefinition(ref = "#/defs/Status")
+        setDefaultValue(refProp, "ACTIVE") shouldBe refProp.copy(default = JsonPrimitive("ACTIVE"))
+
+        val oneOfProp = OneOfPropertyDefinition(oneOf = emptyList())
+        setDefaultValue(oneOfProp, "ACTIVE") shouldBe oneOfProp.copy(default = JsonPrimitive("ACTIVE"))
+    }
+
+    @Test
+    fun `setDefaultValue coerces an integer-looking annotation string to a JSON number for numeric properties`() {
+        val numProp = NumericPropertyDefinition(type = listOf("integer"))
+        setDefaultValue(numProp, "30") shouldBe numProp.copy(default = JsonPrimitive(30L))
+    }
+
+    @Test
+    fun `setDefaultValue coerces a decimal-looking annotation string to a JSON number for numeric properties`() {
+        val numProp = NumericPropertyDefinition(type = listOf("number"))
+        setDefaultValue(numProp, "3.5") shouldBe numProp.copy(default = JsonPrimitive(3.5))
+    }
+
+    @Test
+    fun `setDefaultValue coerces a whole-number decimal string to a JSON integer for integer properties`() {
+        val numProp = NumericPropertyDefinition(type = listOf("integer"))
+        setDefaultValue(numProp, "30.0") shouldBe numProp.copy(default = JsonPrimitive(30L))
+    }
+
+    @Test
+    fun `setDefaultValue throws when a non-integral annotation string is used for an integer property`() {
+        val numProp = NumericPropertyDefinition(type = listOf("integer"))
+        shouldThrow<IllegalArgumentException> { setDefaultValue(numProp, "3.5") }
+    }
+
+    @Test
+    fun `setDefaultValue throws when an annotation string is not a valid number`() {
+        val numProp = NumericPropertyDefinition(type = listOf("number"))
+        shouldThrow<IllegalArgumentException> { setDefaultValue(numProp, "not-a-number") }
+    }
+
+    @Test
+    fun `setDefaultValue throws when an annotation string is a non-finite number`() {
+        val numProp = NumericPropertyDefinition(type = listOf("number"))
+        shouldThrow<IllegalArgumentException> { setDefaultValue(numProp, "NaN") }
+    }
+
+    @Test
+    fun `setDefaultValue throws when an annotation string is not a valid boolean`() {
+        val boolProp = BooleanPropertyDefinition()
+        shouldThrow<IllegalArgumentException> { setDefaultValue(boolProp, "yes") }
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "true, true",
+        "false, false",
+    )
+    fun `setDefaultValue coerces a boolean-looking annotation string to a JSON boolean for boolean properties`(
+        rawValue: String,
+        expected: Boolean,
+    ) {
+        val boolProp = BooleanPropertyDefinition()
+        setDefaultValue(boolProp, rawValue) shouldBe boolProp.copy(default = JsonPrimitive(expected))
+    }
+
+    private fun stringProperty(defaultValue: Any? = null, isConstant: Boolean = false): Property =
+        Property(
+            name = "x",
+            type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING)),
+            defaultValue = defaultValue,
+            isConstant = isConstant,
+        )
+
+    @Test
+    fun `applyDefaultOrConst should set const value for constant properties`() {
+        val def = StringPropertyDefinition()
+        applyDefaultOrConst(def, stringProperty(defaultValue = "FIXED", isConstant = true), isRequired = true) shouldBe
+            def.copy(constValue = JsonPrimitive("FIXED"))
+    }
+
+    @Test
+    fun `applyDefaultOrConst should set default value for optional properties with a default`() {
+        val def = StringPropertyDefinition()
+        applyDefaultOrConst(def, stringProperty(defaultValue = "FALLBACK"), isRequired = false) shouldBe
+            def.copy(default = JsonPrimitive("FALLBACK"))
+    }
+
+    @Test
+    fun `applyDefaultOrConst should leave required properties without applying their default`() {
+        val def = StringPropertyDefinition()
+        applyDefaultOrConst(def, stringProperty(defaultValue = "IGNORED"), isRequired = true) shouldBe def
     }
 
     @ParameterizedTest

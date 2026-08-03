@@ -2,8 +2,9 @@
 
 package me.kpavlov.kt.schema.generator.json
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.kotest.assertions.json.shouldEqualJson
-import me.kpavlov.kt.schema.Description
+import kotlinx.serialization.SerialInfo
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -11,6 +12,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import me.kpavlov.kt.schema.Description
 import kotlin.test.Test
 
 class JsonSchemaGeneratorTest {
@@ -71,6 +73,13 @@ class JsonSchemaGeneratorTest {
         @property:SerialDescription("Described property")
         val name: String,
         val count: Int,
+    )
+
+    data class WithAnnotationDefaults(
+        @param:JsonProperty(defaultValue = "30")
+        val timeoutSeconds: Int,
+        @param:JsonProperty(defaultValue = "true")
+        val enabled: Boolean,
     )
 
     @Serializable
@@ -172,7 +181,8 @@ class JsonSchemaGeneratorTest {
                   "description": "A custom polymorphic property"
                 },
                 "enumProperty": {
-                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestEnum"
+                  "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestEnum",
+                  "default": "One"
                 },
                 "objectProperty": {
                   "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.TestObject"
@@ -262,6 +272,26 @@ class JsonSchemaGeneratorTest {
                 "count": { "type": "integer" }
               },
               "required": ["name", "count"],
+              "additionalProperties": false
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `annotation-provided default value matches the property's declared JSON type`() {
+        val schema = generator.generateSchemaString(WithAnnotationDefaults::class)
+
+        schema shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "me.kpavlov.kt.schema.generator.json.JsonSchemaGeneratorTest.WithAnnotationDefaults",
+              "type": "object",
+              "properties": {
+                "timeoutSeconds": { "type": "integer", "default": 30 },
+                "enabled": { "type": "boolean", "default": true }
+              },
               "additionalProperties": false
             }
             """.trimIndent()

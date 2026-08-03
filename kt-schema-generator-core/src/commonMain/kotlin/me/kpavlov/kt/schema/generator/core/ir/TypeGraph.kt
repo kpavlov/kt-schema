@@ -79,6 +79,7 @@ public data class PrimitiveNode(
 public data class EnumNode(
     override val name: String,
     val entries: List<String>,
+    val defaultValue: String? = null,
     override val description: String? = null,
 ) : NamedTypeNode
 

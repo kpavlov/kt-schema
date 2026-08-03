@@ -301,4 +301,81 @@ class IntrospectionsTest {
     }
 
     //endregion
+
+    //region Enum default annotation recognition
+
+    @Test
+    fun `recognizes JsonEnumDefaultValue by FQN as enum default marker`() {
+        Introspections.isEnumDefaultAnnotation(
+            simpleName = "JsonEnumDefaultValue",
+            qualifiedName = "com.fasterxml.jackson.annotation.JsonEnumDefaultValue",
+        ) shouldBe true
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "JsonEnumDefaultValue, com.example.JsonEnumDefaultValue",
+        "SomeOtherAnnotation, com.fasterxml.jackson.annotation.SomeOtherAnnotation",
+        "JsonEnumDefaultValue, ",
+    )
+    fun `does not match unrecognized annotations as enum default marker`(
+        simpleName: String,
+        qualifiedName: String?,
+    ) {
+        Introspections.isEnumDefaultAnnotation(
+            simpleName = simpleName,
+            qualifiedName = qualifiedName?.takeIf { it.isNotEmpty() },
+        ) shouldBe false
+    }
+
+    //endregion
+
+    //region Default value annotation extraction
+
+    @ParameterizedTest
+    @CsvSource(
+        "JsonProperty, com.fasterxml.jackson.annotation.JsonProperty, ACTIVE, ACTIVE",
+        "JsonProperty, com.fasterxml.jackson.annotation.JsonProperty, 30, 30",
+    )
+    fun `getDefaultValueFromAnnotation extracts defaultValue attribute when FQN matches`(
+        simpleName: String,
+        qualifiedName: String,
+        inputValue: String,
+        expectedResult: String,
+    ) {
+        Introspections.getDefaultValueFromAnnotation(
+            simpleName = simpleName,
+            qualifiedName = qualifiedName,
+            annotationArguments = listOf("defaultValue" to inputValue),
+        ) shouldBe expectedResult
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "JsonProperty, JsonProperty, ACTIVE",
+        "JsonProperty, com.fasterxml.jackson.annotation.JsonPropertyDescription, ACTIVE",
+        "SomeOther, com.example.SomeOther, ACTIVE",
+    )
+    fun `getDefaultValueFromAnnotation returns null for non-matching cases`(
+        simpleName: String,
+        qualifiedName: String,
+        inputValue: String,
+    ) {
+        Introspections.getDefaultValueFromAnnotation(
+            simpleName = simpleName,
+            qualifiedName = qualifiedName,
+            annotationArguments = listOf("defaultValue" to inputValue),
+        ) shouldBe null
+    }
+
+    @Test
+    fun `getDefaultValueFromAnnotation returns null when defaultValue attribute is empty`() {
+        Introspections.getDefaultValueFromAnnotation(
+            simpleName = "JsonProperty",
+            qualifiedName = "com.fasterxml.jackson.annotation.JsonProperty",
+            annotationArguments = listOf("defaultValue" to ""),
+        ) shouldBe null
+    }
+
+    //endregion
 }
