@@ -12,6 +12,7 @@
   * [Extended example](#extended-example)
   * [Reading the resource at runtime](#reading-the-resource-at-runtime)
 * [Supported types](#supported-types)
+  * [Jackson enum names](#jackson-enum-names)
   * [Marking a property nullable/optional](#marking-a-property-nullableoptional)
 * [See Also](#see-also)
 
@@ -303,6 +304,27 @@ try (InputStream in = Person.class.getClassLoader()
 
 Not yet supported: sealed class hierarchies (polymorphic `oneOf` with discriminators). Processing an
 unsupported type fails the build with a descriptive error rather than emitting an incomplete schema.
+
+### Jackson enum names
+
+When the application already uses Jackson, `kt-schema-apt` uses `@JsonProperty` on enum constants as their
+JSON Schema values and `@JsonTypeName` on the enum as its schema `$id`. The generated resource path still
+uses the declared Java type name.
+
+```java
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@JsonTypeName("PriorityLevel")
+public enum Priority {
+    @JsonProperty("low") LOW,
+    @JsonProperty("medium") MEDIUM,
+    @JsonProperty("high") HIGH
+}
+```
+
+This produces a schema whose `$id` is `PriorityLevel` and whose `enum` is `["low", "medium", "high"]`,
+at `META-INF/kt-schema/schemas/com/example/Priority.json` for a `com.example.Priority` enum.
 
 ### Marking a property nullable/optional
 

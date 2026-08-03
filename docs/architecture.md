@@ -22,18 +22,17 @@ The library implements the following pipeline:
 ```mermaid
 graph LR
     subgraph Sources["📦 SOURCES"]
+        Java["Java Classes<br/>Third-party libs"]
+        Functions["Kotlin Functions"]
         Kotlin["Kotlin Classes<br/>@Schema annotated"]
         KSerializer["SerialDescriptor"]
-        Java["Java Classes<br/>Third-party libs"]
-        JavaApt["Java Records/Classes/Interfaces<br/>@Schema or rootPackage"]
-        Functions["Kotlin Functions"]
     end
 
     subgraph Introspectors["🔍 Stage 1: INTROSPECTORS"]
         KSP["KspSchemaIntrospector<br/><i>compile-time</i>"]
+        Serialization["SerializationClassSchemaIntrospector<br/><i>runtime</i>"]
         Apt["AptClassIntrospector<br/><i>compile-time</i>"]
         Reflect["ReflectionSchemaIntrospector<br/><i>runtime</i>"]
-        Serialization["SerializationClassSchemaIntrospector<br/><i>runtime</i>"]
     end
 
     subgraph IR["🧬 INTERNAL REPRESENTATION"]
@@ -58,7 +57,7 @@ graph LR
     Kotlin --> KSP
     KSerializer --> Serialization
     Java --> Reflect
-    JavaApt --> Apt
+    Java --> Apt
     Functions --> KSP
     Functions --> Reflect
 
