@@ -17,7 +17,7 @@
 
 # KT-Schema
 
-**Generate JSON schemas and LLM function calling schemas from Kotlin and Java code — including classes you don't own.**
+**Generate JSON schemas and LLM function calling schemas from Java and Kotlin code — including classes you don't own.**
 
 > [!NOTE]
 > **kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema),
@@ -34,8 +34,8 @@ Quick Links:
 
 **Generation Modes:**
 
-- **Compile-time (KSP)**: Zero runtime overhead, multiplatform, for your annotated Kotlin classes
 - **Compile-time (Java APT)**: Zero runtime overhead for plain Java records — no Kotlin required in your code
+- **Compile-time (KSP)**: Zero runtime overhead, multiplatform, for your annotated Kotlin classes
 - **Runtime (Reflection)**: JVM-only, for any class including third-party libraries
 - **Runtime (SerialDescriptor)**: Kotlin serializable classes, including open polymorphism via `SerializersModule`
 
