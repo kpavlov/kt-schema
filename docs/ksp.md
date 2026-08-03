@@ -7,12 +7,10 @@
   * [Google KSP gradle plugin](#google-ksp-gradle-plugin)
     * [Multiplatform projects](#multiplatform-projects)
     * [JVM-only projects](#jvm-only-projects)
-  * [Maven Plugin](#maven-plugin)
 * [Configuration options](#configuration-options)
   * [Options reference](#options-reference)
   * [Filtering by class/function name](#filtering-by-classfunction-name)
     * [Google KSP plugin](#google-ksp-plugin)
-    * [Maven plugin](#maven-plugin)
   * [Option priority](#option-priority)
 * [Generated Code](#generated-code)
 * [See Also](#see-also)
@@ -23,7 +21,7 @@ Generate JSON schemas at compile time with zero runtime overhead using the `kt-s
 
 ## Setup
 
-Configure the KSP processor directly in your Gradle build script, Maven pom.xml, or use the dedicated Gradle plugin.
+Configure the KSP processor with the Google KSP Gradle plugin.
 
 ### Google KSP gradle plugin
 
@@ -74,51 +72,6 @@ dependencies {
 sourceSets.main.kotlin.srcDir("build/generated/ksp/main/kotlin")
 ```
 
-### Maven Plugin
-
-You may also run schema generation with KSP in your Maven projects.
-
-Add the [`ksp-maven-plugin`](https://github.com/kpavlov/ksp-maven-plugin) with the processor dependency
-and include the annotations library in your project.
-
-```xml
-
-<plugin>
-    <groupId>me.kpavlov.ksp.maven</groupId>
-    <artifactId>ksp-maven-plugin</artifactId>
-    <version>0.3.0</version>
-    <extensions>true</extensions>
-    <dependencies>
-        <dependency>
-            <groupId>me.kpavlov</groupId>
-            <artifactId>kt-schema-ksp</artifactId>
-            <version>${kt-schema.version}</version>
-        </dependency>
-    </dependencies>
-    <configuration>
-        <options>
-            <me.kpavlov.kt.schema.rootPackage>com.example</me.kpavlov.kt.schema.rootPackage>
-        </options>
-    </configuration>
-</plugin>
-
-<!-- In <dependencies> -->
-<dependencies>
-    <dependency>
-        <groupId>me.kpavlov</groupId>
-        <artifactId>kt-schema-annotations</artifactId>
-        <version>${kt-schema.version}</version>
-    </dependency>
-</dependencies>
-
-<properties>
-<!-- check latest version: https://central.sonatype.com/artifact/me.kpavlov/kt-schema-ksp -->
-<kt-schema.version>0.0.5</kt-schema.version>
-</properties>
-```
-
-Check out an [example project](https://github.com/kpavlov/kt-schema/tree/main/examples/maven-ksp).
-
 ## Configuration options
 
 Options can be set globally in your build configuration or overridden per-class via `@Schema`.
@@ -163,17 +116,6 @@ ksp {
 }
 ```
 
-#### Maven plugin
-
-```xml
-<configuration>
-    <options>
-        <me.kpavlov.kt.schema.include>com.example.api.**, com.example.dto.**</me.kpavlov.kt.schema.include>
-        <me.kpavlov.kt.schema.exclude>**.internal.**, **.*Internal</me.kpavlov.kt.schema.exclude>
-    </options>
-</configuration>
-```
-
 > [!TIP]
 > For large projects, combine `rootPackage` with `include` for maximum build performance:
 > `rootPackage` narrows the KSP symbol scan, then `include` filters the remaining candidates.
@@ -181,7 +123,7 @@ ksp {
 ### Option priority
 
 1. **Annotation Parameter** (highest) — `@Schema(withSchemaObject = true)`
-2. **KSP Argument** — Global processor options (e.g., `arg()` in Gradle or `<options>` in Maven)
+2. **KSP Argument** — Global processor options passed through the Gradle `ksp { arg(...) }` block
 3. **Default Value** (lowest)
 
 > [!TIP]

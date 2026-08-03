@@ -19,14 +19,11 @@
 
 **Generate JSON schemas and LLM function calling schemas from Java and Kotlin code — including classes you don't own.**
 
-> [!NOTE]
-> **kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema),
-> originally started by me, Konstantin Pavlov, at JetBrains, and is licensed under the Apache 2.0 License.
-
 Quick Links:
 
+- [Documentation Index](docs/README.md)
 - [KSP Configuration Guide](docs/ksp.md)
-- [Java Annotation Processor Guide](docs/apt.md)
+- [Java Annotation Processor Guide](docs/apt.md) — including Jackson-backed Java enum names
 - [Serialization-Based Schema Generation](docs/serializable.md)
 - [Project Architecture](docs/architecture.md)
 
@@ -63,7 +60,6 @@ Quick Links:
 
 **Developer Experience:**
 
-- Gradle plugin for one-line setup (experimental)
 - Type-safe Kotlin DSL for programmatic schema construction
 - Works everywhere: JVM, JS, iOS, macOS, Wasm
 
@@ -180,9 +176,6 @@ need to extract data class default values. Works equally well for `@Serializable
 
 ## Quick Start
 
-Recommended: use the Gradle plugin.
-It applies KSP for you, wires generated sources, and sets up task dependencies.
-
 Refer to the example projects [here](./examples).
 
 ### Annotate Your Models
@@ -233,8 +226,7 @@ kotlin {
 }
 ```
 
-For JVM-only projects, Maven, and full configuration options, see *
-*[KSP Configuration Guide](docs/ksp.md)**.
+For JVM-only projects and full configuration options, see the [KSP Configuration Guide](docs/ksp.md).
 
 ## Runtime schema generation
 
@@ -1469,7 +1461,7 @@ For build instructions, development setup, and contribution guidelines, see [CON
 ## Requirements
 
 - Kotlin 2.2+
-- KSP 2 (applied automatically when using the Gradle plugin)
+- KSP 2 for compile-time KSP generation
 - _kotlinx-serialization-json_ for JsonObject support
 
 Tip: If you use `@Description` on primary constructor parameters, enable
@@ -1488,13 +1480,13 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ### Attribution
  
-**kt-schema** is a fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema), 
-originally developed by JetBrains s.r.o. and contributors, and is licensed under the Apache License, Version 2.0.
+**kt-schema** is an independently maintained fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema).
+Konstantin Pavlov originally started the work while at JetBrains.
  
 This project contains modified and unmodified portions of the original work. 
 Notable changes include renaming the Kotlin packages from `kotlinx.schema` to `me.kpavlov.kt.schema`, renaming Maven coordinates from `org.jetbrains.kotlinx` to `me.kpavlov`, and further independent development.
  
-See the [LICENSE](LICENSE) and [NOTICE]() files for licensing and attribution information.
+See the [LICENSE](LICENSE) and [NOTICE](NOTICE) files for licensing and attribution information.
 
 **kt-schema** is an independent project and is not affiliated with, endorsed by, or sponsored by JetBrains.
 "Kotlin" and "JetBrains" are trademarks of their respective owners.

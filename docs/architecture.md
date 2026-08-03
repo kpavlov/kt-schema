@@ -22,18 +22,17 @@ The library implements the following pipeline:
 ```mermaid
 graph LR
     subgraph Sources["📦 SOURCES"]
+        Java["Java Classes<br/>Third-party libs"]
+        Functions["Kotlin Functions"]
         Kotlin["Kotlin Classes<br/>@Schema annotated"]
         KSerializer["SerialDescriptor"]
-        Java["Java Classes<br/>Third-party libs"]
-        JavaApt["Java Records/Classes/Interfaces<br/>@Schema or rootPackage"]
-        Functions["Kotlin Functions"]
     end
 
     subgraph Introspectors["🔍 Stage 1: INTROSPECTORS"]
         KSP["KspSchemaIntrospector<br/><i>compile-time</i>"]
+        Serialization["SerializationClassSchemaIntrospector<br/><i>runtime</i>"]
         Apt["AptClassIntrospector<br/><i>compile-time</i>"]
         Reflect["ReflectionSchemaIntrospector<br/><i>runtime</i>"]
-        Serialization["SerializationClassSchemaIntrospector<br/><i>runtime</i>"]
     end
 
     subgraph IR["🧬 INTERNAL REPRESENTATION"]
@@ -58,7 +57,7 @@ graph LR
     Kotlin --> KSP
     KSerializer --> Serialization
     Java --> Reflect
-    JavaApt --> Apt
+    Java --> Apt
     Functions --> KSP
     Functions --> Reflect
 
@@ -112,7 +111,6 @@ C4Context
         System(kxsJsn, "kt-schema-json")
         System(kxsKsp, "kt-schema-ksp")
         System(kxsApt, "kt-schema-apt")
-        System(kxsGradle, "kt-schema-gradle-plugin")
     }
 
     Rel(kxsGenJson, kxsGenCore, "uses")
@@ -120,7 +118,6 @@ C4Context
     Rel(kxsGenCore, kxsAnnotations, "knows")
     Rel(kxsKsp, kxsGenJson, "uses")
     Rel(kxsApt, kxsGenJson, "uses")
-    Rel(kxsGradle, kxsKsp, "uses")
 
     Boundary(userCode, "User's Application Code") {
         System_Ext(userModels, "User Domain Models")
@@ -146,7 +143,7 @@ Top-level modules you might interact with:
     - `KClass<T>.jsonSchemaString: String`
 - **kt-schema-apt** — [JSR 269 annotation processor](apt.md) for plain Java projects; generates a JSON Schema
   resource per processed type instead of Kotlin extensions
-- **ksp-integration-tests** — KSP end‑to‑end tests for generation without the Gradle plugin
+- **ksp-integration-tests** — KSP end‑to‑end tests for schema generation
 - **apt-integration-tests** — Java-only end‑to‑end tests for `kt-schema-apt`
 
 ### Workflow
@@ -181,4 +178,3 @@ sequenceDiagram
    with respect to respecting _Config_ object and returns it to SchemaGenerator
 
 [kser-descriptor]: https://kotlinlang.org/api/kotlinx.serialization/kotlinx-serialization-core/kotlinx.serialization.descriptors/-serial-descriptor/
-

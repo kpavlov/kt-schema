@@ -11,13 +11,14 @@ expected JSON using JUnit 6 and JsonUnit.
 
 - Schemas generated during `compile` through Maven `annotationProcessorPaths`
 - Type selection via `rootPackage` + `include` globs — no `@Schema` annotations required
-- Records, plain classes, and interfaces, including nested types
+- Records, plain classes, interfaces, and enums, including nested types
 - JavaBeans accessors: `isActive()` becomes `active`, `getName()` becomes `name`
 - Jackson annotations recognized out of the box:
   - `@JsonProperty` renames a property (`getEmployeeId()` → `employee_id`)
   - `@JsonPropertyDescription` / `@JsonClassDescription` become schema descriptions
   - `@JsonIgnore` keeps a field out of the schema
 - Collections: `List`/`Set` become `array` with `items`, `Map` becomes `object` with `additionalProperties`
+- Enums become `type: string` with an `enum` array listing the constants in declaration order
 - Nested types land in `$defs` and are referenced with `$ref`, deduplicated
 - Self- and mutual recursion produce cyclic `$ref`s back into `$defs`
 - JSpecify `@Nullable` marks a property nullable without making it optional
@@ -39,9 +40,11 @@ public interface Employee {
 ```
 
 - `Employee` — interface; `manager`/`reports` make the schema recursive. `manager` and `department`
-  are annotated with JSpecify `@Nullable`.
+  are annotated with JSpecify `@Nullable`. Its `employmentType` accessor references the `EmploymentType` enum.
 - `ContactInfo`, `Address` — records; `ContactInfo` holds a `List<Address>` of nested records.
 - `Compensation` — plain class with a `@JsonIgnore` field.
+- `EmploymentType` — enum (`FULL_TIME`, `PART_TIME`, `CONTRACTOR`) whose JSON values are lowercased via
+  `@JsonProperty`; emitted as a string schema with an `enum` array.
 - `Department` — record referencing `Employee`, making the two schemas mutually recursive.
 
 ## Nullable properties

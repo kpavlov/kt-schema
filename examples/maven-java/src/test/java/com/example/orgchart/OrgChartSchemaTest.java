@@ -67,6 +67,10 @@ class OrgChartSchemaTest {
                       "$ref": "#/$defs/com.example.orgchart.Compensation",
                       "description": "Compensation package of the employee"
                     },
+                    "employmentType": {
+                      "$ref": "#/$defs/Employment",
+                      "description": "Employment type of the employee"
+                    },
                     "department": {
                       "description": "Department the employee belongs to",
                       "oneOf": [{"type":"null"}, {"$ref":"#/$defs/com.example.orgchart.Department"}]
@@ -103,6 +107,7 @@ class OrgChartSchemaTest {
                     "active",
                     "contactInfo",
                     "compensation",
+                    "employmentType",
                     "department",
                     "manager",
                     "reports",
@@ -177,6 +182,11 @@ class OrgChartSchemaTest {
                   },
                   "required": ["baseSalary", "annualBonus", "currency"],
                   "additionalProperties": false
+                },
+                "Employment": {
+                  "type": "string",
+                  "description": "Employment type of an employee.",
+                  "enum": ["full_time", "part_time", "contractor"]
                 },
                 "com.example.orgchart.Department": {
                   "type": "object",
