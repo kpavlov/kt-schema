@@ -33,6 +33,9 @@ public interface Employee {
     @JsonPropertyDescription("Compensation package of the employee")
     Compensation getCompensation();
 
+    @JsonPropertyDescription("Employment type of the employee")
+    EmploymentType getEmploymentType();
+
     @JsonPropertyDescription("Department the employee belongs to")
     @Nullable
     Department getDepartment();
