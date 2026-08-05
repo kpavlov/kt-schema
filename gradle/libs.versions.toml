@@ -1,7 +1,7 @@
 [versions]
 agp = "8.13.2"
 assertj = "3.27.7"
-detekt = "2.0.0-alpha.5"
+detekt = "2.0.0-alpha.6"
 dokka = "2.2.0"
 jackson = "3.2.1" # pin it
 jspecify = "1.0.1"
