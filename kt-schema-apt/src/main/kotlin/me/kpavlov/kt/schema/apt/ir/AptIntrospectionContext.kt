@@ -129,9 +129,9 @@ internal class AptIntrospectionContext(
             "java.lang.String" -> PrimitiveKind.STRING
             "java.lang.Boolean" -> PrimitiveKind.BOOLEAN
             "java.lang.Integer", "java.lang.Short", "java.lang.Byte" -> PrimitiveKind.INT
-            "java.lang.Long" -> PrimitiveKind.LONG
+            "java.lang.Long", "java.math.BigInteger" -> PrimitiveKind.LONG
             "java.lang.Float" -> PrimitiveKind.FLOAT
-            "java.lang.Double" -> PrimitiveKind.DOUBLE
+            "java.lang.Double", "java.math.BigDecimal" -> PrimitiveKind.DOUBLE
             "java.lang.Character" -> PrimitiveKind.STRING
             else -> null
         }

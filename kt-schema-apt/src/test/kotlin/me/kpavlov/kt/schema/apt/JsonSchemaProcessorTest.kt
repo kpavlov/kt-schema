@@ -1486,6 +1486,43 @@ class JsonSchemaProcessorTest {
             ),
         )
 
+    @Test
+    fun `should generate schema for record with BigInteger and BigDecimal`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source = """
+            package com.example;
+
+            import java.math.BigDecimal;
+            import java.math.BigInteger;
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Payment(
+                BigInteger quantity,
+                BigDecimal amount
+            ) {}
+        """.trimIndent()
+
+        val outputDir = compile(source, tempDir)
+
+        // language=json
+        outputDir.readSchema("com.example.Payment") shouldEqualJson $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Payment",
+                "type": "object",
+                "properties": {
+                    "quantity": { "type": "integer" },
+                    "amount": { "type": "number" }
+                },
+                "additionalProperties": false,
+                "required": ["quantity", "amount"]
+            }
+        """.trimIndent()
+    }
+
     //endregion
 
     //region compiler helpers

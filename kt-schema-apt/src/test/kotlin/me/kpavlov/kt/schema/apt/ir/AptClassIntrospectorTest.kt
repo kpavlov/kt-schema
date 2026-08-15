@@ -95,6 +95,8 @@ class AptClassIntrospectorTest {
         "java.lang.Double, DOUBLE",
         "java.lang.Boolean, BOOLEAN",
         "java.lang.Character, STRING",
+        "java.math.BigInteger, LONG",
+        "java.math.BigDecimal, DOUBLE",
     )
     fun `should map java scalar types to primitive kinds`(
         javaType: String,
