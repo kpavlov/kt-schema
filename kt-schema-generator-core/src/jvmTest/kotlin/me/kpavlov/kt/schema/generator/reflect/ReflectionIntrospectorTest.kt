@@ -399,7 +399,7 @@ class ReflectionIntrospectorTest {
     }
 
     @Test
-    fun `inline value class wrapping a collection of itself falls back to a structural object instead of looping forever`() {
+    fun `inline value class wrapping a collection of itself falls back to a structural object instead of deadloop`() {
         val graph = introspector.introspect(WithRecursiveInlineValueClass::class)
 
         graph.root.shouldBeInstanceOf<TypeRef.Ref>()
