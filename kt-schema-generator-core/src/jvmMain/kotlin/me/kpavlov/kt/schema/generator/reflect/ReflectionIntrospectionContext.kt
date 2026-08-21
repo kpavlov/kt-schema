@@ -45,6 +45,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      * - Nullability from descriptor.isNullable
      * - Primitives (inlined)
      * - Collections (List, Map) (inlined)
+     * - Inline value classes (flattened to their wrapped element's type)
      * - Enums (referenced via TypeId)
      * - Objects/Classes (referenced via TypeId)
      * - Polymorphic types (referenced via TypeId)
@@ -81,6 +82,11 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             if (!nullable) typeRefCache[type] = ref
             return ref
         }
+
+        // @JvmInline value classes serialize as their wrapped value, not as an object with one
+        // property, so flatten them to the wrapped type's schema (same idea as the kotlinx.serialization
+        // front end's descriptor.isInline handling, just reached via reflection here).
+        if (klass.isValue) return flattenInlineValueClass(type)
 
         // Handle different kinds
         return when {
@@ -208,6 +214,49 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
 
         val ref = TypeRef.Inline(MapNode(keyRef, valueRef), type.effectiveNullable())
         if (!type.effectiveNullable()) typeRefCache[type] = ref
+        return ref
+    }
+
+    /**
+     * Flattens an inline value class to the schema of its single wrapped property.
+     *
+     * On the JVM, a `@JvmInline value class` is erased to its wrapped value at the call site
+     * (e.g. a `Double`), never boxed as `{"value": 14.5}`, so the schema must follow suit.
+     *
+     * A class-level `@Description` on the value class is carried over onto the flattened
+     * primitive node, since there is no wrapper object left to attach it to.
+     *
+     * Falls back to [handleObjectType] when the wrapped property can't be determined, or for a
+     * value class that (transitively) wraps a collection of itself — flattening would otherwise
+     * recurse without end.
+     */
+    private fun flattenInlineValueClass(type: KType): TypeRef {
+        val klass = type.klass
+        val wrappedType = findPrimaryConstructor(klass)?.parameters?.singleOrNull()?.type
+        if (wrappedType == null || type in visitingTypes) return handleObjectType(type)
+
+        val nullable = type.effectiveNullable()
+        visitingTypes += type
+        val wrappedRef =
+            try {
+                toRef(wrappedType)
+            } finally {
+                visitingTypes -= type
+            }
+
+        val classDescription = extractDescription(klass.java.annotations.toList())
+        val resultRef =
+            if (classDescription != null && wrappedRef is TypeRef.Inline && wrappedRef.node is PrimitiveNode) {
+                TypeRef.Inline(
+                    (wrappedRef.node as PrimitiveNode).copy(description = classDescription),
+                    wrappedRef.nullable,
+                )
+            } else {
+                wrappedRef
+            }
+
+        val ref = if (nullable && !resultRef.nullable) resultRef.withNullable(true) else resultRef
+        if (!nullable) typeRefCache[type] = ref
         return ref
     }
 

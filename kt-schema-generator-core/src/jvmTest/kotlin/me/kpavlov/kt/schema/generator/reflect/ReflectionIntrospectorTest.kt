@@ -54,20 +54,35 @@ class ReflectionIntrospectorTest {
     @Suppress("unused")
     sealed interface Vehicle {
         sealed interface Motorized : Vehicle {
-            data class Car(val doors: Int            ) : Motorized
-            data class Truck(val payload: Double            ) : Motorized
+            data class Car(
+                val doors: Int,
+            ) : Motorized
+
+            data class Truck(
+                val payload: Double,
+            ) : Motorized
         }
 
-        data class Bicycle(val gears: Int        ) : Vehicle
+        data class Bicycle(
+            val gears: Int,
+        ) : Vehicle
     }
 
     @Suppress("unused")
     sealed interface Event {
-        data class Click(val x: Int, val y: Int        ) : Event
-        data class PageView(val url: String        ) : Event
+        data class Click(
+            val x: Int,
+            val y: Int,
+        ) : Event
+
+        data class PageView(
+            val url: String,
+        ) : Event
 
         @SchemaIgnore
-        data class Internal(val trace: String        ) : Event
+        data class Internal(
+            val trace: String,
+        ) : Event
     }
 
     data class WithAny(
@@ -80,6 +95,32 @@ class ReflectionIntrospectorTest {
     data class WithStarProjections(
         val items: List<*>,
         val mapping: Map<*, *>,
+    )
+
+    @JvmInline
+    value class Age(
+        val value: Int,
+    )
+
+    @Description("Distance in meters")
+    @JvmInline
+    value class DescribedDistance(
+        val value: Double,
+    )
+
+    data class WithInlineValueClass(
+        val age: Age,
+        val nullableAge: Age?,
+        val distance: DescribedDistance,
+    )
+
+    @JvmInline
+    value class RecursiveWrapper(
+        val items: List<RecursiveWrapper>,
+    )
+
+    data class WithRecursiveInlineValueClass(
+        val wrapper: RecursiveWrapper,
     )
 
     private val introspector = ReflectionClassIntrospector
@@ -322,5 +363,45 @@ class ReflectionIntrospectorTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun `flattens inline value class to its wrapped primitive, carrying nullability and class description`() {
+        val graph = introspector.introspect(WithInlineValueClass::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+        val props = node.properties.associateBy { it.name }
+
+        // Age(Int) flattens to a bare INT primitive — no {"value": ...} wrapper.
+        props.getValue("age").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<PrimitiveNode> { prim ->
+                prim.kind shouldBe PrimitiveKind.INT
+            }
+            inline.nullable shouldBe false
+        }
+
+        // Age? propagates nullability onto the flattened primitive.
+        props.getValue("nullableAge").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.nullable shouldBe true
+        }
+
+        // A class-level @Description on the value class lands on the flattened primitive.
+        props.getValue("distance").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<PrimitiveNode> { prim ->
+                prim.kind shouldBe PrimitiveKind.DOUBLE
+                prim.description shouldBe "Distance in meters"
+            }
+        }
+
+        // Neither Age nor DescribedDistance should appear as a named node in the graph.
+        graph.nodes.keys.none { it.value.endsWith(".Age") || it.value.endsWith(".DescribedDistance") } shouldBe true
+    }
+
+    @Test
+    fun `inline value class wrapping a collection of itself falls back to a structural object instead of looping forever`() {
+        val graph = introspector.introspect(WithRecursiveInlineValueClass::class)
+
+        graph.root.shouldBeInstanceOf<TypeRef.Ref>()
     }
 }
