@@ -38,9 +38,10 @@ import me.kpavlov.kt.schema.generator.core.ir.withNullable
  * 4. Opaque JSON types (kotlinx.serialization.json and the rest of the Jackson databind node
  *    hierarchy) → [AnyNode] → empty schema `{}`
  * 5. Generic type parameters and unknowns -> kotlin.Any via [handleAnyFallback]
- * 6. Sealed class hierarchies -> PolymorphicNode via [handleSealedClass]
- * 7. Enum classes -> EnumNode via [handleEnum]
- * 8. Regular objects/classes -> ObjectNode via [handleObjectOrClass]
+ * 6. Inline value classes -> flattened to their wrapped element's type via [resolveInlineValueClassOrNull]
+ * 7. Sealed class hierarchies -> PolymorphicNode via [handleSealedClass]
+ * 8. Enum classes -> EnumNode via [handleEnum]
+ * 9. Regular objects/classes -> ObjectNode via [handleObjectOrClass]
  */
 @OptIn(InternalSchemaGeneratorApi::class)
 @Suppress("TooManyFunctions")
@@ -69,6 +70,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 ?: resolvePrimitiveTypeKindOrNull(type)
                 ?: resolveOpaqueTypeOrNull(type)
                 ?: handleAnyFallback(type)
+                ?: resolveInlineValueClassOrNull(type, nullable)
                 ?: handleSealedClass(type, nullable)
                 ?: handleEnum(type, nullable)
                 ?: handleObjectOrClass(type, nullable),
@@ -190,6 +192,56 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         if (!declAnyFallback) return null
 
         return TypeRef.Inline(AnyNode(), nullable)
+    }
+
+    /**
+     * Handles inline value classes (`@JvmInline value class Wrapper(val inner: T)`, surfaced by
+     * KSP as [Modifier.VALUE]) by delegating to the wrapped element's type.
+     *
+     * Inline value classes serialize as their inner value (e.g. `14.5` instead of
+     * `{"value": 14.5}`), so the schema must reflect the inner type.
+     *
+     * If the value class has a class-level `@Description` (or KDoc), it is propagated to the
+     * flattened primitive node so it still appears in the generated schema.
+     *
+     * Returns null (falling through to [handleObjectOrClass]) when [type] isn't a value class,
+     * its wrapped type can't be determined, or it (transitively) wraps itself — flattening that
+     * would recurse forever.
+     *
+     * @param type The KSType to check
+     * @param nullable Whether the type reference should be nullable
+     * @return The flattened TypeRef, or null if this isn't a flattenable inline value class
+     */
+    @Suppress("ReturnCount")
+    private fun resolveInlineValueClassOrNull(
+        type: KSType,
+        nullable: Boolean,
+    ): TypeRef? {
+        val decl = type.declaration as? KSClassDeclaration ?: return null
+        if (Modifier.VALUE !in decl.modifiers) return null
+        val wrappedParam = decl.primaryConstructor?.parameters?.singleOrNull() ?: return null
+        if (type in visitingTypes) return null
+
+        visitingTypes += type
+        val wrappedRef =
+            try {
+                toRef(wrappedParam.type.resolve())
+            } finally {
+                visitingTypes -= type
+            }
+
+        val classDescription = extractDescription(decl) { decl.descriptionFromKdoc() }
+        val resultRef =
+            if (classDescription != null && wrappedRef is TypeRef.Inline && wrappedRef.node is PrimitiveNode) {
+                TypeRef.Inline(
+                    (wrappedRef.node as PrimitiveNode).copy(description = classDescription),
+                    wrappedRef.nullable,
+                )
+            } else {
+                wrappedRef
+            }
+
+        return if (nullable && !resultRef.nullable) resultRef.withNullable(true) else resultRef
     }
 
     /**
