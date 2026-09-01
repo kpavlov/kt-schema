@@ -90,14 +90,7 @@ internal fun isSchemaIgnored(annotations: List<Annotation>): Boolean =
  * @see [Introspections.getDescriptionFromAnnotation]
  */
 internal fun extractDescription(annotations: List<Annotation>): String? =
-    annotations.firstNotNullOfOrNull { annotation ->
-        val javaClass = annotation.annotationClass.java
-        Introspections.getDescriptionFromAnnotation(
-            javaClass.simpleName,
-            javaClass.name,
-            buildAnnotationArgs(annotation),
-        )
-    }
+    annotations.firstIntrospected(Introspections::getDescriptionFromAnnotation)
 
 /**
  * Extracts a name override from annotations (e.g., from `@SerialName`).
@@ -106,10 +99,16 @@ internal fun extractDescription(annotations: List<Annotation>): String? =
  */
 @InternalSchemaGeneratorApi
 public fun extractNameOverride(annotations: List<Annotation>): String? =
-    annotations.firstNotNullOfOrNull { annotation ->
-        val javaClass = annotation.annotationClass.java
-        Introspections.getNameOverride(javaClass.simpleName, javaClass.name, buildAnnotationArgs(annotation))
-    }
+    annotations.firstIntrospected(Introspections::getNameOverride)
+
+/**
+ * Extracts a discriminator property-name override from annotations (e.g., from
+ * `@JsonClassDiscriminator`), or `null` when none is present.
+ *
+ * @see [Introspections.getDiscriminatorPropertyName]
+ */
+internal fun extractDiscriminatorPropertyName(annotations: List<Annotation>): String? =
+    annotations.firstIntrospected(Introspections::getDiscriminatorPropertyName)
 
 /**
  * Checks whether the given list of annotations contains a recognized enum-default-value marker
@@ -132,13 +131,17 @@ internal fun isEnumDefaultAnnotated(annotations: List<Annotation>): Boolean =
  * @see [Introspections.getDefaultValueFromAnnotation]
  */
 internal fun extractDefaultValueOverride(annotations: List<Annotation>): String? =
-    annotations.firstNotNullOfOrNull { annotation ->
+    annotations.firstIntrospected(Introspections::getDefaultValueFromAnnotation)
+
+/**
+ * Applies an [Introspections] extractor to each annotation's class names and elements, returning the first hit.
+ */
+private fun List<Annotation>.firstIntrospected(
+    extract: (String, String?, List<Pair<String, Any?>>) -> String?,
+): String? =
+    firstNotNullOfOrNull { annotation ->
         val javaClass = annotation.annotationClass.java
-        Introspections.getDefaultValueFromAnnotation(
-            javaClass.simpleName,
-            javaClass.name,
-            buildAnnotationArgs(annotation),
-        )
+        extract(javaClass.simpleName, javaClass.name, buildAnnotationArgs(annotation))
     }
 
 /**

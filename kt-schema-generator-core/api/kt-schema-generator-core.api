@@ -64,6 +64,7 @@ public final class me/kpavlov/kt/schema/generator/core/ir/AnyNode : me/kpavlov/k
 
 public abstract class me/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionContext {
 	public fun <init> ()V
+	protected final fun discriminatorName (Lkotlin/sequences/Sequence;Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
 	protected final fun flattenValueClass-YT6qU6Q (Ljava/lang/Object;Ljava/lang/String;ZZLjava/lang/String;Lkotlin/jvm/functions/Function0;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
 	public final fun getNodes ()Ljava/util/Map;
 	protected final fun getTypeRefCache ()Ljava/util/Map;
@@ -79,6 +80,8 @@ public abstract interface class me/kpavlov/kt/schema/generator/core/ir/Descripti
 }
 
 public final class me/kpavlov/kt/schema/generator/core/ir/Discriminator {
+	public static final field Companion Lme/kpavlov/kt/schema/generator/core/ir/Discriminator$Companion;
+	public static final field DEFAULT_NAME Ljava/lang/String;
 	public fun <init> (Ljava/lang/String;Ljava/util/Map;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -90,6 +93,9 @@ public final class me/kpavlov/kt/schema/generator/core/ir/Discriminator {
 	public final fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/Discriminator$Companion {
 }
 
 public final class me/kpavlov/kt/schema/generator/core/ir/EnumNode : me/kpavlov/kt/schema/generator/core/ir/NamedTypeNode {
@@ -114,6 +120,7 @@ public final class me/kpavlov/kt/schema/generator/core/ir/Introspections {
 	public static final field INSTANCE Lme/kpavlov/kt/schema/generator/core/ir/Introspections;
 	public static final fun getDefaultValueFromAnnotation (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
 	public static final fun getDescriptionFromAnnotation (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
+	public static final fun getDiscriminatorPropertyName (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
 	public static final fun getNameOverride (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
 	public static final fun isEnumDefaultAnnotation (Ljava/lang/String;Ljava/lang/String;)Z
 	public static synthetic fun isEnumDefaultAnnotation$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Z

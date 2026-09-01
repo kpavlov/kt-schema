@@ -1,9 +1,12 @@
 package me.kpavlov.kt.schema.ksp.ir
 
+import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeAlias
 import com.google.devtools.ksp.symbol.KSTypeParameter
@@ -272,8 +275,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 subtypes = subtypes,
                 discriminator =
                     me.kpavlov.kt.schema.generator.core.ir.Discriminator(
-                        // TODO allow to configure discriminator property name
-                        name = "type",
+                        name = decl.discriminatorPropertyName(),
                         mapping = discriminatorMapping,
                     ),
                 description = extractDescription(decl) { decl.descriptionFromKdoc() },
@@ -282,6 +284,12 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
 
         return TypeRef.Ref(id, nullable)
     }
+
+    /** Resolves the discriminator name declared on this class or, for nested sealed types, on a supertype. */
+    private fun KSClassDeclaration.discriminatorPropertyName(): String =
+        discriminatorName(sequenceOf<KSDeclaration>(this) + getAllSuperTypes().map { it.declaration }) { declaration ->
+            declaration.annotations.firstNotNullOfOrNull(KSAnnotation::discriminatorNameOrNull)
+        }
 
     /** Builds an EnumNode from the enum entries, honoring name overrides and the default-value marker. */
     private fun handleEnum(

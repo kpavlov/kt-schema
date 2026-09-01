@@ -25,6 +25,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.KTypeParameter
 import kotlin.reflect.KTypeProjection
 import kotlin.reflect.KVisibility
+import kotlin.reflect.full.allSuperclasses
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.withNullability
 import kotlin.reflect.typeOf
@@ -566,7 +567,8 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         klass: KClass<*>,
         sealedSubclasses: List<KClass<*>>,
     ): PolymorphicNode {
-        val nameOverride = extractNameOverride(klass.java.annotations.toList())
+        val annotations = klass.java.annotations.toList()
+        val nameOverride = extractNameOverride(annotations)
         val name = nameOverride ?: klass.qualifiedName ?: klass.simpleName ?: "UnknownSealed"
 
         val subtypes =
@@ -587,13 +589,18 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             subtypes = subtypes,
             discriminator =
                 Discriminator(
-                    // TODO allow to configure discriminator property name
-                    name = "type",
+                    name = discriminatorPropertyName(klass),
                     mapping = discriminatorMapping,
                 ),
-            description = extractDescription(klass.java.annotations.toList()),
+            description = extractDescription(annotations),
         )
     }
+
+    /** Resolves the discriminator name declared on [klass] or, for nested sealed types, on a supertype. */
+    private fun discriminatorPropertyName(klass: KClass<*>): String =
+        discriminatorName(sequenceOf(klass) + klass.allSuperclasses) {
+            extractDiscriminatorPropertyName(it.java.annotations.toList())
+        }
 
     /**
      * Returns sealed subclasses excluding those annotated with a recognized ignore annotation.

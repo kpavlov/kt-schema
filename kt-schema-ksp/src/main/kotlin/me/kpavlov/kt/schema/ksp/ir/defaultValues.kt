@@ -12,14 +12,7 @@ internal fun KSAnnotated.isEnumDefaultAnnotated(): Boolean =
     annotations.any { it.withClassNames(Introspections::isEnumDefaultAnnotation) }
 
 /** The default value from the annotation (e.g. `@JsonProperty(defaultValue = "...")`), or null. */
-internal fun KSAnnotation.defaultValueOrNull(): String? =
-    withClassNames { simpleName, qualifiedName ->
-        Introspections.getDefaultValueFromAnnotation(
-            simpleName = simpleName,
-            qualifiedName = qualifiedName,
-            annotationArguments = namedArguments(),
-        )
-    }
+internal fun KSAnnotation.defaultValueOrNull(): String? = extractWith(Introspections::getDefaultValueFromAnnotation)
 
 /** The default-value override from the element's own annotations, see [defaultValueOrNull]. */
 internal fun extractDefaultValueOverride(annotated: KSAnnotated): String? =

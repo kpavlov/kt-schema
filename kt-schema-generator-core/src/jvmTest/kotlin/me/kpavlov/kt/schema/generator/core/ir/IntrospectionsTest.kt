@@ -236,6 +236,48 @@ class IntrospectionsTest {
 
     //endregion
 
+    //region Discriminator property-name extraction
+
+    @ParameterizedTest
+    @CsvSource(
+        "JsonClassDiscriminator, kotlinx.serialization.json.JsonClassDiscriminator, discriminator, outcome",
+        "JsonTypeInfo, com.fasterxml.jackson.annotation.JsonTypeInfo, property, kind",
+        "JsonTypeInfo, com.fasterxml.jackson.annotation.JsonTypeInfo, PROPERTY, kind",
+    )
+    fun `getDiscriminatorPropertyName extracts the attribute value when FQN matches`(
+        simpleName: String,
+        qualifiedName: String,
+        attribute: String,
+        expectedResult: String,
+    ) {
+        Introspections.getDiscriminatorPropertyName(
+            simpleName = simpleName,
+            qualifiedName = qualifiedName,
+            annotationArguments = listOf(attribute to expectedResult),
+        ) shouldBe expectedResult
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "SomeOther, com.example.SomeOther, outcome",
+        "JsonClassDiscriminator, , outcome",
+        "jsonclassdiscriminator, kotlinx.serialization.json.jsonclassdiscriminator, outcome",
+        "JsonClassDiscriminator, kotlinx.serialization.json.JsonClassDiscriminator, ''",
+    )
+    fun `getDiscriminatorPropertyName returns null for non-matching cases`(
+        simpleName: String,
+        qualifiedName: String?,
+        inputValue: String,
+    ) {
+        Introspections.getDiscriminatorPropertyName(
+            simpleName = simpleName,
+            qualifiedName = qualifiedName?.takeIf { it.isNotEmpty() },
+            annotationArguments = listOf("discriminator" to inputValue),
+        ) shouldBe null
+    }
+
+    //endregion
+
     //region Nullable / optional annotation recognition
 
     @ParameterizedTest

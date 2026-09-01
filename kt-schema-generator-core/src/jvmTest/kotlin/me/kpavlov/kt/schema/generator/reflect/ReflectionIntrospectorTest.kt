@@ -4,6 +4,8 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.JsonClassDiscriminator
 import me.kpavlov.kt.schema.Description
 import me.kpavlov.kt.schema.SchemaIgnore
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
@@ -49,6 +51,34 @@ class ReflectionIntrospectorTest {
             val width: Double,
             val height: Double,
         ) : Shape()
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @JsonClassDiscriminator("outcome")
+    @Suppress("unused", "AbstractClassCanBeInterface")
+    sealed class Outcome {
+        data class Success(
+            val value: String,
+        ) : Outcome()
+
+        data class Failure(
+            val reason: String,
+        ) : Outcome()
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @JsonClassDiscriminator("outcome")
+    @Suppress("unused")
+    sealed interface Response {
+        sealed interface Failure : Response {
+            data class Timeout(
+                val seconds: Int,
+            ) : Failure
+        }
+
+        data class Ok(
+            val value: String,
+        ) : Response
     }
 
     @Suppress("unused")
@@ -390,6 +420,34 @@ class ReflectionIntrospectorTest {
             ].shouldNotBeNull()
                 .shouldBeInstanceOf<ObjectNode>()
         rectangleNode.description shouldBe "Rectangle shape"
+    }
+
+    @Test
+    fun `sealed class honors @JsonClassDiscriminator for the polymorphic discriminator name`() {
+        val graph = introspector.introspect(Outcome::class)
+
+        val rootRef = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val polyNode = graph.nodes[rootRef.id].shouldNotBeNull().shouldBeInstanceOf<PolymorphicNode>()
+
+        polyNode.discriminator shouldNotBeNull {
+            name shouldBe "outcome"
+        }
+    }
+
+    @Test
+    fun `nested sealed type inherits the discriminator name of its annotated parent`() {
+        val graph = introspector.introspect(Response::class)
+
+        val discriminatorNames =
+            graph.nodes.values
+                .filterIsInstance<PolymorphicNode>()
+                .associate { it.name to it.discriminator.name }
+
+        discriminatorNames shouldBe
+            mapOf(
+                "me.kpavlov.kt.schema.generator.reflect.ReflectionIntrospectorTest.Response" to "outcome",
+                "me.kpavlov.kt.schema.generator.reflect.ReflectionIntrospectorTest.Response.Failure" to "outcome",
+            )
     }
 
     @Test

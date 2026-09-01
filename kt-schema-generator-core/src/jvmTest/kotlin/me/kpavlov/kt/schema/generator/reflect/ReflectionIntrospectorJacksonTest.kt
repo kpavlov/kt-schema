@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyDescription
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldNotContain
@@ -64,6 +65,12 @@ class ReflectionIntrospectorJacksonTest {
 
         @JsonTypeName("truck")
         data class Truck(val payload: Double) : JacksonVehicle
+    }
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "kind")
+    @Suppress("unused")
+    sealed interface JacksonAnimal {
+        data class Dog(val barks: Boolean) : JacksonAnimal
     }
 
     @Suppress("unused")
@@ -187,6 +194,16 @@ class ReflectionIntrospectorJacksonTest {
         subtypeIds.shouldContainExactlyInAnyOrder(setOf("car", "truck"))
 
         polyNode.discriminator.mapping?.keys shouldBe setOf("car", "truck")
+    }
+
+    @Test
+    fun `honors Jackson @JsonTypeInfo property as the polymorphic discriminator name`() {
+        val graph = introspector.introspect(JacksonAnimal::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val polyNode = graph.nodes[root.id].shouldBeInstanceOf<PolymorphicNode>()
+
+        polyNode.discriminator.name shouldBe "kind"
     }
 
     @Test

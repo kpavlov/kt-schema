@@ -1,5 +1,3 @@
-@file:Suppress("TooManyFunctions")
-
 package me.kpavlov.kt.schema.json
 
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Keys.TYPE

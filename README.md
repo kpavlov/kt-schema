@@ -676,7 +676,7 @@ println(schema.encodeToString(Json { prettyPrint = true }))
 - **`oneOf` with `$ref`**: Each sealed subclass is stored in `$defs` and referenced via `$ref`
 - **Fully qualified names by default**: `$defs` keys and discriminator `const` values use fully qualified class names (e.g., `com.example.Animal.Dog`) to avoid collisions across packages
 - **Name overrides**: a subtype annotated with `@SerialName`/`@JsonTypeName` (or another recognized name-override annotation) uses that short name instead of its FQN — like `Cat` above, overridden via `@SerialName("Cat")`
-- **Discriminator property**: A `type` field with a `const` value is automatically added to each subtype for runtime dispatch
+- **Discriminator property**: A `type` field with a `const` value is automatically added to each subtype for runtime dispatch. The reflection and KSP front ends take the name from `@JsonClassDiscriminator("...")` or `@JsonTypeInfo(property = "...")` on the sealed type or its supertypes; a subtype declaring a property with that name fails schema generation
 - **Property inheritance**: Base class properties are included in each subtype
 - **Type safety**: Each subtype gets its own schema definition
 
@@ -1254,6 +1254,8 @@ By default, the library recognizes:
 **Enum-default annotations**: com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 **Default-value annotations**: com.fasterxml.jackson.annotation.JsonProperty
 **Default-value attributes**: defaultValue
+**Discriminator annotations**: kotlinx.serialization.json.JsonClassDiscriminator, com.fasterxml.jackson.annotation.JsonTypeInfo
+**Discriminator attributes**: discriminator, property
 
 > [!NOTE]
 > Annotation names containing a dot (e.g., `kotlinx.serialization.SerialName`) are matched
@@ -1277,6 +1279,10 @@ introspector.annotations.name.attributes=value
 introspector.annotations.enumDefault.names=com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 introspector.annotations.defaultValue.names=com.fasterxml.jackson.annotation.JsonProperty
 introspector.annotations.defaultValue.attributes=defaultValue
+
+# Polymorphic discriminator property name (reflection and KSP front ends; defaults to "type")
+introspector.annotations.discriminator.names=kotlinx.serialization.json.JsonClassDiscriminator,com.fasterxml.jackson.annotation.JsonTypeInfo
+introspector.annotations.discriminator.attributes=discriminator,property
 ```
 
 **Note**: The library falls back to built-in defaults if the configuration file is missing or cannot be loaded.
