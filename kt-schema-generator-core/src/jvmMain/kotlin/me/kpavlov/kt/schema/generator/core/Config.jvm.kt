@@ -21,6 +21,8 @@ private const val OPTIONAL_TYPE_NAMES_KEY = "introspector.optional.type.names"
 private const val ENUM_DEFAULT_NAMES_KEY = "introspector.annotations.enumDefault.names"
 private const val DEFAULT_VALUE_NAMES_KEY = "introspector.annotations.defaultValue.names"
 private const val DEFAULT_VALUE_ATTRIBUTES_KEY = "introspector.annotations.defaultValue.attributes"
+private const val DISCRIMINATOR_NAMES_KEY = "introspector.annotations.discriminator.names"
+private const val DISCRIMINATOR_ATTRIBUTES_KEY = "introspector.annotations.discriminator.attributes"
 
 /**
  * Default fallback values if configuration loading fails
@@ -110,6 +112,24 @@ private val DEFAULT_DEFAULT_VALUE_ANNOTATION_NAMES =
 private val DEFAULT_DEFAULT_VALUE_ATTRIBUTES =
     listOf(
         "defaultValue",
+    )
+
+/**
+ * Default fallback values if configuration loading fails
+ */
+private val DEFAULT_DISCRIMINATOR_ANNOTATION_NAMES =
+    listOf(
+        "kotlinx.serialization.json.JsonClassDiscriminator",
+        "com.fasterxml.jackson.annotation.JsonTypeInfo",
+    )
+
+/**
+ * Default fallback values if configuration loading fails
+ */
+private val DEFAULT_DISCRIMINATOR_VALUE_ATTRIBUTES =
+    listOf(
+        "discriminator",
+        "property",
     )
 
 private val logger = KotlinLogging.logger {}
@@ -219,6 +239,18 @@ internal actual object Config {
         loadConfiguration { properties ->
             parseListProperty(properties, DEFAULT_VALUE_ATTRIBUTES_KEY)
         } ?: DEFAULT_DEFAULT_VALUE_ATTRIBUTES
+    }
+
+    actual val discriminatorAnnotationNames: List<String> by lazy {
+        loadConfiguration { properties ->
+            parseListPropertyPreservingFqnCase(properties, DISCRIMINATOR_NAMES_KEY)
+        } ?: DEFAULT_DISCRIMINATOR_ANNOTATION_NAMES
+    }
+
+    actual val discriminatorValueAttributes: List<String> by lazy {
+        loadConfiguration { properties ->
+            parseListProperty(properties, DISCRIMINATOR_ATTRIBUTES_KEY)
+        } ?: DEFAULT_DISCRIMINATOR_VALUE_ATTRIBUTES
     }
 
     private fun <T> loadConfiguration(extractor: (Properties) -> T): T? =
