@@ -457,7 +457,8 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         klass: KClass<*>,
         sealedSubclasses: List<KClass<*>>,
     ): PolymorphicNode {
-        val nameOverride = extractNameOverride(klass.java.annotations.toList())
+        val annotations = klass.java.annotations.toList()
+        val nameOverride = extractNameOverride(annotations)
         val name = nameOverride ?: klass.qualifiedName ?: klass.simpleName ?: "UnknownSealed"
 
         val subtypes =
@@ -478,11 +479,10 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             subtypes = subtypes,
             discriminator =
                 Discriminator(
-                    // TODO allow to configure discriminator property name
-                    name = "type",
+                    name = extractDiscriminatorPropertyName(annotations) ?: "type",
                     mapping = discriminatorMapping,
                 ),
-            description = extractDescription(klass.java.annotations.toList()),
+            description = extractDescription(annotations),
         )
     }
 
