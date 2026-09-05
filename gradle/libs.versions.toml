@@ -17,7 +17,7 @@ ksp = "2.3.11"
 langchain4j = "1.20.0"
 logging = "8.0.4"
 mockk = "1.14.11"
-slf4j = "2.0.18"
+slf4j = "2.0.19"
 vanniktechMavenPublish = "0.37.0"
 json-unit-assertj = "6.2.0"
 
