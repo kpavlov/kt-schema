@@ -306,4 +306,39 @@ internal expect object Config {
      * Default value: defaultValue
      */
     val defaultValueAttributes: List<String>
+
+    /**
+     * Ordered list of annotation name glob patterns recognized as discriminator-property-name
+     * providers for polymorphic (sealed) types (e.g. `@JsonClassDiscriminator("outcome")`).
+     *
+     * Matching follows the same rules as [nameAnnotationNames]: simple names case-insensitive,
+     * FQNs (containing a dot) case-sensitive.
+     *
+     * Loaded lazily from the `introspector.annotations.discriminator.names` property in
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
+     *
+     * Default value: kotlinx.serialization.json.JsonClassDiscriminator,
+     *                com.fasterxml.jackson.annotation.JsonTypeInfo
+     */
+    val discriminatorAnnotationNames: List<String>
+
+    /**
+     * Ordered list of lowercase annotation parameter names that may contain the
+     * discriminator's property name.
+     *
+     * When an annotation matches [discriminatorAnnotationNames], its parameters are inspected
+     * for these attribute names to extract the discriminator property name. Order determines
+     * priority — earlier entries take precedence. When no matching annotation is found, a
+     * polymorphic type's discriminator property name falls back to `"type"`.
+     *
+     * Loaded lazily from the `introspector.annotations.discriminator.attributes` property in
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
+     *
+     * Default value: "discriminator", "property"
+     *
+     * ## Examples
+     * - For `@JsonClassDiscriminator("outcome")`, the "discriminator" parameter contains "outcome"
+     * - For Jackson's `@JsonTypeInfo(property = "outcome")`, the "property" parameter contains "outcome"
+     */
+    val discriminatorValueAttributes: List<String>
 }

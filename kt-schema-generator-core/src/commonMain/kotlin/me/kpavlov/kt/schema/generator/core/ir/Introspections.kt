@@ -188,6 +188,22 @@ public object Introspections {
 
     //endregion
 
+    //region Discriminator annotation config
+
+    private val discriminatorNames: AnnotationNamePatterns by lazy {
+        splitByFqn(Config.discriminatorAnnotationNames)
+    }
+
+    /**
+     * Ordered list of lowercase annotation parameter names that may contain the discriminator's
+     * property name. Order determines priority — earlier entries take precedence.
+     *
+     * @see Config.discriminatorValueAttributes
+     */
+    private val discriminatorValueAttributes: List<String> = Config.discriminatorValueAttributes
+
+    //endregion
+
     /**
      * Extracts the description text from an annotation if it matches a recognized description annotation.
      *
@@ -251,6 +267,32 @@ public object Introspections {
     ): String? =
         if (matchesAnnotation(simpleName, qualifiedName, nameNames)) {
             extractFirstStringAttribute(annotationArguments, nameValueAttributes)
+        } else {
+            null
+        }
+
+    /**
+     * Extracts the discriminator property-name override from an annotation if it matches a
+     * recognised discriminator annotation (e.g., `@JsonClassDiscriminator`).
+     *
+     * Simple annotation names are matched **case-insensitively**; fully qualified names are matched
+     * **case-sensitively** (exact match).
+     *
+     * @param simpleName The simple name of the annotation (e.g., "JsonClassDiscriminator")
+     * @param qualifiedName The fully qualified name of the annotation
+     *   (e.g., "kotlinx.serialization.json.JsonClassDiscriminator"), or null if unavailable
+     * @param annotationArguments List of key-value pairs representing the annotation's parameters
+     * @return The discriminator property name if found, or null if the annotation is not
+     *         recognized or contains no matching parameter
+     */
+    @JvmStatic
+    public fun getDiscriminatorPropertyName(
+        simpleName: String,
+        qualifiedName: String?,
+        annotationArguments: List<Pair<String, Any?>>,
+    ): String? =
+        if (matchesAnnotation(simpleName, qualifiedName, discriminatorNames)) {
+            extractFirstStringAttribute(annotationArguments, discriminatorValueAttributes)
         } else {
             null
         }

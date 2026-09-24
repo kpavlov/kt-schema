@@ -27,4 +27,8 @@ internal actual object Config {
         get() = listOf("com.fasterxml.jackson.annotation.JsonProperty")
     actual val defaultValueAttributes: List<String>
         get() = listOf("defaultValue")
+    actual val discriminatorAnnotationNames: List<String>
+        get() = listOf("kotlinx.serialization.json.JsonClassDiscriminator")
+    actual val discriminatorValueAttributes: List<String>
+        get() = listOf("discriminator")
 }

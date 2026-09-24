@@ -236,6 +236,64 @@ class IntrospectionsTest {
 
     //endregion
 
+    //region Discriminator property-name extraction
+
+    @ParameterizedTest
+    @CsvSource(
+        "JsonClassDiscriminator, kotlinx.serialization.json.JsonClassDiscriminator, outcome, outcome",
+        "JsonClassDiscriminator, kotlinx.serialization.json.JsonClassDiscriminator, kind, kind",
+    )
+    fun `getDiscriminatorPropertyName extracts discriminator attribute when FQN matches`(
+        simpleName: String,
+        qualifiedName: String,
+        inputValue: String,
+        expectedResult: String,
+    ) {
+        Introspections.getDiscriminatorPropertyName(
+            simpleName = simpleName,
+            qualifiedName = qualifiedName,
+            annotationArguments = listOf("discriminator" to inputValue),
+        ) shouldBe expectedResult
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "JsonTypeInfo, com.fasterxml.jackson.annotation.JsonTypeInfo, outcome, outcome",
+    )
+    fun `getDiscriminatorPropertyName extracts property attribute from Jackson annotation when FQN matches`(
+        simpleName: String,
+        qualifiedName: String,
+        inputValue: String,
+        expectedResult: String,
+    ) {
+        Introspections.getDiscriminatorPropertyName(
+            simpleName = simpleName,
+            qualifiedName = qualifiedName,
+            annotationArguments = listOf("property" to inputValue),
+        ) shouldBe expectedResult
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "SomeOther, com.example.SomeOther, outcome",
+        "JsonClassDiscriminator, , outcome",
+        "jsonclassdiscriminator, kotlinx.serialization.json.jsonclassdiscriminator, outcome",
+        "JsonClassDiscriminator, kotlinx.serialization.json.JsonClassDiscriminator, ''",
+    )
+    fun `getDiscriminatorPropertyName returns null for non-matching cases`(
+        simpleName: String,
+        qualifiedName: String?,
+        inputValue: String,
+    ) {
+        Introspections.getDiscriminatorPropertyName(
+            simpleName = simpleName,
+            qualifiedName = qualifiedName?.takeIf { it.isNotEmpty() },
+            annotationArguments = listOf("discriminator" to inputValue),
+        ) shouldBe null
+    }
+
+    //endregion
+
     //region Nullable / optional annotation recognition
 
     @ParameterizedTest
