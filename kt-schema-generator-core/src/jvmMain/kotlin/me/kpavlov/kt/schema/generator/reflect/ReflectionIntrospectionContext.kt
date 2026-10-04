@@ -22,8 +22,12 @@ import me.kpavlov.kt.schema.generator.core.ir.withNullable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
+import kotlin.reflect.KTypeParameter
+import kotlin.reflect.KTypeProjection
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.createType
+import kotlin.reflect.full.withNullability
+import kotlin.reflect.typeOf
 
 /**
  * Reflection-based introspection context based on [KType].
@@ -223,6 +227,10 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      * On the JVM, a `@JvmInline value class` is erased to its wrapped value at the call site
      * (e.g. a `Double`), never boxed as `{"value": 14.5}`, so the schema must follow suit.
      *
+     * For a generic value class (`value class Wrapper<T>(val value: T)`), the type parameters in
+     * the wrapped type are substituted with the use-site type arguments (`Wrapper<Int>` flattens
+     * to an integer) before it is resolved.
+     *
      * A class-level `@Description` on the value class is carried over onto the flattened
      * primitive node, since there is no wrapper object left to attach it to.
      *
@@ -232,8 +240,16 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      */
     private fun flattenInlineValueClass(type: KType): TypeRef {
         val klass = type.klass
-        val wrappedType = findPrimaryConstructor(klass)?.parameters?.singleOrNull()?.type
-        if (wrappedType == null || type in visitingTypes) return handleObjectType(type)
+        val declaredWrappedType = findPrimaryConstructor(klass)?.parameters?.singleOrNull()?.type
+        if (declaredWrappedType == null || type in visitingTypes) return handleObjectType(type)
+
+        // A star projection (`Wrapper<*>`) carries no type, so it is treated as `Any?`.
+        val bindings =
+            klass.typeParameters.zip(type.arguments).associate { (parameter, argument) ->
+                parameter to (argument.type ?: typeOf<Any?>())
+            }
+        val wrappedType =
+            if (bindings.isEmpty()) declaredWrappedType else substituteTypeParameters(declaredWrappedType, bindings)
 
         val nullable = type.effectiveNullable()
         visitingTypes += type
@@ -259,6 +275,42 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         if (!nullable) typeRefCache[type] = ref
         return ref
     }
+
+    /**
+     * Returns [type] with every [KTypeParameter] found in [bindings] replaced by its bound type,
+     * recursing into type arguments (e.g. `List<T>` becomes `List<Int>`).
+     *
+     * Rebuilding the type, rather than resolving parameters during [toRef], keeps [typeRefCache]
+     * correct: `List<Int>` and `List<String>` are distinct keys, whereas `List<T>` would be shared.
+     * A `T?` use keeps its nullability. Parameters without a binding are left as is.
+     */
+    private fun substituteTypeParameters(
+        type: KType,
+        bindings: Map<KTypeParameter, KType>,
+    ): KType =
+        when (val classifier = type.classifier) {
+            is KTypeParameter ->
+                bindings[classifier]?.let { bound ->
+                    if (type.isMarkedNullable) bound.withNullability(true) else bound
+                } ?: type
+
+            is KClass<*> ->
+                if (type.arguments.isEmpty()) {
+                    type
+                } else {
+                    classifier.createType(
+                        arguments =
+                            type.arguments.map { projection ->
+                                projection.type?.let {
+                                    KTypeProjection(projection.variance, substituteTypeParameters(it, bindings))
+                                } ?: projection
+                            },
+                        nullable = type.isMarkedNullable,
+                    )
+                }
+
+            else -> type
+        }
 
     /**
      * Handles enum types by creating an EnumNode and adding it to discovered nodes.

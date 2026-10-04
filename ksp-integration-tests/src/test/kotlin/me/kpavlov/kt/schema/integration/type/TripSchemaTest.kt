@@ -3,9 +3,6 @@ package me.kpavlov.kt.schema.integration.type
 import io.kotest.assertions.json.shouldEqualJson
 import kotlin.test.Test
 
-/**
- * Tests for Trip schema generation - inline value class flattening.
- */
 class TripSchemaTest {
     @Test
     fun `flattens inline value class properties to their wrapped primitive type`() {
