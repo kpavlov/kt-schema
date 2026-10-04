@@ -86,6 +86,7 @@ Options can be set globally in your build configuration or overridden per-class 
 | `exclude`          | `String`  | `null`  | Comma- or semicolon-separated glob patterns. Matching symbols are always skipped.  |
 | `withSchemaObject` | `Boolean` | `false` | Generate `jsonSchema: JsonObject` property. Requires `kotlinx-serialization-json`. |
 | `visibility`       | `String`  | `""`    | Visibility modifier for generated extensions (`public`, `internal`, etc.).         |
+| `config`           | `String`  | `null`  | Schema flavour: `strict`, `lenient`, `openapi` or a `JsonSchemaConfig` class name. Unset: classes use `strict`, functions use the function-calling default. See [Schema configuration](../README.md#schema-configuration). |
 
 ### Filtering by class/function name
 

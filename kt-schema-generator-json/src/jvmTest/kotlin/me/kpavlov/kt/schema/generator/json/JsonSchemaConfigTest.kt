@@ -1,5 +1,7 @@
 package me.kpavlov.kt.schema.generator.json
 
+import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.equals.shouldNotBeEqual
@@ -121,8 +123,55 @@ class JsonSchemaConfigTest {
             "useUnionTypes=${config.useUnionTypes}, " +
             "useNullableField=${config.useNullableField}, " +
             "includePolymorphicDiscriminator=${config.includePolymorphicDiscriminator}, " +
-            "includeOpenAPIPolymorphicDiscriminator=${config.includeOpenAPIPolymorphicDiscriminator}" +
+            "includeOpenAPIPolymorphicDiscriminator=${config.includeOpenAPIPolymorphicDiscriminator}, " +
+            "allowAdditionalProperties=${config.allowAdditionalProperties}" +
             ")"
+    }
+
+    @Test
+    fun `allowAdditionalProperties should take part in equals and hashCode`() {
+        val denying = JsonSchemaConfig(allowAdditionalProperties = false)
+        val allowing = JsonSchemaConfig(allowAdditionalProperties = true)
+
+        denying shouldBe JsonSchemaConfig.Default
+        denying shouldNotBeEqual allowing
+        denying.hashCode() shouldNotBe allowing.hashCode()
+    }
+
+    @Test
+    fun `should allow disabling both useUnionTypes and useNullableField`() {
+        val config = JsonSchemaConfig(useUnionTypes = false, useNullableField = false)
+
+        assertSoftly(config) {
+            useUnionTypes shouldBe false
+            useNullableField shouldBe false
+        }
+    }
+
+    @Test
+    fun `should reject enabling both useUnionTypes and useNullableField`() {
+        shouldThrow<IllegalArgumentException> {
+            JsonSchemaConfig(useUnionTypes = true, useNullableField = true)
+        }
+    }
+
+    @Test
+    fun `Lenient preset should be compact and permissive`() {
+        assertSoftly(JsonSchemaConfig.Lenient) {
+            respectDefaultPresence shouldBe true
+            requireNullableFields shouldBe false
+            useUnionTypes shouldBe false
+            useNullableField shouldBe false
+            includePolymorphicDiscriminator shouldBe true
+            includeOpenAPIPolymorphicDiscriminator shouldBe false
+            allowAdditionalProperties shouldBe true
+        }
+    }
+
+    @Test
+    fun `existing presets should keep denying additional properties`() {
+        listOf(JsonSchemaConfig.Default, JsonSchemaConfig.Strict, JsonSchemaConfig.OpenAPI)
+            .map { it.allowAdditionalProperties } shouldBe listOf(false, false, false)
     }
 
     //region Node description propagation
@@ -252,4 +301,21 @@ class JsonSchemaConfigTest {
     }
 
     //endregion
+
+    @Test
+    fun `should keep the six-argument constructor for binary compatibility`() {
+        val constructor = JsonSchemaConfig::class.java.getConstructor(*Array(6) { Boolean::class.java })
+
+        val config = constructor.newInstance(false, true, false, true, true, true)
+
+        assertSoftly(config) {
+            respectDefaultPresence shouldBe false
+            requireNullableFields shouldBe true
+            useUnionTypes shouldBe false
+            useNullableField shouldBe true
+            includePolymorphicDiscriminator shouldBe true
+            includeOpenAPIPolymorphicDiscriminator shouldBe true
+            allowAdditionalProperties shouldBe false
+        }
+    }
 }

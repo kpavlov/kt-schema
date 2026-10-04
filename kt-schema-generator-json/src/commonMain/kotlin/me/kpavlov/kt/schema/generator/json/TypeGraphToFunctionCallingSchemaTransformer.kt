@@ -1,5 +1,6 @@
 package me.kpavlov.kt.schema.generator.json
 
+import kotlinx.serialization.json.JsonPrimitive
 import me.kpavlov.kt.schema.generator.core.ir.AbstractTypeGraphTransformer
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
@@ -17,8 +18,8 @@ import me.kpavlov.kt.schema.json.AdditionalPropertiesSchema
 import me.kpavlov.kt.schema.json.AnyOfPropertyDefinition
 import me.kpavlov.kt.schema.json.ArrayPropertyDefinition
 import me.kpavlov.kt.schema.json.BooleanPropertyDefinition
-import me.kpavlov.kt.schema.json.DenyAdditionalProperties
 import me.kpavlov.kt.schema.json.FunctionCallingSchema
+import me.kpavlov.kt.schema.json.GenericPropertyDefinition
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.ARRAY_OR_NULL_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.ARRAY_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.BOOLEAN_OR_NULL_TYPE
@@ -32,12 +33,10 @@ import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.OBJECT_OR_NULL_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.OBJECT_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.STRING_OR_NULL_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.STRING_TYPE
-import me.kpavlov.kt.schema.json.GenericPropertyDefinition
 import me.kpavlov.kt.schema.json.NumericPropertyDefinition
 import me.kpavlov.kt.schema.json.ObjectPropertyDefinition
 import me.kpavlov.kt.schema.json.PropertyDefinition
 import me.kpavlov.kt.schema.json.StringPropertyDefinition
-import kotlinx.serialization.json.JsonPrimitive
 import kotlin.jvm.JvmOverloads
 import me.kpavlov.kt.schema.generator.json.FunctionCallingSchemaConfig.Companion.Default as DefaultConfig
 
@@ -70,8 +69,10 @@ private const val MAX_NESTING_DEPTH = 8
  *
  * ## Nullable Types
  *
- * Nullable/optional fields are represented using union types that include "null"
- * (e.g., ["string", "null"]) instead of using the "nullable" flag.
+ * Nullable/optional fields follow [FunctionCallingSchemaConfig]: by default they are represented using union
+ * types that include "null" (e.g., ["string", "null"]); with `useNullableField` they get `"nullable": true`;
+ * with both disabled they carry no null marker and are never required, while nullable collection elements and
+ * map values get an `anyOf` null branch.
  */
 public class TypeGraphToFunctionCallingSchemaTransformer
     @JvmOverloads
@@ -138,30 +139,41 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                     ObjectPropertyDefinition(
                         properties = properties,
                         required = requiredFields,
-                        additionalProperties = DenyAdditionalProperties,
+                        additionalProperties = config.objectAdditionalProperties,
                     ),
             )
         }
 
-        private fun requiredFieldNames(node: ObjectNode): List<String> =
-            if (config.strictMode) {
-                node.properties.map { it.name }
-            } else if (config.respectDefaultPresence) {
-                if (config.requireNullableFields) {
-                    node.properties
-                        .filter { it.name in node.required || it.type.nullable || it.isConstant }
-                        .map { it.name }
+        private fun requiredFieldNames(node: ObjectNode): List<String> {
+            val required =
+                if (config.strictMode) {
+                    node.properties.map { it.name }
+                } else if (config.respectDefaultPresence) {
+                    if (config.requireNullableFields) {
+                        node.properties
+                            .filter { it.name in node.required || it.type.nullable || it.isConstant }
+                            .map { it.name }
+                    } else {
+                        // Use the required set from the ObjectNode (respects DefaultPresence)
+                        node.required.toList()
+                    }
+                } else if (config.requireNullableFields) {
+                    // All properties are required (legacy strict mode from JsonSchemaConfig)
+                    node.properties.map { it.name }
                 } else {
-                    // Use the required set from the ObjectNode (respects DefaultPresence)
-                    node.required.toList()
+                    // Only non-nullable properties are required
+                    node.properties.filter { !it.type.nullable || it.isConstant }.map { it.name }
                 }
-            } else if (config.requireNullableFields) {
-                // All properties are required (legacy strict mode from JsonSchemaConfig)
-                node.properties.map { it.name }
-            } else {
-                // Only non-nullable properties are required
-                node.properties.filter { !it.type.nullable || it.isConstant }.map { it.name }
-            }
+            if (config.strictMode || !config.omitsNullMarker) return required
+
+            // Without a null marker a required nullable property could hold neither `null` nor a value
+            val optional =
+                node.properties
+                    .filter { it.type.nullable && !it.isConstant }
+                    .map { it.name }
+                    .toSet()
+            return required.filterNot { it in optional }
+        }
 
         private fun convertTypeRef(
             typeRef: TypeRef,
@@ -267,33 +279,33 @@ public class TypeGraphToFunctionCallingSchemaTransformer
             when (node.kind) {
                 PrimitiveKind.STRING -> {
                     StringPropertyDefinition(
-                        type = if (nullable) STRING_OR_NULL_TYPE else STRING_TYPE,
+                        type = if (nullable && config.useUnionTypes) STRING_OR_NULL_TYPE else STRING_TYPE,
                         description = node.description,
-                        nullable = null,
+                        nullable = config.nullableFlag(nullable),
                     )
                 }
 
                 PrimitiveKind.BOOLEAN -> {
                     BooleanPropertyDefinition(
-                        type = if (nullable) BOOLEAN_OR_NULL_TYPE else BOOLEAN_TYPE,
+                        type = if (nullable && config.useUnionTypes) BOOLEAN_OR_NULL_TYPE else BOOLEAN_TYPE,
                         description = node.description,
-                        nullable = null,
+                        nullable = config.nullableFlag(nullable),
                     )
                 }
 
                 PrimitiveKind.INT, PrimitiveKind.LONG -> {
                     NumericPropertyDefinition(
-                        type = if (nullable) INTEGER_OR_NULL_TYPE else INTEGER_TYPE,
+                        type = if (nullable && config.useUnionTypes) INTEGER_OR_NULL_TYPE else INTEGER_TYPE,
                         description = node.description,
-                        nullable = null,
+                        nullable = config.nullableFlag(nullable),
                     )
                 }
 
                 PrimitiveKind.FLOAT, PrimitiveKind.DOUBLE -> {
                     NumericPropertyDefinition(
-                        type = if (nullable) NUMBER_OR_NULL_TYPE else NUMBER_TYPE,
+                        type = if (nullable && config.useUnionTypes) NUMBER_OR_NULL_TYPE else NUMBER_TYPE,
                         description = node.description,
-                        nullable = null,
+                        nullable = config.nullableFlag(nullable),
                     )
                 }
             }
@@ -319,12 +331,12 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                 }
 
             return ObjectPropertyDefinition(
-                type = if (nullable) OBJECT_OR_NULL_TYPE else OBJECT_TYPE,
+                type = if (nullable && config.useUnionTypes) OBJECT_OR_NULL_TYPE else OBJECT_TYPE,
                 description = node.description,
-                nullable = null,
+                nullable = config.nullableFlag(nullable),
                 properties = properties,
                 required = requiredFields,
-                additionalProperties = DenyAdditionalProperties,
+                additionalProperties = config.objectAdditionalProperties,
             )
         }
 
@@ -334,9 +346,9 @@ public class TypeGraphToFunctionCallingSchemaTransformer
         ): PropertyDefinition {
             val base =
                 StringPropertyDefinition(
-                    type = if (nullable) STRING_OR_NULL_TYPE else STRING_TYPE,
+                    type = if (nullable && config.useUnionTypes) STRING_OR_NULL_TYPE else STRING_TYPE,
                     description = node.description,
-                    nullable = null,
+                    nullable = config.nullableFlag(nullable),
                     enum = node.entries,
                 )
             // OpenAI structured-output strict mode disallows the "default" keyword entirely.
@@ -354,14 +366,27 @@ public class TypeGraphToFunctionCallingSchemaTransformer
             jsonTypeNames: Map<TypeId, String>,
             depth: Int,
         ): PropertyDefinition {
-            val items = convertTypeRef(node.element, graph, jsonTypeNames, depth)
+            val items = convertElement(node.element, graph, jsonTypeNames, depth)
             return ArrayPropertyDefinition(
-                type = if (nullable) ARRAY_OR_NULL_TYPE else ARRAY_TYPE,
+                type = if (nullable && config.useUnionTypes) ARRAY_OR_NULL_TYPE else ARRAY_TYPE,
                 description = node.description,
-                nullable = null,
+                nullable = config.nullableFlag(nullable),
                 items = items,
             )
         }
+
+        /**
+         * Converts a collection element or map value. Without null markers, a nullable one keeps an explicit
+         * `null` branch: unlike a property, it cannot express `null` by being omitted.
+         */
+        private fun convertElement(
+            typeRef: TypeRef,
+            graph: TypeGraph,
+            jsonTypeNames: Map<TypeId, String>,
+            depth: Int,
+        ): PropertyDefinition =
+            convertTypeRef(typeRef, graph, jsonTypeNames, depth)
+                .let { if (typeRef.nullable && config.omitsNullMarker) it.withNullBranch() else it }
 
         private fun convertMap(
             node: MapNode,
@@ -370,11 +395,11 @@ public class TypeGraphToFunctionCallingSchemaTransformer
             jsonTypeNames: Map<TypeId, String>,
             depth: Int,
         ): PropertyDefinition {
-            val valuePropertyDef = convertTypeRef(node.value, graph, jsonTypeNames, depth)
+            val valuePropertyDef = convertElement(node.value, graph, jsonTypeNames, depth)
             return ObjectPropertyDefinition(
-                type = if (nullable) OBJECT_OR_NULL_TYPE else OBJECT_TYPE,
+                type = if (nullable && config.useUnionTypes) OBJECT_OR_NULL_TYPE else OBJECT_TYPE,
                 description = node.description,
-                nullable = null,
+                nullable = config.nullableFlag(nullable),
                 additionalProperties = AdditionalPropertiesSchema(valuePropertyDef),
             )
         }
@@ -424,14 +449,15 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                 }
 
             // oneOf is not supported by OpenAI-like JSON schemas, using anyOf instead
+            val wrapInNull = nullable && config.useUnionTypes
             val anyOfDef =
                 AnyOfPropertyDefinition(
                     anyOf = subtypeDefs,
-                    description = if (nullable) null else node.description,
+                    description = if (wrapInNull) null else node.description,
                 )
 
             // If nullable, wrap in additional anyOf with the 'null' option
-            return if (nullable) {
+            return if (wrapInNull) {
                 AnyOfPropertyDefinition(
                     anyOf =
                         listOf(

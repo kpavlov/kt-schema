@@ -5,6 +5,8 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import me.kpavlov.kt.schema.generator.core.ir.Discriminator
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
+import me.kpavlov.kt.schema.generator.core.ir.ListNode
+import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
@@ -70,9 +72,10 @@ class TypeGraphToJsonSchemaTransformerTest {
                     ),
             )
 
-        val error = shouldThrow<IllegalStateException> {
-            transformer.transform(graph, "Root")
-        }
+        val error =
+            shouldThrow<IllegalStateException> {
+                transformer.transform(graph, "Root")
+            }
 
         // The error should mention the dangling reference
         error.message.toString() shouldContainAny listOf("Dangling", "not found")
@@ -492,8 +495,7 @@ class TypeGraphToJsonSchemaTransformerTest {
         val yId = TypeId("com.example.Y")
         val wId = TypeId("com.example.W")
 
-        fun node(name: String) =
-            ObjectNode(name = name, properties = emptyList(), required = emptySet())
+        fun node(name: String) = ObjectNode(name = name, properties = emptyList(), required = emptySet())
 
         val graph =
             TypeGraph(
@@ -578,6 +580,180 @@ class TypeGraphToJsonSchemaTransformerTest {
               "type": "string",
               "enum": ["ACTIVE", "INACTIVE"],
               "default": "ACTIVE"
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `Lenient omits null markers and additionalProperties and keeps nullable fields optional`() {
+        // Given: Msg(text: String, count: Int?, ref: Other?, inner: Inner, tags: Map<String, Int>?)
+        val msgId = TypeId("Msg")
+        val otherId = TypeId("Other")
+        val innerId = TypeId("Inner")
+        val otherNode =
+            ObjectNode(
+                name = "Other",
+                properties = listOf(Property(name = "id", type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING)))),
+                required = setOf("id"),
+            )
+        val innerNode =
+            ObjectNode(
+                name = "Inner",
+                properties = listOf(Property(name = "leaf", type = TypeRef.Ref(otherId))),
+                required = setOf("leaf"),
+            )
+        val msgNode =
+            ObjectNode(
+                name = "Msg",
+                properties =
+                    listOf(
+                        Property("text", TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING))),
+                        Property("count", TypeRef.Inline(PrimitiveNode(PrimitiveKind.INT), nullable = true)),
+                        Property("ref", TypeRef.Ref(otherId, nullable = true)),
+                        Property("inner", TypeRef.Ref(innerId)),
+                        Property(
+                            "tags",
+                            TypeRef.Inline(
+                                MapNode(
+                                    key = TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING)),
+                                    value = TypeRef.Inline(PrimitiveNode(PrimitiveKind.INT)),
+                                ),
+                                nullable = true,
+                            ),
+                        ),
+                    ),
+                required = setOf("text", "count", "ref", "inner", "tags"),
+            )
+        val graph =
+            TypeGraph(
+                root = TypeRef.Ref(msgId),
+                nodes = mapOf(msgId to msgNode, otherId to otherNode, innerId to innerNode),
+            )
+
+        // When
+        val schema = TypeGraphToJsonSchemaTransformer(JsonSchemaConfig.Lenient).transform(graph, "Msg")
+
+        // Then
+        schema.encodeToString(json) shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "Msg",
+              "type": "object",
+              "properties": {
+                "text": { "type": "string" },
+                "count": { "type": "integer" },
+                "ref": { "$ref": "#/$defs/Other" },
+                "inner": { "$ref": "#/$defs/Inner" },
+                "tags": {
+                  "type": "object",
+                  "additionalProperties": { "type": "integer" }
+                }
+              },
+              "required": ["text", "inner"],
+              "$defs": {
+                "Other": {
+                  "type": "object",
+                  "properties": { "id": { "type": "string" } },
+                  "required": ["id"]
+                },
+                "Inner": {
+                  "type": "object",
+                  "properties": { "leaf": { "$ref": "#/$defs/Other" } },
+                  "required": ["leaf"]
+                }
+              }
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `Lenient keeps a null branch for nullable collection elements and map values`() {
+        // Given: Bag(names: List<String?>, refs: List<Other?>, scores: Map<String, Int?>)
+        val bagId = TypeId("Bag")
+        val otherId = TypeId("Other")
+        val otherNode =
+            ObjectNode(
+                name = "Other",
+                properties = listOf(Property(name = "id", type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING)))),
+                required = setOf("id"),
+            )
+        val bagNode =
+            ObjectNode(
+                name = "Bag",
+                properties =
+                    listOf(
+                        Property(
+                            "names",
+                            TypeRef.Inline(
+                                ListNode(
+                                    TypeRef.Inline(
+                                        node = PrimitiveNode(kind = PrimitiveKind.STRING),
+                                        nullable = true,
+                                    ),
+                                ),
+                            ),
+                        ),
+                        Property("refs", TypeRef.Inline(ListNode(TypeRef.Ref(otherId, nullable = true)))),
+                        Property(
+                            "scores",
+                            TypeRef.Inline(
+                                MapNode(
+                                    key =
+                                        TypeRef.Inline(
+                                            PrimitiveNode(
+                                                kind = PrimitiveKind.STRING,
+                                            ),
+                                        ),
+                                    value =
+                                        TypeRef.Inline(
+                                            PrimitiveNode(
+                                                kind = PrimitiveKind.INT,
+                                            ),
+                                            nullable = true,
+                                        ),
+                                ),
+                            ),
+                        ),
+                    ),
+                required = setOf("names", "refs", "scores"),
+            )
+        val graph = TypeGraph(root = TypeRef.Ref(bagId), nodes = mapOf(bagId to bagNode, otherId to otherNode))
+
+        // When
+        val schema = TypeGraphToJsonSchemaTransformer(JsonSchemaConfig.Lenient).transform(graph, "Bag")
+
+        // Then
+        schema.encodeToString(json) shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "Bag",
+              "type": "object",
+              "properties": {
+                "names": {
+                  "type": "array",
+                  "items": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+                },
+                "refs": {
+                  "type": "array",
+                  "items": { "anyOf": [{ "$ref": "#/$defs/Other" }, { "type": "null" }] }
+                },
+                "scores": {
+                  "type": "object",
+                  "additionalProperties": { "anyOf": [{ "type": "integer" }, { "type": "null" }] }
+                }
+              },
+              "required": ["names", "refs", "scores"],
+              "$defs": {
+                "Other": {
+                  "type": "object",
+                  "properties": { "id": { "type": "string" } },
+                  "required": ["id"]
+                }
+              }
             }
             """.trimIndent()
     }

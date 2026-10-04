@@ -30,14 +30,19 @@ public final class PackagePrivateAnnotationFixtures {
         String description() default "";
     }
 
-    /** Holder with a method annotated with the package-private {@code @LLMDescription}. */
+    /**
+     * Holder with a method annotated with the package-private {@code @LLMDescription}.
+     */
     public static final class AnnotatedHolder {
         @LLMDescription(description = "product search tool")
-        public static void searchProducts() {}
+        public static void searchProducts() {
+        }
 
         @LLMDescription("find user by id")
-        public static void findUser() {}
+        public static void findUser() {
+        }
     }
 
-    private PackagePrivateAnnotationFixtures() {}
+    private PackagePrivateAnnotationFixtures() {
+    }
 }

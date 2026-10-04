@@ -15,30 +15,30 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 class AddressSchemaTest {
 
     private static final String RESOURCE_PATH =
-            "META-INF/kt-schema/schemas/me/kpavlov/kt/schema/apt/integration/type/Address.json";
+        "META-INF/kt-schema/schemas/me/kpavlov/kt/schema/apt/integration/type/Address.json";
 
     @Test
     void shouldGenerateCompleteSchemaWithAllRequiredFields() throws IOException {
         // language=json
         assertThatJson(readGeneratedSchema()).isEqualTo("""
-                {
-                  "$id": "Address",
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "type": "object",
-                  "properties": {
-                    "city": {
-                      "type": "string",
-                      "description": "City or town name"
-                    },
-                    "street": {
-                      "type": "string",
-                      "description": "Street name and number"
-                    }
-                  },
-                  "additionalProperties": false,
-                  "required": ["city", "street"]
+            {
+              "$id": "Address",
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "type": "object",
+              "properties": {
+                "city": {
+                  "type": "string",
+                  "description": "City or town name"
+                },
+                "street": {
+                  "type": "string",
+                  "description": "Street name and number"
                 }
-                """);
+              },
+              "additionalProperties": false,
+              "required": ["city", "street"]
+            }
+            """);
     }
 
     private static String readGeneratedSchema() throws IOException {

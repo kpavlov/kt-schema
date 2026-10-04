@@ -64,7 +64,8 @@ final class me.kpavlov.kt.schema.generator.json.serialization/SerializationClass
 }
 
 final class me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig : me.kpavlov.kt.schema.generator.json/JsonSchemaConfig { // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig|null[0]
-    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Boolean, kotlin/Boolean, kotlin/Boolean, kotlin/Boolean, kotlin/Boolean, kotlin/Boolean) // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
 
     final val strictMode // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.strictMode|{}strictMode[0]
         final fun <get-strictMode>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.strictMode.<get-strictMode>|<get-strictMode>(){}[0]
@@ -72,6 +73,10 @@ final class me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig : me
     final object Companion { // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.Companion|null[0]
         final val Default // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.Companion.Default|{}Default[0]
             final fun <get-Default>(): me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.Companion.Default.<get-Default>|<get-Default>(){}[0]
+        final val Lenient // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.Companion.Lenient|{}Lenient[0]
+            final fun <get-Lenient>(): me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.Companion.Lenient.<get-Lenient>|<get-Lenient>(){}[0]
+        final val OpenAPI // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.Companion.OpenAPI|{}OpenAPI[0]
+            final fun <get-OpenAPI>(): me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.Companion.OpenAPI.<get-OpenAPI>|<get-OpenAPI>(){}[0]
         final val Simple // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.Companion.Simple|{}Simple[0]
             final fun <get-Simple>(): me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.Companion.Simple.<get-Simple>|<get-Simple>(){}[0]
         final val Strict // me.kpavlov.kt.schema.generator.json/FunctionCallingSchemaConfig.Companion.Strict|{}Strict[0]
@@ -109,8 +114,11 @@ final class me.kpavlov.kt.schema.generator.json/TypeGraphToJsonSchemaTransformer
 }
 
 open class me.kpavlov.kt.schema.generator.json/JsonSchemaConfig { // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig|null[0]
-    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Boolean, kotlin/Boolean, kotlin/Boolean, kotlin/Boolean, kotlin/Boolean, kotlin/Boolean) // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
 
+    final val allowAdditionalProperties // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.allowAdditionalProperties|{}allowAdditionalProperties[0]
+        final fun <get-allowAdditionalProperties>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.allowAdditionalProperties.<get-allowAdditionalProperties>|<get-allowAdditionalProperties>(){}[0]
     final val includeOpenAPIPolymorphicDiscriminator // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.includeOpenAPIPolymorphicDiscriminator|{}includeOpenAPIPolymorphicDiscriminator[0]
         final fun <get-includeOpenAPIPolymorphicDiscriminator>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.includeOpenAPIPolymorphicDiscriminator.<get-includeOpenAPIPolymorphicDiscriminator>|<get-includeOpenAPIPolymorphicDiscriminator>(){}[0]
     final val includePolymorphicDiscriminator // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.includePolymorphicDiscriminator|{}includePolymorphicDiscriminator[0]
@@ -131,6 +139,8 @@ open class me.kpavlov.kt.schema.generator.json/JsonSchemaConfig { // me.kpavlov.
     final object Companion { // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion|null[0]
         final val Default // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.Default|{}Default[0]
             final fun <get-Default>(): me.kpavlov.kt.schema.generator.json/JsonSchemaConfig // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.Default.<get-Default>|<get-Default>(){}[0]
+        final val Lenient // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.Lenient|{}Lenient[0]
+            final fun <get-Lenient>(): me.kpavlov.kt.schema.generator.json/JsonSchemaConfig // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.Lenient.<get-Lenient>|<get-Lenient>(){}[0]
         final val OpenAPI // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.OpenAPI|{}OpenAPI[0]
             final fun <get-OpenAPI>(): me.kpavlov.kt.schema.generator.json/JsonSchemaConfig // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.OpenAPI.<get-OpenAPI>|<get-OpenAPI>(){}[0]
         final val Strict // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.Strict|{}Strict[0]

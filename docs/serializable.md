@@ -504,6 +504,7 @@ This code generates:
 | `Default` | Respects default values; nullable fields use union types `["string", "null"]`.                 |
 | `Strict`  | All fields required (including nullable); union types. Use for OpenAI strict function calling. |
 | `OpenAPI` | Nullable fields use `"nullable": true`; includes `discriminator` for polymorphic types.        |
+| `Lenient` | Compact and permissive: only non-nullable fields without defaults are required, no null markers, extra properties allowed. |
 
 ### JsonSchemaConfig reference
 
@@ -515,9 +516,12 @@ This code generates:
 | `useNullableField`                       | `Boolean` | `false` | Emit `"nullable": true` instead of union types (legacy OpenAPI compatibility).                                         |
 | `includePolymorphicDiscriminator`        | `Boolean` | `true`  | Add a `"type"` property with a constant discriminator value to each polymorphic subtype schema.                        |
 | `includeOpenAPIPolymorphicDiscriminator` | `Boolean` | `false` | Include a `discriminator` mapping object in `oneOf` schemas (OpenAPI 3.x). Requires `includePolymorphicDiscriminator`. |
+| `allowAdditionalProperties`              | `Boolean` | `false` | Omit `additionalProperties` from object schemas (extra properties allowed) instead of emitting `false`. Maps are unaffected. |
 
 > [!NOTE]
-> `useUnionTypes` and `useNullableField` are mutually exclusive — exactly one must be `true`.
+> `useUnionTypes` and `useNullableField` are mutually exclusive. With both `false`, nullable properties carry no null
+> marker and are never required (an absent field means `null`); nullable collection elements and map values get an
+> `anyOf` null branch.
 
 ## Polymorphic types
 

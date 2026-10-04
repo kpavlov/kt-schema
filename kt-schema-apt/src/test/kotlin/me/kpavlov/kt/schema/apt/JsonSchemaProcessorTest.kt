@@ -4,7 +4,6 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import kotlin.test.assertFailsWith
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.io.TempDir
@@ -19,28 +18,30 @@ import java.util.stream.Stream
 import javax.tools.DiagnosticCollector
 import javax.tools.JavaFileObject
 import javax.tools.ToolProvider
+import kotlin.test.assertFailsWith
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JsonSchemaProcessorTest {
-
     //region test cases
     @Test
     fun `should generate schema for annotated record`(
         @TempDir tempDir: Path,
     ) {
-        val source = """
+        val source =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Person(String name, int age) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(source, tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Person") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Person") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Person",
@@ -52,7 +53,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["name", "age"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @ParameterizedTest(name = "should resolve record component description from {0} annotation")
@@ -63,7 +64,8 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val annotationSource = """
+        val annotationSource =
+            """
             package com.example;
 
             import java.lang.annotation.ElementType;
@@ -76,26 +78,30 @@ class JsonSchemaProcessorTest {
             public @interface Description {
                 String value();
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // language=java
-        val recordSource = """
+        val recordSource =
+            """
             package com.example;
 
             public record Foo(@Description("$expectedDescription") String name) {}
-        """.trimIndent()
+            """.trimIndent()
 
-        val outputDir = compile(
-            sources = listOf(annotationSource, recordSource),
-            tempDir = tempDir,
-            options = listOf(
-                "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
-                "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
-            ),
-        )
+        val outputDir =
+            compile(
+                sources = listOf(annotationSource, recordSource),
+                tempDir = tempDir,
+                options =
+                    listOf(
+                        "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
+                        "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
+                    ),
+            )
 
         // language=json
-        outputDir.readSchema("com.example.Foo") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Foo") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Foo",
@@ -109,7 +115,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["name"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -117,23 +123,27 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             public record Person(String name, int age) {}
-        """.trimIndent()
+            """.trimIndent()
 
-        val outputDir = compile(
-            source = source,
-            tempDir = tempDir,
-            options = listOf(
-                "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
-                "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
-            ),
-        )
+        val outputDir =
+            compile(
+                source = source,
+                tempDir = tempDir,
+                options =
+                    listOf(
+                        "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
+                        "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
+                    ),
+            )
 
         // language=json
-        outputDir.readSchema("com.example.Person") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Person") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Person",
@@ -145,7 +155,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["name", "age"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -153,20 +163,23 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             public record Person(String name, int age) {}
-        """.trimIndent()
+            """.trimIndent()
 
-        val outputDir = compile(
-            source = source,
-            tempDir = tempDir,
-            options = listOf("-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*"),
-        )
+        val outputDir =
+            compile(
+                source = source,
+                tempDir = tempDir,
+                options = listOf("-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*"),
+            )
 
         // language=json
-        outputDir.readSchema("com.example.Person") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Person") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Person",
@@ -178,7 +191,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["name", "age"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -186,27 +199,31 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val personSource = """
+        val personSource =
+            """
             package com.example;
 
             public record Person(String name) {}
-        """.trimIndent()
+            """.trimIndent()
 
         // language=java
-        val addressSource = """
+        val addressSource =
+            """
             package com.example;
 
             public record Address(String city) {}
-        """.trimIndent()
+            """.trimIndent()
 
-        val outputDir = compile(
-            sources = listOf(personSource, addressSource),
-            tempDir = tempDir,
-            options = listOf(
-                "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.**",
-                "-A${JsonSchemaProcessor.EXCLUDE_OPTION}=**.Person",
-            ),
-        )
+        val outputDir =
+            compile(
+                sources = listOf(personSource, addressSource),
+                tempDir = tempDir,
+                options =
+                    listOf(
+                        "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.**",
+                        "-A${JsonSchemaProcessor.EXCLUDE_OPTION}=**.Person",
+                    ),
+            )
 
         outputDir.hasSchema("com.example.Address") shouldBe true
         outputDir.hasSchema("com.example.Person") shouldBe false
@@ -231,21 +248,23 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val tagSource = """
+        val tagSource =
+            """
             package com.example;
 
             public @interface Tag {}
-        """.trimIndent()
+            """.trimIndent()
 
         // language=java
-        val itemSource = """
+        val itemSource =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Item(Tag tag) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val exception =
             assertFailsWith<IllegalStateException> {
@@ -263,7 +282,8 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
@@ -271,7 +291,7 @@ class JsonSchemaProcessorTest {
             @Schema
             public enum Empty {
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val exception =
             assertFailsWith<IllegalStateException> {
@@ -289,7 +309,8 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
@@ -298,19 +319,20 @@ class JsonSchemaProcessorTest {
             public enum Color {
                 RED, GREEN, BLUE
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(source, tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Color") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Color") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Color",
                 "type": "string",
                 "enum": ["RED", "GREEN", "BLUE"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -318,32 +340,36 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             public enum Color {
                 RED, GREEN, BLUE
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val outputDir = compile(
-            source = source,
-            tempDir = tempDir,
-            options = listOf(
-                "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
-                "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
-            ),
-        )
+        val outputDir =
+            compile(
+                source = source,
+                tempDir = tempDir,
+                options =
+                    listOf(
+                        "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
+                        "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
+                    ),
+            )
 
         // language=json
-        outputDir.readSchema("com.example.Color") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Color") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Color",
                 "type": "string",
                 "enum": ["RED", "GREEN", "BLUE"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -351,28 +377,31 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val colorSource = """
+        val colorSource =
+            """
             package com.example;
 
             public enum Color {
                 RED, GREEN, BLUE
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // language=java
-        val carSource = """
+        val carSource =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Car(Color color) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(listOf(colorSource, carSource), tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Car") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Car") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Car",
@@ -389,7 +418,7 @@ class JsonSchemaProcessorTest {
                     }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -397,38 +426,42 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val colorSource = """
+        val colorSource =
+            """
             package com.example;
 
             public enum Color {
                 RED, GREEN, BLUE
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // language=java
-        val carSource = """
+        val carSource =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Car(Color color) {}
-        """.trimIndent()
+            """.trimIndent()
 
         // language=java
-        val bikeSource = """
+        val bikeSource =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Bike(Color color) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(listOf(colorSource, carSource, bikeSource), tempDir)
 
         // language=json
-        val expectedSchema = $$"""
+        val expectedSchema =
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Car",
@@ -445,12 +478,13 @@ class JsonSchemaProcessorTest {
                     }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         outputDir.readSchema("com.example.Car") shouldEqualJson expectedSchema
 
         // language=json
-        outputDir.readSchema("com.example.Bike") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Bike") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Bike",
@@ -467,7 +501,7 @@ class JsonSchemaProcessorTest {
                     }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -475,29 +509,32 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val addressSource = """
+        val addressSource =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Address(String city, String street) {}
-        """.trimIndent()
+            """.trimIndent()
 
         // language=java
-        val personSource = """
+        val personSource =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Person(String name, int age, Address address) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(listOf(addressSource, personSource), tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Person") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Person") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Person",
@@ -523,10 +560,11 @@ class JsonSchemaProcessorTest {
                     }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         // language=json
-        outputDir.readSchema("com.example.Address") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Address") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Address",
@@ -538,7 +576,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["city", "street"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -546,44 +584,49 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val vendorSource = """
+        val vendorSource =
+            """
             package com.example;
 
             public record Vendor(String name, String location) {}
-        """.trimIndent()
+            """.trimIndent()
 
         // language=java
-        val lineItemSource = """
+        val lineItemSource =
+            """
             package com.example;
 
             public record LineItem(String sku, int quantity, Vendor vendor) {}
-        """.trimIndent()
+            """.trimIndent()
 
         // language=java
-        val orderSource = """
+        val orderSource =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Order(LineItem item) {}
-        """.trimIndent()
+            """.trimIndent()
 
         // language=java
-        val invoiceSource = """
+        val invoiceSource =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Invoice(LineItem item) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir =
             compile(listOf(vendorSource, lineItemSource, orderSource, invoiceSource), tempDir)
 
         // language=json
-        val expectedSchema = $$"""
+        val expectedSchema =
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Order",
@@ -619,12 +662,13 @@ class JsonSchemaProcessorTest {
                     }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
 
         outputDir.readSchema("com.example.Order") shouldEqualJson expectedSchema
 
         // language=json
-        outputDir.readSchema("com.example.Invoice") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Invoice") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Invoice",
@@ -660,7 +704,7 @@ class JsonSchemaProcessorTest {
                     }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -668,34 +712,38 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val addressSource = """
+        val addressSource =
+            """
             package com.example;
 
             public record Address(String city) {}
-        """.trimIndent()
+            """.trimIndent()
 
         // language=java
-        val orderSource = """
+        val orderSource =
+            """
             package com.example;
 
             import java.util.List;
             import java.util.Map;
 
             public record Order(List<String> tags, Map<String, Integer> counts, int[] values, Address address) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir =
             compile(
                 sources = listOf(addressSource, orderSource),
                 tempDir = tempDir,
-                options = listOf(
-                "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
-                "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
-            ),
+                options =
+                    listOf(
+                        "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
+                        "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
+                    ),
             )
 
         // language=json
-        outputDir.readSchema("com.example.Order") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Order") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Order",
@@ -738,7 +786,7 @@ class JsonSchemaProcessorTest {
                     }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -746,7 +794,8 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
@@ -756,12 +805,13 @@ class JsonSchemaProcessorTest {
                 java.util.Set<String> tags,
                 java.util.Collection<Integer> scores
             ) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(source, tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Bundle") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Bundle") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Bundle",
@@ -783,7 +833,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["tags", "scores"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -791,19 +841,21 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record ArraysHolder(double[][] matrix) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(source, tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.ArraysHolder") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.ArraysHolder") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.ArraysHolder",
@@ -822,7 +874,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["matrix"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -830,7 +882,8 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
@@ -841,12 +894,13 @@ class JsonSchemaProcessorTest {
                 java.util.Map<String, java.util.List<Integer>> grouped,
                 java.util.List<java.util.Map<String, java.lang.Boolean>> flags
             ) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(source, tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Nested") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Nested") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Nested",
@@ -883,7 +937,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["matrix", "grouped", "flags"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -891,19 +945,21 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Wrapper(Object payload) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(source, tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Wrapper") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Wrapper") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Wrapper",
@@ -914,7 +970,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["payload"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -922,19 +978,21 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Box<T extends Number>(T value) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(source, tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Box") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Box") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Box",
@@ -955,7 +1013,7 @@ class JsonSchemaProcessorTest {
                     }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -963,19 +1021,21 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Box<T>(T value) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(source, tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Box") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Box") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Box",
@@ -986,7 +1046,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["value"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -994,26 +1054,29 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val namesSource = """
+        val namesSource =
+            """
             package com.example;
 
             class Names extends java.util.ArrayList<String> {}
-        """.trimIndent()
+            """.trimIndent()
 
         // language=java
-        val orderSource = """
+        val orderSource =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Order(Names names) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(listOf(namesSource, orderSource), tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Order") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Order") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Order",
@@ -1029,7 +1092,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["names"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @ParameterizedTest(name = "should generate schema for record with {0} of object components")
@@ -1043,29 +1106,32 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val addressSource = """
+        val addressSource =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Address(String city) {}
-        """.trimIndent()
+            """.trimIndent()
 
         // language=java
-        val catalogSource = """
+        val catalogSource =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Catalog($fieldDeclaration) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(listOf(addressSource, catalogSource), tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Catalog") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Catalog") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Catalog",
@@ -1088,7 +1154,7 @@ class JsonSchemaProcessorTest {
                     }
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -1096,7 +1162,8 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             public class Company {
@@ -1108,19 +1175,22 @@ class JsonSchemaProcessorTest {
                     this.founded = founded;
                 }
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val outputDir = compile(
-            source = source,
-            tempDir = tempDir,
-            options = listOf(
-                "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
-                "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
-            ),
-        )
+        val outputDir =
+            compile(
+                source = source,
+                tempDir = tempDir,
+                options =
+                    listOf(
+                        "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
+                        "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
+                    ),
+            )
 
         // language=json
-        outputDir.readSchema("com.example.Company") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Company") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Company",
@@ -1132,7 +1202,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["name", "founded"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -1140,7 +1210,8 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Description;
@@ -1154,12 +1225,13 @@ class JsonSchemaProcessorTest {
                 @Description("Age of the person")
                 int getAge();
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(source, tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Person") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Person") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Person",
@@ -1177,7 +1249,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["name", "age"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -1185,7 +1257,8 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             public interface Resource {
@@ -1195,19 +1268,22 @@ class JsonSchemaProcessorTest {
                 String getUrlPath();
                 boolean isActive();
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val outputDir = compile(
-            source = source,
-            tempDir = tempDir,
-            options = listOf(
-                "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
-                "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
-            ),
-        )
+        val outputDir =
+            compile(
+                source = source,
+                tempDir = tempDir,
+                options =
+                    listOf(
+                        "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
+                        "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
+                    ),
+            )
 
         // language=json
-        outputDir.readSchema("com.example.Resource") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Resource") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Resource",
@@ -1222,7 +1298,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["name", "URL", "OK", "urlPath", "active"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -1230,26 +1306,30 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             public interface Product {
                 String name();
                 int price();
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val outputDir = compile(
-            source = source,
-            tempDir = tempDir,
-            options = listOf(
-                "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
-                "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
-            ),
-        )
+        val outputDir =
+            compile(
+                source = source,
+                tempDir = tempDir,
+                options =
+                    listOf(
+                        "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
+                        "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.*",
+                    ),
+            )
 
         // language=json
-        outputDir.readSchema("com.example.Product") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Product") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Product",
@@ -1261,7 +1341,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["name", "price"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -1269,23 +1349,27 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example.sub.sub;
 
             public record DeepRecord(String value) {}
-        """.trimIndent()
+            """.trimIndent()
 
-        val outputDir = compile(
-            source = source,
-            tempDir = tempDir,
-            options = listOf(
-                "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
-                "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.**",
-            ),
-        )
+        val outputDir =
+            compile(
+                source = source,
+                tempDir = tempDir,
+                options =
+                    listOf(
+                        "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
+                        "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.**",
+                    ),
+            )
 
         // language=json
-        outputDir.readSchema("com.example.sub.sub.DeepRecord") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.sub.sub.DeepRecord") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.sub.sub.DeepRecord",
@@ -1296,7 +1380,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["value"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     @ParameterizedTest(name = "should map {0} to JSON Schema type {1}")
@@ -1325,19 +1409,21 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             import me.kpavlov.kt.schema.Schema;
 
             @Schema
             public record Scalars($javaType value) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(source, tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Scalars") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Scalars") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Scalars",
@@ -1348,7 +1434,7 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["value"]
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     //endregion
@@ -1401,47 +1487,52 @@ class JsonSchemaProcessorTest {
         )
 
     // language=java
-    private val annotatedRecordOutsideRootPackage = """
+    private val annotatedRecordOutsideRootPackage =
+        """
         package com.other;
 
         import me.kpavlov.kt.schema.Schema;
 
         @Schema
         public record Person(String name, int age) {}
-    """.trimIndent()
+        """.trimIndent()
 
     // language=java
-    private val annotatedPerson = """
+    private val annotatedPerson =
+        """
         package com.example;
 
         import me.kpavlov.kt.schema.Schema;
 
         @Schema
         public record Person(String name) {}
-    """.trimIndent()
+        """.trimIndent()
 
     // language=java
-    private val plainPerson = """
+    private val plainPerson =
+        """
         package com.example;
 
         public record Person(String name) {}
-    """.trimIndent()
+        """.trimIndent()
 
     // language=java
-    private val plainEnum = """
+    private val plainEnum =
+        """
         package com.example;
 
         public enum Color {
             RED, GREEN, BLUE
         }
-    """.trimIndent()
+        """.trimIndent()
 
     // language=java
-    private val plainRecord = """
+    private val plainRecord =
+        """
         package com.example;
 
         public record PlainRecord(String value) {}
-    """.trimIndent()
+        """.trimIndent()
 
     private fun objectCollectionFields(): Stream<Arguments> =
         Stream.of(
@@ -1491,7 +1582,8 @@ class JsonSchemaProcessorTest {
         @TempDir tempDir: Path,
     ) {
         // language=java
-        val source = """
+        val source =
+            """
             package com.example;
 
             import java.math.BigDecimal;
@@ -1503,12 +1595,13 @@ class JsonSchemaProcessorTest {
                 BigInteger quantity,
                 BigDecimal amount
             ) {}
-        """.trimIndent()
+            """.trimIndent()
 
         val outputDir = compile(source, tempDir)
 
         // language=json
-        outputDir.readSchema("com.example.Payment") shouldEqualJson $$"""
+        outputDir.readSchema("com.example.Payment") shouldEqualJson
+            $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "com.example.Payment",
@@ -1520,7 +1613,117 @@ class JsonSchemaProcessorTest {
                 "additionalProperties": false,
                 "required": ["quantity", "amount"]
             }
-        """.trimIndent()
+            """.trimIndent()
+    }
+
+    @Test
+    fun `should generate lenient schema when config option is Lenient`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val nullableSource =
+            """
+            package com.example;
+
+            public @interface Nullable {}
+            """.trimIndent()
+
+        // language=java
+        val messageSource =
+            """
+            package com.example;
+
+            public class Message {
+                public String text;
+                public int priority = 0;
+                @Nullable
+                public String author;
+            }
+            """.trimIndent()
+
+        val outputDir =
+            compile(
+                sources = listOf(nullableSource, messageSource),
+                tempDir = tempDir,
+                options =
+                    listOf(
+                        "-A${JsonSchemaProcessor.CONFIG_OPTION}=Lenient",
+                        "-A${JsonSchemaProcessor.ROOT_PACKAGE_OPTION}=com.example",
+                        "-A${JsonSchemaProcessor.INCLUDE_OPTION}=com.example.Message",
+                    ),
+            )
+
+        // APT cannot see default values, so `priority` stays required; the nullable `author` is optional
+        // and has no null marker.
+        // language=json
+        outputDir.readSchema("com.example.Message") shouldEqualJson
+            $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Message",
+                "type": "object",
+                "properties": {
+                    "text": { "type": "string" },
+                    "priority": { "type": "integer" },
+                    "author": { "type": "string" }
+                },
+                "required": ["text", "priority"]
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `should fail the build when config option is invalid`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source =
+            """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Person(String name) {}
+            """.trimIndent()
+
+        val exception =
+            assertFailsWith<IllegalStateException> {
+                compile(
+                    source = source,
+                    tempDir = tempDir,
+                    options = listOf("-A${JsonSchemaProcessor.CONFIG_OPTION}=no.such.Config"),
+                )
+            }
+
+        assertSoftly(exception) {
+            message shouldContain "no.such.Config"
+            message shouldContain "strict, lenient, openapi"
+        }
+    }
+
+    @Test
+    fun `should fail the build when config option is invalid even if no type is processed`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source =
+            """
+            package com.example;
+
+            public record Person(String name) {}
+            """.trimIndent()
+
+        val exception =
+            assertFailsWith<IllegalStateException> {
+                compile(
+                    source = source,
+                    tempDir = tempDir,
+                    options = listOf("-A${JsonSchemaProcessor.CONFIG_OPTION}=no.such.Config"),
+                )
+            }
+
+        exception.message shouldContain "no.such.Config"
     }
 
     //endregion
@@ -1531,17 +1734,16 @@ class JsonSchemaProcessorTest {
         source: String,
         tempDir: Path,
         options: List<String> = emptyList(),
-    ): Path {
-        return compile(listOf(source), tempDir, options)
-    }
+    ): Path = compile(listOf(source), tempDir, options)
 
     private fun compile(
         sources: List<String>,
         tempDir: Path,
         options: List<String> = emptyList(),
     ): Path {
-        val compiler = ToolProvider.getSystemJavaCompiler()
-            ?: error("No system Java compiler available — run on JDK, not JRE")
+        val compiler =
+            ToolProvider.getSystemJavaCompiler()
+                ?: error("No system Java compiler available — run on JDK, not JRE")
 
         val diagnostics = DiagnosticCollector<JavaFileObject>()
         val outputDir = tempDir.resolve("classes")
@@ -1553,14 +1755,15 @@ class JsonSchemaProcessorTest {
         allOptions.addAll(options)
 
         val writer = StringWriter()
-        val task = compiler.getTask(
-            writer,
-            null,
-            diagnostics,
-            allOptions,
-            null,
-            sourceFiles,
-        )
+        val task =
+            compiler.getTask(
+                writer,
+                null,
+                diagnostics,
+                allOptions,
+                null,
+                sourceFiles,
+            )
         task.setProcessors(listOf(JsonSchemaProcessor()))
 
         val success = task.call()
@@ -1579,11 +1782,9 @@ class JsonSchemaProcessorTest {
         return file.readText()
     }
 
-    private fun Path.hasSchema(fqn: String): Boolean =
-        schemaFile(fqn).exists()
+    private fun Path.hasSchema(fqn: String): Boolean = schemaFile(fqn).exists()
 
-    private fun Path.schemaFiles(): List<File> =
-        toFile().walkTopDown().filter { it.name.endsWith(".json") }.toList()
+    private fun Path.schemaFiles(): List<File> = toFile().walkTopDown().filter { it.name.endsWith(".json") }.toList()
 
     private fun Path.schemaFile(fqn: String): File =
         resolve("META-INF/kt-schema/schemas/${fqn.replace('.', '/')}.json").toFile()

@@ -7,6 +7,7 @@ import me.kpavlov.kt.schema.apt.ir.AptClassIntrospector
 import me.kpavlov.kt.schema.generator.core.GlobMatcher
 import me.kpavlov.kt.schema.generator.core.parseGlobPatterns
 import me.kpavlov.kt.schema.generator.json.JsonSchemaConfig
+import me.kpavlov.kt.schema.generator.json.SchemaConfigResolver
 import me.kpavlov.kt.schema.generator.json.TypeGraphToJsonSchemaTransformer
 import me.kpavlov.kt.schema.json.JsonSchema
 import java.io.IOException
@@ -39,6 +40,7 @@ import javax.tools.StandardLocation
     JsonSchemaProcessor.ROOT_PACKAGE_OPTION,
     JsonSchemaProcessor.INCLUDE_OPTION,
     JsonSchemaProcessor.EXCLUDE_OPTION,
+    JsonSchemaProcessor.CONFIG_OPTION,
 )
 public class JsonSchemaProcessor : AbstractProcessor() {
     //region Processor state
@@ -53,21 +55,22 @@ public class JsonSchemaProcessor : AbstractProcessor() {
      */
     private val introspector by lazy { AptClassIntrospector(processingEnv) }
 
-    private val transformer =
-        TypeGraphToJsonSchemaTransformer(
-            // build JsonSchemaConfig upon Strict config, matching kt-schema-ksp's ClassSchemaStrategy
-            config =
-                with(JsonSchemaConfig.Strict) {
-                    JsonSchemaConfig(
-                        respectDefaultPresence = false,
-                        requireNullableFields = requireNullableFields,
-                        useUnionTypes = useUnionTypes,
-                        useNullableField = useNullableField,
-                        includePolymorphicDiscriminator = includePolymorphicDiscriminator,
-                        includeOpenAPIPolymorphicDiscriminator = includeOpenAPIPolymorphicDiscriminator,
-                    )
-                },
-        )
+    /** `null` when [CONFIG_OPTION] is invalid; the error has been reported by then. */
+    private val transformer: TypeGraphToJsonSchemaTransformer? by lazy {
+        try {
+            TypeGraphToJsonSchemaTransformer(
+                config =
+                    SchemaConfigResolver.resolveJsonSchemaConfig(
+                        processingEnv.options[CONFIG_OPTION],
+                        JsonSchemaConfig.Strict,
+                        JsonSchemaProcessor::class.java.classLoader,
+                    ),
+            )
+        } catch (e: IllegalArgumentException) {
+            processingEnv.messager.printMessage(Diagnostic.Kind.ERROR, e.message.orEmpty())
+            null
+        }
+    }
 
     private val json =
         Json {
@@ -79,15 +82,18 @@ public class JsonSchemaProcessor : AbstractProcessor() {
 
     //region Processing
 
+    @Suppress("ReturnCount")
     override fun process(
         annotations: MutableSet<out TypeElement>,
         roundEnv: RoundEnvironment,
     ): Boolean {
         if (roundEnv.processingOver()) return false
 
+        val activeTransformer = transformer ?: return false
+
         candidateTypes(roundEnv)
             .filter { processedTypes.add(it.qualifiedName.toString()) }
-            .forEach(::processType)
+            .forEach { processType(it, activeTransformer) }
 
         return false
     }
@@ -148,7 +154,10 @@ public class JsonSchemaProcessor : AbstractProcessor() {
 
     //region Resource writing
 
-    private fun processType(type: TypeElement) {
+    private fun processType(
+        type: TypeElement,
+        transformer: TypeGraphToJsonSchemaTransformer,
+    ) {
         @Suppress("TooGenericExceptionCaught")
         try {
             val graph = introspector.introspect(type)
@@ -214,6 +223,13 @@ public class JsonSchemaProcessor : AbstractProcessor() {
          * or matches an include pattern. Glob syntax matches [INCLUDE_OPTION].
          */
         public const val EXCLUDE_OPTION: String = "me.kpavlov.kt.schema.exclude"
+
+        /**
+         * Processor option (`-A<name>=<value>`) selecting the schema configuration: a case-insensitive
+         * shortcut (`strict`, `lenient`, `openapi`) or the fully qualified name of a
+         * [JsonSchemaConfig] class on the processor path. Defaults to `strict`.
+         */
+        public const val CONFIG_OPTION: String = SchemaConfigResolver.OPTION
     }
 
     //endregion

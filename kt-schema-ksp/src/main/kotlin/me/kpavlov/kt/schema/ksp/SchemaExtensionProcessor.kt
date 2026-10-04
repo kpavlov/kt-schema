@@ -9,6 +9,9 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.validate
+import me.kpavlov.kt.schema.generator.json.FunctionCallingSchemaConfig
+import me.kpavlov.kt.schema.generator.json.JsonSchemaConfig
+import me.kpavlov.kt.schema.generator.json.SchemaConfigResolver
 import me.kpavlov.kt.schema.ksp.functions.CompanionFunctionStrategy
 import me.kpavlov.kt.schema.ksp.functions.InstanceFunctionStrategy
 import me.kpavlov.kt.schema.ksp.functions.ObjectFunctionStrategy
@@ -57,16 +60,38 @@ internal class SchemaExtensionProcessor(
 
         /** Option key: visibility of the generated declarations (`public`, `internal`, `private` or empty). */
         const val OPTION_VISIBILITY = "me.kpavlov.kt.schema.visibility"
+
+        /**
+         * Option key: schema configuration, either a shortcut (`strict`, `lenient`, `openapi`;
+         * case-insensitive) or the fully qualified name of a `JsonSchemaConfig` class on the processor classpath.
+         * Defaults to `strict` for classes and to the function-calling default for functions.
+         */
+        const val OPTION_CONFIG = SchemaConfigResolver.OPTION
     }
 
-    private val classStrategy = ClassSchemaStrategy()
-    private val functionStrategies =
+    /** Resolved once; `null` when [OPTION_CONFIG] is invalid, in which case the error has been logged. */
+    private val configs: Pair<JsonSchemaConfig, FunctionCallingSchemaConfig>? by lazy {
+        val value = options[OPTION_CONFIG]
+        val loader = SchemaExtensionProcessor::class.java.classLoader
+        try {
+            SchemaConfigResolver.resolveJsonSchemaConfig(value, JsonSchemaConfig.Strict, loader) to
+                SchemaConfigResolver.resolveFunctionCallingConfig(value, FunctionCallingSchemaConfig.Default, loader)
+        } catch (e: IllegalArgumentException) {
+            logger.error(e.message.orEmpty())
+            null
+        }
+    }
+
+    private val classStrategy by lazy { ClassSchemaStrategy(checkNotNull(configs).first) }
+    private val functionStrategies by lazy {
+        val config = checkNotNull(configs).second
         listOf(
-            TopLevelFunctionStrategy(),
-            InstanceFunctionStrategy(),
-            CompanionFunctionStrategy(),
-            ObjectFunctionStrategy(),
+            TopLevelFunctionStrategy(config),
+            InstanceFunctionStrategy(config),
+            CompanionFunctionStrategy(config),
+            ObjectFunctionStrategy(config),
         )
+    }
 
     override fun finish() {
         logger.info("[kt-schema] ✅ Done!")
@@ -84,6 +109,7 @@ internal class SchemaExtensionProcessor(
         )
     }
 
+    @Suppress("ReturnCount")
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val enabled = options[OPTION_ENABLED]?.trim()?.takeIf { it.isNotEmpty() } != "false"
 
@@ -93,6 +119,8 @@ internal class SchemaExtensionProcessor(
             logger.info("[kt-schema] Plugin is disabled")
             return emptyList()
         }
+
+        configs ?: return emptyList()
 
         val unprocessable = mutableListOf<KSAnnotated>()
 

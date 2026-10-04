@@ -31,7 +31,8 @@ Quick Links:
 
 **Generation Modes:**
 
-- **Compile-time (Java APT)**: Zero runtime overhead for plain Java records, classes, interfaces and enums — no Kotlin required in your code
+- **Compile-time (Java APT)**: Zero runtime overhead for plain Java records, classes, interfaces and enums — no Kotlin
+  required in your code
 - **Compile-time (KSP)**: Zero runtime overhead, multiplatform, for your annotated Kotlin classes
 - **Runtime (Reflection)**: JVM-only, for any class including third-party libraries
 - **Runtime (SerialDescriptor)**: Kotlin serializable classes, including open polymorphism via `SerializersModule`
@@ -51,7 +52,8 @@ Quick Links:
 **Comprehensive Type Support:**
 
 - **Enums, collections, maps, nested objects, nullability, generics** (with star-projection)
-- **Polymorphic hierarchies** — sealed classes and open polymorphism (via `SerializersModule`) with automatic `oneOf` generation and discriminator field
+- **Polymorphic hierarchies** — sealed classes and open polymorphism (via `SerializersModule`) with automatic `oneOf`
+  generation and discriminator field
 - **Union types** for nullable parameters (`["string", "null"]`)
 - **Type constraints** (min/max, patterns, formats) via the JSON Schema DSL
 - **Default values** (compile-time: tracked but not extracted; runtime: fully extracted)
@@ -78,6 +80,7 @@ Quick Links:
   * [Annotate Your Models](#annotate-your-models)
   * [Configuration](#configuration)
     * [Quick Setup](#quick-setup)
+    * [Schema configuration](#schema-configuration)
 * [Runtime schema generation](#runtime-schema-generation)
   * [Why Runtime Generation?](#why-runtime-generation?)
   * [Usage](#usage)
@@ -168,17 +171,19 @@ internally, but neither processor's standard generated resource surfaces it, sin
 required regardless of default presence (KSP/APT can't evaluate a real Kotlin/Java default-value expression at
 compile time, unlike reflection) — see [Multi-Framework Annotation Support](#multi-framework-annotation-support).
 
-- **[Pick KSP](docs/ksp.md)** when you own the classes, want zero runtime overhead, and target Multiplatform or need KDoc
-in your schema.
+- **[Pick KSP](docs/ksp.md)** when you own the classes, want zero runtime overhead, and target Multiplatform or need
+  KDoc
+  in your schema.
 
 - **[Pick Java APT](docs/apt.md)** when your code is plain Java (no Kotlin) and you want zero runtime overhead.
-Supports Java records, classes, interfaces and enums.
+  Supports Java records, classes, interfaces and enums.
 
 - **[Pick Serialization-based](docs/serializable.md)** when your classes are already `@Serializable` and you need
-Multiplatform support without a build-time processor.
+  Multiplatform support without a build-time processor.
 
-- **[Pick Reflection](#runtime-schema-generation)** when you need JVM-only runtime generation for third-party classes, or
-need to extract data class default values. Works equally well for `@Serializable` classes on JVM.
+- **[Pick Reflection](#runtime-schema-generation)** when you need JVM-only runtime generation for third-party classes,
+  or
+  need to extract data class default values. Works equally well for `@Serializable` classes on JVM.
 
 ## Quick Start
 
@@ -233,6 +238,43 @@ kotlin {
 ```
 
 For JVM-only projects and full configuration options, see the [KSP Configuration Guide](docs/ksp.md).
+
+#### Schema configuration
+
+The `me.kpavlov.kt.schema.config` processor option selects the schema flavour for both KSP and the Java annotation
+processor. Unset, classes use `strict` and KSP function schemas use `FunctionCallingSchemaConfig.Default`. The value is
+a case-insensitive shortcut:
+
+| Value     | Schema                                                                                                                     |
+|:----------|:---------------------------------------------------------------------------------------------------------------------------|
+| `strict`  | All fields required, nullable types as `["string", "null"]`, `additionalProperties: false`.                                |
+| `lenient` | Compact and permissive: only non-nullable fields without defaults are required, no null markers, extra properties allowed. |
+| `openapi` | OpenAPI 3.x flavour: nullable types use `"nullable": true`.                                                                |
+
+```kotlin
+// KSP
+ksp {
+    arg("me.kpavlov.kt.schema.config", "lenient")
+}
+
+// Java annotation processor
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.add("-Ame.kpavlov.kt.schema.config=lenient")
+}
+```
+
+Instead of a shortcut, the value can be the fully qualified name of your own `JsonSchemaConfig` class: a Kotlin
+`object`, or a class with a public no-arg constructor. It must be on the processor classpath, i.e. provided by a
+`ksp(...)` / `annotationProcessor(...)` dependency. For function schemas (KSP), a plain `JsonSchemaConfig` is copied
+into a
+`FunctionCallingSchemaConfig` with `strictMode = false`. An unresolvable value fails the build with an error listing the
+valid shortcuts.
+
+> [!IMPORTANT]
+> `lenient` schemas express `null` as an absent field: a nullable property has no null marker and is never required.
+> Nullable collection elements and map values can't be omitted, so they keep an `anyOf` branch with `{"type": "null"}`.
+> Serialize payloads with `explicitNulls = false` (e.g. `Json { explicitNulls = false }`), otherwise an explicit
+> `null` does not validate.
 
 ## Runtime schema generation
 
@@ -333,7 +375,8 @@ Schemas follow JSON Schema Draft 2020-12 format. Example (pretty-printed):
 - Collections: `List<T>`/`Set<T>` → `{ "type":"array", "items": T }`; `Map<String, V>` →
   `{ "type":"object", "additionalProperties": V }`.
 - `kotlin.Any` / unbound generic type parameters (e.g., `T`) map to the empty schema `{}`, which accepts any JSON value.
-- Named types (nested objects, enums, sealed classes) are deduplicated in a `$defs` section and referenced via `$ref` at every usage site.
+- Named types (nested objects, enums, sealed classes) are deduplicated in a `$defs` section and referenced via `$ref` at
+  every usage site.
 
 ## Examples
 
@@ -674,9 +717,14 @@ println(schema.encodeToString(Json { prettyPrint = true }))
 **Key features:**
 
 - **`oneOf` with `$ref`**: Each sealed subclass is stored in `$defs` and referenced via `$ref`
-- **Fully qualified names by default**: `$defs` keys and discriminator `const` values use fully qualified class names (e.g., `com.example.Animal.Dog`) to avoid collisions across packages
-- **Name overrides**: a subtype annotated with `@SerialName`/`@JsonTypeName` (or another recognized name-override annotation) uses that short name instead of its FQN — like `Cat` above, overridden via `@SerialName("Cat")`
-- **Discriminator property**: A `type` field with a `const` value is automatically added to each subtype for runtime dispatch. The reflection and KSP front ends take the name from `@JsonClassDiscriminator("...")` or `@JsonTypeInfo(property = "...")` on the sealed type or its supertypes; a subtype declaring a property with that name fails schema generation
+- **Fully qualified names by default**: `$defs` keys and discriminator `const` values use fully qualified class names
+  (e.g., `com.example.Animal.Dog`) to avoid collisions across packages
+- **Name overrides**: a subtype annotated with `@SerialName`/`@JsonTypeName` (or another recognized name-override
+  annotation) uses that short name instead of its FQN — like `Cat` above, overridden via `@SerialName("Cat")`
+- **Discriminator property**: A `type` field with a `const` value is automatically added to each subtype for runtime
+  dispatch. The reflection and KSP front ends take the name from `@JsonClassDiscriminator("...")` or
+  `@JsonTypeInfo(property = "...")` on the sealed type or its supertypes; a subtype declaring a property with that name
+  fails schema generation
 - **Property inheritance**: Base class properties are included in each subtype
 - **Type safety**: Each subtype gets its own schema definition
 
@@ -735,8 +783,8 @@ data class Person(val name: String, val age: Int)
 **@Schema parameters:**
 
 - `value = "json"`: Schema type (only JSON currently supported)
-- `withSchemaObject = false`: Generate `jsonSchema: JsonObject` property (
-  see [Advanced Configuration](#advanced-configuration))
+- `withSchemaObject = false`: Generate `jsonSchema: JsonObject` property
+  (see [Advanced Configuration](#advanced-configuration))
 
 **Note**: `jsonSchemaString` is always generated. `jsonSchema` requires `withSchemaObject = true`.
 
@@ -1208,10 +1256,10 @@ Beyond descriptions, kt-schema also recognizes **name overrides** and **ignore m
 **Default values** — matched by **fully qualified name** (case-sensitive); mainly useful for the KSP and Java APT
 processors, which can't evaluate a real Kotlin/Java default-value expression at compile time:
 
-| Annotation                                                       | Maps to                                                                                                     |
-|-------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
-| `com.fasterxml.jackson.annotation.JsonEnumDefaultValue`          | the enum constant it's placed on becomes that enum type's `default` (on the enum's own schema, in `$defs`)  |
-| `com.fasterxml.jackson.annotation.JsonProperty(defaultValue=..)` | the property's default value, internally                                                                    |
+| Annotation                                                       | Maps to                                                                                                    |
+|------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------|
+| `com.fasterxml.jackson.annotation.JsonEnumDefaultValue`          | the enum constant it's placed on becomes that enum type's `default` (on the enum's own schema, in `$defs`) |
+| `com.fasterxml.jackson.annotation.JsonProperty(defaultValue=..)` | the property's default value, internally                                                                   |
 
 > [!NOTE]
 > The `@JsonEnumDefaultValue`-derived `default` always appears in the generated output, since it's a property of
@@ -1235,7 +1283,8 @@ without a dot are matched **case-insensitively** against the simple name. This m
 > Multi-framework annotation recognition applies to the **KSP processor**, the **Java APT processor**
 > (via `AptIntrospectionContext`, which recognizes the same Jackson defaults), and **reflection-based generators**.
 > The serialization-based generator (`SerializationClassJsonSchemaGenerator`) can only access annotations marked
-> with `@SerialInfo` — see [Custom description extraction](docs/serializable.md#custom-description-extraction) for details.
+> with `@SerialInfo` — see [Custom description extraction](docs/serializable.md#custom-description-extraction) for
+details.
 
 ### Customizing Annotation Detection
 
@@ -1246,16 +1295,14 @@ The configuration file is **optional** — if not provided or fails to load, the
 
 By default, the library recognizes:
 
-**Description annotations**: Description, LLMDescription, JsonPropertyDescription, JsonClassDescription, P
-**Description attributes**: value, description
-**Ignore annotations**: SchemaIgnore, SerialSchemaIgnore, JsonIgnoreType, JsonIgnore
-**Name-override annotations**: kotlinx.serialization.SerialName, com.fasterxml.jackson.annotation.JsonProperty, com.fasterxml.jackson.annotation.JsonTypeName
-**Name-override attributes**: value
-**Enum-default annotations**: com.fasterxml.jackson.annotation.JsonEnumDefaultValue
-**Default-value annotations**: com.fasterxml.jackson.annotation.JsonProperty
-**Default-value attributes**: defaultValue
-**Discriminator annotations**: kotlinx.serialization.json.JsonClassDiscriminator, com.fasterxml.jackson.annotation.JsonTypeInfo
-**Discriminator attributes**: discriminator, property
+**Description annotations**: Description, LLMDescription, JsonPropertyDescription, JsonClassDescription, P **Description
+attributes**: value, description **Ignore annotations**: SchemaIgnore, SerialSchemaIgnore, JsonIgnoreType, JsonIgnore
+**Name-override annotations**: kotlinx.serialization.SerialName, com.fasterxml.jackson.annotation.JsonProperty,
+com.fasterxml.jackson.annotation.JsonTypeName **Name-override attributes**: value **Enum-default annotations**:
+com.fasterxml.jackson.annotation.JsonEnumDefaultValue **Default-value annotations**:
+com.fasterxml.jackson.annotation.JsonProperty **Default-value attributes**: defaultValue **Discriminator annotations**:
+kotlinx.serialization.json.JsonClassDiscriminator, com.fasterxml.jackson.annotation.JsonTypeInfo **Discriminator
+attributes**: discriminator, property
 
 > [!NOTE]
 > Annotation names containing a dot (e.g., `kotlinx.serialization.SerialName`) are matched
@@ -1270,16 +1317,13 @@ To customize, place `kt-schema.properties` in your project's resources:
 # Add your custom annotations to the defaults
 introspector.annotations.description.names=Description,MyCustomAnnotation,DocString
 introspector.annotations.description.attributes=value,description,text
-
 # Name-override annotations (use FQN for precise matching)
 introspector.annotations.name.names=kotlinx.serialization.SerialName
 introspector.annotations.name.attributes=value
-
 # Default-value annotations (use FQN for precise matching)
 introspector.annotations.enumDefault.names=com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 introspector.annotations.defaultValue.names=com.fasterxml.jackson.annotation.JsonProperty
 introspector.annotations.defaultValue.attributes=defaultValue
-
 # Polymorphic discriminator property name (reflection and KSP front ends; defaults to "type")
 introspector.annotations.discriminator.names=kotlinx.serialization.json.JsonClassDiscriminator,com.fasterxml.jackson.annotation.JsonTypeInfo
 introspector.annotations.discriminator.attributes=discriminator,property
@@ -1514,13 +1558,14 @@ sure you read and adhere to it.
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ### Attribution
- 
+
 **kt-schema** is an independently maintained fork of [kotlinx.schema](https://github.com/Kotlin/kotlinx-schema).
 Konstantin Pavlov originally started the work while at JetBrains.
- 
-This project contains modified and unmodified portions of the original work. 
-Notable changes include renaming the Kotlin packages from `kotlinx.schema` to `me.kpavlov.kt.schema`, renaming Maven coordinates from `org.jetbrains.kotlinx` to `me.kpavlov`, and further independent development.
- 
+
+This project contains modified and unmodified portions of the original work.
+Notable changes include renaming the Kotlin packages from `kotlinx.schema` to `me.kpavlov.kt.schema`, renaming Maven
+coordinates from `org.jetbrains.kotlinx` to `me.kpavlov`, and further independent development.
+
 See the [LICENSE](LICENSE) and [NOTICE](NOTICE) files for licensing and attribution information.
 
 **kt-schema** is an independent project and is not affiliated with, endorsed by, or sponsored by JetBrains.

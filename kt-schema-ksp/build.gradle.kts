@@ -27,6 +27,7 @@ kotlin {
 
         testImplementation(libs.junit.jupiter.params)
         testImplementation(libs.kotest.assertions.core)
+        testImplementation(libs.kotest.assertions.json)
         testImplementation(libs.kotlin.test)
         testImplementation(libs.mockk)
     }

@@ -1,7 +1,5 @@
 package me.kpavlov.kt.schema.generator.json
 
-import me.kpavlov.kt.schema.generator.json.JsonSchemaConfig.Companion.Strict
-
 /**
  * Configuration for JSON Schema transformers.
  *
@@ -25,7 +23,7 @@ import me.kpavlov.kt.schema.generator.json.JsonSchemaConfig.Companion.Strict
  * |---------------|------------------|--------|
  * | true | false | `{"type": ["string", "null"]}` (JSON Schema Draft 2020-12) |
  * | false | true | `{"type": "string", "nullable": true}` (legacy OpenAPI) |
- * | false | false | `{"type": "string"}` (no nullable indication) |
+ * | false | false | `{"type": "string"}` (no nullable indication); nullable properties are omitted from `required` |
  *
  * @see [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/json-schema-core.html)
  * @author Konstantin Pavlov
@@ -78,7 +76,9 @@ public open class JsonSchemaConfig(
      * Whether to use union types for nullable fields.
      *
      * When `true`: Generates `["string", "null"]` (JSON Schema Draft 2020-12 standard).
-     * When `false`: Uses nullable field instead (see [useNullableField]).
+     * When `false`: Uses nullable field instead (see [useNullableField]); with both disabled,
+     * nullable properties carry no null marker and are never required; nullable collection elements
+     * and map values get an `anyOf` branch with `{"type": "null"}`.
      *
      * Default: `true`
      */
@@ -115,16 +115,42 @@ public open class JsonSchemaConfig(
      * Default: `false`
      */
     public val includeOpenAPIPolymorphicDiscriminator: Boolean = false,
+    /**
+     * Whether object schemas allow properties that are not declared.
+     *
+     * When `true`: object schemas omit `additionalProperties` (JSON Schema allows them by default).
+     * When `false`: object schemas emit `"additionalProperties": false`.
+     *
+     * Map schemas are unaffected: they always describe their value type in `additionalProperties`.
+     *
+     * Default: `false`
+     */
+    public val allowAdditionalProperties: Boolean = false,
 ) {
+    // Binary compatibility with callers compiled before allowAdditionalProperties was added
+    @Deprecated("Kept for binary compatibility", level = DeprecationLevel.HIDDEN)
+    public constructor(
+        respectDefaultPresence: Boolean,
+        requireNullableFields: Boolean,
+        useUnionTypes: Boolean,
+        useNullableField: Boolean,
+        includePolymorphicDiscriminator: Boolean,
+        includeOpenAPIPolymorphicDiscriminator: Boolean,
+    ) : this(
+        respectDefaultPresence = respectDefaultPresence,
+        requireNullableFields = requireNullableFields,
+        useUnionTypes = useUnionTypes,
+        useNullableField = useNullableField,
+        includePolymorphicDiscriminator = includePolymorphicDiscriminator,
+        includeOpenAPIPolymorphicDiscriminator = includeOpenAPIPolymorphicDiscriminator,
+        allowAdditionalProperties = false,
+    )
+
     init {
         // Validate flag combinations
         require(!useUnionTypes || !useNullableField) {
             "Cannot use both useUnionTypes and useNullableField. " +
                 "Choose one: union types [\"string\", \"null\"] OR nullable field."
-        }
-
-        require(useUnionTypes || useNullableField) {
-            "Either useUnionTypes or useNullableField must be enabled..."
         }
 
         require(!includeOpenAPIPolymorphicDiscriminator || includePolymorphicDiscriminator) {
@@ -190,6 +216,30 @@ public open class JsonSchemaConfig(
                 includePolymorphicDiscriminator = true,
                 includeOpenAPIPolymorphicDiscriminator = true,
             )
+
+        /**
+         * Compact, permissive configuration: only non-nullable fields without defaults are required,
+         * nullable properties carry no null marker, and extra properties are allowed. Nullable collection
+         * elements and map values keep an `anyOf` null branch, since they cannot be omitted.
+         *
+         * An absent field means `null`, so serialize payloads with `explicitNulls = false`.
+         *
+         *  - `respectDefaultPresence = true` - fields with defaults are optional
+         *  - `requireNullableFields = false` - nullable fields are optional
+         *  - `useUnionTypes = false`, `useNullableField = false` - no null markers
+         *  - `allowAdditionalProperties = true` - object schemas omit `additionalProperties`
+         *  - Type discriminators are enabled for polymorphic types
+         */
+        public val Lenient: JsonSchemaConfig =
+            JsonSchemaConfig(
+                respectDefaultPresence = true,
+                requireNullableFields = false,
+                useUnionTypes = false,
+                useNullableField = false,
+                includePolymorphicDiscriminator = true,
+                includeOpenAPIPolymorphicDiscriminator = false,
+                allowAdditionalProperties = true,
+            )
     }
 
     override fun toString(): String =
@@ -199,7 +249,8 @@ public open class JsonSchemaConfig(
             "useUnionTypes=$useUnionTypes, " +
             "useNullableField=$useNullableField, " +
             "includePolymorphicDiscriminator=$includePolymorphicDiscriminator, " +
-            "includeOpenAPIPolymorphicDiscriminator=$includeOpenAPIPolymorphicDiscriminator" +
+            "includeOpenAPIPolymorphicDiscriminator=$includeOpenAPIPolymorphicDiscriminator, " +
+            "allowAdditionalProperties=$allowAdditionalProperties" +
             ")"
 
     override fun equals(other: Any?): Boolean {
@@ -212,6 +263,7 @@ public open class JsonSchemaConfig(
         if (useNullableField != other.useNullableField) return false
         if (includePolymorphicDiscriminator != other.includePolymorphicDiscriminator) return false
         if (includeOpenAPIPolymorphicDiscriminator != other.includeOpenAPIPolymorphicDiscriminator) return false
+        if (allowAdditionalProperties != other.allowAdditionalProperties) return false
 
         return true
     }
@@ -223,6 +275,7 @@ public open class JsonSchemaConfig(
         result = 31 * result + useNullableField.hashCode()
         result = 31 * result + includePolymorphicDiscriminator.hashCode()
         result = 31 * result + includeOpenAPIPolymorphicDiscriminator.hashCode()
+        result = 31 * result + allowAdditionalProperties.hashCode()
         return result
     }
 }

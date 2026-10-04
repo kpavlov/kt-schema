@@ -27,6 +27,7 @@ Generate JSON Schema resources at compile time from plain Java records, classes,
 ### Maven
 
 ```xml
+
 <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-compiler-plugin</artifactId>
@@ -45,13 +46,13 @@ Generate JSON Schema resources at compile time from plain Java records, classes,
     </configuration>
 </plugin>
 
-<!-- Only needed if you annotate types with @Schema/@Description directly -->
+    <!-- Only needed if you annotate types with @Schema/@Description directly -->
 <dependencies>
-    <dependency>
-        <groupId>me.kpavlov.kt.schema</groupId>
-        <artifactId>kt-schema-annotations</artifactId>
-        <version>${kt-schema.version}</version>
-    </dependency>
+<dependency>
+    <groupId>me.kpavlov.kt.schema</groupId>
+    <artifactId>kt-schema-annotations</artifactId>
+    <version>${kt-schema.version}</version>
+</dependency>
 </dependencies>
 ```
 
@@ -89,9 +90,9 @@ import me.kpavlov.kt.schema.Schema;
 @Description("A person with a first and last name and age.")
 @Schema
 public record Person(
-        @Description("Given name of the person") String firstName,
-        @Description("Family name of the person") String lastName,
-        @Description("Age of the person in years") int age) {
+    @Description("Given name of the person") String firstName,
+    @Description("Family name of the person") String lastName,
+    @Description("Age of the person in years") int age) {
 }
 ```
 
@@ -104,9 +105,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 @JsonClassDescription("A person with a first and last name and age.")
 public record Person(
-        @JsonPropertyDescription("Given name of the person") String firstName,
-        @JsonPropertyDescription("Family name of the person") String lastName,
-        @JsonPropertyDescription("Age of the person in years") int age) {
+    @JsonPropertyDescription("Given name of the person") String firstName,
+    @JsonPropertyDescription("Family name of the person") String lastName,
+    @JsonPropertyDescription("Age of the person in years") int age) {
 }
 ```
 
@@ -115,11 +116,12 @@ public record Person(
 
 ## Configuration options
 
-| Option        | Type     | Default | Description                                                                                                     |
-|:--------------|:---------|:--------|:------------------------------------------------------------------------------------------------------------------|
-| `rootPackage` | `String` | `null`  | Scope discovery to types declared under this package (and sub-packages); absent means the whole module is scanned.  |
-| `include`     | `String` | `null`  | Comma/semicolon-separated glob patterns; a type not annotated with `@Schema` is processed only when it matches at least one. |
-| `exclude`     | `String` | `null`  | Comma/semicolon-separated glob patterns; a type matching any of them is dropped, even when `@Schema`-annotated or include-matched. |
+| Option        | Type     | Default  | Description                                                                                                                                       |
+|:--------------|:---------|:---------|:--------------------------------------------------------------------------------------------------------------------------------------------------|
+| `rootPackage` | `String` | `null`   | Scope discovery to types declared under this package (and sub-packages); absent means the whole module is scanned.                                |
+| `include`     | `String` | `null`   | Comma/semicolon-separated glob patterns; a type not annotated with `@Schema` is processed only when it matches at least one.                      |
+| `exclude`     | `String` | `null`   | Comma/semicolon-separated glob patterns; a type matching any of them is dropped, even when `@Schema`-annotated or include-matched.                |
+| `config`      | `String` | `strict` | Schema flavour: `strict`, `lenient`, `openapi` or a `JsonSchemaConfig` class name. See [Schema configuration](../README.md#schema-configuration). |
 
 Set them as javac `-A` compiler arguments:
 
@@ -151,26 +153,30 @@ For the `Person` record above, that's `META-INF/kt-schema/schemas/com/example/Pe
 
 ```json
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "com.example.Person",
-  "description": "A person with a first and last name and age.",
-  "type": "object",
-  "properties": {
-    "firstName": {
-      "type": "string",
-      "description": "Given name of the person"
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "com.example.Person",
+    "description": "A person with a first and last name and age.",
+    "type": "object",
+    "properties": {
+        "firstName": {
+            "type": "string",
+            "description": "Given name of the person"
+        },
+        "lastName": {
+            "type": "string",
+            "description": "Family name of the person"
+        },
+        "age": {
+            "type": "integer",
+            "description": "Age of the person in years"
+        }
     },
-    "lastName": {
-      "type": "string",
-      "description": "Family name of the person"
-    },
-    "age": {
-      "type": "integer",
-      "description": "Age of the person in years"
-    }
-  },
-  "additionalProperties": false,
-  "required": ["firstName", "lastName", "age"]
+    "additionalProperties": false,
+    "required": [
+        "firstName",
+        "lastName",
+        "age"
+    ]
 }
 ```
 
@@ -189,20 +195,21 @@ import me.kpavlov.kt.schema.Schema;
 @Schema
 @Description("A customer order with tags, quantities, price points and billing address.")
 public record Order(
-        @Description("Unique order identifier") String id,
-        @Description("Tags attached to the order") java.util.Set<String> tags,
-        @Description("Line item quantities by SKU") java.util.Map<String, Integer> quantities,
-        @Description("Historical price points") double[] prices,
-        @Description("Free-form metadata") Object metadata,
-        @Description("Billing address") Address address) {
+    @Description("Unique order identifier") String id,
+    @Description("Tags attached to the order") java.util.Set<String> tags,
+    @Description("Line item quantities by SKU") java.util.Map<String, Integer> quantities,
+    @Description("Historical price points") double[] prices,
+    @Description("Free-form metadata") Object metadata,
+    @Description("Billing address") Address address) {
 }
 ```
 
 ```java
+
 @Schema
 public record Address(
-        @Description("City part of the address") String city,
-        @Description("Street part of the address") String street) {
+    @Description("City part of the address") String city,
+    @Description("Street part of the address") String street) {
 }
 ```
 
@@ -210,63 +217,73 @@ This generates `META-INF/kt-schema/schemas/com/example/Order.json`:
 
 ```json
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "com.example.Order",
-  "description": "A customer order with tags, quantities, price points and billing address.",
-  "type": "object",
-  "properties": {
-    "id": {
-      "type": "string",
-      "description": "Unique order identifier"
-    },
-    "tags": {
-      "type": "array",
-      "description": "Tags attached to the order",
-      "items": {
-        "type": "string"
-      }
-    },
-    "quantities": {
-      "type": "object",
-      "description": "Line item quantities by SKU",
-      "additionalProperties": {
-        "type": "integer"
-      }
-    },
-    "prices": {
-      "type": "array",
-      "description": "Historical price points",
-      "items": {
-        "type": "number"
-      }
-    },
-    "metadata": {
-      "description": "Free-form metadata"
-    },
-    "address": {
-      "$ref": "#/$defs/com.example.Address",
-      "description": "Billing address"
-    }
-  },
-  "additionalProperties": false,
-  "required": ["id", "tags", "quantities", "prices", "metadata", "address"],
-  "$defs": {
-    "com.example.Address": {
-      "type": "object",
-      "properties": {
-        "city": {
-          "type": "string",
-          "description": "City part of the address"
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "com.example.Order",
+    "description": "A customer order with tags, quantities, price points and billing address.",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "Unique order identifier"
         },
-        "street": {
-          "type": "string",
-          "description": "Street part of the address"
+        "tags": {
+            "type": "array",
+            "description": "Tags attached to the order",
+            "items": {
+                "type": "string"
+            }
+        },
+        "quantities": {
+            "type": "object",
+            "description": "Line item quantities by SKU",
+            "additionalProperties": {
+                "type": "integer"
+            }
+        },
+        "prices": {
+            "type": "array",
+            "description": "Historical price points",
+            "items": {
+                "type": "number"
+            }
+        },
+        "metadata": {
+            "description": "Free-form metadata"
+        },
+        "address": {
+            "$ref": "#/$defs/com.example.Address",
+            "description": "Billing address"
         }
-      },
-      "additionalProperties": false,
-      "required": ["city", "street"]
+    },
+    "additionalProperties": false,
+    "required": [
+        "id",
+        "tags",
+        "quantities",
+        "prices",
+        "metadata",
+        "address"
+    ],
+    "$defs": {
+        "com.example.Address": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "description": "City part of the address"
+                },
+                "street": {
+                    "type": "string",
+                    "description": "Street part of the address"
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "city",
+                "street"
+            ]
+        }
     }
-  }
 }
 ```
 
@@ -280,9 +297,9 @@ root resource because it is `@Schema`-annotated.
 Read it like any other classpath resource:
 
 ```java
-try (InputStream in = Person.class.getClassLoader()
-        .getResourceAsStream("META-INF/kt-schema/schemas/com/example/Person.json")) {
-    String schema = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+try(InputStream in = Person.class.getClassLoader()
+    .getResourceAsStream("META-INF/kt-schema/schemas/com/example/Person.json")){
+String schema = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 }
 ```
 
@@ -291,14 +308,14 @@ try (InputStream in = Person.class.getClassLoader()
 - Java `record`s — components map to required properties by default (Java records have no notion of
   optional/default values); mark a component nullable/optional via convention — see below
 - Plain Java `class`es — non-static fields map to required properties, treated the same way as records
-- Java `interface`s — no-arg methods map to required properties, named per the JavaBeans convention
-  (`getName()` → `name`, `isActive()` → `active`, and a bare `name()` accessor stays `name`)
+- Java `interface`s — no-arg methods map to required properties, named per the JavaBeans convention (`getName()` →
+  `name`, `isActive()` → `active`, and a bare `name()` accessor stays `name`)
 - Java `enum`s — emitted as `type: string` with an `enum` array listing the constants in declaration order
 - `String`, boxed and primitive numeric/boolean types
 - `Iterable`-derived collections (`List`, `Set`, `Collection`, custom subclasses) — emitted as `array` with
   `items` describing the element type
 - `Map` — emitted as `object` with `additionalProperties` describing the value type
-- Arrays, including multi-dimensional — emitted as `array` with `items` nested per dimension
+- Arrays, including multidimensional — emitted as `array` with `items` nested per dimension
 - `java.lang.Object` — emitted as an empty schema `{}` accepting any value
 - Type variables: upper-bounded (`T extends Number`) resolve to their bound; unbounded (`T`) emit `{}`
 - Nested records/classes/interfaces, emitted as `$ref`/`$defs` and deduplicated, same as KSP
@@ -342,11 +359,13 @@ public enum Priority {
     HIGH
 }
 
-public record Job(Priority priority, @JsonProperty(defaultValue = "30") int timeoutSeconds) {}
+public record Job(Priority priority, @JsonProperty(defaultValue = "30") int timeoutSeconds) {
+}
 ```
 
 `@JsonEnumDefaultValue`, placed on one enum constant, marks it as that enum's `default` — always shown on the
-enum's own schema in `$defs`, since it describes the *type*, not any one property using it. `@JsonProperty(defaultValue = "...")`
+enum's own schema in `$defs`, since it describes the *type*, not any one property using it.
+`@JsonProperty(defaultValue = "...")`
 populates the property's default internally, but — like every property here — `kt-schema-apt`'s generated resource
 always marks it required and never shows the `default` keyword for it, since Java has no reliable way to know
 whether a value truly behaves as optional. Both are configurable via `kt-schema.properties`
@@ -362,12 +381,12 @@ and don't imply each other:
 
 - **Nullable** — marks a property's *type* nullable (adds `"null"` to its `type`), the same way Kotlin's `?`
   is handled, but leaves it in `required`:
-  - **Type-name glob pattern** — a field/component whose *type's* simple class name matches a configured
-    pattern (`*` = any substring; default `*Opt`), e.g. a type literally named `EmailOpt`.
-  - **`@Nullable` annotation** — a field/component/accessor or its type annotated with a marker annotation
-    (default simple name `Nullable`, matched case-insensitively regardless of package — so
-    `org.jspecify.annotations.Nullable`, `javax.annotation.Nullable`, `jakarta.annotation.Nullable`,
-    `org.jetbrains.annotations.Nullable`, etc. all work out of the box).
+    - **Type-name glob pattern** — a field/component whose *type's* simple class name matches a configured
+      pattern (`*` = any substring; default `*Opt`), e.g. a type literally named `EmailOpt`.
+    - **`@Nullable` annotation** — a field/component/accessor or its type annotated with a marker annotation (default
+      simple name `Nullable`, matched case-insensitively regardless of package — so
+      `org.jspecify.annotations.Nullable`, `javax.annotation.Nullable`, `jakarta.annotation.Nullable`,
+      `org.jetbrains.annotations.Nullable`, etc. all work out of the box).
 - **Optional** — excludes a property from `required`, the same way a Kotlin default value is handled, but
   doesn't affect its type's nullability. Matched the same way as the nullable convention (type-name glob
   pattern or marker annotation, e.g. `@Optional`), via a separate, opt-in-only configuration with no default.
@@ -392,5 +411,6 @@ public record Person(String name, @Nullable String middleName) {
 
 - [KSP Configuration Guide](ksp.md) — the Kotlin compile-time equivalent, with `KClass<T>.jsonSchemaString` extensions
 - [Annotation Reference](../README.md#using-schema-and-description-annotations) — `@Schema` and `@Description` usage
-- [Multi-Framework Annotation Support](../README.md#multi-framework-annotation-support) — Jackson, LangChain4j, Koog recognition
+- [Multi-Framework Annotation Support](../README.md#multi-framework-annotation-support) — Jackson, LangChain4j, Koog
+  recognition
 - [Project Architecture](architecture.md) — how the shared IR and transformer pipeline works

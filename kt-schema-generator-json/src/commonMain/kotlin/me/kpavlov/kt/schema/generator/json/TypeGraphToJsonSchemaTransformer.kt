@@ -1,5 +1,7 @@
 package me.kpavlov.kt.schema.generator.json
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
 import me.kpavlov.kt.schema.generator.core.ir.AbstractTypeGraphTransformer
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
@@ -17,8 +19,8 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.json.AdditionalPropertiesSchema
 import me.kpavlov.kt.schema.json.ArrayPropertyDefinition
 import me.kpavlov.kt.schema.json.BooleanPropertyDefinition
-import me.kpavlov.kt.schema.json.DenyAdditionalProperties
 import me.kpavlov.kt.schema.json.Discriminator
+import me.kpavlov.kt.schema.json.GenericPropertyDefinition
 import me.kpavlov.kt.schema.json.JsonSchema
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.JSON_SCHEMA_ID_DRAFT202012
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.ARRAY_OR_NULL_TYPE
@@ -34,15 +36,12 @@ import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.OBJECT_OR_NULL_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.OBJECT_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.STRING_OR_NULL_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.STRING_TYPE
-import me.kpavlov.kt.schema.json.GenericPropertyDefinition
 import me.kpavlov.kt.schema.json.NumericPropertyDefinition
 import me.kpavlov.kt.schema.json.ObjectPropertyDefinition
 import me.kpavlov.kt.schema.json.OneOfPropertyDefinition
 import me.kpavlov.kt.schema.json.PropertyDefinition
 import me.kpavlov.kt.schema.json.ReferencePropertyDefinition
 import me.kpavlov.kt.schema.json.StringPropertyDefinition
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonPrimitive
 import kotlin.jvm.JvmOverloads
 
 /**
@@ -52,7 +51,7 @@ import kotlin.jvm.JvmOverloads
  * Supports primitives, collections, objects, enums, and sealed hierarchies with discriminators.
  * All named types (objects, enums, sealed hierarchies) are emitted as `$ref` with definitions
  * registered in `$defs` exactly once, regardless of nullability. Nullable named types use
- * `oneOf: [{type: null}, {$ref}]`.
+ * `oneOf: [{type: null}, {$ref}]`, or a plain `$ref` when the config emits no null markers.
  *
  * @param json JSON encoder for schema elements
  */
@@ -82,8 +81,10 @@ public class TypeGraphToJsonSchemaTransformer
             // Resolve the root node directly to avoid the root becoming a bare $ref
             val (rootNode, rootJsonName) =
                 when (val root = graph.root) {
-                    is TypeRef.Inline ->
+                    is TypeRef.Inline -> {
                         root.node to ((root.node as? NamedTypeNode)?.name ?: rootName.substringAfterLast('.'))
+                    }
+
                     is TypeRef.Ref -> {
                         val node =
                             checkNotNull(graph.nodes[root.id]) {
@@ -161,7 +162,7 @@ public class TypeGraphToJsonSchemaTransformer
                 id = rootName,
                 properties = emptyMap(),
                 required = emptyList(),
-                additionalProperties = DenyAdditionalProperties,
+                additionalProperties = config.objectAdditionalProperties,
                 description = rootDefinition.description,
                 oneOf = rootDefinition.oneOf,
                 discriminator =
@@ -264,7 +265,7 @@ public class TypeGraphToJsonSchemaTransformer
                 id = rootName,
                 properties = emptyMap(),
                 required = emptyList(),
-                additionalProperties = DenyAdditionalProperties,
+                additionalProperties = config.objectAdditionalProperties,
                 defs = definitions.takeIf { it.isNotEmpty() },
             )
 
@@ -272,7 +273,8 @@ public class TypeGraphToJsonSchemaTransformer
          * Converts a type reference to a property definition.
          *
          * Named types ([TypeRef.Ref]) are always emitted as `$ref` with the definition registered
-         * in `$defs` exactly once. Nullable named types use `oneOf: [{type: null}, {$ref}]`.
+         * in `$defs` exactly once. Nullable named types use `oneOf: [{type: null}, {$ref}]`,
+         * unless the config emits no null markers (then a plain `$ref`).
          * Inline types (primitives, lists, maps) are expanded directly.
          */
         private fun convertTypeRef(
@@ -299,7 +301,7 @@ public class TypeGraphToJsonSchemaTransformer
                         ReferencePropertyDefinition(
                             ref = $$"#/$defs/$${jsonTypeNames.getValue(id)}",
                         )
-                    if (typeRef.nullable) {
+                    if (typeRef.nullable && !config.omitsNullMarker) {
                         OneOfPropertyDefinition(
                             oneOf =
                                 listOf(
@@ -382,20 +384,20 @@ public class TypeGraphToJsonSchemaTransformer
         ): PropertyDefinition =
             when (node) {
                 is PrimitiveNode -> convertPrimitive(node, nullable)
+
                 // AnyNode emits {} which already accepts null — nullable flag intentionally ignored
                 is AnyNode -> GenericPropertyDefinition(description = node.description)
+
                 is ObjectNode -> convertObject(node, nullable, graph, jsonTypeNames, definitions)
+
                 is EnumNode -> convertEnum(node, nullable)
+
                 is ListNode -> convertList(node, nullable, graph, jsonTypeNames, definitions)
+
                 is MapNode -> convertMap(node, nullable, graph, jsonTypeNames, definitions)
+
                 is PolymorphicNode -> convertPolymorphic(node, nullable, graph, jsonTypeNames, definitions)
             }
-
-        /**
-         * Determines the nullable flag value based on config and nullable parameter.
-         */
-        private fun getNullableFlag(nullable: Boolean): Boolean? =
-            if (!config.useUnionTypes && nullable && config.useNullableField) true else null
 
         private fun convertPrimitive(
             node: PrimitiveNode,
@@ -406,7 +408,7 @@ public class TypeGraphToJsonSchemaTransformer
                     StringPropertyDefinition(
                         type = if (nullable && config.useUnionTypes) STRING_OR_NULL_TYPE else STRING_TYPE,
                         description = node.description,
-                        nullable = getNullableFlag(nullable),
+                        nullable = config.nullableFlag(nullable),
                     )
                 }
 
@@ -414,7 +416,7 @@ public class TypeGraphToJsonSchemaTransformer
                     BooleanPropertyDefinition(
                         type = if (nullable && config.useUnionTypes) BOOLEAN_OR_NULL_TYPE else BOOLEAN_TYPE,
                         description = node.description,
-                        nullable = getNullableFlag(nullable),
+                        nullable = config.nullableFlag(nullable),
                     )
                 }
 
@@ -422,7 +424,7 @@ public class TypeGraphToJsonSchemaTransformer
                     NumericPropertyDefinition(
                         type = if (nullable && config.useUnionTypes) INTEGER_OR_NULL_TYPE else INTEGER_TYPE,
                         description = node.description,
-                        nullable = getNullableFlag(nullable),
+                        nullable = config.nullableFlag(nullable),
                     )
                 }
 
@@ -430,7 +432,7 @@ public class TypeGraphToJsonSchemaTransformer
                     NumericPropertyDefinition(
                         type = if (nullable && config.useUnionTypes) NUMBER_OR_NULL_TYPE else NUMBER_TYPE,
                         description = node.description,
-                        nullable = getNullableFlag(nullable),
+                        nullable = config.nullableFlag(nullable),
                     )
                 }
             }
@@ -466,7 +468,8 @@ public class TypeGraphToJsonSchemaTransformer
                                     !property.type.nullable
                                 }
                             }
-                    }.map { it.name }
+                    }.filterNot { config.omitsNullMarker && it.type.nullable && !it.isConstant }
+                    .map { it.name }
                     .toSet()
 
             // Convert all properties
@@ -498,10 +501,10 @@ public class TypeGraphToJsonSchemaTransformer
             return ObjectPropertyDefinition(
                 type = if (nullable && config.useUnionTypes) OBJECT_OR_NULL_TYPE else OBJECT_TYPE,
                 description = node.description,
-                nullable = getNullableFlag(nullable),
+                nullable = config.nullableFlag(nullable),
                 properties = properties,
                 required = required.toList(),
-                additionalProperties = DenyAdditionalProperties,
+                additionalProperties = config.objectAdditionalProperties,
             )
         }
 
@@ -513,7 +516,7 @@ public class TypeGraphToJsonSchemaTransformer
                 StringPropertyDefinition(
                     type = if (nullable && config.useUnionTypes) STRING_OR_NULL_TYPE else STRING_TYPE,
                     description = node.description,
-                    nullable = getNullableFlag(nullable),
+                    nullable = config.nullableFlag(nullable),
                     enum = node.entries,
                 )
             return node.defaultValue?.let { setDefaultValue(base, it) } ?: base
@@ -526,14 +529,27 @@ public class TypeGraphToJsonSchemaTransformer
             jsonTypeNames: Map<TypeId, String>,
             definitions: MutableMap<String, PropertyDefinition>,
         ): PropertyDefinition {
-            val items = convertTypeRef(node.element, graph, jsonTypeNames, definitions)
+            val items = convertElement(node.element, graph, jsonTypeNames, definitions)
             return ArrayPropertyDefinition(
                 type = if (nullable && config.useUnionTypes) ARRAY_OR_NULL_TYPE else ARRAY_TYPE,
                 description = node.description,
-                nullable = getNullableFlag(nullable),
+                nullable = config.nullableFlag(nullable),
                 items = items.takeIf { it !is GenericPropertyDefinition },
             )
         }
+
+        /**
+         * Converts a collection element or map value. Without null markers, a nullable one keeps an explicit
+         * `null` branch: unlike a property, it cannot express `null` by being omitted.
+         */
+        private fun convertElement(
+            typeRef: TypeRef,
+            graph: TypeGraph,
+            jsonTypeNames: Map<TypeId, String>,
+            definitions: MutableMap<String, PropertyDefinition>,
+        ): PropertyDefinition =
+            convertTypeRef(typeRef, graph, jsonTypeNames, definitions)
+                .let { if (typeRef.nullable && config.omitsNullMarker) it.withNullBranch() else it }
 
         private fun convertMap(
             node: MapNode,
@@ -544,12 +560,12 @@ public class TypeGraphToJsonSchemaTransformer
         ): PropertyDefinition {
             // Maps are represented as objects with additionalProperties
             // The value type determines what additionalProperties accepts
-            val valuePropertyDef = convertTypeRef(node.value, graph, jsonTypeNames, definitions)
+            val valuePropertyDef = convertElement(node.value, graph, jsonTypeNames, definitions)
 
             return ObjectPropertyDefinition(
                 type = if (nullable && config.useUnionTypes) OBJECT_OR_NULL_TYPE else OBJECT_TYPE,
                 description = node.description,
-                nullable = getNullableFlag(nullable),
+                nullable = config.nullableFlag(nullable),
                 additionalProperties = AdditionalPropertiesSchema(valuePropertyDef),
             )
         }
@@ -627,10 +643,11 @@ public class TypeGraphToJsonSchemaTransformer
                 ) {
                     node.discriminator.let { disc ->
                         val mapping =
-                            disc.mapping?.map { (_, typeId) ->
-                                val typeName = jsonTypeNames.getValue(typeId)
-                                typeName to $$"#/$defs/$$typeName"
-                            }?.toMap()
+                            disc.mapping
+                                ?.map { (_, typeId) ->
+                                    val typeName = jsonTypeNames.getValue(typeId)
+                                    typeName to $$"#/$defs/$$typeName"
+                                }?.toMap()
                         Discriminator(
                             propertyName = disc.name,
                             mapping = mapping,

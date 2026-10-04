@@ -36,7 +36,9 @@ import me.kpavlov.kt.schema.ksp.strategy.shouldGenerateSchemaObject
  * This strategy maintains the exact same API as the previous implementation,
  * ensuring no breaking changes for class schema generation.
  */
-internal class ClassSchemaStrategy : SchemaGenerationStrategy<KSClassDeclaration> {
+internal class ClassSchemaStrategy(
+    config: JsonSchemaConfig = JsonSchemaConfig.Strict,
+) : SchemaGenerationStrategy<KSClassDeclaration> {
     /**
      * Unified schema generator configured for class schemas.
      *
@@ -49,21 +51,7 @@ internal class ClassSchemaStrategy : SchemaGenerationStrategy<KSClassDeclaration
         UnifiedKspSchemaGenerator(
             KspSchemaGeneratorConfig(
                 introspector = KspClassIntrospector(),
-                transformer =
-                    TypeGraphToJsonSchemaTransformer(
-                        // build JsonSchemaConfig upon Strict config
-                        config =
-                            with(JsonSchemaConfig.Strict) {
-                                JsonSchemaConfig(
-                                    respectDefaultPresence = false,
-                                    requireNullableFields = requireNullableFields,
-                                    useUnionTypes = useUnionTypes,
-                                    useNullableField = useNullableField,
-                                    includePolymorphicDiscriminator = includePolymorphicDiscriminator,
-                                    includeOpenAPIPolymorphicDiscriminator = includeOpenAPIPolymorphicDiscriminator,
-                                )
-                            },
-                    ),
+                transformer = TypeGraphToJsonSchemaTransformer(config = config),
                 serializer = JsonSchema.serializer(),
                 jsonPrettyPrint = true,
                 jsonEncodeDefaults = false,
