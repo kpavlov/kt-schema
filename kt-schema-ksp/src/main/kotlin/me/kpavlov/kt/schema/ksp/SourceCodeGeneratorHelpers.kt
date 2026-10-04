@@ -92,7 +92,6 @@ internal object SourceCodeGeneratorHelpers {
      * @param context Generation context for determining what to generate
      * @return Complete Kotlin source code as a string
      */
-    @Suppress("LongParameterList")
     fun buildKClassExtensions(
         packageName: String,
         classNameWithGenerics: String,
