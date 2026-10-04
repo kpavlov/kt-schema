@@ -50,7 +50,7 @@ import me.kpavlov.kt.schema.ksp.strategy.SchemaGenerationStrategy
  * - Both regular and suspend companion functions
  */
 internal class CompanionFunctionStrategy(
-    config: FunctionCallingSchemaConfig = FunctionCallingSchemaConfig.Default,
+    config: FunctionCallingSchemaConfig = FunctionCallingSchemaConfig.Strict,
 ) : SchemaGenerationStrategy<KSFunctionDeclaration> {
     /**
      * Unified schema generator configured for function schemas.

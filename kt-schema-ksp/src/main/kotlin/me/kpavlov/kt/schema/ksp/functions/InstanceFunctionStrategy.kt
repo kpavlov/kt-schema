@@ -46,7 +46,7 @@ import me.kpavlov.kt.schema.ksp.strategy.SchemaGenerationStrategy
  * - Both regular and suspend instance functions
  */
 internal class InstanceFunctionStrategy(
-    config: FunctionCallingSchemaConfig = FunctionCallingSchemaConfig.Default,
+    config: FunctionCallingSchemaConfig = FunctionCallingSchemaConfig.Strict,
 ) : SchemaGenerationStrategy<KSFunctionDeclaration> {
     /**
      * Unified schema generator configured for function schemas.

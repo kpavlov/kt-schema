@@ -45,7 +45,7 @@ import me.kpavlov.kt.schema.ksp.strategy.shouldGenerateSchemaObject
  * - Extension functions declared at package level
  */
 internal class TopLevelFunctionStrategy(
-    config: FunctionCallingSchemaConfig = FunctionCallingSchemaConfig.Default,
+    config: FunctionCallingSchemaConfig = FunctionCallingSchemaConfig.Strict,
 ) : SchemaGenerationStrategy<KSFunctionDeclaration> {
     /**
      * Unified schema generator configured for function schemas.
