@@ -370,13 +370,10 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
     //region Create methods
 
     /**
-     * Creates a [TypeId] from a [KClass], using `@SerialName` override if present,
-     * or qualified name / simple name as fallback.
+     * Creates a [TypeId] from the declaration identity of a [KClass]: its qualified name, or the
+     * JVM class name for local and anonymous classes. Name overrides do not affect it.
      */
-    private fun createTypeId(klass: KClass<*>): TypeId {
-        val nameOverride = extractNameOverride(klass.java.annotations.toList())
-        return TypeId(nameOverride ?: klass.qualifiedName ?: klass.simpleName ?: "Anonymous")
-    }
+    private fun createTypeId(klass: KClass<*>): TypeId = TypeId(klass.qualifiedName ?: klass.java.name)
 
     /**
      * Creates an [EnumNode] from an enum [KClass].
@@ -586,12 +583,11 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                 SubtypeRef(createTypeId(subclass))
             }
 
-        // Build discriminator mapping: discriminator value -> TypeId
-        // Key must equal the TypeId value so it matches the `const` value the transformer emits
+        // Build discriminator mapping: wire name -> TypeId
         val discriminatorMapping =
             sealedSubclasses.associate { subclass ->
-                val id = createTypeId(subclass)
-                id.value to id
+                (extractNameOverride(subclass.java.annotations.toList()) ?: createTypeId(subclass).value) to
+                    createTypeId(subclass)
             }
 
         return PolymorphicNode(

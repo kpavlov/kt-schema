@@ -46,18 +46,18 @@ class LenientSchemaGeneratorTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "me.kpavlov.kt.schema.generator.json.Message",
+              "$id": "Message",
               "type": "object",
               "properties": {
                 "text":       { "type": "string" },
                 "priority":   { "type": "integer", "default": 0 },
                 "note":       { "type": "string" },
                 "author":     { "type": "string" },
-                "attachment": { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Attachment" }
+                "attachment": { "$ref": "#/$defs/Attachment" }
               },
               "required": ["text"],
               "$defs": {
-                "me.kpavlov.kt.schema.generator.json.Attachment": {
+                "Attachment": {
                   "type": "object",
                   "properties": { "url": { "type": "string" } },
                   "required": ["url"]

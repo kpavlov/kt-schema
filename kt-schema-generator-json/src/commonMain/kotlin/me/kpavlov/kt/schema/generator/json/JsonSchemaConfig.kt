@@ -126,6 +126,17 @@ public open class JsonSchemaConfig(
      * Default: `false`
      */
     public val allowAdditionalProperties: Boolean = false,
+    /**
+     * Whether `$defs` keys, `$ref` targets, the root `$id` and discriminator `const` values use the
+     * shortest unique dotted suffix of the type's qualified name (`com.acme.Payload` becomes `Payload`).
+     *
+     * Names set explicitly by annotations such as `@JsonTypeName` are used as is. Colliding names
+     * grow one package segment at a time until unique, ending with the full qualified name.
+     * Schemas generated from kotlinx.serialization descriptors are never shortened.
+     *
+     * Default: `false`
+     */
+    public val shortDefinitionNames: Boolean = false,
 ) {
     // Binary compatibility with callers compiled before allowAdditionalProperties was added
     @Deprecated("Kept for binary compatibility", level = DeprecationLevel.HIDDEN)
@@ -144,6 +155,7 @@ public open class JsonSchemaConfig(
         includePolymorphicDiscriminator = includePolymorphicDiscriminator,
         includeOpenAPIPolymorphicDiscriminator = includeOpenAPIPolymorphicDiscriminator,
         allowAdditionalProperties = false,
+        shortDefinitionNames = false,
     )
 
     init {
@@ -231,6 +243,7 @@ public open class JsonSchemaConfig(
          *  - `requireNullableFields = false` - nullable fields are optional
          *  - `useUnionTypes = false`, `useNullableField = false` - no null markers
          *  - `allowAdditionalProperties = true` - object schemas omit `additionalProperties`
+         *  - `shortDefinitionNames = true` - `$defs` keys and `$ref`s use short type names
          *  - Type discriminators are enabled for polymorphic types
          */
         public val Lenient: JsonSchemaConfig =
@@ -242,6 +255,7 @@ public open class JsonSchemaConfig(
                 includePolymorphicDiscriminator = true,
                 includeOpenAPIPolymorphicDiscriminator = false,
                 allowAdditionalProperties = true,
+                shortDefinitionNames = true,
             )
     }
 
@@ -253,7 +267,8 @@ public open class JsonSchemaConfig(
             "useNullableField=$useNullableField, " +
             "includePolymorphicDiscriminator=$includePolymorphicDiscriminator, " +
             "includeOpenAPIPolymorphicDiscriminator=$includeOpenAPIPolymorphicDiscriminator, " +
-            "allowAdditionalProperties=$allowAdditionalProperties" +
+            "allowAdditionalProperties=$allowAdditionalProperties, " +
+            "shortDefinitionNames=$shortDefinitionNames" +
             ")"
 
     override fun equals(other: Any?): Boolean {
@@ -267,6 +282,7 @@ public open class JsonSchemaConfig(
         if (includePolymorphicDiscriminator != other.includePolymorphicDiscriminator) return false
         if (includeOpenAPIPolymorphicDiscriminator != other.includeOpenAPIPolymorphicDiscriminator) return false
         if (allowAdditionalProperties != other.allowAdditionalProperties) return false
+        if (shortDefinitionNames != other.shortDefinitionNames) return false
 
         return true
     }
@@ -279,6 +295,23 @@ public open class JsonSchemaConfig(
         result = 31 * result + includePolymorphicDiscriminator.hashCode()
         result = 31 * result + includeOpenAPIPolymorphicDiscriminator.hashCode()
         result = 31 * result + allowAdditionalProperties.hashCode()
+        result = 31 * result + shortDefinitionNames.hashCode()
         return result
     }
 }
+
+internal fun JsonSchemaConfig.withoutShortDefinitionNames(): JsonSchemaConfig =
+    if (!shortDefinitionNames) {
+        this
+    } else {
+        JsonSchemaConfig(
+            respectDefaultPresence = respectDefaultPresence,
+            requireNullableFields = requireNullableFields,
+            useUnionTypes = useUnionTypes,
+            useNullableField = useNullableField,
+            includePolymorphicDiscriminator = includePolymorphicDiscriminator,
+            includeOpenAPIPolymorphicDiscriminator = includeOpenAPIPolymorphicDiscriminator,
+            allowAdditionalProperties = allowAdditionalProperties,
+            shortDefinitionNames = false,
+        )
+    }

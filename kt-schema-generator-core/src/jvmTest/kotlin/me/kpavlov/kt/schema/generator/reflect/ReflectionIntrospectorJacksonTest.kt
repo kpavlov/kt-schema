@@ -13,6 +13,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.Literal
+import me.kpavlov.kt.schema.generator.core.ir.NamedTypeNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
@@ -212,8 +213,8 @@ class ReflectionIntrospectorJacksonTest {
         val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
         val polyNode = graph.nodes[root.id].shouldBeInstanceOf<PolymorphicNode>()
 
-        val subtypeIds = polyNode.subtypes.map { it.id.value }.toSet()
-        subtypeIds.shouldContainExactlyInAnyOrder(setOf("car", "truck"))
+        val subtypeNames = polyNode.subtypes.map { (graph.nodes.getValue(it.id) as NamedTypeNode).name }.toSet()
+        subtypeNames.shouldContainExactlyInAnyOrder(setOf("car", "truck"))
 
         polyNode.discriminator.mapping?.keys shouldBe setOf("car", "truck")
     }

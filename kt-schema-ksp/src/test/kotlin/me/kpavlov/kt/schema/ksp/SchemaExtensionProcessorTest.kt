@@ -342,7 +342,7 @@ class SchemaExtensionProcessorTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "test.Subject",
+              "$id": "Subject",
               "type": "object"
             }
             """.trimIndent()
@@ -370,7 +370,7 @@ class SchemaExtensionProcessorTest {
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "test.Subject",
+              "$id": "Subject",
               "type": "object",
               "properties": {
                 "priority": { "type": "integer" },

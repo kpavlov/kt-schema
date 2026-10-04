@@ -45,6 +45,8 @@ internal class SerializationIntrospectionContext(
     private val json: Json,
     private val config: SerializationClassSchemaIntrospector.Config,
 ) : BaseIntrospectionContext<SerialDescriptor>() {
+    private val objectDescriptors = mutableMapOf<TypeId, SerialDescriptor>()
+
     /**
      * Converts a [SerialDescriptor] to a [TypeRef].
      * This is the main entry point for type conversion.
@@ -206,6 +208,22 @@ internal class SerializationIntrospectionContext(
         return if (nullable && !innerRef.nullable) innerRef.withNullable(true) else innerRef
     }
 
+    // ponytail: structurally identical distinct classes still merge; descriptors carry no FQN.
+    // Only element names are compared: element descriptors differ between generic applications.
+    private fun failOnSerialNameClash(
+        id: TypeId,
+        descriptor: SerialDescriptor,
+    ) {
+        val known = objectDescriptors.getOrPut(id) { descriptor }
+        val knownNames = known.elementNamesList()
+        val names = descriptor.elementNamesList()
+        check(known.kind == descriptor.kind && knownNames == names) {
+            "Distinct types share serial name '${id.value}' with different shapes: $knownNames vs $names"
+        }
+    }
+
+    private fun SerialDescriptor.elementNamesList(): List<String> = List(elementsCount, ::getElementName)
+
     /**
      * Handles object/class types by creating an [ObjectNode] with properties.
      */
@@ -214,6 +232,7 @@ internal class SerializationIntrospectionContext(
         nullable: Boolean,
     ): TypeRef {
         val id = descriptorId(descriptor)
+        failOnSerialNameClash(id, descriptor)
 
         withCycleDetection(descriptor, id) {
             val properties = mutableListOf<Property>()

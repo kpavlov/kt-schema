@@ -114,7 +114,7 @@ final class me.kpavlov.kt.schema.generator.json/TypeGraphToJsonSchemaTransformer
 }
 
 open class me.kpavlov.kt.schema.generator.json/JsonSchemaConfig { // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig|null[0]
-    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
     constructor <init>(kotlin/Boolean, kotlin/Boolean, kotlin/Boolean, kotlin/Boolean, kotlin/Boolean, kotlin/Boolean) // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.<init>|<init>(kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
 
     final val allowAdditionalProperties // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.allowAdditionalProperties|{}allowAdditionalProperties[0]
@@ -127,6 +127,8 @@ open class me.kpavlov.kt.schema.generator.json/JsonSchemaConfig { // me.kpavlov.
         final fun <get-requireNullableFields>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.requireNullableFields.<get-requireNullableFields>|<get-requireNullableFields>(){}[0]
     final val respectDefaultPresence // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.respectDefaultPresence|{}respectDefaultPresence[0]
         final fun <get-respectDefaultPresence>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.respectDefaultPresence.<get-respectDefaultPresence>|<get-respectDefaultPresence>(){}[0]
+    final val shortDefinitionNames // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.shortDefinitionNames|{}shortDefinitionNames[0]
+        final fun <get-shortDefinitionNames>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.shortDefinitionNames.<get-shortDefinitionNames>|<get-shortDefinitionNames>(){}[0]
     final val useNullableField // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.useNullableField|{}useNullableField[0]
         final fun <get-useNullableField>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.useNullableField.<get-useNullableField>|<get-useNullableField>(){}[0]
     final val useUnionTypes // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.useUnionTypes|{}useUnionTypes[0]

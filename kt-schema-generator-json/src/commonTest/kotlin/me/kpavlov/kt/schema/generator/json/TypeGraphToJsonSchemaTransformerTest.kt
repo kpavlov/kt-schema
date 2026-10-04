@@ -357,9 +357,9 @@ class TypeGraphToJsonSchemaTransformerTest {
     }
 
     @Test
-    fun `colliding override names fall back to fully qualified ids`() {
+    fun `colliding override names fail with all conflicting ids`() {
         // ResultA.Success and ResultB.Success are both annotated e.g. @JsonTypeName("Success") —
-        // the fully qualified id must be used to keep $defs keys unambiguous.
+        // explicit names are honored exactly, so the clash is reported instead of silently renamed.
         val rootId = TypeId("com.example.ApiResponse")
         val resultAId = TypeId("com.example.ResultA")
         val resultBId = TypeId("com.example.ResultB")
@@ -417,89 +417,12 @@ class TypeGraphToJsonSchemaTransformerTest {
                     ),
             )
 
-        val schema = transformer.transform(graph, "com.example.ApiResponse")
-        val schemaJson = schema.encodeToString(json)
+        val error = shouldThrow<IllegalStateException> { transformer.transform(graph, "com.example.ApiResponse") }
 
-        schemaJson shouldEqualJson
-            // language=JSON
-            $$"""
-            {
-              "$schema": "https://json-schema.org/draft/2020-12/schema",
-              "$id": "com.example.ApiResponse",
-              "type": "object",
-              "properties": {
-                "resultA": { "$ref": "#/$defs/com.example.ResultA" },
-                "resultB": { "$ref": "#/$defs/com.example.ResultB" }
-              },
-              "required": ["resultA", "resultB"],
-              "additionalProperties": false,
-              "$defs": {
-                "com.example.ResultA": {
-                  "oneOf": [
-                    { "$ref": "#/$defs/com.example.ResultA.Success" }
-                  ]
-                },
-                "com.example.ResultB": {
-                  "oneOf": [
-                    { "$ref": "#/$defs/com.example.ResultB.Success" }
-                  ]
-                },
-                "com.example.ResultA.Success": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "const": "com.example.ResultA.Success"
-                    },
-                    "value": { "type": "string" }
-                  },
-                  "required": ["type", "value"],
-                  "additionalProperties": false
-                },
-                "com.example.ResultB.Success": {
-                  "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "const": "com.example.ResultB.Success"
-                    },
-                    "code": { "type": "integer" }
-                  },
-                  "required": ["type", "code"],
-                  "additionalProperties": false
-                }
-              }
-            }
-            """.trimIndent()
-    }
-
-    @Test
-    fun `jsonTypeNames falls back names that collide with another node's id after a prior fallback`() {
-        // X and Y both override to "Bar" and must fall back to their own ids.
-        // W's own name happens to equal X's id, which only becomes a problem once X
-        // falls back to it - a second resolution pass is required to catch it.
-        val xId = TypeId("com.example.X")
-        val yId = TypeId("com.example.Y")
-        val wId = TypeId("com.example.W")
-
-        fun node(name: String) = ObjectNode(name = name, properties = emptyList())
-
-        val graph =
-            TypeGraph(
-                root = TypeRef.Ref(wId),
-                nodes =
-                    mapOf(
-                        xId to node("Bar"),
-                        yId to node("Bar"),
-                        wId to node("com.example.X"),
-                    ),
-            )
-
-        val names = graph.jsonTypeNames()
-
-        names[xId] shouldBe "com.example.X"
-        names[yId] shouldBe "com.example.Y"
-        names[wId] shouldBe "com.example.W"
+        error.message shouldBe
+            "Type name 'Success' is used by multiple declarations: " +
+            "com.example.ResultA.Success, com.example.ResultB.Success. " +
+            "Give them distinct @JsonTypeName/@SerialName values."
     }
 
     @Test

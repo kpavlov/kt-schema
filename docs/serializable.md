@@ -504,7 +504,7 @@ This code generates:
 | `Default` | Respects default values; nullable fields use union types `["string", "null"]`.                 |
 | `Strict`  | All fields required (including nullable); union types. Use for OpenAI strict function calling. |
 | `OpenAPI` | Nullable fields use `"nullable": true`; includes `discriminator` for polymorphic types.        |
-| `Lenient` | Compact and permissive: only non-nullable fields without defaults are required, no null markers, extra properties allowed. |
+| `Lenient` | Compact and permissive: only non-nullable fields without defaults are required, no null markers, extra properties allowed, short `$defs` names. |
 
 ### JsonSchemaConfig reference
 
@@ -517,6 +517,7 @@ This code generates:
 | `includePolymorphicDiscriminator`        | `Boolean` | `true`  | Add a `"type"` property with a constant discriminator value to each polymorphic subtype schema.                        |
 | `includeOpenAPIPolymorphicDiscriminator` | `Boolean` | `false` | Include a `discriminator` mapping object in `oneOf` schemas (OpenAPI 3.x). Requires `includePolymorphicDiscriminator`. |
 | `allowAdditionalProperties`              | `Boolean` | `false` | Omit `additionalProperties` from object schemas (extra properties allowed) instead of emitting `false`. Maps are unaffected. |
+| `shortDefinitionNames`                   | `Boolean` | `false` | Use the shortest unique dotted suffix of the qualified name for `$defs` keys, `$ref`s, the root `$id` and discriminator values. Annotation names are kept; kotlinx.serialization schemas are never shortened. |
 
 > [!NOTE]
 > `useUnionTypes` and `useNullableField` are mutually exclusive. With both `false`, nullable properties carry no null
