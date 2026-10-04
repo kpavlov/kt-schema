@@ -5,6 +5,8 @@ import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSTypeAlias
+import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSValueParameter
 import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Nullability
@@ -24,47 +26,79 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 
 /**
- * Shared introspection context for KSP-based introspectors.
+ * Resolves [KSType]s to [TypeRef]s for the KSP introspectors, on top of the state and cycle detection of
+ * [BaseIntrospectionContext]. Typealiases are resolved through the aliased type first, see [toAliasedRef].
  *
- * Eliminates toRef() duplication between KspClassIntrospector and KspFunctionIntrospector
- * by providing a single, well-tested implementation of the type resolution strategy.
- *
- * Extends [BaseIntrospectionContext] to inherit state management and cycle detection,
- * while implementing KSP-specific type resolution logic.
- *
- * Resolution strategy (applied in order):
- * 1. Basic types (primitives and collections) via [resolveBasicTypeOrNull]
- * 2. JSON collection types ([kotlinx.serialization.json.JsonObject]/[kotlinx.serialization.json.JsonArray]) → inline [MapNode]/[ListNode]
- * 3. Third-party types with a well-defined JSON primitive shape (e.g. Jackson's `StringNode`, `IntNode`) → [PrimitiveNode] via [resolvePrimitiveTypeKindOrNull]
- * 4. Opaque JSON types (kotlinx.serialization.json and the rest of the Jackson databind node
- *    hierarchy) → [AnyNode] → empty schema `{}`
- * 5. Generic type parameters and unknowns -> kotlin.Any via [handleAnyFallback]
- * 6. Inline value classes -> flattened to their wrapped element's type via [resolveInlineValueClassOrNull]
- * 7. Sealed class hierarchies -> PolymorphicNode via [handleSealedClass]
- * 8. Enum classes -> EnumNode via [handleEnum]
- * 9. Regular objects/classes -> ObjectNode via [handleObjectOrClass]
+ * Resolution order:
+ * 1. Primitives and collections ([resolveBasicTypeOrNull])
+ * 2. [kotlinx.serialization.json.JsonObject]/[kotlinx.serialization.json.JsonArray] -> inline [MapNode]/[ListNode]
+ * 3. Third-party types with a JSON primitive shape, e.g. Jackson's `StringNode` ([resolvePrimitiveTypeKindOrNull])
+ * 4. Opaque JSON types (kotlinx.serialization.json, Jackson databind nodes) -> [AnyNode], i.e. `{}`
+ * 5. Type parameters and unknown declarations -> [AnyNode] ([handleAnyFallback])
+ * 6. Inline value classes -> their wrapped type ([resolveInlineValueClassOrNull])
+ * 7. `java.util`/`kotlin.collections` Iterable/Map classes -> [ListNode]/[MapNode] ([resolvePlatformCollectionOrNull])
+ * 8. Sealed classes -> PolymorphicNode ([handleSealedClass])
+ * 9. Enums -> EnumNode ([handleEnum])
+ * 10. Other classes and objects -> ObjectNode ([handleObjectOrClass])
  */
 @OptIn(InternalSchemaGeneratorApi::class)
 @Suppress("TooManyFunctions")
 internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
+    /** Use-site arguments of the typealiases being resolved, by alias type parameter. */
+    private val aliasBindings = mutableMapOf<KSTypeParameter, KSType>()
+
     /**
-     * Converts a KSType to a TypeRef using the standard resolution strategy.
+     * Converts [type] to a [TypeRef], trying the handlers listed on the class in order.
      *
-     * This method implements the common type resolution pattern used across all KSP
-     * introspectors. It tries each handler in priority order, using elvis operator
-     * chain to return the first successful match.
-     *
-     * All types should be handled by one of the resolution steps. If not, an exception
-     * is thrown to fail fast and help identify missing handler cases during development.
-     *
-     * @param type The KSType to convert
-     * @return TypeRef representing the type in the schema IR
-     * @throws IllegalArgumentException if the type cannot be handled by any handler
+     * @throws IllegalArgumentException if no handler accepts [type]
      */
-    override fun toRef(type: KSType): TypeRef {
+    override fun toRef(type: KSType): TypeRef =
+        when (val declaration = type.declaration) {
+            is KSTypeAlias -> toAliasedRef(type, declaration)
+            is KSTypeParameter -> toBoundRef(type, declaration) ?: toResolvedRef(type)
+            else -> toResolvedRef(type)
+        }
+
+    /**
+     * Resolves a typealias through the type it stands for. KSP reports the alias as [KSType.declaration] and
+     * [KSType.arguments] are the alias's own, so its type parameters are bound in [aliasBindings] while the
+     * aliased type is resolved (see [toBoundRef]).
+     */
+    private fun toAliasedRef(
+        type: KSType,
+        alias: KSTypeAlias,
+    ): TypeRef {
+        val outerBindings = aliasBindings.toMap()
+        alias.typeParameters.zip(type.arguments).forEach { (parameter, argument) ->
+            val resolved = argument.type?.resolve()
+            if (resolved != null) aliasBindings[parameter] = resolved else aliasBindings -= parameter
+        }
+        try {
+            return toRef(alias.type.resolve()).withNullableIf(type.isNullableAtUseSite())
+        } finally {
+            aliasBindings.clear()
+            aliasBindings += outerBindings
+        }
+    }
+
+    /** Substitutes a bound typealias type parameter with its use-site argument. */
+    private fun toBoundRef(
+        type: KSType,
+        parameter: KSTypeParameter,
+    ): TypeRef? = aliasBindings[parameter]?.let { toRef(it).withNullableIf(type.isNullableAtUseSite()) }
+
+    /**
+     * Explicitly nullable (`T?`) or nullable by type-name convention. Unlike [effectiveNullable], ignores
+     * [KSType.nullability], which is `NULLABLE` for a bare type parameter with a nullable upper bound.
+     */
+    private fun KSType.isNullableAtUseSite(): Boolean = isMarkedNullable || isNullableByTypeName()
+
+    private fun TypeRef.withNullableIf(condition: Boolean): TypeRef =
+        if (condition && !nullable) withNullable(true) else this
+
+    private fun toResolvedRef(type: KSType): TypeRef {
         val nullable = type.effectiveNullable()
 
-        // Try each handler in order, using elvis operator chain for single return
         return requireNotNull(
             resolveBasicTypeOrNull(type)
                 ?: resolveJsonCollectionTypeOrNull(type)
@@ -72,6 +106,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 ?: resolveOpaqueTypeOrNull(type)
                 ?: handleAnyFallback(type)
                 ?: resolveInlineValueClassOrNull(type, nullable)
+                ?: resolvePlatformCollectionOrNull(type, nullable)
                 ?: handleSealedClass(type, nullable)
                 ?: handleEnum(type, nullable)
                 ?: handleObjectOrClass(type, nullable),
@@ -80,50 +115,28 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         }
     }
 
-    /**
-     * Whether this type should be treated as nullable — either natively (Kotlin `?`) or by
-     * convention (its declaration's simple name matches a configured nullable-type-name glob
-     * pattern, e.g. `*Opt`).
-     */
+    /** Nullable natively (`?`) or by a configured nullable-type-name pattern (e.g. `*Opt`). */
     private fun KSType.effectiveNullable(): Boolean = nullability == Nullability.NULLABLE || isNullableByTypeName()
 
-    /**
-     * Attempts to resolve basic types (primitives and collections) to TypeRef.
-     *
-     * This is the shared prefix logic used by both KspClassIntrospector and KspFunctionIntrospector
-     * for handling primitive types and collections before diverging to handle complex types.
-     *
-     * Returns null if the type requires complex handling (classes, enums, sealed, etc.).
-     *
-     * @param type The KSType to resolve
-     * @return TypeRef if this is a primitive or collection type, null otherwise
-     */
+    /** Resolves primitives and collections; null for anything that needs complex handling. */
     private fun resolveBasicTypeOrNull(type: KSType): TypeRef? {
         val nullable = type.effectiveNullable()
 
-        // Try primitive types first, then collections, using elvis operator chain.
-        // KspTypeMappers.collectionTypeRefOrNull computes its own nullable flag from native KSP
-        // nullability only, so re-apply the outer `nullable` (which also folds in the
-        // type-name-pattern convention) on top of whatever it returns.
+        // collectionTypeRefOrNull sees only native nullability; re-apply `nullable` (incl. name convention).
         return KspTypeMappers.primitiveFor(type)?.let { TypeRef.Inline(it, nullable) }
-            ?: KspTypeMappers.collectionTypeRefOrNull(type, ::toRef)?.let { ref ->
-                if (nullable) ref.withNullable(true) else ref
-            }
+            ?: KspTypeMappers.collectionTypeRefOrNull(type, ::toRef)?.withNullableIf(nullable)
     }
 
+    /** See [KspTypeMappers.platformCollectionTypeRefOrNull]. */
+    private fun resolvePlatformCollectionOrNull(
+        type: KSType,
+        nullable: Boolean,
+    ): TypeRef? = KspTypeMappers.platformCollectionTypeRefOrNull(type, ::toRef)?.withNullableIf(nullable)
+
     /**
-     * Maps the built-in `kotlinx.serialization.json` collection-like types
-     * ([kotlinx.serialization.json.JsonObject], [kotlinx.serialization.json.JsonArray]) to their proper inline
-     * schema representations.
-     * - [kotlinx.serialization.json.JsonObject] implements
-     *    [Map] → [MapNode] → `{ "type": "object", "additionalProperties": {} }`
-     * - [kotlinx.serialization.json.JsonArray] implements [List] → [ListNode] → `{ "type": "array" }`
-     *
-     * The element/value types are [AnyNode] (matching the opaque handling of [kotlinx.serialization.json.JsonElement]),
-     * so they produce no `$ref`/`$defs` and remain inline.
-     *
-     * KSP cannot reliably resolve the supertype type-arguments of external library classes,
-     * so we construct the IR nodes directly rather than walking supertypes.
+     * Maps [kotlinx.serialization.json.JsonObject]/[kotlinx.serialization.json.JsonArray] to inline
+     * [MapNode]/[ListNode] of [AnyNode]. Built directly, as KSP can't reliably resolve the supertype arguments
+     * of library classes.
      */
     private fun resolveJsonCollectionTypeOrNull(type: KSType): TypeRef? {
         val nullable = type.effectiveNullable()
@@ -152,11 +165,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         }
     }
 
-    /**
-     * Checks whether [type] is a known opaque type (e.g., [kotlinx.serialization.json] types or the
-     * Jackson databind node hierarchy, all with incompatible class structures) and maps it to
-     * [AnyNode] → empty schema `{}`.
-     */
+    /** Maps known opaque types (kotlinx.serialization.json, Jackson databind nodes) to [AnyNode]. */
     private fun resolveOpaqueTypeOrNull(type: KSType): TypeRef? {
         val nullable = type.effectiveNullable()
         val qualifiedName = type.declaration.qualifiedName?.asString() ?: return null
@@ -167,26 +176,14 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         }
     }
 
-    /**
-     * Checks whether [type] is a known third-party type with a single well-defined JSON
-     * primitive shape (e.g. Jackson's `StringNode`, `IntNode`) and maps it to the matching
-     * [PrimitiveNode] — unlike the types with no fixed shape handled by [resolveOpaqueTypeOrNull].
-     */
+    /** Maps third-party types with a fixed JSON primitive shape (e.g. Jackson's `StringNode`) to [PrimitiveNode]. */
     private fun resolvePrimitiveTypeKindOrNull(type: KSType): TypeRef? {
         val nullable = type.effectiveNullable()
         val qualifiedName = type.declaration.qualifiedName?.asString() ?: return null
         return PRIMITIVE_TYPE_KINDS[qualifiedName]?.let { TypeRef.Inline(PrimitiveNode(it), nullable) }
     }
 
-    /**
-     * Handles generic type parameters or unknown declarations by falling back to kotlin.Any.
-     *
-     * This handler is invoked when the type declaration is not a KSClassDeclaration or lacks
-     * a qualified name (e.g., generic type parameters like `T` in `fun <T> foo(param: T)`).
-     *
-     * @param type The KSType to check
-     * @return [TypeRef.Inline] wrapping [AnyNode] if fallback is needed, null otherwise
-     */
+    /** Falls back to [AnyNode] for type parameters (`T`) and declarations that aren't named classes. */
     private fun handleAnyFallback(type: KSType): TypeRef? {
         val nullable = type.effectiveNullable()
         val declAnyFallback = type.declaration !is KSClassDeclaration || type.declaration.qualifiedName == null
@@ -196,27 +193,11 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     }
 
     /**
-     * Handles inline value classes (`@JvmInline value class Wrapper(val inner: T)`, surfaced by
-     * KSP as [Modifier.VALUE]) by delegating to the wrapped element's type.
+     * Flattens an inline value class ([Modifier.VALUE]) to its wrapped type, since it serializes as the inner value.
+     * Type parameters of the wrapped type are substituted with the use-site arguments (`Wrapper<Int>` is an integer)
+     * and the class description is carried over to the flattened node. Recursion is handled by [flattenValueClass].
      *
-     * Inline value classes serialize as their inner value (e.g. `14.5` instead of
-     * `{"value": 14.5}`), so the schema must reflect the inner type.
-     *
-     * For a generic value class (`value class Wrapper<T>(val value: T)`), the wrapped type is
-     * resolved as a member of [type], so its type parameters are replaced by the use-site type
-     * arguments (`Wrapper<Int>` flattens to an integer).
-     *
-     * If the value class has a class-level `@Description` (or KDoc), it is propagated to the
-     * flattened node so it still appears in the generated schema.
-     *
-     * Recursive value classes are handled by [flattenValueClass].
-     *
-     * Returns null (falling through to [handleObjectOrClass]) when [type] isn't a value class or
-     * its wrapped type can't be determined.
-     *
-     * @param type The KSType to check
-     * @param nullable Whether the type reference should be nullable
-     * @return The flattened TypeRef, or null if this isn't a flattenable inline value class
+     * @return null if [type] isn't a value class or its wrapped type can't be determined
      */
     @Suppress("ReturnCount")
     private fun resolveInlineValueClassOrNull(
@@ -237,16 +218,13 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 description = extractDescription(decl) { decl.descriptionFromKdoc() },
             ) { toRef(wrappedType) }
 
-        return if (nullable && !wrappedRef.nullable) wrappedRef.withNullable(true) else wrappedRef
+        return wrappedRef.withNullableIf(nullable)
     }
 
     /**
-     * Resolves the type of the value class's wrapped constructor parameter as a member of [type],
-     * using the KSP-provided [com.google.devtools.ksp.symbol.KSPropertyDeclaration.asMemberOf]
-     * to substitute type parameters with the use-site type arguments.
-     *
-     * Non-generic value classes keep the declared parameter type, as do generic ones when the
-     * backing property can't be found or the substitution fails.
+     * The wrapped parameter's type as a member of [type]
+     * ([com.google.devtools.ksp.symbol.KSPropertyDeclaration.asMemberOf]), so type parameters become the use-site
+     * arguments. Falls back to the declared type if that isn't possible.
      */
     private fun resolveWrappedTypeAsMemberOf(
         decl: KSClassDeclaration,
@@ -261,17 +239,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         return wrappedProperty?.asMemberOf(type.makeNotNullable())?.takeUnless { it.isError } ?: declaredType
     }
 
-    /**
-     * Handles sealed class hierarchies by generating a PolymorphicNode.
-     *
-     * Creates a polymorphic schema with discriminator-based subtype resolution. Each sealed
-     * subclass is recursively processed and registered in the type graph. The discriminator
-     * maps simple class names to their fully qualified TypeIds.
-     *
-     * @param type The KSType to check
-     * @param nullable Whether the type reference should be nullable
-     * @return TypeRef.Ref to the polymorphic node if this is a sealed class, null otherwise
-     */
+    /** Builds a PolymorphicNode over the sealed subclasses not marked as ignored, registering each of them. */
     private fun handleSealedClass(
         type: KSType,
         nullable: Boolean,
@@ -280,27 +248,23 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         val id = decl.typeId()
 
         withCycleDetection(type, id) {
-            // Find all sealed subclasses, excluding those annotated with @SchemaIgnore
             val sealedSubclasses =
                 decl
                     .getSealedSubclasses()
                     .filter { !it.isSchemaIgnored() }
                     .toList()
 
-            // Create SubtypeRef for each sealed subclass using their typeId()
             val subtypes =
                 sealedSubclasses.map {
                     me.kpavlov.kt.schema.generator.core.ir
                         .SubtypeRef(it.typeId())
                 }
 
-            // Build discriminator mapping: discriminator value (fully qualified name) -> TypeId
             // Keys must match the `const` values emitted for each subtype's discriminator property.
             val discriminatorMapping =
                 sealedSubclasses.associate { it.typeId().value to it.typeId() }
 
-            // Process each sealed subclass
-            sealedSubclasses.forEach { toRef(it.asType(emptyList())) }
+            sealedSubclasses.forEach { toRef(it.asStarProjectedType()) }
 
             val sealedNameOverride = extractNameOverride(decl)
             me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode(
@@ -319,16 +283,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         return TypeRef.Ref(id, nullable)
     }
 
-    /**
-     * Handles enum classes by generating an EnumNode.
-     *
-     * Extracts all enum entries and creates a schema node that constrains values to the
-     * declared enum constants. Enum entries are identified by ClassKind.ENUM_ENTRY.
-     *
-     * @param type The KSType to check
-     * @param nullable Whether the type reference should be nullable
-     * @return TypeRef.Ref to the enum node if this is an enum class, null otherwise
-     */
+    /** Builds an EnumNode from the enum entries, honoring name overrides and the default-value marker. */
     private fun handleEnum(
         type: KSType,
         nullable: Boolean,
@@ -361,18 +316,9 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     }
 
     /**
-     * Handles regular objects and data classes by generating an ObjectNode.
-     *
-     * Prefers primary constructor parameters for data classes (extracting parameter names,
-     * types, and default value presence). Falls back to public properties for objects and
-     * classes without primary constructors. Properties without defaults are marked as required.
-     *
-     * Note: KSP does not provide access to default value expressions at compile-time
-     * (https://github.com/google/ksp/issues/1868), so only the presence of defaults is tracked.
-     *
-     * @param type The KSType to check
-     * @param nullable Whether the type reference should be nullable
-     * @return TypeRef.Ref to the object node if this is a class/object, null otherwise
+     * Builds an ObjectNode from the primary constructor parameters, or from the public properties when there is
+     * none. Properties without defaults are required. KSP can't expose default value expressions
+     * (https://github.com/google/ksp/issues/1868), so only their presence is tracked.
      */
     @Suppress("ReturnCount")
     private fun handleObjectOrClass(
@@ -393,16 +339,11 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
             val props = ArrayList<Property>()
             val required = LinkedHashSet<String>()
 
-            // Original (pre-rename) Kotlin declaration names already handled directly by this
-            // class — NOT the emitted/renamed names, so a sealed-parent property satisfied via a
-            // renamed constructor override isn't mistaken for unprocessed and re-added below.
+            // Kotlin declaration names (not the emitted ones), so a sealed-parent property already covered
+            // by a renamed constructor override isn't re-added.
             val processedKotlinNames = HashSet<String>()
 
-            /**
-             * Helper to add a property and track whether it's required.
-             *
-             * Properties without default values are automatically added to the required set.
-             */
+            /** Adds a property; it's required unless it has a default value (or is constant). */
             fun addProperty(
                 kotlinName: String,
                 name: String,
@@ -433,13 +374,10 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     }
 
     /**
-     * Resolves a property's [TypeRef] and effective "has default value" flag, folding in the
-     * nullable/optional convention (type-name pattern or `@Nullable`-style annotation) on top of
-     * [nativeHasDefault] (a Kotlin default-value expression, or `true` for an inherited
-     * sealed-parent property with a fixed value).
+     * Resolves a property's [TypeRef], whether it has a default value and the annotation-provided default value.
+     * The type-name and `@Nullable`/`@Optional`-style conventions apply on top of [nativeHasDefault].
      *
-     * @param annotationSources annotated declarations to check for the convention annotation
-     *   (e.g. both a constructor parameter and its corresponding property)
+     * @param annotationSources declarations whose annotations are checked (e.g. a parameter and its property)
      */
     private fun resolvePropertyTypeAndOptionality(
         resolvedType: KSType,
@@ -460,13 +398,11 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         addProperty: (String, String, TypeRef, String?, Boolean, String?) -> Unit,
     ) {
         val declaredProperties = decl.getDeclaredProperties().associateBy { it.simpleName.asString() }
-        // Prefer primary constructor parameters for data classes; fall back to public properties
         val params = decl.primaryConstructor?.parameters.orEmpty()
         if (params.isNotEmpty()) {
             params.forEach { p ->
                 val kotlinName = p.name?.asString() ?: return@forEach
                 val property = declaredProperties[kotlinName]
-                // Skip properties marked with an ignore annotation (e.g. @JsonIgnore)
                 if (p.isSchemaIgnored() || property?.isIgnoredForSchema() == true) return@forEach
                 val propertyName =
                     extractNameOverride(p) ?: property?.let { extractNameOverride(it) } ?: kotlinName
@@ -512,16 +448,14 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         processedKotlinNames: Set<String>,
         addProperty: (String, String, TypeRef, String?, Boolean, String?, Boolean) -> Unit,
     ) {
-        // Add inherited properties from sealed parents that weren't in the constructor
         val sealedParents =
             decl.superTypes
                 .mapNotNull { it.resolve().declaration as? KSClassDeclaration }
                 .filter { it.modifiers.contains(Modifier.SEALED) }
                 .toList()
 
-        // The child's own declared properties, so an override that re-declares the annotation
-        // (e.g. `@get:JsonProperty` placed on the subclass's `override val`) takes precedence
-        // over the parent's — mirroring how the reflection-based introspector resolves overrides.
+        // A child override that re-declares an annotation (e.g. `@get:JsonProperty`) wins over the parent's,
+        // as in the reflection front end.
         val childDeclaredProperties = decl.getDeclaredProperties().associateBy { it.simpleName.asString() }
 
         sealedParents.forEach { parent ->
@@ -532,9 +466,6 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 val overridingProp = childDeclaredProperties[kotlinName]
                 val effectiveProp = overridingProp ?: parentProp
 
-                // Prefer the child override's own name override (covers a re-declared
-                // `@get:JsonProperty`), falling back to the parent's — mirroring how the
-                // reflection-based introspector resolves overrides.
                 val name =
                     overridingProp?.let { extractNameOverride(it) }
                         ?: extractNameOverride(parentProp)
@@ -570,16 +501,10 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     }
 
     private companion object {
-        /**
-         * Fully-qualified class names of types that represent arbitrary JSON values
-         * and should be treated as opaque (mapped to [AnyNode] → empty schema `{}`).
-         */
+        /** Types representing arbitrary JSON values, mapped to [AnyNode]. */
         val OPAQUE_TYPE_NAMES: Set<String> = defaultOpaqueTypeNames()
 
-        /**
-         * Fully qualified third-party type names mapped to the [PrimitiveKind] they represent
-         * (e.g. Jackson's `StringNode` -> `STRING`).
-         */
+        /** Third-party type names mapped to the [PrimitiveKind] they represent. */
         val PRIMITIVE_TYPE_KINDS: Map<String, PrimitiveKind> = defaultPrimitiveTypeKinds()
     }
 }

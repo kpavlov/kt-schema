@@ -1,5 +1,7 @@
 package me.kpavlov.kt.schema.ksp.ir
 
+import com.google.devtools.ksp.getAllSuperTypes
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.Nullability
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
@@ -8,28 +10,16 @@ import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 
-/**
- * Shared type mapping utilities for KSP introspectors.
- *
- * This object provides common type conversion logic used by both
- * KspClassIntrospector and KspFunctionIntrospector to avoid code duplication.
- */
+/** Type mapping shared by the KSP introspectors. */
 internal object KspTypeMappers {
     /**
-     * Maps a Kotlin primitive type to a PrimitiveNode, or returns null if not a primitive.
-     *
-     * Supported primitives:
-     * - String → STRING
-     * - Boolean → BOOLEAN
-     * - Int, Byte, Short → INT
-     * - Long → LONG
-     * - Float → FLOAT
-     * - Double → DOUBLE
+     * Maps a Kotlin primitive to a [PrimitiveNode], or null: String/Char -> STRING, Boolean, Int/Byte/Short -> INT,
+     * Long, Float, Double.
      */
     fun primitiveFor(type: KSType): PrimitiveNode? {
         val qn = type.declaration.qualifiedName?.asString()
         return when (qn) {
-            "kotlin.String" -> PrimitiveNode(PrimitiveKind.STRING)
+            "kotlin.String", "kotlin.Char" -> PrimitiveNode(PrimitiveKind.STRING)
             "kotlin.Boolean" -> PrimitiveNode(PrimitiveKind.BOOLEAN)
             "kotlin.Int", "kotlin.Byte", "kotlin.Short" -> PrimitiveNode(PrimitiveKind.INT)
             "kotlin.Long" -> PrimitiveNode(PrimitiveKind.LONG)
@@ -40,13 +30,8 @@ internal object KspTypeMappers {
     }
 
     /**
-     * Attempts to map collection types (List, Set, Map, Array) to TypeRef.
-     *
-     * Returns null if the type is not a recognized collection type.
-     *
-     * @param type The KSType to check
-     * @param recursiveMapper A function to recursively resolve element/key/value types
-     * @return TypeRef if this is a collection, null otherwise
+     * Maps the named Kotlin collection and array types to a list or map [TypeRef], or null for other types.
+     * Element, key and value types are resolved with [recursiveMapper].
      */
     fun collectionTypeRefOrNull(
         type: KSType,
@@ -90,8 +75,34 @@ internal object KspTypeMappers {
     }
 
     /**
-     * Creates TypeRef for List/Set/Array collections.
+     * Maps `java.util`/`kotlin.collections` classes implementing [Iterable] or [Map] that [collectionTypeRefOrNull]
+     * doesn't name (e.g. `ArrayList`, `HashMap`, which the `kotlin.collections` typealiases expand to) to a list or
+     * map, or null. Other implementers (e.g. `Path`, `IntRange`, user types) keep their object schema.
      */
+    fun platformCollectionTypeRefOrNull(
+        type: KSType,
+        recursiveMapper: (KSType) -> TypeRef,
+    ): TypeRef? {
+        val declaration =
+            (type.declaration as? KSClassDeclaration)?.takeIf { candidate ->
+                val qn = candidate.qualifiedName?.asString().orEmpty()
+                qn.startsWith("java.util.") || qn.startsWith("kotlin.collections.")
+            } ?: return null
+
+        val nullable = type.nullability == Nullability.NULLABLE
+        val superTypeNames =
+            declaration
+                .getAllSuperTypes()
+                .mapNotNull { it.declaration.qualifiedName?.asString() }
+                .toSet()
+        return when {
+            "kotlin.collections.Iterable" in superTypeNames -> listOrSetTypeRef(type, nullable, recursiveMapper)
+            "kotlin.collections.Map" in superTypeNames -> mapTypeRef(type, nullable, recursiveMapper)
+            else -> null
+        }
+    }
+
+    /** List/Set/Array [TypeRef]. */
     private fun listOrSetTypeRef(
         type: KSType,
         nullable: Boolean,
@@ -127,9 +138,7 @@ internal object KspTypeMappers {
         return TypeRef.Inline(ListNode(element = elementRef), nullable)
     }
 
-    /**
-     * Creates TypeRef for Map collections.
-     */
+    /** Map [TypeRef]. */
     private fun mapTypeRef(
         type: KSType,
         nullable: Boolean,

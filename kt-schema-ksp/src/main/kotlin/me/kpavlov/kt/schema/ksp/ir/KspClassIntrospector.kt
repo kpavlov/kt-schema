@@ -15,7 +15,7 @@ internal class KspClassIntrospector : SchemaIntrospector<KSClassDeclaration, Uni
         val context = KspIntrospectionContext()
         val rootRef = TypeRef.Ref(root.typeId())
         // ensure root node is populated
-        context.toRef(root.asType(emptyList()))
+        context.toRef(root.asStarProjectedType())
         return TypeGraph(root = rootRef, nodes = context.nodes)
     }
 }

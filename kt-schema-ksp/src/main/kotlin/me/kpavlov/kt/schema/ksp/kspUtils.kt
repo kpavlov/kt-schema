@@ -2,17 +2,11 @@ package me.kpavlov.kt.schema.ksp
 
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSDeclaration
+import com.google.devtools.ksp.symbol.Origin
 
 /**
- * Filters a declaration based on whether it resides within the specified root package.
- * Logs a message if the declaration is skipped for being outside the root package.
- *
- * @param declaration The Kotlin Symbol Processing (KSP) declaration to filter.
- * @param rootPackage The optional root package name used to constrain the filtering.
- *                     If null, no filtering is applied based on the root package.
- * @param logger The KSP logger instance used for logging messages.
- * @return `true` if the declaration is in the specified root package or no root package is specified,
- *         `false` otherwise.
+ * Whether [declaration] is in [rootPackage] or one of its subpackages; always true if [rootPackage] is null.
+ * Logs the declarations that are skipped.
  */
 internal fun filterByRootPackage(
     declaration: KSDeclaration,
@@ -34,31 +28,20 @@ internal fun filterByRootPackage(
 }
 
 /**
- * Retrieves schema parameters from a specified annotation on a declaration,
- * merging them with provided default parameters.
+ * The arguments explicitly passed to [annotation] on [declaration], or an empty map if it is absent.
+ * Defaults, which KSP merges into [com.google.devtools.ksp.symbol.KSAnnotation.arguments] as [Origin.SYNTHETIC],
+ * are skipped so that unset parameters fall back to the processor option.
  *
- * @param declaration The declaration from which to retrieve the annotation parameters.
- * @param annotation The fully qualified name of the annotation to look for.
- * @param defaultParameters A map of default parameters to be merged with the annotation parameters.
- * @return A map containing the merged parameters from the specified annotation and the default parameters.
+ * @param annotation fully qualified annotation name
  */
 internal fun getSchemaParameters(
     declaration: KSDeclaration,
     annotation: String,
-    defaultParameters: Map<String, Any?>,
-): Map<String, Any?> {
-    val schemaAnnotation =
-        declaration.annotations.firstOrNull {
-            it.toString() == annotation
-        }
-    if (schemaAnnotation == null) {
-        return mapOf()
-    }
-
-    val parameters =
-        schemaAnnotation.arguments
-            .mapNotNull { arg ->
-                arg.name?.getShortName()?.let { it to arg.value }
-            }.toMap()
-    return defaultParameters.plus(parameters)
-}
+): Map<String, Any?> =
+    declaration.annotations
+        .firstOrNull { it.annotationType.resolve().declaration.qualifiedName?.asString() == annotation }
+        ?.arguments
+        ?.filter { it.origin != Origin.SYNTHETIC }
+        ?.mapNotNull { argument -> argument.name?.asString()?.let { it to argument.value } }
+        ?.toMap()
+        .orEmpty()

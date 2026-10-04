@@ -9,6 +9,9 @@
 
 - Generic inline value classes (e.g. `Wrapper<Int>`) now resolve their type arguments in the reflection and KSP front ends; previously reflection threw and KSP emitted an empty schema
 - Self-wrapping inline value classes (e.g. `value class Tree(val children: List<Tree>)`) get a `$defs` entry of their wrapped shape (`{"type": "array", "items": {"$ref": ...}}`) in the reflection, KSP and kotlinx.serialization front ends; previously reflection emitted a dangling `$ref`, KSP failed processing and kotlinx.serialization overflowed the stack. Polymorphically recursive ones are cut off after 8 nested levels as "any value"
+- KSP: typealiases (e.g. `typealias UserId = String`) resolve to the type they stand for instead of an empty schema; the `kotlin.collections` aliases `ArrayList`, `HashMap`, `LinkedHashMap`, `HashSet` and `LinkedHashSet` map to `array`/`object` schemas, and `Char` maps to `string` like in the reflection front end
+- KSP: `@Schema(withSchemaObject = ...)` is now honored; previously the annotation arguments were never read and only the `me.kpavlov.kt.schema.withSchemaObject` processor option applied, contrary to the documented option priority. An explicit annotation value now takes precedence over the option
+- KSP: processing errors point at the offending declaration and include the stack trace.
 
 ### Dependencies
 
