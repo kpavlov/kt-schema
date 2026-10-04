@@ -63,7 +63,9 @@ public final class me/kpavlov/kt/schema/generator/core/ir/AnyNode : me/kpavlov/k
 }
 
 public abstract class me/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionContext {
+	public static final field MAX_FLATTENING_DEPTH I
 	public fun <init> ()V
+	protected final fun flattenValueClass-Z7QVJo0 (Ljava/lang/Object;Ljava/lang/String;ZZLkotlin/jvm/functions/Function0;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
 	public final fun getNodes ()Ljava/util/Map;
 	protected final fun getTypeRefCache ()Ljava/util/Map;
 	protected final fun getVisitingTypes ()Ljava/util/Set;

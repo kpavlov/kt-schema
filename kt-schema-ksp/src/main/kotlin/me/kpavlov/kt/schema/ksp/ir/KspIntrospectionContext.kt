@@ -48,15 +48,6 @@ import me.kpavlov.kt.schema.generator.core.ir.withNullable
 @Suppress("TooManyFunctions")
 internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     /**
-     * Value classes currently being flattened by [resolveInlineValueClassOrNull].
-     *
-     * Kept apart from [visitingTypes] (active node construction): a flattened value class never
-     * registers a node itself, so a recursive reference must be allowed to register the fallback
-     * object node, whereas a type whose node is under construction must not be re-entered.
-     */
-    private val flatteningTypes: MutableSet<KSType> = mutableSetOf()
-
-    /**
      * Converts a KSType to a TypeRef using the standard resolution strategy.
      *
      * This method implements the common type resolution pattern used across all KSP
@@ -218,10 +209,10 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
      * If the value class has a class-level `@Description` (or KDoc), it is propagated to the
      * flattened primitive node so it still appears in the generated schema.
      *
-     * Returns null (falling through to [handleObjectOrClass]) when [type] isn't a value class,
-     * its wrapped type can't be determined, or it (transitively) wraps itself — flattening that
-     * would recurse forever. The fall-through registers the value class's object node, so the
-     * resulting [TypeRef.Ref] always resolves.
+     * Recursive value classes are handled by [flattenValueClass].
+     *
+     * Returns null (falling through to [handleObjectOrClass]) when [type] isn't a value class or
+     * its wrapped type can't be determined.
      *
      * @param type The KSType to check
      * @param nullable Whether the type reference should be nullable
@@ -235,18 +226,15 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         val decl = type.declaration as? KSClassDeclaration ?: return null
         if (Modifier.VALUE !in decl.modifiers) return null
         val wrappedParam = decl.primaryConstructor?.parameters?.singleOrNull() ?: return null
-        // Keyed by the non-null type so `Wrapper?` inside `Wrapper` is caught as the same cycle.
-        val flatteningKey = type.makeNotNullable()
-        if (flatteningKey in flatteningTypes) return null
 
         val wrappedType = resolveWrappedTypeAsMemberOf(decl, wrappedParam, type)
-        flatteningTypes += flatteningKey
         val wrappedRef =
-            try {
-                toRef(wrappedType)
-            } finally {
-                flatteningTypes -= flatteningKey
-            }
+            flattenValueClass(
+                key = type.makeNotNullable(),
+                id = decl.typeId(),
+                nullable = nullable,
+                wrappedNullable = wrappedType.isMarkedNullable,
+            ) { toRef(wrappedType) }
 
         val classDescription = extractDescription(decl) { decl.descriptionFromKdoc() }
         val resultRef =

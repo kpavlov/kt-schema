@@ -44,6 +44,15 @@ public abstract class BaseIntrospectionContext<TType : Any> {
     protected val typeRefCache: MutableMap<TType, TypeRef> = mutableMapOf()
 
     /**
+     * Value classes currently being flattened by [flattenValueClass], each mapped to the
+     * [visitingTypes] size when its flattening started.
+     */
+    private val flatteningDepths: MutableMap<TType, Int> = mutableMapOf()
+
+    /** Value classes from [flatteningDepths] that were re-entered through a purely inline cycle. */
+    private val inlineCycleTypes: MutableSet<TType> = mutableSetOf()
+
+    /**
      * Converts [type] to a [TypeRef] for use in the schema.
      * This is the main entry point for type conversion.
      */
@@ -84,6 +93,57 @@ public abstract class BaseIntrospectionContext<TType : Any> {
     }
 
     /**
+     * Flattens the value class [key] (its non-null type) to the [TypeRef] returned by [flatten].
+     *
+     * A value class re-entered with no `$ref`-able node built in between (e.g.
+     * `value class Tree(val children: List<Tree>)`) is a purely inline cycle: the re-entry returns
+     * a [TypeRef.Ref] to [id], and the outermost frame registers the flattened node under [id].
+     * A cycle that passes through an object is already broken by that object's `$ref`.
+     *
+     * More than [MAX_FLATTENING_DEPTH] value classes flattened directly inside one another are cut
+     * off as "any value". This stops polymorphic recursion
+     * (`value class Nest<T>(val items: List<Nest<List<T>>>)`), which yields a new type per level,
+     * but also applies to deeper chains of distinct value classes.
+     *
+     * @param nullable whether the value class occurrence is nullable
+     * @param wrappedNullable whether the wrapped type is nullable
+     */
+    @Suppress("ReturnCount")
+    protected fun flattenValueClass(
+        key: TType,
+        id: TypeId,
+        nullable: Boolean,
+        wrappedNullable: Boolean,
+        flatten: () -> TypeRef,
+    ): TypeRef {
+        val objectDepth = visitingTypes.size
+        if (flatteningDepths[key] == objectDepth) {
+            inlineCycleTypes += key
+            return TypeRef.Ref(id, nullable || wrappedNullable)
+        }
+        if (flatteningDepths.values.count { it == objectDepth } >= MAX_FLATTENING_DEPTH) {
+            return TypeRef.Inline(AnyNode(), nullable)
+        }
+
+        val outerDepth = flatteningDepths.put(key, objectDepth)
+        val wrappedRef =
+            try {
+                flatten()
+            } finally {
+                if (outerDepth == null) flatteningDepths -= key else flatteningDepths[key] = outerDepth
+            }
+        if (!inlineCycleTypes.remove(key)) return wrappedRef
+
+        // Kotlin rejects a value class whose underlying type is itself, so the cycle always runs
+        // through an inline collection here.
+        val node = checkNotNull((wrappedRef as? TypeRef.Inline)?.node) { "Unexpected inline cycle via $wrappedRef" }
+        // ponytail: TypeId is per class, so two recursive instantiations of one generic value class
+        // share a definition; put type arguments into the id if that ever matters.
+        withCycleDetection(key, id) { node }
+        return TypeRef.Ref(id, nullable || wrappedRef.nullable)
+    }
+
+    /**
      * Registers the [NamedTypeNode] built by [nodeBuilder] for [id] (idempotent via
      * [withCycleDetection]) and returns a [TypeRef.Ref] to it.
      *
@@ -101,5 +161,10 @@ public abstract class BaseIntrospectionContext<TType : Any> {
     ): TypeRef.Ref {
         withCycleDetection(type, id, nodeBuilder)
         return TypeRef.Ref(id, nullable)
+    }
+
+    private companion object {
+        /** Maximum number of value classes flattened directly inside one another. */
+        const val MAX_FLATTENING_DEPTH = 8
     }
 }

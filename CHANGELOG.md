@@ -8,6 +8,7 @@
 ### Fixed
 
 - Generic inline value classes (e.g. `Wrapper<Int>`) now resolve their type arguments in the reflection and KSP front ends; previously reflection threw and KSP emitted an empty schema
+- Self-wrapping inline value classes (e.g. `value class Tree(val children: List<Tree>)`) get a `$defs` entry of their wrapped shape (`{"type": "array", "items": {"$ref": ...}}`) in the reflection, KSP and kotlinx.serialization front ends; previously reflection emitted a dangling `$ref`, KSP failed processing and kotlinx.serialization overflowed the stack. Polymorphically recursive ones are cut off after 8 nested levels as "any value"
 
 ### Dependencies
 

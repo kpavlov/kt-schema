@@ -42,15 +42,6 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
     private val defaultValueExtractor = DefaultValueExtractor
 
     /**
-     * Value classes currently being flattened by [flattenInlineValueClass].
-     *
-     * Kept apart from [visitingTypes] (active node construction): a flattened value class never
-     * registers a node itself, so a recursive reference must be allowed to register the fallback
-     * object node, whereas a type whose node is under construction must not be re-entered.
-     */
-    private val flatteningTypes: MutableSet<KType> = mutableSetOf()
-
-    /**
      * Converts a [KType] to a [TypeRef].
      * This is the main entry point for type conversion.
      *
@@ -160,11 +151,16 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      * both the exact type and its subtypes (e.g., [Iterable] matches [List]/[Collection]).
      * Returns null if no matching supertype is found or the argument index is out of bounds.
      */
-    private fun superTypeArg(klass: KClass<*>, superType: KClass<*>, argumentIndex: Int): KType? {
-        val found = klass.supertypes.firstOrNull {
-            val classifier = it.classifier as? KClass<*> ?: return@firstOrNull false
-            superType.java.isAssignableFrom(classifier.java)
-        } ?: return null
+    private fun superTypeArg(
+        klass: KClass<*>,
+        superType: KClass<*>,
+        argumentIndex: Int,
+    ): KType? {
+        val found =
+            klass.supertypes.firstOrNull {
+                val classifier = it.classifier as? KClass<*> ?: return@firstOrNull false
+                superType.java.isAssignableFrom(classifier.java)
+            } ?: return null
         return found.arguments.getOrNull(argumentIndex)?.type
     }
 
@@ -180,7 +176,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      */
     private fun handleListType(type: KType): TypeRef {
         // Only fall back to supertype arguments for non-generic wrappers (e.g. JsonArray).
-        // When the type already declares arguments, honor them so star projections like
+        // When the type already declares arguments, honour them so star projections like
         // List<*> resolve to a null element instead of leaking a raw type parameter.
         val elementType =
             if (type.arguments.isEmpty()) {
@@ -207,7 +203,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      */
     private fun handleMapType(type: KType): TypeRef {
         // Only fall back to supertype arguments for non-generic wrappers (e.g. JsonObject).
-        // When the type already declares arguments, honor them so star projections like
+        // When the type already declares arguments, honour them so star projections like
         // Map<*, *> resolve to null key/value instead of leaking raw type parameters.
         val hasArguments = type.arguments.isNotEmpty()
         val keyType =
@@ -243,17 +239,14 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      * A class-level `@Description` on the value class is carried over onto the flattened
      * primitive node, since there is no wrapper object left to attach it to.
      *
-     * Falls back to [handleObjectType] when the wrapped property can't be determined, or for a
-     * value class that (transitively) wraps a collection of itself — flattening would otherwise
-     * recurse without end. The fallback registers the value class's object node, so the
-     * resulting [TypeRef.Ref] always resolves.
+     * Recursive value classes are handled by [flattenValueClass].
+     *
+     * Falls back to [handleObjectType] when the wrapped property can't be determined.
      */
     private fun flattenInlineValueClass(type: KType): TypeRef {
         val klass = type.klass
-        val declaredWrappedType = findPrimaryConstructor(klass)?.parameters?.singleOrNull()?.type
-        // Keyed by the non-null type so `Wrapper?` inside `Wrapper` is caught as the same cycle.
-        val flatteningKey = type.withNullability(false)
-        if (declaredWrappedType == null || flatteningKey in flatteningTypes) return handleObjectType(type)
+        val declaredWrappedType =
+            findPrimaryConstructor(klass)?.parameters?.singleOrNull()?.type ?: return handleObjectType(type)
 
         // A star projection (`Wrapper<*>`) carries no type, so it is treated as `Any?`.
         val bindings =
@@ -264,19 +257,19 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             if (bindings.isEmpty()) declaredWrappedType else substituteTypeParameters(declaredWrappedType, bindings)
 
         val nullable = type.effectiveNullable()
-        flatteningTypes += flatteningKey
         val wrappedRef =
-            try {
-                toRef(wrappedType)
-            } finally {
-                flatteningTypes -= flatteningKey
-            }
+            flattenValueClass(
+                key = type.withNullability(false),
+                id = createTypeId(klass),
+                nullable = nullable,
+                wrappedNullable = wrappedType.isMarkedNullable,
+            ) { toRef(wrappedType) }
 
         val classDescription = extractDescription(klass.java.annotations.toList())
         val resultRef =
             if (classDescription != null && wrappedRef is TypeRef.Inline && wrappedRef.node is PrimitiveNode) {
                 TypeRef.Inline(
-                    (wrappedRef.node as PrimitiveNode).copy(description = classDescription),
+                    wrappedRef.node.copy(description = classDescription),
                     wrappedRef.nullable,
                 )
             } else {
@@ -301,12 +294,13 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         bindings: Map<KTypeParameter, KType>,
     ): KType =
         when (val classifier = type.classifier) {
-            is KTypeParameter ->
+            is KTypeParameter -> {
                 bindings[classifier]?.let { bound ->
                     if (type.isMarkedNullable) bound.withNullability(true) else bound
                 } ?: type
+            }
 
-            is KClass<*> ->
+            is KClass<*> -> {
                 if (type.arguments.isEmpty()) {
                     type
                 } else {
@@ -320,8 +314,11 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                         nullable = type.isMarkedNullable,
                     )
                 }
+            }
 
-            else -> type
+            else -> {
+                type
+            }
         }
 
     /**
@@ -396,12 +393,17 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         @Suppress("UNCHECKED_CAST")
         val enumConstants = (klass.java as Class<out Enum<*>>).enumConstants
         var defaultValue: String? = null
-        val entries = enumConstants.map { constant ->
-            val annotations = klass.java.getField(constant.name).annotations.toList()
-            val entryName = extractNameOverride(annotations) ?: constant.name
-            if (defaultValue == null && isEnumDefaultAnnotated(annotations)) defaultValue = entryName
-            entryName
-        }
+        val entries =
+            enumConstants.map { constant ->
+                val annotations =
+                    klass.java
+                        .getField(constant.name)
+                        .annotations
+                        .toList()
+                val entryName = extractNameOverride(annotations) ?: constant.name
+                if (defaultValue == null && isEnumDefaultAnnotated(annotations)) defaultValue = entryName
+                entryName
+            }
         val nameOverride = extractNameOverride(klass.java.annotations.toList())
         return EnumNode(
             name = nameOverride ?: klass.qualifiedName ?: klass.simpleName ?: "UnknownEnum",
@@ -455,7 +457,11 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         // properties already satisfied via a renamed constructor override (see below) —
         // `processedProperties` above holds the emitted/renamed names, not the declaration names.
         val constructorParameterNames =
-            findPrimaryConstructor(klass)?.parameters?.mapNotNull { it.name }?.toSet().orEmpty()
+            findPrimaryConstructor(klass)
+                ?.parameters
+                ?.mapNotNull { it.name }
+                ?.toSet()
+                .orEmpty()
 
         // If there are sealed parents, update descriptions to inherit from parent if needed
         if (sealedParents.isNotEmpty()) {
@@ -613,7 +619,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      * This method processes constructor parameters to create Property objects,
      * handling type conversion, default values, descriptions, and nullability.
      *
-     * @param klass The class whose constructor to analyze
+     * @param klass The class whose constructor to analyse
      * @param defaultValues Map of property names to their default values (from DefaultValueExtractor)
      * @return Pair of (list of properties, set of required property names)
      */

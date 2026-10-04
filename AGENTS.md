@@ -63,7 +63,7 @@
 3. Prefer jetbrains MCP for viewing/editing/running tests.
 4. Write tests first.
 5. Implement (SOLID, no API breakage without discussion).
-6. Run tests: `./gradlew test` | `./gradlew :ksp-integration-tests:test`.
+6. Run tests: `./gradlew -q test` | `./gradlew -q :ksp-integration-tests:test`.
 7. Verify schemas by structure (Kotest JSON matchers).
 8. Document decisions in PR/commit.
 

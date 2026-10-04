@@ -91,7 +91,6 @@ class ReflectionIntrospectorTest {
         val metadata: Map<String, Any>,
     )
 
-    @Suppress("unused")
     data class WithStarProjections(
         val items: List<*>,
         val mapping: Map<*, *>,
@@ -138,6 +137,95 @@ class ReflectionIntrospectorTest {
         val nullableStringWrapper: Wrapper<String?>,
         val listWrapper: ListWrapper<Int>,
         val starWrapper: Wrapper<*>,
+    )
+
+    @JvmInline
+    value class Hop1(
+        val stop: Stop1,
+    )
+
+    data class Stop1(
+        val next: Hop2,
+    )
+
+    @JvmInline
+    value class Hop2(
+        val stop: Stop2,
+    )
+
+    data class Stop2(
+        val next: Hop3,
+    )
+
+    @JvmInline
+    value class Hop3(
+        val stop: Stop3,
+    )
+
+    data class Stop3(
+        val next: Hop4,
+    )
+
+    @JvmInline
+    value class Hop4(
+        val stop: Stop4,
+    )
+
+    data class Stop4(
+        val next: Hop5,
+    )
+
+    @JvmInline
+    value class Hop5(
+        val stop: Stop5,
+    )
+
+    data class Stop5(
+        val next: Hop6,
+    )
+
+    @JvmInline
+    value class Hop6(
+        val stop: Stop6,
+    )
+
+    data class Stop6(
+        val next: Hop7,
+    )
+
+    @JvmInline
+    value class Hop7(
+        val stop: Stop7,
+    )
+
+    data class Stop7(
+        val next: Hop8,
+    )
+
+    @JvmInline
+    value class Hop8(
+        val stop: Stop8,
+    )
+
+    data class Stop8(
+        val next: Hop9,
+    )
+
+    @JvmInline
+    value class Hop9(
+        val stop: Stop9,
+    )
+
+    data class Stop9(
+        val leaf: String,
+    )
+
+    data class WithDeepValueClassChain(
+        val first: Hop1,
+    )
+
+    data class WithNestedGenericValueClass(
+        val nested: Wrapper<Wrapper<Int>>,
     )
 
     private val introspector = ReflectionClassIntrospector
@@ -460,20 +548,36 @@ class ReflectionIntrospectorTest {
     }
 
     @Test
-    fun `inline value class wrapping a collection of itself falls back to a structural object instead of deadloop`() {
-        val graph = introspector.introspect(WithRecursiveInlineValueClass::class)
-
-        graph.root.shouldBeInstanceOf<TypeRef.Ref>()
-    }
-
-    @Test
-    fun `recursive inline value class fallback ref resolves to a registered object node`() {
+    fun `inline value class wrapping a collection of itself is defined by its wrapped shape`() {
         val graph = introspector.introspect(WithRecursiveInlineValueClass::class)
 
         val wrapperId = TypeId(RecursiveWrapper::class.qualifiedName!!)
-        val wrapperNode = graph.nodes[wrapperId].shouldBeInstanceOf<ObjectNode>()
-        val items = wrapperNode.properties.single { it.name == "items" }.type
-        val list = items.shouldBeInstanceOf<TypeRef.Inline>().node.shouldBeInstanceOf<ListNode>()
+        val list = graph.nodes[wrapperId].shouldBeInstanceOf<ListNode>()
         list.element.shouldBeInstanceOf<TypeRef.Ref>().id shouldBe wrapperId
+    }
+
+    @Test
+    fun `flattens nested instantiations of the same generic inline value class`() {
+        val graph = introspector.introspect(WithNestedGenericValueClass::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+        node.properties.single().type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<PrimitiveNode>().kind shouldBe PrimitiveKind.INT
+        }
+        graph.nodes.keys.none { it.value.endsWith("Wrapper") } shouldBe true
+    }
+
+    @Test
+    fun `does not cut off value classes nested through objects`() {
+        val graph = introspector.introspect(WithDeepValueClassChain::class)
+
+        val lastStop = graph.nodes[TypeId(Stop9::class.qualifiedName!!)].shouldBeInstanceOf<ObjectNode>()
+        lastStop.properties.single().type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<PrimitiveNode>().kind shouldBe PrimitiveKind.STRING
+        }
+        graph.nodes[TypeId(Stop8::class.qualifiedName!!)].shouldBeInstanceOf<ObjectNode> { stop ->
+            stop.properties.single().type shouldBe TypeRef.Ref(TypeId(Stop9::class.qualifiedName!!))
+        }
     }
 }

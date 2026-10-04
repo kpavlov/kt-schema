@@ -55,6 +55,15 @@ class RecursiveTypeReflectionTest {
     )
 
     @JvmInline
+    value class OptionalRecursiveWrapper(
+        val items: List<OptionalRecursiveWrapper>?,
+    )
+
+    data class WithOptionalRecursiveWrapper(
+        val wrapper: OptionalRecursiveWrapper,
+    )
+
+    @JvmInline
     value class Ping(
         val pongs: List<Pong>,
     )
@@ -68,8 +77,30 @@ class RecursiveTypeReflectionTest {
         val ping: Ping,
     )
 
+    @JvmInline
+    value class ChainHolder(
+        val chain: Chain,
+    )
+
+    data class Chain(
+        val value: String,
+        val next: ChainHolder?,
+    )
+
+    data class WithValueClassCycleThroughObject(
+        val holder: ChainHolder,
+    )
+
+    @JvmInline
+    value class Nest<T>(
+        val items: List<Nest<List<T>>>,
+    )
+
+    data class WithPolymorphicallyRecursiveWrapper(
+        val nest: Nest<Int>,
+    )
+
     object RecursiveFunction {
-        @Suppress("unused")
         fun process(node: LinkedNode): String = node.value
     }
 
@@ -184,7 +215,7 @@ class RecursiveTypeReflectionTest {
                     }
                   }
                 }
-                """.trimIndent()
+            """.trimIndent()
     }
 
     @Test
@@ -201,7 +232,7 @@ class RecursiveTypeReflectionTest {
     }
 
     @Test
-    fun `should register fallback definition for self-wrapping inline value class`() {
+    fun `should define self-wrapping inline value class by its wrapped array shape`() {
         val schema = generator.generateSchemaString(WithRecursiveWrapper::class)
 
         schema shouldEqualJson
@@ -212,24 +243,14 @@ class RecursiveTypeReflectionTest {
               "$id": "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.WithRecursiveWrapper",
               "type": "object",
               "properties": {
-                "wrapper": {
-                  "type": "array",
-                  "items": { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.RecursiveWrapper" }
-                }
+                "wrapper": { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.RecursiveWrapper" }
               },
               "required": ["wrapper"],
               "additionalProperties": false,
               "$defs": {
                 "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.RecursiveWrapper": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.RecursiveWrapper" }
-                    }
-                  },
-                  "required": ["items"],
-                  "additionalProperties": false
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.RecursiveWrapper" }
                 }
               }
             }
@@ -237,7 +258,7 @@ class RecursiveTypeReflectionTest {
     }
 
     @Test
-    fun `should stop flattening at nullable self-reference of inline value class`() {
+    fun `should define inline value class wrapping a list of nullable selves by its array shape`() {
         val schema = generator.generateSchemaString(WithNullableRecursiveWrapper::class)
 
         schema shouldEqualJson
@@ -248,7 +269,12 @@ class RecursiveTypeReflectionTest {
               "$id": "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.WithNullableRecursiveWrapper",
               "type": "object",
               "properties": {
-                "wrapper": {
+                "wrapper": { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.NullableRecursiveWrapper" }
+              },
+              "required": ["wrapper"],
+              "additionalProperties": false,
+              "$defs": {
+                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.NullableRecursiveWrapper": {
                   "type": "array",
                   "items": {
                     "oneOf": [
@@ -257,24 +283,86 @@ class RecursiveTypeReflectionTest {
                     ]
                   }
                 }
+              }
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `should keep nullability of the wrapped type on recursive inline value class references`() {
+        val schema = generator.generateSchemaString(WithOptionalRecursiveWrapper::class)
+
+        schema shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.WithOptionalRecursiveWrapper",
+              "type": "object",
+              "properties": {
+                "wrapper": {
+                  "oneOf": [
+                    { "type": "null" },
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.OptionalRecursiveWrapper" }
+                  ]
+                }
               },
               "required": ["wrapper"],
               "additionalProperties": false,
               "$defs": {
-                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.NullableRecursiveWrapper": {
+                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.OptionalRecursiveWrapper": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      { "type": "null" },
+                      { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.OptionalRecursiveWrapper" }
+                    ]
+                  }
+                }
+              }
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `should define only the re-entered class of mutually recursive inline value classes`() {
+        val schema = Json.parseToJsonElement(generator.generateSchemaString(WithMutuallyRecursiveWrappers::class))
+
+        schema.jsonObject
+            .getValue($$"$defs")
+            .jsonObject.keys shouldBe
+            setOf("me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.Ping")
+    }
+
+    @Test
+    fun `should flatten inline value class whose cycle goes through an object`() {
+        val schema = generator.generateSchemaString(WithValueClassCycleThroughObject::class)
+
+        schema shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.WithValueClassCycleThroughObject",
+              "type": "object",
+              "properties": {
+                "holder": { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.Chain" }
+              },
+              "required": ["holder"],
+              "additionalProperties": false,
+              "$defs": {
+                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.Chain": {
                   "type": "object",
                   "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "oneOf": [
-                          { "type": "null" },
-                          { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.NullableRecursiveWrapper" }
-                        ]
-                      }
+                    "value": { "type": "string" },
+                    "next": {
+                      "oneOf": [
+                        { "type": "null" },
+                        { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.Chain" }
+                      ]
                     }
                   },
-                  "required": ["items"],
+                  "required": ["value", "next"],
                   "additionalProperties": false
                 }
               }
@@ -283,13 +371,17 @@ class RecursiveTypeReflectionTest {
     }
 
     @Test
-    fun `should register fallback definitions for mutually recursive inline value classes`() {
-        val schema = Json.parseToJsonElement(generator.generateSchemaString(WithMutuallyRecursiveWrappers::class))
+    fun `should cut polymorphically recursive inline value class off as any value`() {
+        val schemaString = generator.generateSchemaString(WithPolymorphicallyRecursiveWrapper::class)
+        val schema = Json.parseToJsonElement(schemaString)
 
-        schema.jsonObject.getValue($$"$defs").jsonObject.keys shouldBe
-            setOf(
-                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.Ping",
-                "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.Pong",
-            )
+        var nest =
+            schema.jsonObject
+                .getValue("properties")
+                .jsonObject
+                .getValue("nest")
+        repeat(7) { nest = nest.jsonObject.getValue("items") }
+        // The 8th level's items are "any value" ({}), which is omitted.
+        nest.toString() shouldEqualJson """{"type": "array"}"""
     }
 }

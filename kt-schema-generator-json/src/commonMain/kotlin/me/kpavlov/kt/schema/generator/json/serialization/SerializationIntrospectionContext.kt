@@ -1,5 +1,15 @@
 package me.kpavlov.kt.schema.generator.json.serialization
 
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PolymorphicKind
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.SerialKind
+import kotlinx.serialization.descriptors.StructureKind
+import kotlinx.serialization.descriptors.nonNullOriginal
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonClassDiscriminator
+import kotlinx.serialization.modules.SerializersModuleCollector
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
@@ -17,14 +27,6 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 import me.kpavlov.kt.schema.generator.json.SerialSchemaIgnore
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.descriptors.PolymorphicKind
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.SerialKind
-import kotlinx.serialization.descriptors.StructureKind
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonClassDiscriminator
-import kotlinx.serialization.modules.SerializersModuleCollector
 import kotlin.reflect.KClass
 import kotlinx.serialization.descriptors.PrimitiveKind as SerialPrimitiveKind
 
@@ -180,13 +182,24 @@ internal class SerializationIntrospectionContext(
      * If the inline class has a **class-level** description annotation, it is propagated to the
      * flattened primitive node so that it appears in the generated schema. Annotations on the
      * inner `value` property are not used.
+     *
+     * Recursive value classes are handled by [flattenValueClass].
      */
+    @OptIn(ExperimentalSerializationApi::class)
     private fun handleInlineValueClass(
         descriptor: SerialDescriptor,
         nullable: Boolean,
     ): TypeRef {
         require(descriptor.elementsCount == 1) { "Inline value class descriptor must have exactly one element" }
-        val innerRef = toRef(descriptor.getElementDescriptor(0))
+        val wrappedDescriptor = descriptor.getElementDescriptor(0)
+        val innerRef =
+            flattenValueClass(
+                key = descriptor.nonNullOriginal,
+                id = descriptorId(descriptor),
+                nullable = nullable,
+                wrappedNullable = wrappedDescriptor.isNullable,
+            ) { toRef(wrappedDescriptor) }
+
         val description = extractDescription(descriptor)
         val effectiveRef =
             if (innerRef is TypeRef.Inline && innerRef.node is PrimitiveNode) {
@@ -390,8 +403,7 @@ internal class SerializationIntrospectionContext(
             getElementName(0) == "type" &&
             getElementName(1) == "value"
 
-    private fun SerialDescriptor.elementNames(): List<String> =
-        (0 until elementsCount).map { getElementName(it) }
+    private fun SerialDescriptor.elementNames(): List<String> = (0 until elementsCount).map { getElementName(it) }
 
     /**
      * Extracts subtype descriptors for open polymorphic types by querying the
@@ -493,7 +505,10 @@ internal class SerializationIntrospectionContext(
      * to an empty set suppresses only the configurable opaque types — it does not disable
      * the built-in `kotlin.Any`/`java.lang.Object` handling.
      */
-    private fun opaqueRefOrNull(serialName: String, nullable: Boolean): TypeRef? =
+    private fun opaqueRefOrNull(
+        serialName: String,
+        nullable: Boolean,
+    ): TypeRef? =
         if (serialName in ANY_SERIAL_NAMES || serialName in config.opaqueSerialNames) {
             if (nullable) ANY_REF_NULLABLE else ANY_REF
         } else {

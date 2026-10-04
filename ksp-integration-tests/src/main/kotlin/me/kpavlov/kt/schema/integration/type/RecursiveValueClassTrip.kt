@@ -23,6 +23,16 @@ data class NullableRecursiveValueClassTrip(
 )
 
 @JvmInline
+value class OptionalRecursiveWrapper(
+    val items: List<OptionalRecursiveWrapper>?,
+)
+
+@Schema
+data class OptionalRecursiveValueClassTrip(
+    val wrapper: OptionalRecursiveWrapper,
+)
+
+@JvmInline
 value class Ping(
     val pongs: List<Pong>,
 )
@@ -35,4 +45,34 @@ value class Pong(
 @Schema
 data class MutuallyRecursiveValueClassTrip(
     val ping: Ping,
+)
+
+@JvmInline
+value class ChainHolder(
+    val chain: Chain,
+)
+
+data class Chain(
+    val value: String,
+    val next: ChainHolder?,
+)
+
+@Schema
+data class ValueClassCycleThroughObjectTrip(
+    val holder: ChainHolder,
+)
+
+@Schema
+data class NestedGenericValueClassTrip(
+    val nested: Wrapper<Wrapper<Int>>,
+)
+
+@JvmInline
+value class Nest<T>(
+    val items: List<Nest<List<T>>>,
+)
+
+@Schema
+data class PolymorphicallyRecursiveValueClassTrip(
+    val nest: Nest<Int>,
 )
