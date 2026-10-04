@@ -83,7 +83,7 @@ public class FunctionCallingSchemaConfig(
          * Non-strict configuration for function calling schemas.
          *
          * - Strict flag: disabled
-         * - Only non-nullable fields required
+         * - Fields without a default or optional marker are required; nullable ones accept `null`
          * - Union type nullable handling
          */
         public val Simple: FunctionCallingSchemaConfig =
@@ -101,7 +101,9 @@ public class FunctionCallingSchemaConfig(
          *
          * Mirrors [JsonSchemaConfig.Lenient]: only non-nullable fields without defaults are required,
          * nullable properties carry no null marker, and extra properties are allowed.
-         * The strict flag is disabled, so a missing field means `null`.
+         * The strict flag is disabled, so a missing field means `null`. An explicit `null` fails
+         * validation, since there is no null marker. Decode with `explicitNulls = false` and
+         * `ignoreUnknownKeys = true`.
          */
         public val Lenient: FunctionCallingSchemaConfig =
             FunctionCallingSchemaConfig(
@@ -133,8 +135,13 @@ public class FunctionCallingSchemaConfig(
             )
 
         /**
-         * Default configuration for function calling schemas.
+         * Same as [Strict].
          */
-        public val Default: FunctionCallingSchemaConfig = FunctionCallingSchemaConfig()
+        @Deprecated(
+            "Ambiguous; use FunctionCallingSchemaConfig.Strict",
+            ReplaceWith("FunctionCallingSchemaConfig.Strict"),
+            level = DeprecationLevel.WARNING,
+        )
+        public val Default: FunctionCallingSchemaConfig = Strict
     }
 }

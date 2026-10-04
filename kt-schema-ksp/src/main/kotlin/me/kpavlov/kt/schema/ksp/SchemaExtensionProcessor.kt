@@ -75,7 +75,7 @@ internal class SchemaExtensionProcessor(
         val loader = SchemaExtensionProcessor::class.java.classLoader
         try {
             SchemaConfigResolver.resolveJsonSchemaConfig(value, JsonSchemaConfig.Strict, loader) to
-                SchemaConfigResolver.resolveFunctionCallingConfig(value, FunctionCallingSchemaConfig.Default, loader)
+                SchemaConfigResolver.resolveFunctionCallingConfig(value, FunctionCallingSchemaConfig.Strict, loader)
         } catch (e: IllegalArgumentException) {
             logger.error(e.message.orEmpty())
             null

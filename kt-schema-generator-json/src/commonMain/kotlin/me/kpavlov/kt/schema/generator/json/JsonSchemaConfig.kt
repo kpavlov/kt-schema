@@ -223,8 +223,9 @@ public open class JsonSchemaConfig(
          * allowed. Nullable collection elements and map values keep an `anyOf` null branch, since they
          * cannot be omitted.
          *
-         * An absent field means `null`, so serialize payloads with `explicitNulls = false`. A `null`
-         * default is never emitted, since nullable properties carry no null marker.
+         * An absent field means `null`, so serialize payloads with `explicitNulls = false` (Jackson:
+         * `NON_NULL`); an explicit `null` fails validation, since there is no null marker. A `null`
+         * default is never emitted for the same reason.
          *
          *  - `respectDefaultPresence = true` - fields with defaults are optional
          *  - `requireNullableFields = false` - nullable fields are optional

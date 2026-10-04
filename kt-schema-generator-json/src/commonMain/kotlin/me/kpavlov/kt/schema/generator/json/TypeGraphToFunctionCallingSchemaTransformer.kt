@@ -40,7 +40,6 @@ import me.kpavlov.kt.schema.json.ObjectPropertyDefinition
 import me.kpavlov.kt.schema.json.PropertyDefinition
 import me.kpavlov.kt.schema.json.StringPropertyDefinition
 import kotlin.jvm.JvmOverloads
-import me.kpavlov.kt.schema.generator.json.FunctionCallingSchemaConfig.Companion.Default as DefaultConfig
 
 /**
  * Function schemas inline all types, so cyclic type graphs (e.g. a self-referencing `Node` type)
@@ -79,7 +78,7 @@ private const val MAX_NESTING_DEPTH = 8
 public class TypeGraphToFunctionCallingSchemaTransformer
     @JvmOverloads
     public constructor(
-        public override val config: FunctionCallingSchemaConfig = DefaultConfig,
+        public override val config: FunctionCallingSchemaConfig = FunctionCallingSchemaConfig.Strict,
     ) : AbstractTypeGraphTransformer<
             FunctionCallingSchema,
             FunctionCallingSchemaConfig,

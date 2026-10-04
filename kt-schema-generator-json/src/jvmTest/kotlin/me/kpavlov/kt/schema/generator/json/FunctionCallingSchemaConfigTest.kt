@@ -3,10 +3,41 @@ package me.kpavlov.kt.schema.generator.json
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.string.shouldContain
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 
 class FunctionCallingSchemaConfigTest {
+    data class Address(
+        val city: String,
+    )
+
+    object Fixtures {
+        @Suppress("UNUSED_PARAMETER", "FunctionOnlyReturningConstant")
+        fun sample(
+            nickname: String? = null,
+            retries: Int = 3,
+            address: Address,
+        ): String = ""
+    }
+
+    @Test
+    @Suppress("DEPRECATION")
+    fun `Default should be the Strict instance`() {
+        FunctionCallingSchemaConfig.Default shouldBeSameInstanceAs FunctionCallingSchemaConfig.Strict
+    }
+
+    @Test
+    fun `Strict should produce the same schema as the implicit strict-mode config`() {
+        val json = Json { encodeDefaults = false }
+        val implicit =
+            ReflectionFunctionCallingSchemaGenerator(json, FunctionCallingSchemaConfig(strictMode = true))
+        val strict = ReflectionFunctionCallingSchemaGenerator(json, FunctionCallingSchemaConfig.Strict)
+
+        strict.generateSchemaString(Fixtures::sample) shouldBe implicit.generateSchemaString(Fixtures::sample)
+    }
+
     @Test
     fun `should deny additional properties by default`() {
         FunctionCallingSchemaConfig().allowAdditionalProperties shouldBe false

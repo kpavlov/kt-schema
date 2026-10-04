@@ -21,6 +21,11 @@
 - Reflection and KSP front ends: `kotlin.time.Instant` maps to `string`, matching kotlinx.serialization's default
   `Instant` serializer; previously it was expanded into an `epochSeconds`/`nanosecondsOfSecond` object
 
+### Deprecated
+
+- `FunctionCallingSchemaConfig.Default`: identical to `Strict`; use `Strict` (IDE quick-fix available). It will be
+  removed in a future minor release.
+
 ### Changed
 
 - Breaking, IR migration ([#148](https://github.com/kpavlov/kt-schema/issues/148)): `Property` now stores facts instead

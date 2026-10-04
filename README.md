@@ -242,7 +242,7 @@ For JVM-only projects and full configuration options, see the [KSP Configuration
 #### Schema configuration
 
 The `me.kpavlov.kt.schema.config` processor option selects the schema flavour for both KSP and the Java annotation
-processor. Unset, classes use `strict` and KSP function schemas use `FunctionCallingSchemaConfig.Default`. The value is
+processor. Unset, classes use `strict` and KSP function schemas use `FunctionCallingSchemaConfig.Strict`. The value is
 a case-insensitive shortcut:
 
 | Value     | Schema                                                                                                                     |
