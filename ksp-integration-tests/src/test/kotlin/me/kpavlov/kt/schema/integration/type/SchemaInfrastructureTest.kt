@@ -7,10 +7,10 @@ import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import me.kpavlov.kt.schema.generator.json.ReflectionClassJsonSchemaGenerator
-import me.kpavlov.kt.schema.json.encodeToJsonObject
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import me.kpavlov.kt.schema.generator.json.ReflectionClassJsonSchemaGenerator
+import me.kpavlov.kt.schema.json.encodeToJsonObject
 import org.junitpioneer.jupiter.Issue
 import kotlin.test.Test
 
@@ -62,11 +62,11 @@ class SchemaInfrastructureTest {
             val jsonObj = Json.decodeFromString<JsonObject>(schema)
 
             // All schemas must have $id and $schema fields per JSON Schema Draft 2020-12
-            assert(jsonObj.containsKey("\$id")) { "Schema must have \$id field" }
-            assert(jsonObj.containsKey("\$schema")) { "Schema must have \$schema field pointing to Draft 2020-12" }
+            assert(jsonObj.containsKey($$"$id")) { $$"Schema must have $id field" }
+            assert(jsonObj.containsKey($$"$schema")) { $$"Schema must have $schema field pointing to Draft 2020-12" }
 
             // Unwrapped schemas should NOT have root-level $ref
-            assert(!jsonObj.containsKey("\$ref")) { "Schema should not have root-level \$ref in unwrapped format" }
+            assert(!jsonObj.containsKey($$"$ref")) { $$"Schema should not have root-level $ref in unwrapped format" }
         }
     }
 

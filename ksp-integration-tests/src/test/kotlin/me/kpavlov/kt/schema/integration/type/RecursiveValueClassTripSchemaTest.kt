@@ -14,45 +14,31 @@ class RecursiveValueClassTripSchemaTest {
           "$id": "me.kpavlov.kt.schema.integration.type.RecursiveValueClassTrip",
           "type": "object",
           "properties": {
-            "wrapper": {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.RecursiveWrapper"
-              }
-            }
+            "wrapper": { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.RecursiveWrapper" }
           },
           "required": ["wrapper"],
           "additionalProperties": false,
           "$defs": {
             "me.kpavlov.kt.schema.integration.type.RecursiveWrapper": {
-              "type": "object",
-              "properties": {
-                "items": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.RecursiveWrapper"
-                  }
-                }
-              },
-              "required": ["items"],
-              "additionalProperties": false
+              "type": "array",
+              "items": { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.RecursiveWrapper" }
             }
           }
         }
         """.trimIndent()
 
     @Test
-    fun `registers the fallback object node of a self-wrapping inline value class in jsonSchemaString`() {
+    fun `defines self-wrapping inline value class by its wrapped array shape in jsonSchemaString`() {
         RecursiveValueClassTrip::class.jsonSchemaString shouldEqualJson expectedSchema
     }
 
     @Test
-    fun `registers the fallback object node of a self-wrapping inline value class in jsonSchema`() {
+    fun `defines self-wrapping inline value class by its wrapped array shape in jsonSchema`() {
         RecursiveValueClassTrip::class.jsonSchema.toString() shouldEqualJson expectedSchema
     }
 
     @Test
-    fun `stops flattening at nullable self-reference of inline value class`() {
+    fun `defines inline value class wrapping a list of nullable selves by its array shape`() {
         // language=json
         NullableRecursiveValueClassTrip::class.jsonSchemaString shouldEqualJson
             $$"""
@@ -61,7 +47,12 @@ class RecursiveValueClassTripSchemaTest {
               "$id": "me.kpavlov.kt.schema.integration.type.NullableRecursiveValueClassTrip",
               "type": "object",
               "properties": {
-                "wrapper": {
+                "wrapper": { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.NullableRecursiveWrapper" }
+              },
+              "required": ["wrapper"],
+              "additionalProperties": false,
+              "$defs": {
+                "me.kpavlov.kt.schema.integration.type.NullableRecursiveWrapper": {
                   "type": "array",
                   "items": {
                     "oneOf": [
@@ -70,24 +61,109 @@ class RecursiveValueClassTripSchemaTest {
                     ]
                   }
                 }
+              }
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `keeps nullability of the wrapped type on recursive inline value class references`() {
+        // language=json
+        val expected =
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "me.kpavlov.kt.schema.integration.type.OptionalRecursiveValueClassTrip",
+              "type": "object",
+              "properties": {
+                "wrapper": {
+                  "oneOf": [
+                    { "type": "null" },
+                    { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.OptionalRecursiveWrapper" }
+                  ]
+                }
               },
               "required": ["wrapper"],
               "additionalProperties": false,
               "$defs": {
-                "me.kpavlov.kt.schema.integration.type.NullableRecursiveWrapper": {
+                "me.kpavlov.kt.schema.integration.type.OptionalRecursiveWrapper": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      { "type": "null" },
+                      { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.OptionalRecursiveWrapper" }
+                    ]
+                  }
+                }
+              }
+            }
+            """.trimIndent()
+
+        OptionalRecursiveValueClassTrip::class.jsonSchemaString shouldEqualJson expected
+        OptionalRecursiveValueClassTrip::class.jsonSchema.toString() shouldEqualJson expected
+    }
+
+    @Test
+    fun `carries class description onto recursive inline value class definition`() {
+        // language=json
+        val expected =
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "me.kpavlov.kt.schema.integration.type.DescribedRecursiveValueClassTrip",
+              "type": "object",
+              "properties": {
+                "wrapper": { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.DescribedRecursiveWrapper" }
+              },
+              "required": ["wrapper"],
+              "additionalProperties": false,
+              "$defs": {
+                "me.kpavlov.kt.schema.integration.type.DescribedRecursiveWrapper": {
+                  "type": "array",
+                  "description": "Nested items",
+                  "items": { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.DescribedRecursiveWrapper" }
+                }
+              }
+            }
+            """.trimIndent()
+
+        DescribedRecursiveValueClassTrip::class.jsonSchemaString shouldEqualJson expected
+        DescribedRecursiveValueClassTrip::class.jsonSchema.toString() shouldEqualJson expected
+    }
+
+    @Test
+    fun `defines only the re-entered class of mutually recursive inline value classes`() {
+        MutuallyRecursiveValueClassTrip::class.jsonSchema.getValue($$"$defs").jsonObject.keys shouldBe
+            setOf("me.kpavlov.kt.schema.integration.type.Ping")
+    }
+
+    @Test
+    fun `flattens inline value class whose cycle goes through an object`() {
+        // language=json
+        ValueClassCycleThroughObjectTrip::class.jsonSchemaString shouldEqualJson
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "me.kpavlov.kt.schema.integration.type.ValueClassCycleThroughObjectTrip",
+              "type": "object",
+              "properties": {
+                "holder": { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.Chain" }
+              },
+              "required": ["holder"],
+              "additionalProperties": false,
+              "$defs": {
+                "me.kpavlov.kt.schema.integration.type.Chain": {
                   "type": "object",
                   "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "oneOf": [
-                          { "type": "null" },
-                          { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.NullableRecursiveWrapper" }
-                        ]
-                      }
+                    "value": { "type": "string" },
+                    "next": {
+                      "oneOf": [
+                        { "type": "null" },
+                        { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.Chain" }
+                      ]
                     }
                   },
-                  "required": ["items"],
+                  "required": ["value", "next"],
                   "additionalProperties": false
                 }
               }
@@ -96,11 +172,29 @@ class RecursiveValueClassTripSchemaTest {
     }
 
     @Test
-    fun `registers fallback definitions for mutually recursive inline value classes`() {
-        MutuallyRecursiveValueClassTrip::class.jsonSchema.getValue($$"$defs").jsonObject.keys shouldBe
-            setOf(
-                "me.kpavlov.kt.schema.integration.type.Ping",
-                "me.kpavlov.kt.schema.integration.type.Pong",
-            )
+    fun `flattens nested instantiations of the same generic inline value class`() {
+        // language=json
+        NestedGenericValueClassTrip::class.jsonSchemaString shouldEqualJson
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "me.kpavlov.kt.schema.integration.type.NestedGenericValueClassTrip",
+              "type": "object",
+              "properties": {
+                "nested": { "type": "integer" }
+              },
+              "required": ["nested"],
+              "additionalProperties": false
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `cuts polymorphically recursive inline value class off as any value`() {
+        val properties = PolymorphicallyRecursiveValueClassTrip::class.jsonSchema.getValue("properties")
+        var nest = properties.jsonObject.getValue("nest")
+        repeat(7) { nest = nest.jsonObject.getValue("items") }
+        // The 8th level's items are "any value" ({}), which is omitted.
+        nest.toString() shouldEqualJson """{"type": "array"}"""
     }
 }

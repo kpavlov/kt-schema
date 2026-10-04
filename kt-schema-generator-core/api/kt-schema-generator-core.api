@@ -64,6 +64,7 @@ public final class me/kpavlov/kt/schema/generator/core/ir/AnyNode : me/kpavlov/k
 
 public abstract class me/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionContext {
 	public fun <init> ()V
+	protected final fun flattenValueClass-YT6qU6Q (Ljava/lang/Object;Ljava/lang/String;ZZLjava/lang/String;Lkotlin/jvm/functions/Function0;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
 	public final fun getNodes ()Ljava/util/Map;
 	protected final fun getTypeRefCache ()Ljava/util/Map;
 	protected final fun getVisitingTypes ()Ljava/util/Set;
@@ -281,6 +282,7 @@ public final class me/kpavlov/kt/schema/generator/core/ir/TypeGraph {
 }
 
 public final class me/kpavlov/kt/schema/generator/core/ir/TypeGraphKt {
+	public static final fun withDescription (Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;Ljava/lang/String;)Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;
 	public static final fun withNullable (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Z)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
 }
 

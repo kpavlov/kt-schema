@@ -15,6 +15,9 @@ complexity:
       - '**/jvmTest/**'
       - '**/jsTest/**'
       - '**/iosTest/**'
+  LongParameterList:
+    allowedFunctionParameters: 7
+    allowedConstructorParameters: 8
   LongMethod:
     ignoreAnnotated:
       - kotlin.test.Test

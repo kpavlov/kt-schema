@@ -19,6 +19,7 @@ import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import kotlin.jvm.JvmInline
 import kotlin.test.Test
 import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassSchemaIntrospector as SerializationIntrospector
 
@@ -50,6 +51,18 @@ class SerializationIntrospectorTest {
     @Serializable
     data class WithDescribedInlineValueClass(
         val distance: DescribedInlineValueClass,
+    )
+
+    @CustomDescription("Tag list")
+    @JvmInline
+    @Serializable
+    value class DescribedTags(
+        val items: List<String>,
+    )
+
+    @Serializable
+    data class WithDescribedCollectionValueClass(
+        val tags: DescribedTags,
     )
 
     @Serializable
@@ -296,6 +309,32 @@ class SerializationIntrospectorTest {
             inline.node.shouldBeInstanceOf<PrimitiveNode> { prim ->
                 prim.kind shouldBe PrimitiveKind.DOUBLE
                 prim.description shouldBe "Distance in meters"
+            }
+        }
+    }
+
+    @Test
+    fun `carries class description onto flattened collection of inline value class in IR`() {
+        val introspectorWithDescriptions =
+            SerializationIntrospector(
+                config =
+                    SerializationIntrospector.Config(
+                        descriptionExtractor = { annotations ->
+                            annotations.filterIsInstance<CustomDescription>().firstOrNull()?.value
+                        },
+                    ),
+            )
+        val graph =
+            introspectorWithDescriptions.introspect(
+                WithDescribedCollectionValueClass.serializer().descriptor,
+            )
+
+        val rootRef = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val objNode = graph.nodes[rootRef.id].shouldNotBeNull().shouldBeInstanceOf<ObjectNode>()
+
+        objNode.properties.single().type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<ListNode> { list ->
+                list.description shouldBe "Tag list"
             }
         }
     }

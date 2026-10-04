@@ -1,5 +1,6 @@
 package me.kpavlov.kt.schema.integration.type
 
+import me.kpavlov.kt.schema.Description
 import me.kpavlov.kt.schema.Schema
 
 @JvmInline
@@ -23,6 +24,27 @@ data class NullableRecursiveValueClassTrip(
 )
 
 @JvmInline
+value class OptionalRecursiveWrapper(
+    val items: List<OptionalRecursiveWrapper>?,
+)
+
+@Schema
+data class OptionalRecursiveValueClassTrip(
+    val wrapper: OptionalRecursiveWrapper,
+)
+
+@Description("Nested items")
+@JvmInline
+value class DescribedRecursiveWrapper(
+    val items: List<DescribedRecursiveWrapper>,
+)
+
+@Schema
+data class DescribedRecursiveValueClassTrip(
+    val wrapper: DescribedRecursiveWrapper,
+)
+
+@JvmInline
 value class Ping(
     val pongs: List<Pong>,
 )
@@ -35,4 +57,34 @@ value class Pong(
 @Schema
 data class MutuallyRecursiveValueClassTrip(
     val ping: Ping,
+)
+
+@JvmInline
+value class ChainHolder(
+    val chain: Chain,
+)
+
+data class Chain(
+    val value: String,
+    val next: ChainHolder?,
+)
+
+@Schema
+data class ValueClassCycleThroughObjectTrip(
+    val holder: ChainHolder,
+)
+
+@Schema
+data class NestedGenericValueClassTrip(
+    val nested: Wrapper<Wrapper<Int>>,
+)
+
+@JvmInline
+value class Nest<T>(
+    val items: List<Nest<List<T>>>,
+)
+
+@Schema
+data class PolymorphicallyRecursiveValueClassTrip(
+    val nest: Nest<Int>,
 )

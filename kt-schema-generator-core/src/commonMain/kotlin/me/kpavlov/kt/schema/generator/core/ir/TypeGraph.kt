@@ -45,6 +45,19 @@ public fun TypeRef.withNullable(nullable: Boolean): TypeRef =
         is TypeRef.Ref -> copy(nullable = nullable)
     }
 
+/** Returns a copy of this [TypeNode] with the specified [description]. */
+@InternalSchemaGeneratorApi
+public fun TypeNode.withDescription(description: String): TypeNode =
+    when (this) {
+        is PrimitiveNode -> copy(description = description)
+        is ListNode -> copy(description = description)
+        is MapNode -> copy(description = description)
+        is AnyNode -> copy(description = description)
+        is EnumNode -> copy(description = description)
+        is ObjectNode -> copy(description = description)
+        is PolymorphicNode -> copy(description = description)
+    }
+
 /** Base node for all kinds supported by the schema IR. */
 public sealed interface TypeNode {
     public val description: String?
