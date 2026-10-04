@@ -29,19 +29,20 @@ internal val DEFAULT_OPAQUE_TYPE_NAMES: Set<String> =
     )
 
 /**
- * Fully qualified names of third-party types with a single well-defined JSON primitive shape,
+ * Fully qualified names of non-primitive types with a single well-defined JSON primitive shape,
  * mapped to the [PrimitiveKind] they represent.
  *
  * A generic mechanism, not tied to any one framework — unlike [DEFAULT_OPAQUE_TYPE_NAMES] (types
  * with no fixed shape, mapped to the empty schema `{}`), every type listed here always represents
  * exactly one JSON primitive, so it resolves to the matching
- * [PrimitiveNode][me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode] instead. Currently only
- * populated with the leaf/numeric-abstraction types from Jackson's databind node hierarchy
- * (`tools.jackson.databind.node`); other frameworks' fixed-shape wrapper types can be added the
- * same way.
+ * [PrimitiveNode][me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode] instead. Currently
+ * populated with `kotlin.time.Instant` (an ISO-8601 string under kotlinx.serialization's default
+ * serializer) and the leaf/numeric-abstraction types from Jackson's databind node hierarchy
+ * (`tools.jackson.databind.node`); other fixed-shape types can be added the same way.
  */
 internal val DEFAULT_PRIMITIVE_TYPE_KINDS: Map<String, PrimitiveKind> =
     mapOf(
+        "kotlin.time.Instant" to PrimitiveKind.STRING,
         "tools.jackson.databind.node.StringNode" to PrimitiveKind.STRING,
         "tools.jackson.databind.node.BinaryNode" to PrimitiveKind.STRING,
         "tools.jackson.databind.node.BooleanNode" to PrimitiveKind.BOOLEAN,

@@ -5,6 +5,7 @@
 - Inline value classes (`@JvmInline value class`) are flattened to their wrapped type in the reflection and KSP front ends; `@Description` on the class or property is kept ([#117](https://github.com/kpavlov/kt-schema/issues/117))
 - `kt-schema-apt`: `BigInteger` (`integer`) and `BigDecimal` (`number`) fields ([#114](https://github.com/kpavlov/kt-schema/pull/114))
 - Reflection and KSP front ends: the polymorphic discriminator property name honors `@JsonClassDiscriminator("...")` and Jackson `@JsonTypeInfo(property = "...")`, inherited by nested sealed types, instead of always using `type`; configurable via `introspector.annotations.discriminator.names` and `introspector.annotations.discriminator.attributes`
+- Reflection and KSP front ends: `kotlin.time.Instant` maps to `string`, matching kotlinx.serialization's default `Instant` serializer; previously it was expanded into an `epochSeconds`/`nanosecondsOfSecond` object
 
 ### Changed
 
@@ -20,7 +21,7 @@
 
 ### Dependencies
 
-- Gradle 9.8.0, KSP 2.3.12, Kotest 6.2.5, JUnit 6.1.3, Jackson BOM 3.2.3 (test-only), detekt 2.0.0-alpha.6, Kover 0.9.11, slf4j 2.0.20, langchain4j 1.21.0, Koog 1.3.0 (examples)
+- Gradle 9.8.0, kotlinx.serialization 1.9.0, KSP 2.3.12, Kotest 6.2.5, JUnit 6.1.3, Jackson BOM 3.2.3 (test-only), detekt 2.0.0-alpha.6, Kover 0.9.11, slf4j 2.0.20, langchain4j 1.21.0, Koog 1.3.0 (examples)
 
 ---
 
