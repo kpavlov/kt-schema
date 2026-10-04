@@ -588,23 +588,28 @@ public class TypeGraphToJsonSchemaTransformer
 
                     // Inject discriminator property into the registered definition if not already present
                     val registered = definitions[typeName]
-                    if (
-                        registered is ObjectPropertyDefinition &&
-                        config.includePolymorphicDiscriminator &&
-                        node.discriminator.name !in registered.properties.orEmpty()
-                    ) {
+                    if (registered is ObjectPropertyDefinition && config.includePolymorphicDiscriminator) {
                         val discriminatorProperty =
                             StringPropertyDefinition(
                                 constValue = JsonPrimitive(typeName),
                             )
+                        val existing = registered.properties.orEmpty()[node.discriminator.name]
 
-                        definitions[typeName] =
-                            registered.copy(
-                                properties =
-                                    mapOf(node.discriminator.name to discriminatorProperty) +
-                                        registered.properties.orEmpty(),
-                                required = listOf(node.discriminator.name) + registered.required.orEmpty(),
-                            )
+                        if (existing == null) {
+                            definitions[typeName] =
+                                registered.copy(
+                                    properties =
+                                        mapOf(node.discriminator.name to discriminatorProperty) +
+                                            registered.properties.orEmpty(),
+                                    required = listOf(node.discriminator.name) + registered.required.orEmpty(),
+                                )
+                        } else {
+                            // Already injected on an earlier visit; anything else is a real subtype property.
+                            check(existing == discriminatorProperty) {
+                                "Property '${node.discriminator.name}' of '$typeName' collides with the " +
+                                    "polymorphic discriminator of '${node.name}'"
+                            }
+                        }
                     }
 
                     // Return a reference to this definition

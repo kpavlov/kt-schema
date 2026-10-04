@@ -73,7 +73,6 @@ private const val MAX_NESTING_DEPTH = 8
  * Nullable/optional fields are represented using union types that include "null"
  * (e.g., ["string", "null"]) instead of using the "nullable" flag.
  */
-@Suppress("TooManyFunctions")
 public class TypeGraphToFunctionCallingSchemaTransformer
     @JvmOverloads
     public constructor(
@@ -407,6 +406,10 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                                     StringPropertyDefinition(
                                         constValue = JsonPrimitive(typeName),
                                     )
+                                check(node.discriminator.name !in definition.properties.orEmpty()) {
+                                    "Property '${node.discriminator.name}' of '$typeName' collides with the " +
+                                        "polymorphic discriminator of '${node.name}'"
+                                }
 
                                 definition.copy(
                                     properties =

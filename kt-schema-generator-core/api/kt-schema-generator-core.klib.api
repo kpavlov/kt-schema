@@ -122,6 +122,7 @@ abstract class <#A: kotlin/Any> me.kpavlov.kt.schema.generator.core.ir/BaseIntro
         final fun <get-visitingTypes>(): kotlin.collections/MutableSet<#A> // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.visitingTypes.<get-visitingTypes>|<get-visitingTypes>(){}[0]
 
     abstract fun toRef(#A): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.toRef|toRef(1:0){}[0]
+    final fun <#A1: kotlin/Any?> discriminatorName(kotlin.sequences/Sequence<#A1>, kotlin/Function1<#A1, kotlin/String?>): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.discriminatorName|discriminatorName(kotlin.sequences.Sequence<0:0>;kotlin.Function1<0:0,kotlin.String?>){0§<kotlin.Any?>}[0]
     final fun flattenValueClass(#A, me.kpavlov.kt.schema.generator.core.ir/TypeId, kotlin/Boolean, kotlin/Boolean, kotlin/String?, kotlin/Function0<me.kpavlov.kt.schema.generator.core.ir/TypeRef>): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.flattenValueClass|flattenValueClass(1:0;me.kpavlov.kt.schema.generator.core.ir.TypeId;kotlin.Boolean;kotlin.Boolean;kotlin.String?;kotlin.Function0<me.kpavlov.kt.schema.generator.core.ir.TypeRef>){}[0]
     final fun namedRef(#A, me.kpavlov.kt.schema.generator.core.ir/TypeId, kotlin/Boolean = ..., kotlin/Function0<me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode>): me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.namedRef|namedRef(1:0;me.kpavlov.kt.schema.generator.core.ir.TypeId;kotlin.Boolean;kotlin.Function0<me.kpavlov.kt.schema.generator.core.ir.NamedTypeNode>){}[0]
     final fun withCycleDetection(#A, me.kpavlov.kt.schema.generator.core.ir/TypeId, kotlin/Function0<me.kpavlov.kt.schema.generator.core.ir/TypeNode>): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/BaseIntrospectionContext.withCycleDetection|withCycleDetection(1:0;me.kpavlov.kt.schema.generator.core.ir.TypeId;kotlin.Function0<me.kpavlov.kt.schema.generator.core.ir.TypeNode>){}[0]
@@ -161,6 +162,11 @@ final class me.kpavlov.kt.schema.generator.core.ir/Discriminator { // me.kpavlov
     final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Discriminator.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/Discriminator.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Discriminator.toString|toString(){}[0]
+
+    final object Companion { // me.kpavlov.kt.schema.generator.core.ir/Discriminator.Companion|null[0]
+        final const val DEFAULT_NAME // me.kpavlov.kt.schema.generator.core.ir/Discriminator.Companion.DEFAULT_NAME|{}DEFAULT_NAME[0]
+            final fun <get-DEFAULT_NAME>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Discriminator.Companion.DEFAULT_NAME.<get-DEFAULT_NAME>|<get-DEFAULT_NAME>(){}[0]
+    }
 }
 
 final class me.kpavlov.kt.schema.generator.core.ir/EnumNode : me.kpavlov.kt.schema.generator.core.ir/NamedTypeNode { // me.kpavlov.kt.schema.generator.core.ir/EnumNode|null[0]
@@ -373,6 +379,7 @@ final value class me.kpavlov.kt.schema.generator.core.ir/TypeId { // me.kpavlov.
 final object me.kpavlov.kt.schema.generator.core.ir/Introspections { // me.kpavlov.kt.schema.generator.core.ir/Introspections|null[0]
     final fun getDefaultValueFromAnnotation(kotlin/String, kotlin/String?, kotlin.collections/List<kotlin/Pair<kotlin/String, kotlin/Any?>>): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Introspections.getDefaultValueFromAnnotation|getDefaultValueFromAnnotation(kotlin.String;kotlin.String?;kotlin.collections.List<kotlin.Pair<kotlin.String,kotlin.Any?>>){}[0]
     final fun getDescriptionFromAnnotation(kotlin/String, kotlin/String?, kotlin.collections/List<kotlin/Pair<kotlin/String, kotlin/Any?>>): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Introspections.getDescriptionFromAnnotation|getDescriptionFromAnnotation(kotlin.String;kotlin.String?;kotlin.collections.List<kotlin.Pair<kotlin.String,kotlin.Any?>>){}[0]
+    final fun getDiscriminatorPropertyName(kotlin/String, kotlin/String?, kotlin.collections/List<kotlin/Pair<kotlin/String, kotlin/Any?>>): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Introspections.getDiscriminatorPropertyName|getDiscriminatorPropertyName(kotlin.String;kotlin.String?;kotlin.collections.List<kotlin.Pair<kotlin.String,kotlin.Any?>>){}[0]
     final fun getNameOverride(kotlin/String, kotlin/String?, kotlin.collections/List<kotlin/Pair<kotlin/String, kotlin/Any?>>): kotlin/String? // me.kpavlov.kt.schema.generator.core.ir/Introspections.getNameOverride|getNameOverride(kotlin.String;kotlin.String?;kotlin.collections.List<kotlin.Pair<kotlin.String,kotlin.Any?>>){}[0]
     final fun isEnumDefaultAnnotation(kotlin/String, kotlin/String? = ...): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Introspections.isEnumDefaultAnnotation|isEnumDefaultAnnotation(kotlin.String;kotlin.String?){}[0]
     final fun isIgnoreAnnotation(kotlin/String, kotlin/String? = ...): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Introspections.isIgnoreAnnotation|isIgnoreAnnotation(kotlin.String;kotlin.String?){}[0]

@@ -11,6 +11,12 @@ internal inline fun <R> KSAnnotation.withClassNames(block: (simpleName: String, 
     return block(declaration.simpleName.asString(), declaration.qualifiedName?.asString())
 }
 
+/** Applies an `Introspections` extractor to this annotation's class names and named arguments. */
+internal fun KSAnnotation.extractWith(
+    extract: (simpleName: String, qualifiedName: String?, arguments: List<Pair<String, Any?>>) -> String?,
+): String? =
+    withClassNames { simpleName, qualifiedName -> extract(simpleName, qualifiedName, namedArguments()) }
+
 /** Named arguments as name/value pairs, including the defaults KSP merges into [KSAnnotation.arguments]. */
 internal fun KSAnnotation.namedArguments(): List<Pair<String, Any?>> =
     arguments.mapNotNull { argument -> argument.name?.asString()?.let { it to argument.value } }

@@ -18,6 +18,12 @@ complexity:
   LongParameterList:
     allowedFunctionParameters: 7
     allowedConstructorParameters: 8
+  TooManyFunctions:
+    allowedFunctionsPerFile: 15
+    allowedFunctionsPerClass: 15
+    allowedFunctionsPerInterface: 15
+    allowedFunctionsPerObject: 15
+    allowedFunctionsPerEnum: 15
   LongMethod:
     ignoreAnnotated:
       - kotlin.test.Test

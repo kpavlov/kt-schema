@@ -85,6 +85,21 @@
 - KDoc class refs: `[ClassName]`.
 - Links to specs: verify they're real and accurate.
 
+### KDoc
+
+Minimalist, correct, descriptive — the bar is Google open-source libraries (Guava, Dagger, Kotlin stdlib).
+
+- Open with a one-sentence summary fragment in third person, ending with a period ("Returns the …", "Creates a …").
+  No "This function …", "Helper to …", "Utility for …".
+- Say *what* and the contract, not *how*. Document what callers can't read from the signature: `null` meaning,
+  defaults, `@throws`, thread-safety, ordering, units, side effects.
+- Skip KDoc that only restates the name or signature. Add `@param`/`@return` only when they say more than the
+  name and type.
+- One short paragraph is the norm. Add a ≤10-line example only for non-obvious public API.
+- Don't repeat another KDoc: link it with `[Other]` / `@see`.
+- No history, implementation narration, review context, or `TODO` in KDoc — use a `//` comment.
+- Update the KDoc in the same change as the behavior. A stale or wrong KDoc is worse than none.
+
 ### Module.md (Dokka)
 
 - `# Module module-name` (H1), packages `# Package pkg.name` (H1), all other headers H2+.

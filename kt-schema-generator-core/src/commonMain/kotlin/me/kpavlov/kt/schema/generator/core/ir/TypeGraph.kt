@@ -155,4 +155,9 @@ public data class SubtypeRef(
 public data class Discriminator(
     val name: String,
     val mapping: Map<String, TypeId>? = null,
-)
+) {
+    public companion object {
+        /** The discriminator property name used when a sealed type does not declare one. */
+        public const val DEFAULT_NAME: String = "type"
+    }
+}

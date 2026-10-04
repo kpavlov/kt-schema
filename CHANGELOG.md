@@ -4,6 +4,11 @@
 
 - Inline value classes (`@JvmInline value class`) are flattened to their wrapped type in the reflection and KSP front ends; `@Description` on the class or property is kept ([#117](https://github.com/kpavlov/kt-schema/issues/117))
 - `kt-schema-apt`: `BigInteger` (`integer`) and `BigDecimal` (`number`) fields ([#114](https://github.com/kpavlov/kt-schema/pull/114))
+- Reflection and KSP front ends: the polymorphic discriminator property name honors `@JsonClassDiscriminator("...")` and Jackson `@JsonTypeInfo(property = "...")`, inherited by nested sealed types, instead of always using `type`; configurable via `introspector.annotations.discriminator.names` and `introspector.annotations.discriminator.attributes`
+
+### Changed
+
+- Breaking: a sealed subtype that declares a property named like the polymorphic discriminator (default `type`, or the name from `@JsonClassDiscriminator`/`@JsonTypeInfo`) now fails schema generation with an `IllegalStateException`, in the JSON Schema and function-calling emitters, instead of silently dropping the discriminator `const`
 
 ### Fixed
 

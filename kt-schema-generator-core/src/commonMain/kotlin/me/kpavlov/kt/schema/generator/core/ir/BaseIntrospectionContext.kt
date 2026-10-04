@@ -171,6 +171,15 @@ public abstract class BaseIntrospectionContext<TType : Any> {
         withCycleDetection(type, id, nodeBuilder)
         return TypeRef.Ref(id, nullable)
     }
+
+    /**
+     * Returns the discriminator property name of a sealed type: the first name [declaredName] finds on
+     * [typeAndSupertypes], nearest first, or [Discriminator.DEFAULT_NAME].
+     */
+    protected fun <D> discriminatorName(
+        typeAndSupertypes: Sequence<D>,
+        declaredName: (D) -> String?,
+    ): String = typeAndSupertypes.firstNotNullOfOrNull(declaredName) ?: Discriminator.DEFAULT_NAME
 }
 
 /** Maximum number of value classes flattened directly inside one another. */
