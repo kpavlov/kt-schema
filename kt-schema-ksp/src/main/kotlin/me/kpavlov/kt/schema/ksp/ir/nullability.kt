@@ -2,54 +2,26 @@ package me.kpavlov.kt.schema.ksp.ir
 
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSTypeAlias
 import me.kpavlov.kt.schema.generator.core.ir.Introspections
 
-/**
- * Checks whether the symbol is annotated with a recognized nullable marker (e.g. `@Nullable`).
- *
- * Recognition is delegated to [Introspections.isNullableAnnotation], which performs
- * matching against a configurable set loaded from `kt-schema.properties`.
- *
- * @return `true` if any annotation on this symbol is recognized as a nullable marker
- */
+/** Whether the symbol has a nullable-marker annotation (e.g. `@Nullable`); see [Introspections]. */
 internal fun KSAnnotated.isNullableAnnotated(): Boolean =
-    annotations.any { annotation ->
-        val declaration = annotation.annotationType.resolve().declaration
-        val simpleName = declaration.simpleName.asString()
-        val qualifiedName = declaration.qualifiedName?.asString()
-        Introspections.isNullableAnnotation(simpleName, qualifiedName)
-    }
+    annotations.any { it.withClassNames(Introspections::isNullableAnnotation) }
 
-/**
- * Checks whether the symbol is annotated with a recognized optional marker (e.g. `@Optional`).
- *
- * Recognition is delegated to [Introspections.isOptionalAnnotation], which performs
- * matching against a configurable set loaded from `kt-schema.properties`.
- *
- * @return `true` if any annotation on this symbol is recognized as an optional marker
- */
+/** Whether the symbol has an optional-marker annotation (e.g. `@Optional`); see [Introspections]. */
 internal fun KSAnnotated.isOptionalAnnotated(): Boolean =
-    annotations.any { annotation ->
-        val declaration = annotation.annotationType.resolve().declaration
-        val simpleName = declaration.simpleName.asString()
-        val qualifiedName = declaration.qualifiedName?.asString()
-        Introspections.isOptionalAnnotation(simpleName, qualifiedName)
-    }
+    annotations.any { it.withClassNames(Introspections::isOptionalAnnotation) }
 
-/**
- * Checks whether this type's declaration simple name matches a configured nullable-type-name
- * glob pattern (e.g. `*Opt`).
- *
- * @see [Introspections.isNullableTypeName]
- */
-internal fun KSType.isNullableByTypeName(): Boolean =
-    Introspections.isNullableTypeName(declaration.simpleName.asString())
+/** Whether the type's simple name matches a configured nullable-type-name glob (e.g. `*Opt`). */
+internal fun KSType.isNullableByTypeName(): Boolean = Introspections.isNullableTypeName(classSimpleName())
 
-/**
- * Checks whether this type's declaration simple name matches a configured optional-type-name
- * glob pattern (e.g. `*Opt`).
- *
- * @see [Introspections.isOptionalTypeName]
- */
-internal fun KSType.isOptionalByTypeName(): Boolean =
-    Introspections.isOptionalTypeName(declaration.simpleName.asString())
+/** Whether the type's simple name matches a configured optional-type-name glob (e.g. `*Opt`). */
+internal fun KSType.isOptionalByTypeName(): Boolean = Introspections.isOptionalTypeName(classSimpleName())
+
+/** Simple name of the declaration, looking through typealiases like the reflection front end. */
+private fun KSType.classSimpleName(): String =
+    generateSequence(declaration) { (it as? KSTypeAlias)?.type?.resolve()?.declaration }
+        .last()
+        .simpleName
+        .asString()

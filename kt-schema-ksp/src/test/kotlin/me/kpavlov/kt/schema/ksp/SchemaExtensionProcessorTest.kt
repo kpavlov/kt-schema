@@ -4,6 +4,8 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSAnnotation
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -15,16 +17,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.parallel.Isolated
 
-/**
- * Unit tests for SchemaExtensionProcessor.
- *
- * These tests verify that the processor correctly:
- * - Handles enabled/disabled state
- * - Manages lifecycle correctly (finish, onError)
- * - Processes symbols with correct configuration
- *
- * Strategy-specific code generation logic is tested in individual strategy unit tests.
- */
 @ExtendWith(MockKExtension::class)
 @Isolated
 class SchemaExtensionProcessorTest {
@@ -259,4 +251,42 @@ class SchemaExtensionProcessorTest {
         // Then
         result.shouldBeEmpty()
     }
+
+    @Test
+    fun `should report contradictory annotations at the offending class`() {
+        // Given
+        val classDeclaration = validClassDeclaration(annotations = listOf(annotationMock("test.SchemaIgnore")))
+        every { resolver.getSymbolsWithAnnotation("me.kpavlov.kt.schema.Schema") } returns
+            sequenceOf(classDeclaration)
+
+        // When
+        subject.process(resolver)
+
+        // Then
+        verify { logger.error(match { it.contains("contradictory") }, classDeclaration) }
+    }
+
+    @Test
+    fun `should report generation failure at the offending class with its stack trace`() {
+        // Given: unstubbed members make schema generation throw
+        val classDeclaration = validClassDeclaration(annotations = emptyList())
+        every { resolver.getSymbolsWithAnnotation("me.kpavlov.kt.schema.Schema") } returns
+            sequenceOf(classDeclaration)
+
+        // When
+        subject.process(resolver)
+
+        // Then
+        verify {
+            logger.error(match { it.startsWith("Failed to generate schema extension") }, classDeclaration)
+            logger.exception(any())
+        }
+    }
+
+    private fun validClassDeclaration(annotations: List<KSAnnotation>): KSClassDeclaration =
+        mockk {
+            every { qualifiedName } returns ksName("test.Subject")
+            every { this@mockk.annotations } returns annotations.asSequence()
+            every { accept<Any?, Boolean>(any(), any()) } returns true
+        }
 }
