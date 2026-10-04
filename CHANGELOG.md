@@ -2,8 +2,110 @@
 
 ### Added
 
-- `@JsonClassDiscriminator` support: per-class discriminator key from `@JsonClassDiscriminator` now takes precedence over the global `Json.classDiscriminator` setting in sealed polymorphic schema generation ([#53](https://github.com/kpavlov/kt-schema/issues/53))
-- Support built-in kotlinx-serialization JSON types (`JsonObject`, `JsonElement`, `JsonArray`, `JsonPrimitive`, `JsonNull`) ([#54](https://github.com/kpavlov/kt-schema/issues/54))
+- Inline value classes (`@JvmInline value class`) are flattened to their wrapped type in the reflection and KSP front ends; `@Description` on the class or property is kept ([#117](https://github.com/kpavlov/kt-schema/issues/117))
+- `kt-schema-apt`: `BigInteger` (`integer`) and `BigDecimal` (`number`) fields ([#114](https://github.com/kpavlov/kt-schema/pull/114))
+
+### Fixed
+
+- Generic inline value classes (e.g. `Wrapper<Int>`) now resolve their type arguments in the reflection and KSP front ends; previously reflection threw and KSP emitted an empty schema
+
+### Dependencies
+
+- Gradle 9.8.0, KSP 2.3.12, Kotest 6.2.5, JUnit 6.1.3, Jackson BOM 3.2.3 (test-only), detekt 2.0.0-alpha.6, Kover 0.9.11, slf4j 2.0.20, langchain4j 1.21.0, Koog 1.3.0 (examples)
+
+---
+
+## 0.8.3
+
+Published: 2026-08-03
+
+### Added
+
+- Default values via Jackson annotations: `@JsonEnumDefaultValue` on an enum constant emits `default` on that enum's schema; `@JsonProperty(defaultValue = "...")` populates the property default. The property default only shows up with a non-strict `JsonSchemaConfig`, since KSP/APT output marks every property required. Configurable via `introspector.annotations.enumDefault.names`, `introspector.annotations.defaultValue.names` and `introspector.annotations.defaultValue.attributes` ([#99](https://github.com/kpavlov/kt-schema/pull/99))
+
+### Docs
+
+- Expanded guides (generation modes, configuration, architecture, type support), updated examples ([#98](https://github.com/kpavlov/kt-schema/pull/98))
+
+---
+
+## 0.8.2
+
+Published: 2026-08-03
+
+### Added
+
+- `kt-schema-apt`: enum support, both as root types and as fields; `@JsonTypeName` / `@JsonProperty` override the enum and constant names ([#97](https://github.com/kpavlov/kt-schema/pull/97))
+
+### Fixed
+
+- An enum shared by several `@Schema` roots no longer crashes the processor on the second root
+- `kt-schema-apt`: an enum with no constants now fails with a clear error instead of emitting `"enum": []`
+- KSP: `@SerialName` on enum entries covered by tests
+
+---
+
+## 0.8.1
+
+Published: 2026-08-02
+
+### Changed
+
+- **IR API (breaking for direct users of `kt-schema-generator-core`)**: `TypeId` is now a value class, `ObjectNode`/`EnumNode`/`PolymorphicNode` implement the new `NamedTypeNode`, and `PolymorphicNode.baseName` is now `name` ([#92](https://github.com/kpavlov/kt-schema/pull/92))
+- Function-calling schemas fail with a clear error beyond 8 levels of type nesting (guards against cycles)
+
+### Fixed
+
+- Custom type names (`@SerialName`, `@JsonTypeName`, ...) are respected in `$id`, `$defs`, `$ref` and polymorphic discriminator values; unique graph-wide names fall back to the FQN on collision ([#92](https://github.com/kpavlov/kt-schema/pull/92))
+- `kt-schema-apt`: `@Nullable` annotation is respected ([#91](https://github.com/kpavlov/kt-schema/pull/91))
+
+### Chores
+
+- Pure Java annotation-processing example, release pipeline
+
+---
+
+## 0.8.0
+
+Published: 2026-08-02
+
+### Added
+
+- **`kt-schema-apt`**: Java annotation processor generating JSON Schema resources at compile time for Java records, classes and interfaces ([#75](https://github.com/kpavlov/kt-schema/pull/75))
+  - Collections, maps, arrays and type variables ([#80](https://github.com/kpavlov/kt-schema/pull/80))
+  - `rootPackage`, `include` and `exclude` options with glob patterns ([#82](https://github.com/kpavlov/kt-schema/pull/82)); KSP now shares the same glob matcher
+- Jackson annotations support in reflection, KSP and APT: `@JsonProperty` (names), `@JsonTypeName` (polymorphic subtype names), `@JsonIgnore`; `@get:` use-site targets, inherited and singleton properties are honored ([#83](https://github.com/kpavlov/kt-schema/pull/83), [#84](https://github.com/kpavlov/kt-schema/pull/84))
+- Nullable/optional conventions shared by all front ends: types matching `introspector.nullable.type.names` (default `*Opt`) and `@Nullable`-style annotations are nullable; optional markers (`introspector.annotations.optional.names`, `introspector.optional.type.names`) exclude a property from `required` and are opt-in
+- Jackson 3 `JsonNode` hierarchy resolves to `{}` (opaque), and scalar nodes (`StringNode`, `IntNode`, ...) to their primitive types ([#74](https://github.com/kpavlov/kt-schema/issues/74))
+
+### Fixed
+
+- Nullable properties stay `required` by default
+- `NoClassDefFoundError: org/slf4j/LoggerFactory` in KSP and APT processor workers (`slf4j-simple` is now bundled)
+
+### Performance
+
+- APT: type nodes are memoized across roots
+
+### Dependencies
+
+- Jackson 3 (test-only), KSP 2.3.10, Kotest 6.2.3, JUnit 6.1.2, detekt 2.0.0-alpha.5, Kover 0.9.9
+
+---
+
+## 0.7.0
+
+Published: 2026-07-01
+
+### Added
+
+- `jsonSchemaOf<T>()` convenience function for kotlinx-serialization, analogous to `serializer<T>()` ([#60](https://github.com/kpavlov/kt-schema/pull/60))
+- `@JsonClassDiscriminator` support: per-class discriminator key now takes precedence over the global `Json.classDiscriminator` setting in sealed polymorphic schema generation ([#53](https://github.com/kpavlov/kt-schema/issues/53))
+- Built-in kotlinx-serialization JSON types (`JsonObject`, `JsonElement`, `JsonArray`, `JsonPrimitive`, `JsonNull`) are mapped to open schemas instead of crashing; configurable via `SerializationClassSchemaIntrospector.Config.opaqueSerialNames` and `introspector.opaque.type.names` ([#54](https://github.com/kpavlov/kt-schema/issues/54))
+
+### Dependencies
+
+- Gradle 9.6.1, KSP 2.3.9, langchain4j 1.17.1, kotlin-logging 8.0.4
 
 ---
 
