@@ -5,6 +5,7 @@ import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSValueParameter
 import com.google.devtools.ksp.symbol.Modifier
 import com.google.devtools.ksp.symbol.Nullability
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
@@ -201,6 +202,10 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
      * Inline value classes serialize as their inner value (e.g. `14.5` instead of
      * `{"value": 14.5}`), so the schema must reflect the inner type.
      *
+     * For a generic value class (`value class Wrapper<T>(val value: T)`), the wrapped type is
+     * resolved as a member of [type], so its type parameters are replaced by the use-site type
+     * arguments (`Wrapper<Int>` flattens to an integer).
+     *
      * If the value class has a class-level `@Description` (or KDoc), it is propagated to the
      * flattened primitive node so it still appears in the generated schema.
      *
@@ -222,10 +227,11 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         val wrappedParam = decl.primaryConstructor?.parameters?.singleOrNull() ?: return null
         if (type in visitingTypes) return null
 
+        val wrappedType = resolveWrappedTypeAsMemberOf(decl, wrappedParam, type)
         visitingTypes += type
         val wrappedRef =
             try {
-                toRef(wrappedParam.type.resolve())
+                toRef(wrappedType)
             } finally {
                 visitingTypes -= type
             }
@@ -242,6 +248,27 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
             }
 
         return if (nullable && !resultRef.nullable) resultRef.withNullable(true) else resultRef
+    }
+
+    /**
+     * Resolves the type of the value class's wrapped constructor parameter as a member of [type],
+     * using the KSP-provided [com.google.devtools.ksp.symbol.KSPropertyDeclaration.asMemberOf]
+     * to substitute type parameters with the use-site type arguments.
+     *
+     * Non-generic value classes keep the declared parameter type, as do generic ones when the
+     * backing property can't be found or the substitution fails.
+     */
+    private fun resolveWrappedTypeAsMemberOf(
+        decl: KSClassDeclaration,
+        wrappedParam: KSValueParameter,
+        type: KSType,
+    ): KSType {
+        val declaredType = wrappedParam.type.resolve()
+        if (decl.typeParameters.isEmpty()) return declaredType
+
+        val wrappedProperty =
+            decl.getDeclaredProperties().firstOrNull { it.simpleName.asString() == wrappedParam.name?.asString() }
+        return wrappedProperty?.asMemberOf(type.makeNotNullable())?.takeUnless { it.isError } ?: declaredType
     }
 
     /**

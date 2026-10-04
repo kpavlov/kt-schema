@@ -123,6 +123,23 @@ class ReflectionIntrospectorTest {
         val wrapper: RecursiveWrapper,
     )
 
+    @JvmInline
+    value class Wrapper<T>(
+        val value: T,
+    )
+
+    @JvmInline
+    value class ListWrapper<T>(
+        val items: List<T>,
+    )
+
+    data class WithGenericValueClass(
+        val intWrapper: Wrapper<Int>,
+        val nullableStringWrapper: Wrapper<String?>,
+        val listWrapper: ListWrapper<Int>,
+        val starWrapper: Wrapper<*>,
+    )
+
     private val introspector = ReflectionClassIntrospector
 
     @Test
@@ -396,6 +413,50 @@ class ReflectionIntrospectorTest {
 
         // Neither Age nor DescribedDistance should appear as a named node in the graph.
         graph.nodes.keys.none { it.value.endsWith(".Age") || it.value.endsWith(".DescribedDistance") } shouldBe true
+    }
+
+    @Test
+    fun `flattens generic inline value class using the type arguments from the use site`() {
+        val graph = introspector.introspect(WithGenericValueClass::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+        val props = node.properties.associateBy { it.name }
+
+        // Wrapper<Int> resolves T to Int.
+        props.getValue("intWrapper").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<PrimitiveNode> { prim ->
+                prim.kind shouldBe PrimitiveKind.INT
+            }
+            inline.nullable shouldBe false
+        }
+
+        // Wrapper<String?> resolves T to String? and carries the nullability.
+        props.getValue("nullableStringWrapper").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<PrimitiveNode> { prim ->
+                prim.kind shouldBe PrimitiveKind.STRING
+            }
+            inline.nullable shouldBe true
+        }
+
+        // ListWrapper<Int> resolves T nested inside List<T>.
+        props.getValue("listWrapper").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<ListNode> { list ->
+                list.element.shouldBeInstanceOf<TypeRef.Inline> { element ->
+                    element.node.shouldBeInstanceOf<PrimitiveNode> { prim ->
+                        prim.kind shouldBe PrimitiveKind.INT
+                    }
+                }
+            }
+        }
+
+        // Wrapper<*> is treated as Wrapper<Any?>: any value, nullable.
+        props.getValue("starWrapper").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<AnyNode>()
+            inline.nullable shouldBe true
+        }
+
+        graph.nodes.keys.none { it.value.endsWith("Wrapper") } shouldBe true
     }
 
     @Test
