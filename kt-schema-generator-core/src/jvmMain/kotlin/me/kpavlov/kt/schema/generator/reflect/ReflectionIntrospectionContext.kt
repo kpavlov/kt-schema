@@ -237,7 +237,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      * to an integer) before it is resolved.
      *
      * A class-level `@Description` on the value class is carried over onto the flattened
-     * primitive node, since there is no wrapper object left to attach it to.
+     * node, since there is no wrapper object left to attach it to.
      *
      * Recursive value classes are handled by [flattenValueClass].
      *
@@ -263,20 +263,10 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                 id = createTypeId(klass),
                 nullable = nullable,
                 wrappedNullable = wrappedType.isMarkedNullable,
+                description = extractDescription(klass.java.annotations.toList()),
             ) { toRef(wrappedType) }
 
-        val classDescription = extractDescription(klass.java.annotations.toList())
-        val resultRef =
-            if (classDescription != null && wrappedRef is TypeRef.Inline && wrappedRef.node is PrimitiveNode) {
-                TypeRef.Inline(
-                    wrappedRef.node.copy(description = classDescription),
-                    wrappedRef.nullable,
-                )
-            } else {
-                wrappedRef
-            }
-
-        val ref = if (nullable && !resultRef.nullable) resultRef.withNullable(true) else resultRef
+        val ref = if (nullable && !wrappedRef.nullable) wrappedRef.withNullable(true) else wrappedRef
         if (!nullable) typeRefCache[type] = ref
         return ref
     }

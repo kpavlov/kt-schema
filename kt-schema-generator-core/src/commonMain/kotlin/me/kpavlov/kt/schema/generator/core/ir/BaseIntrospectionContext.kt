@@ -107,6 +107,7 @@ public abstract class BaseIntrospectionContext<TType : Any> {
      *
      * @param nullable whether the value class occurrence is nullable
      * @param wrappedNullable whether the wrapped type is nullable
+     * @param description class-level description of the value class, set on the flattened node
      */
     @Suppress("ReturnCount")
     protected fun flattenValueClass(
@@ -114,6 +115,7 @@ public abstract class BaseIntrospectionContext<TType : Any> {
         id: TypeId,
         nullable: Boolean,
         wrappedNullable: Boolean,
+        description: String?,
         flatten: () -> TypeRef,
     ): TypeRef {
         val objectDepth = visitingTypes.size
@@ -132,11 +134,18 @@ public abstract class BaseIntrospectionContext<TType : Any> {
             } finally {
                 if (outerDepth == null) flatteningDepths -= key else flatteningDepths[key] = outerDepth
             }
-        if (!inlineCycleTypes.remove(key)) return wrappedRef
+        // There is no wrapper object left to carry the class description, so it moves to the inline node.
+        val describedRef =
+            if (description != null && wrappedRef is TypeRef.Inline) {
+                wrappedRef.copy(node = wrappedRef.node.withDescription(description))
+            } else {
+                wrappedRef
+            }
+        if (!inlineCycleTypes.remove(key)) return describedRef
 
         // Kotlin rejects a value class whose underlying type is itself, so the cycle always runs
         // through an inline collection here.
-        val node = checkNotNull((wrappedRef as? TypeRef.Inline)?.node) { "Unexpected inline cycle via $wrappedRef" }
+        val node = checkNotNull((describedRef as? TypeRef.Inline)?.node) { "Unexpected inline cycle via $wrappedRef" }
         // ponytail: TypeId is per class, so two recursive instantiations of one generic value class
         // share a definition; put type arguments into the id if that ever matters.
         withCycleDetection(key, id) { node }
@@ -162,9 +171,7 @@ public abstract class BaseIntrospectionContext<TType : Any> {
         withCycleDetection(type, id, nodeBuilder)
         return TypeRef.Ref(id, nullable)
     }
-
-    private companion object {
-        /** Maximum number of value classes flattened directly inside one another. */
-        const val MAX_FLATTENING_DEPTH = 8
-    }
 }
+
+/** Maximum number of value classes flattened directly inside one another. */
+private const val MAX_FLATTENING_DEPTH = 8

@@ -1,5 +1,6 @@
 package me.kpavlov.kt.schema.integration.type
 
+import me.kpavlov.kt.schema.Description
 import me.kpavlov.kt.schema.Schema
 
 @JvmInline
@@ -30,6 +31,17 @@ value class OptionalRecursiveWrapper(
 @Schema
 data class OptionalRecursiveValueClassTrip(
     val wrapper: OptionalRecursiveWrapper,
+)
+
+@Description("Nested items")
+@JvmInline
+value class DescribedRecursiveWrapper(
+    val items: List<DescribedRecursiveWrapper>,
+)
+
+@Schema
+data class DescribedRecursiveValueClassTrip(
+    val wrapper: DescribedRecursiveWrapper,
 )
 
 @JvmInline

@@ -207,7 +207,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
      * arguments (`Wrapper<Int>` flattens to an integer).
      *
      * If the value class has a class-level `@Description` (or KDoc), it is propagated to the
-     * flattened primitive node so it still appears in the generated schema.
+     * flattened node so it still appears in the generated schema.
      *
      * Recursive value classes are handled by [flattenValueClass].
      *
@@ -234,20 +234,10 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 id = decl.typeId(),
                 nullable = nullable,
                 wrappedNullable = wrappedType.isMarkedNullable,
+                description = extractDescription(decl) { decl.descriptionFromKdoc() },
             ) { toRef(wrappedType) }
 
-        val classDescription = extractDescription(decl) { decl.descriptionFromKdoc() }
-        val resultRef =
-            if (classDescription != null && wrappedRef is TypeRef.Inline && wrappedRef.node is PrimitiveNode) {
-                TypeRef.Inline(
-                    (wrappedRef.node as PrimitiveNode).copy(description = classDescription),
-                    wrappedRef.nullable,
-                )
-            } else {
-                wrappedRef
-            }
-
-        return if (nullable && !resultRef.nullable) resultRef.withNullable(true) else resultRef
+        return if (nullable && !wrappedRef.nullable) wrappedRef.withNullable(true) else wrappedRef
     }
 
     /**

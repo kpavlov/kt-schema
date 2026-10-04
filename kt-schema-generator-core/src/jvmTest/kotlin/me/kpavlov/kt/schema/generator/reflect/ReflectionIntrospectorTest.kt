@@ -107,6 +107,16 @@ class ReflectionIntrospectorTest {
         val value: Double,
     )
 
+    @Description("Tag list")
+    @JvmInline
+    value class DescribedTags(
+        val items: List<String>,
+    )
+
+    data class WithDescribedCollectionValueClass(
+        val tags: DescribedTags,
+    )
+
     data class WithInlineValueClass(
         val age: Age,
         val nullableAge: Age?,
@@ -501,6 +511,20 @@ class ReflectionIntrospectorTest {
 
         // Neither Age nor DescribedDistance should appear as a named node in the graph.
         graph.nodes.keys.none { it.value.endsWith(".Age") || it.value.endsWith(".DescribedDistance") } shouldBe true
+    }
+
+    @Test
+    fun `carries class description onto flattened collection of inline value class`() {
+        val graph = introspector.introspect(WithDescribedCollectionValueClass::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+
+        node.properties.single().type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<ListNode> { list ->
+                list.description shouldBe "Tag list"
+            }
+        }
     }
 
     @Test

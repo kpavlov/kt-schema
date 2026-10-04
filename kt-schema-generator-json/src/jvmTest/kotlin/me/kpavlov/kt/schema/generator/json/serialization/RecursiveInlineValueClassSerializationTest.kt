@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
+import me.kpavlov.kt.schema.generator.json.SerialDescription
 import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator.Companion.jsonSchemaOf
 import me.kpavlov.kt.schema.json.encodeToString
 import kotlin.test.Test
@@ -43,6 +44,18 @@ class RecursiveInlineValueClassSerializationTest {
     @Serializable
     data class WithOptionalTree(
         val tree: OptionalTree,
+    )
+
+    @SerialDescription("Nested children")
+    @Serializable
+    @JvmInline
+    value class DescribedTree(
+        val children: List<DescribedTree>,
+    )
+
+    @Serializable
+    data class WithDescribedTree(
+        val tree: DescribedTree,
     )
 
     @Serializable
@@ -146,6 +159,23 @@ class RecursiveInlineValueClassSerializationTest {
               "me.kpavlov.kt.schema.generator.json.serialization.RecursiveInlineValueClassSerializationTest.OptionalTree": {
                 "type": "array",
                 "items": $$optionalTreeRef
+              }
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `should carry class description onto recursive inline value class definition`() {
+        val schema = jsonSchemaOf<WithDescribedTree>().encodeToString()
+
+        schemaOf(schema).getValue($$"$defs").toString() shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "me.kpavlov.kt.schema.generator.json.serialization.RecursiveInlineValueClassSerializationTest.DescribedTree": {
+                "type": "array",
+                "description": "Nested children",
+                "items": { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.serialization.RecursiveInlineValueClassSerializationTest.DescribedTree" }
               }
             }
             """.trimIndent()

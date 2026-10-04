@@ -180,7 +180,7 @@ internal class SerializationIntrospectionContext(
      * `{"gramsPerDeciliter": 14.5}`), so the schema must reflect the inner type.
      *
      * If the inline class has a **class-level** description annotation, it is propagated to the
-     * flattened primitive node so that it appears in the generated schema. Annotations on the
+     * flattened node so that it appears in the generated schema. Annotations on the
      * inner `value` property are not used.
      *
      * Recursive value classes are handled by [flattenValueClass].
@@ -198,24 +198,11 @@ internal class SerializationIntrospectionContext(
                 id = descriptorId(descriptor),
                 nullable = nullable,
                 wrappedNullable = wrappedDescriptor.isNullable,
+                description = extractDescription(descriptor),
             ) { toRef(wrappedDescriptor) }
 
-        val description = extractDescription(descriptor)
-        val effectiveRef =
-            if (innerRef is TypeRef.Inline && innerRef.node is PrimitiveNode) {
-                if (description != null) {
-                    TypeRef.Inline(
-                        (innerRef.node as PrimitiveNode).copy(description = description),
-                        innerRef.nullable,
-                    )
-                } else {
-                    innerRef
-                }
-            } else {
-                innerRef
-            }
-        if (!nullable) typeRefCache[descriptor] = effectiveRef
-        return if (nullable && !effectiveRef.nullable) effectiveRef.withNullable(true) else effectiveRef
+        if (!nullable) typeRefCache[descriptor] = innerRef
+        return if (nullable && !innerRef.nullable) innerRef.withNullable(true) else innerRef
     }
 
     /**

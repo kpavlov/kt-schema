@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
+import me.kpavlov.kt.schema.Description
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -61,6 +62,16 @@ class RecursiveTypeReflectionTest {
 
     data class WithOptionalRecursiveWrapper(
         val wrapper: OptionalRecursiveWrapper,
+    )
+
+    @Description("Nested items")
+    @JvmInline
+    value class DescribedRecursiveWrapper(
+        val items: List<DescribedRecursiveWrapper>,
+    )
+
+    data class WithDescribedRecursiveWrapper(
+        val wrapper: DescribedRecursiveWrapper,
     )
 
     @JvmInline
@@ -319,6 +330,23 @@ class RecursiveTypeReflectionTest {
                     ]
                   }
                 }
+              }
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `should carry class description onto recursive inline value class definition`() {
+        val schema = Json.parseToJsonElement(generator.generateSchemaString(WithDescribedRecursiveWrapper::class))
+
+        schema.jsonObject.getValue($$"$defs").toString() shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.DescribedRecursiveWrapper": {
+                "type": "array",
+                "description": "Nested items",
+                "items": { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.RecursiveTypeReflectionTest.DescribedRecursiveWrapper" }
               }
             }
             """.trimIndent()

@@ -69,7 +69,7 @@ class RecursiveValueClassTripSchemaTest {
     @Test
     fun `keeps nullability of the wrapped type on recursive inline value class references`() {
         // language=json
-        OptionalRecursiveValueClassTrip::class.jsonSchemaString shouldEqualJson
+        val expected =
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -98,6 +98,37 @@ class RecursiveValueClassTripSchemaTest {
               }
             }
             """.trimIndent()
+
+        OptionalRecursiveValueClassTrip::class.jsonSchemaString shouldEqualJson expected
+        OptionalRecursiveValueClassTrip::class.jsonSchema.toString() shouldEqualJson expected
+    }
+
+    @Test
+    fun `carries class description onto recursive inline value class definition`() {
+        // language=json
+        val expected =
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "me.kpavlov.kt.schema.integration.type.DescribedRecursiveValueClassTrip",
+              "type": "object",
+              "properties": {
+                "wrapper": { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.DescribedRecursiveWrapper" }
+              },
+              "required": ["wrapper"],
+              "additionalProperties": false,
+              "$defs": {
+                "me.kpavlov.kt.schema.integration.type.DescribedRecursiveWrapper": {
+                  "type": "array",
+                  "description": "Nested items",
+                  "items": { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.DescribedRecursiveWrapper" }
+                }
+              }
+            }
+            """.trimIndent()
+
+        DescribedRecursiveValueClassTrip::class.jsonSchemaString shouldEqualJson expected
+        DescribedRecursiveValueClassTrip::class.jsonSchema.toString() shouldEqualJson expected
     }
 
     @Test
