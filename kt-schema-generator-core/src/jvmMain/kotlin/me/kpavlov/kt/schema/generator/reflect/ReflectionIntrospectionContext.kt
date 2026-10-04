@@ -42,6 +42,15 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
     private val defaultValueExtractor = DefaultValueExtractor
 
     /**
+     * Value classes currently being flattened by [flattenInlineValueClass].
+     *
+     * Kept apart from [visitingTypes] (active node construction): a flattened value class never
+     * registers a node itself, so a recursive reference must be allowed to register the fallback
+     * object node, whereas a type whose node is under construction must not be re-entered.
+     */
+    private val flatteningTypes: MutableSet<KType> = mutableSetOf()
+
+    /**
      * Converts a [KType] to a [TypeRef].
      * This is the main entry point for type conversion.
      *
@@ -236,12 +245,15 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      *
      * Falls back to [handleObjectType] when the wrapped property can't be determined, or for a
      * value class that (transitively) wraps a collection of itself — flattening would otherwise
-     * recurse without end.
+     * recurse without end. The fallback registers the value class's object node, so the
+     * resulting [TypeRef.Ref] always resolves.
      */
     private fun flattenInlineValueClass(type: KType): TypeRef {
         val klass = type.klass
         val declaredWrappedType = findPrimaryConstructor(klass)?.parameters?.singleOrNull()?.type
-        if (declaredWrappedType == null || type in visitingTypes) return handleObjectType(type)
+        // Keyed by the non-null type so `Wrapper?` inside `Wrapper` is caught as the same cycle.
+        val flatteningKey = type.withNullability(false)
+        if (declaredWrappedType == null || flatteningKey in flatteningTypes) return handleObjectType(type)
 
         // A star projection (`Wrapper<*>`) carries no type, so it is treated as `Any?`.
         val bindings =
@@ -252,12 +264,12 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             if (bindings.isEmpty()) declaredWrappedType else substituteTypeParameters(declaredWrappedType, bindings)
 
         val nullable = type.effectiveNullable()
-        visitingTypes += type
+        flatteningTypes += flatteningKey
         val wrappedRef =
             try {
                 toRef(wrappedType)
             } finally {
-                visitingTypes -= type
+                flatteningTypes -= flatteningKey
             }
 
         val classDescription = extractDescription(klass.java.annotations.toList())

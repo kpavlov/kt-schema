@@ -465,4 +465,15 @@ class ReflectionIntrospectorTest {
 
         graph.root.shouldBeInstanceOf<TypeRef.Ref>()
     }
+
+    @Test
+    fun `recursive inline value class fallback ref resolves to a registered object node`() {
+        val graph = introspector.introspect(WithRecursiveInlineValueClass::class)
+
+        val wrapperId = TypeId(RecursiveWrapper::class.qualifiedName!!)
+        val wrapperNode = graph.nodes[wrapperId].shouldBeInstanceOf<ObjectNode>()
+        val items = wrapperNode.properties.single { it.name == "items" }.type
+        val list = items.shouldBeInstanceOf<TypeRef.Inline>().node.shouldBeInstanceOf<ListNode>()
+        list.element.shouldBeInstanceOf<TypeRef.Ref>().id shouldBe wrapperId
+    }
 }
