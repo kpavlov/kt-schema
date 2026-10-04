@@ -43,13 +43,11 @@ class TypeGraphToFunctionCallingSchemaTransformerTest {
                         type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING)),
                     ),
                 ),
-            required = setOf("id"),
         )
     private val innerNode =
         ObjectNode(
             name = "Inner",
             properties = listOf(Property(name = "leaf", type = TypeRef.Ref(otherId))),
-            required = setOf("leaf"),
         )
 
     /** Function `send(text: String, count: Int?, ref: Other?, inner: Inner, tags: Map<String, Int>?)`. */
@@ -81,7 +79,6 @@ class TypeGraphToFunctionCallingSchemaTransformerTest {
                                         ),
                                     ),
                                 ),
-                            required = setOf("text", "count", "ref", "inner", "tags"),
                         ),
                     otherId to otherNode,
                     innerId to innerNode,
@@ -147,7 +144,6 @@ class TypeGraphToFunctionCallingSchemaTransformerTest {
             ObjectNode(
                 name = "Other",
                 properties = listOf(Property(name = "id", type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING)))),
-                required = setOf("id"),
             )
         val bagNode =
             ObjectNode(
@@ -176,7 +172,6 @@ class TypeGraphToFunctionCallingSchemaTransformerTest {
                             ),
                         ),
                     ),
-                required = setOf("names", "refs", "scores"),
             )
         val graph = TypeGraph(root = TypeRef.Ref(bagId), nodes = mapOf(bagId to bagNode, otherId to otherNode))
         val transformer = TypeGraphToFunctionCallingSchemaTransformer(FunctionCallingSchemaConfig.Lenient)
@@ -317,7 +312,6 @@ class TypeGraphToFunctionCallingSchemaTransformerTest {
                                             description = "A shape",
                                         ),
                                     ),
-                                required = setOf("shape"),
                             ),
                         shapeId to
                             PolymorphicNode(
@@ -325,8 +319,8 @@ class TypeGraphToFunctionCallingSchemaTransformerTest {
                                 subtypes = listOf(SubtypeRef(circleId), SubtypeRef(squareId)),
                                 discriminator = Discriminator(name = "type"),
                             ),
-                        circleId to ObjectNode(name = "Circle", properties = emptyList(), required = emptySet()),
-                        squareId to ObjectNode(name = "Square", properties = emptyList(), required = emptySet()),
+                        circleId to ObjectNode(name = "Circle", properties = emptyList()),
+                        squareId to ObjectNode(name = "Square", properties = emptyList()),
                     ),
             )
         val transformer = TypeGraphToFunctionCallingSchemaTransformer(FunctionCallingSchemaConfig.Lenient)

@@ -10,10 +10,12 @@ import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.isPresenceRequired
 import me.kpavlov.kt.schema.json.AdditionalPropertiesSchema
 import me.kpavlov.kt.schema.json.AnyOfPropertyDefinition
 import me.kpavlov.kt.schema.json.ArrayPropertyDefinition
@@ -127,7 +129,7 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                     val finalDef =
                         convertTypeRef(property.type, graph, jsonTypeNames, depth = 0)
                             .let { def -> property.description?.let { setDescription(def, it) } ?: def }
-                            .let { def -> applyDefaultOrConst(def, property, isRequired) }
+                            .let { def -> applyDefaultOrConst(def, property, isRequired, config.omitsNullMarker) }
                     property.name to finalDef
                 }
 
@@ -151,25 +153,25 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                 } else if (config.respectDefaultPresence) {
                     if (config.requireNullableFields) {
                         node.properties
-                            .filter { it.name in node.required || it.type.nullable || it.isConstant }
+                            .filter { it.isPresenceRequired() || it.type.nullable }
                             .map { it.name }
                     } else {
-                        // Use the required set from the ObjectNode (respects DefaultPresence)
-                        node.required.toList()
+                        // Respects DefaultPresence
+                        node.properties.filter { it.isPresenceRequired() }.map { it.name }
                     }
                 } else if (config.requireNullableFields) {
                     // All properties are required (legacy strict mode from JsonSchemaConfig)
                     node.properties.map { it.name }
                 } else {
                     // Only non-nullable properties are required
-                    node.properties.filter { !it.type.nullable || it.isConstant }.map { it.name }
+                    node.properties.filter { !it.type.nullable || it.value is PropertyValue.Const }.map { it.name }
                 }
             if (config.strictMode || !config.omitsNullMarker) return required
 
             // Without a null marker a required nullable property could hold neither `null` nor a value
             val optional =
                 node.properties
-                    .filter { it.type.nullable && !it.isConstant }
+                    .filter { it.type.nullable && it.value !is PropertyValue.Const }
                     .map { it.name }
                     .toSet()
             return required.filterNot { it in optional }
@@ -326,7 +328,7 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                     val finalDef =
                         convertTypeRef(property.type, graph, jsonTypeNames, depth)
                             .let { def -> property.description?.let { setDescription(def, it) } ?: def }
-                            .let { def -> applyDefaultOrConst(def, property, isRequired) }
+                            .let { def -> applyDefaultOrConst(def, property, isRequired, config.omitsNullMarker) }
                     property.name to finalDef
                 }
 

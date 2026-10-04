@@ -2,9 +2,11 @@ package me.kpavlov.kt.schema.generator.json
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import me.kpavlov.kt.schema.generator.core.ir.Literal
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.Property
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.json.AllOfPropertyDefinition
 import me.kpavlov.kt.schema.json.AnyOfPropertyDefinition
@@ -108,32 +110,34 @@ class PropertyDefinitionUtilsTest {
         setDefaultValue(boolProp, rawValue) shouldBe boolProp.copy(default = JsonPrimitive(expected))
     }
 
-    private fun stringProperty(defaultValue: Any? = null, isConstant: Boolean = false): Property =
+    private fun stringProperty(value: PropertyValue): Property =
         Property(
             name = "x",
             type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING)),
-            defaultValue = defaultValue,
-            isConstant = isConstant,
+            value = value,
         )
 
     @Test
     fun `applyDefaultOrConst should set const value for constant properties`() {
         val def = StringPropertyDefinition()
-        applyDefaultOrConst(def, stringProperty(defaultValue = "FIXED", isConstant = true), isRequired = true) shouldBe
+        val property = stringProperty(PropertyValue.Const(Literal.Str("FIXED")))
+        applyDefaultOrConst(def, property, isRequired = true, omitsNullMarker = false) shouldBe
             def.copy(constValue = JsonPrimitive("FIXED"))
     }
 
     @Test
     fun `applyDefaultOrConst should set default value for optional properties with a default`() {
         val def = StringPropertyDefinition()
-        applyDefaultOrConst(def, stringProperty(defaultValue = "FALLBACK"), isRequired = false) shouldBe
+        val property = stringProperty(PropertyValue.Default(Literal.Str("FALLBACK")))
+        applyDefaultOrConst(def, property, isRequired = false, omitsNullMarker = false) shouldBe
             def.copy(default = JsonPrimitive("FALLBACK"))
     }
 
     @Test
     fun `applyDefaultOrConst should leave required properties without applying their default`() {
         val def = StringPropertyDefinition()
-        applyDefaultOrConst(def, stringProperty(defaultValue = "IGNORED"), isRequired = true) shouldBe def
+        val property = stringProperty(PropertyValue.Default(Literal.Str("IGNORED")))
+        applyDefaultOrConst(def, property, isRequired = true, omitsNullMarker = false) shouldBe def
     }
 
     @ParameterizedTest
@@ -143,12 +147,6 @@ class PropertyDefinitionUtilsTest {
         if (updated != null) {
             updated.description shouldBe "desc"
         }
-    }
-
-    @Test
-    fun `removeNullableFlag should set nullable to null`() {
-        val stringProp = StringPropertyDefinition(nullable = true)
-        removeNullableFlag(stringProp) shouldBe stringProp.copy(nullable = null)
     }
 
     fun descriptionPropertyDefinitionProvider(): Array<PropertyDefinition> =

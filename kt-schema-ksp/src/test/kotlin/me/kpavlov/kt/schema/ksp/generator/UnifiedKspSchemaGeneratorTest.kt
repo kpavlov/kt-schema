@@ -41,7 +41,6 @@ class UnifiedKspSchemaGeneratorTest {
                                 ObjectNode(
                                     name = "greet",
                                     properties = emptyList(),
-                                    required = emptySet(),
                                 ),
                         ),
                 )

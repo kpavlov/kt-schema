@@ -12,10 +12,12 @@ import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.isPresenceRequired
 import me.kpavlov.kt.schema.json.AdditionalPropertiesSchema
 import me.kpavlov.kt.schema.json.ArrayPropertyDefinition
 import me.kpavlov.kt.schema.json.BooleanPropertyDefinition
@@ -453,10 +455,10 @@ public class TypeGraphToJsonSchemaTransformer
             val required =
                 node.properties
                     .filter { property ->
-                        property.isConstant ||
+                        property.value is PropertyValue.Const ||
                             when {
                                 config.respectDefaultPresence -> {
-                                    !property.hasDefaultValue ||
+                                    property.isPresenceRequired() ||
                                         (config.requireNullableFields && property.type.nullable)
                                 }
 
@@ -468,7 +470,7 @@ public class TypeGraphToJsonSchemaTransformer
                                     !property.type.nullable
                                 }
                             }
-                    }.filterNot { config.omitsNullMarker && it.type.nullable && !it.isConstant }
+                    }.filterNot { config.omitsNullMarker && it.type.nullable && it.value !is PropertyValue.Const }
                     .map { it.name }
                     .toSet()
 
@@ -479,16 +481,8 @@ public class TypeGraphToJsonSchemaTransformer
 
                     val propertyDef = convertTypeRef(property.type, graph, jsonTypeNames, definitions)
 
-                    // Remove nullable flag if property is required (in required array)
-                    // Convention: nullable flag is only used for optional properties
-                    val withoutNullableIfRequired =
-                        if (isRequired) {
-                            removeNullableFlag(propertyDef)
-                        } else {
-                            propertyDef
-                        }
-
-                    val withDefaultOrConst = applyDefaultOrConst(withoutNullableIfRequired, property, isRequired)
+                    val withDefaultOrConst =
+                        applyDefaultOrConst(propertyDef, property, isRequired, config.omitsNullMarker)
 
                     // Add description if available
                     val finalDef =

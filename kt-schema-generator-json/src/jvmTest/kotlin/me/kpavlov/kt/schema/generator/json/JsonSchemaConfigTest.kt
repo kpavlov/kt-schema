@@ -257,7 +257,6 @@ class JsonSchemaConfigTest {
                                             description = null,
                                         ),
                                     ),
-                                required = setOf("count", "items"),
                             ),
                     ),
             )
@@ -292,7 +291,6 @@ class JsonSchemaConfigTest {
                                             description = "property description",
                                         ),
                                     ),
-                                required = setOf("items"),
                             ),
                     ),
             )

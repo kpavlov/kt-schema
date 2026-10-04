@@ -51,28 +51,32 @@ class JsonSchemaTypesTest {
                     "integer",
                     "null"
                   ],
-                  "description": "Nullable int"
+                  "description": "Nullable int",
+                  "default": null
                 },
                 "nullableLong": {
                   "type": [
                     "integer",
                     "null"
                   ],
-                  "description": "Nullable long"
+                  "description": "Nullable long",
+                  "default": null
                 },
                 "nullableFloat": {
                   "type": [
                     "number",
                     "null"
                   ],
-                  "description": "Nullable float"
+                  "description": "Nullable float",
+                  "default": null
                 },
                 "nullableDouble": {
                   "type": [
                     "number",
                     "null"
                   ],
-                  "description": "Nullable double"
+                  "description": "Nullable double",
+                  "default": null
                 }
               },
               "required": [
@@ -112,7 +116,8 @@ class JsonSchemaTypesTest {
                       "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Status"
                     }
                   ],
-                  "description": "Optional status"
+                  "description": "Optional status",
+                  "default": null
                 }
               },
               "additionalProperties": false,
@@ -170,7 +175,8 @@ class JsonSchemaTypesTest {
                   "description": "Nullable list",
                   "items": {
                     "type": "string"
-                  }
+                  },
+                  "default": null
                 },
                 "optMap": {
                   "type": [
@@ -180,7 +186,8 @@ class JsonSchemaTypesTest {
                   "description": "Nullable map",
                   "additionalProperties": {
                     "type": "string"
-                  }
+                  },
+                  "default": null
                 }
               },
               "required": [
@@ -220,7 +227,8 @@ class JsonSchemaTypesTest {
                   "description": "Optional items",
                   "items": {
                     "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Address"
-                  }
+                  },
+                  "default": null
                 }
               },
               "required": [
@@ -268,7 +276,8 @@ class JsonSchemaTypesTest {
                   "description": "Optional data",
                   "additionalProperties": {
                     "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.Address"
-                  }
+                  },
+                  "default": null
                 }
               },
               "required": ["data"],
@@ -469,14 +478,16 @@ class JsonSchemaTypesTest {
                     "string",
                     "null"
                   ],
-                  "description": "Optional string"
+                  "description": "Optional string",
+                  "default": null
                 },
                 "opt2": {
                   "type": [
                     "integer",
                     "null"
                   ],
-                  "description": "Optional int"
+                  "description": "Optional int",
+                  "default": null
                 },
                 "def1": {
                   "type": "string",
@@ -578,14 +589,16 @@ class JsonSchemaTypesTest {
                     "string",
                     "null"
                   ],
-                  "description": "Optional string"
+                  "description": "Optional string",
+                  "default": null
                 },
                 "opt2": {
                   "type": [
                     "integer",
                     "null"
                   ],
-                  "description": "Optional int"
+                  "description": "Optional int",
+                  "default": null
                 },
                 "def1": {
                   "type": "string",
@@ -631,28 +644,32 @@ class JsonSchemaTypesTest {
                     "integer",
                     "null"
                   ],
-                  "description": "Age"
+                  "description": "Age",
+                  "default": null
                 },
                 "email": {
                   "type": [
                     "string",
                     "null"
                   ],
-                  "description": "Email"
+                  "description": "Email",
+                  "default": null
                 },
                 "score": {
                   "type": [
                     "number",
                     "null"
                   ],
-                  "description": "Score"
+                  "description": "Score",
+                  "default": null
                 },
                 "active": {
                   "type": [
                     "boolean",
                     "null"
                   ],
-                  "description": "Active"
+                  "description": "Active",
+                  "default": null
                 }
               },
               "required": [

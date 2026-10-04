@@ -8,13 +8,16 @@ import me.kpavlov.kt.schema.apt.JavaSources
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
+import me.kpavlov.kt.schema.generator.core.ir.Literal
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.isPresenceRequired
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -67,7 +70,7 @@ class AptClassIntrospectorTest {
 
         val companyNode = graph.nodes.getValue(rootRef.id).shouldBeInstanceOf<ObjectNode>()
         assertSoftly(companyNode) {
-            required.shouldContainExactlyInAnyOrder(setOf("name", "founded", "active"))
+            requiredNames().shouldContainExactlyInAnyOrder(setOf("name", "founded", "active"))
             val props = properties.associateBy { it.name }
             props.keys.shouldContainExactlyInAnyOrder(setOf("name", "founded", "active"))
             props.getValue("name").type.shouldBePrimitive(PrimitiveKind.STRING)
@@ -327,7 +330,7 @@ class AptClassIntrospectorTest {
 
         val node = graph.rootNode()
         assertSoftly(node) {
-            required.shouldContainExactlyInAnyOrder(setOf("name", "age"))
+            requiredNames().shouldContainExactlyInAnyOrder(setOf("name", "age"))
             val props = properties.associateBy { it.name }
             props.getValue("name").type.shouldBePrimitive(PrimitiveKind.STRING)
             props.getValue("age").type.shouldBePrimitive(PrimitiveKind.INT)
@@ -385,7 +388,7 @@ class AptClassIntrospectorTest {
 
         val node = graph.rootNode()
         assertSoftly(node) {
-            required.shouldContainExactlyInAnyOrder(setOf("name", "phone"))
+            requiredNames().shouldContainExactlyInAnyOrder(setOf("name", "phone"))
             val props = properties.associateBy { it.name }
             props.getValue("phone").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
                 inline.node.shouldBeInstanceOf<PrimitiveNode> { prim -> prim.kind shouldBe PrimitiveKind.STRING }
@@ -412,7 +415,7 @@ class AptClassIntrospectorTest {
 
         val node = graph.rootNode()
         assertSoftly(node) {
-            required.shouldContainExactlyInAnyOrder(setOf("name", "phone"))
+            requiredNames().shouldContainExactlyInAnyOrder(setOf("name", "phone"))
             val props = properties.associateBy { it.name }
             props.getValue("phone").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
                 inline.node.shouldBeInstanceOf<PrimitiveNode> { prim -> prim.kind shouldBe PrimitiveKind.STRING }
@@ -440,7 +443,7 @@ class AptClassIntrospectorTest {
 
         val node = graph.rootNode()
         assertSoftly(node) {
-            required.shouldContainExactlyInAnyOrder(setOf("name", "phone"))
+            requiredNames().shouldContainExactlyInAnyOrder(setOf("name", "phone"))
             val props = properties.associateBy { it.name }
             props.getValue("phone").type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
                 inline.node.shouldBeInstanceOf<PrimitiveNode> { prim -> prim.kind shouldBe PrimitiveKind.STRING }
@@ -469,7 +472,7 @@ class AptClassIntrospectorTest {
         assertSoftly(node) {
             // No default `introspector.optional.type.names` pattern — matching a nullable-by-convention
             // type name doesn't by itself exclude the property from `required`.
-            required.shouldContainExactlyInAnyOrder(setOf("name", "email"))
+            requiredNames().shouldContainExactlyInAnyOrder(setOf("name", "email"))
             val props = properties.associateBy { it.name }
             props.getValue("email").type.shouldBeInstanceOf<TypeRef.Ref> { ref ->
                 ref.id.value shouldBe "com.example.EmailOpt"
@@ -535,7 +538,7 @@ class AptClassIntrospectorTest {
 
         val node = graph.rootNode()
         assertSoftly(node) {
-            required.shouldContainExactlyInAnyOrder(setOf("color"))
+            requiredNames().shouldContainExactlyInAnyOrder(setOf("color"))
             properties.single().type.shouldBeInstanceOf<TypeRef.Ref> { ref ->
                 ref.id.value shouldBe "com.example.Color"
                 ref.nullable shouldBe true
@@ -625,7 +628,7 @@ class AptClassIntrospectorTest {
     }
 
     @Test
-    fun `should populate Property defaultValue from JsonProperty defaultValue-style annotation`() {
+    fun `should populate Property value from JsonProperty defaultValue-style annotation`() {
         val graph =
             graph(
                 root = "com.example.Car",
@@ -642,10 +645,10 @@ class AptClassIntrospectorTest {
 
         val node = graph.rootNode()
         assertSoftly(node) {
-            required.shouldContainExactlyInAnyOrder(emptySet())
+            properties.filter { it.isPresenceRequired() } shouldBe emptyList()
             properties.single().apply {
-                hasDefaultValue shouldBe true
-                defaultValue shouldBe "30"
+                optional shouldBe false
+                value shouldBe PropertyValue.Default(Literal.Str("30"))
             }
         }
     }

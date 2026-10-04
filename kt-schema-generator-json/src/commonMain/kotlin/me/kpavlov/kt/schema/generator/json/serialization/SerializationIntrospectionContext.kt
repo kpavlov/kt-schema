@@ -22,6 +22,7 @@ import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.Property
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.SubtypeRef
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
@@ -216,25 +217,21 @@ internal class SerializationIntrospectionContext(
 
         withCycleDetection(descriptor, id) {
             val properties = mutableListOf<Property>()
-            val required = mutableSetOf<String>()
 
             for (i in 0 until descriptor.elementsCount) {
                 val name = descriptor.getElementName(i)
                 val elementDescriptor = descriptor.getElementDescriptor(i)
                 val elementDescription = extractElementDescription(descriptor, i)
                 val typeRef = toRef(elementDescriptor)
-                val hasDefault = descriptor.isElementOptional(i)
-
-                if (!hasDefault) {
-                    required.add(name)
-                }
+                val optional = descriptor.isElementOptional(i)
 
                 properties.add(
                     Property(
                         name = name,
                         type = typeRef,
                         description = elementDescription,
-                        hasDefaultValue = hasDefault,
+                        optional = optional,
+                        value = if (optional) PropertyValue.UnknownDefault else PropertyValue.None,
                     ),
                 )
             }
@@ -242,7 +239,6 @@ internal class SerializationIntrospectionContext(
             ObjectNode(
                 name = descriptor.unwrapSerialName().removeSuffix("?"),
                 properties = properties,
-                required = required,
                 description = extractDescription(descriptor),
             )
         }
@@ -464,7 +460,6 @@ internal class SerializationIntrospectionContext(
             ObjectNode(
                 name = descriptor.unwrapSerialName().removeSuffix("?"),
                 properties = emptyList(),
-                required = emptySet(),
                 description = extractDescription(descriptor),
             )
         }

@@ -35,7 +35,6 @@ internal class KspFunctionIntrospector : SchemaIntrospector<KSFunctionDeclaratio
         val id = TypeId(functionName)
 
         val properties = mutableListOf<Property>()
-        val requiredProperties = mutableSetOf<String>()
 
         // Process function parameters
         root.parameters.forEach { param ->
@@ -62,10 +61,8 @@ internal class KspFunctionIntrospector : SchemaIntrospector<KSFunctionDeclaratio
                     name = paramName,
                     type = typeRef,
                     description = description,
-                    hasDefaultValue = false,
+                    optional = false,
                 )
-
-            requiredProperties += paramName
         }
 
         // Extract function description
@@ -75,7 +72,6 @@ internal class KspFunctionIntrospector : SchemaIntrospector<KSFunctionDeclaratio
             ObjectNode(
                 name = functionName,
                 properties = properties,
-                required = requiredProperties,
                 description = functionDescription,
             )
 

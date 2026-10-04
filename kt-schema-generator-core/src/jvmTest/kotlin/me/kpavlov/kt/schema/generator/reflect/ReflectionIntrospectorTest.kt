@@ -5,17 +5,20 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.json.JsonClassDiscriminator
 import me.kpavlov.kt.schema.Description
 import me.kpavlov.kt.schema.SchemaIgnore
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
+import me.kpavlov.kt.schema.generator.core.ir.Literal
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import kotlin.test.Test
@@ -286,7 +289,7 @@ class ReflectionIntrospectorTest {
         userNode.description shouldBe "A user model"
 
         // Required should include all without defaults: name, age, tags, attributes (email has default)
-        userNode.required.shouldContainExactlyInAnyOrder(setOf("name", "age", "tags", "attributes"))
+        userNode.requiredNames().shouldContainExactlyInAnyOrder(setOf("name", "age", "tags", "attributes"))
 
         // Properties: check types
         val props = userNode.properties.associateBy { it.name }
@@ -294,7 +297,7 @@ class ReflectionIntrospectorTest {
         // Verify property with description and required status
         props.getValue("name").apply {
             description shouldBe "The name of the user"
-            hasDefaultValue shouldBe false
+            optional shouldBe false
             type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
                 inline.node.shouldBeInstanceOf<PrimitiveNode> { prim ->
                     prim.kind shouldBe PrimitiveKind.STRING
@@ -305,7 +308,7 @@ class ReflectionIntrospectorTest {
 
         // age is nullable but still required (no default value)
         props.getValue("age").apply {
-            hasDefaultValue shouldBe false
+            optional shouldBe false
             type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
                 inline.node.shouldBeInstanceOf<PrimitiveNode> { prim ->
                     prim.kind shouldBe PrimitiveKind.INT
@@ -314,9 +317,9 @@ class ReflectionIntrospectorTest {
             }
         }
 
-        // email has default value, so hasDefaultValue should be true
+        // email has a default value, so it is optional
         props.getValue("email").apply {
-            hasDefaultValue shouldBe true
+            optional shouldBe true
             type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
                 inline.node.shouldBeInstanceOf<PrimitiveNode> { prim ->
                     prim.kind shouldBe PrimitiveKind.STRING
@@ -326,12 +329,12 @@ class ReflectionIntrospectorTest {
 
         // tags is required (no default)
         props.getValue("tags").apply {
-            hasDefaultValue shouldBe false
+            optional shouldBe false
         }
 
         // attributes is nullable but required (no default)
         props.getValue("attributes").apply {
-            hasDefaultValue shouldBe false
+            optional shouldBe false
         }
 
         // Verify collection types
@@ -662,4 +665,32 @@ class ReflectionIntrospectorTest {
             stop.properties.single().type shouldBe TypeRef.Ref(TypeId(Stop9::class.qualifiedName!!))
         }
     }
+
+    //region Enum defaults
+
+    enum class RenamedColor {
+        @SerialName("red")
+        RED,
+        BLUE,
+    }
+
+    data class Paint(
+        val color: RenamedColor = RenamedColor.RED,
+        val shades: List<RenamedColor> = listOf(RenamedColor.RED, RenamedColor.BLUE),
+    )
+
+    @Test
+    fun `enum default uses the emitted entry name`() {
+        val graph = introspector.introspect(Paint::class)
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+
+        val values = node.properties.associate { it.name to it.value }
+
+        values.getValue("color") shouldBe PropertyValue.Default(Literal.Str("red"))
+        values.getValue("shades") shouldBe
+            PropertyValue.Default(Literal.ListOf(listOf(Literal.Str("red"), Literal.Str("BLUE"))))
+    }
+
+    //endregion
 }

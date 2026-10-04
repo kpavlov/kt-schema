@@ -12,10 +12,12 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
+import me.kpavlov.kt.schema.generator.core.ir.Literal
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import org.junit.jupiter.api.TestInstance
@@ -159,7 +161,27 @@ class ReflectionIntrospectorJacksonTest {
         @param:JsonProperty(defaultValue = "IGNORED") val label: String = "REAL",
     )
 
+    enum class JacksonColor {
+        @JsonProperty("red")
+        RED,
+        BLUE,
+    }
+
+    data class JacksonPaint(
+        val color: JacksonColor = JacksonColor.RED,
+    )
+
     private val introspector = ReflectionClassIntrospector
+
+    @Test
+    fun `enum default uses the Jackson entry name override`() {
+        val graph = introspector.introspect(JacksonPaint::class)
+
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
+
+        node.properties.single().value shouldBe PropertyValue.Default(Literal.Str("red"))
+    }
 
     @Test
     fun `honors Jackson @JsonProperty name override in properties and required`() {
@@ -169,7 +191,7 @@ class ReflectionIntrospectorJacksonTest {
         val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
 
         node.properties.map { it.name } shouldBe listOf("user_name", "email_address")
-        node.required shouldBe setOf("user_name")
+        node.requiredNames() shouldBe setOf("user_name")
     }
 
     @Test
@@ -180,7 +202,7 @@ class ReflectionIntrospectorJacksonTest {
         val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
 
         node.properties.map { it.name } shouldNotContain "password"
-        node.required shouldNotContain "password"
+        node.requiredNames() shouldNotContain "password"
     }
 
     @Test
@@ -216,7 +238,7 @@ class ReflectionIntrospectorJacksonTest {
         node.properties.map { it.name } shouldBe listOf("user_login", "email_address")
         node.properties.associateBy { it.name }.getValue("email_address").description shouldBe
             "The user's email address"
-        node.required shouldBe setOf("user_login")
+        node.requiredNames() shouldBe setOf("user_login")
         node.properties.map { it.name } shouldNotContain "sessionToken"
     }
 
@@ -230,9 +252,9 @@ class ReflectionIntrospectorJacksonTest {
         node.properties.map { it.name } shouldBe listOf("body", "document_id")
         node.properties.associateBy { it.name }.getValue("document_id").apply {
             description shouldBe "The document identifier"
-            hasDefaultValue shouldBe true
+            value.shouldBeInstanceOf<PropertyValue.Const>()
         }
-        node.required shouldBe setOf("body", "document_id")
+        node.requiredNames() shouldBe setOf("body", "document_id")
     }
 
     @Test
@@ -243,7 +265,7 @@ class ReflectionIntrospectorJacksonTest {
         val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
 
         node.properties.map { it.name } shouldBe listOf("body", "memo_id")
-        node.required shouldBe setOf("body", "memo_id")
+        node.requiredNames() shouldBe setOf("body", "memo_id")
     }
 
     @Test
@@ -255,7 +277,7 @@ class ReflectionIntrospectorJacksonTest {
 
         node.properties.map { it.name } shouldBe listOf("entry_id", "label")
         node.properties.map { it.name } shouldNotContain "id"
-        node.required shouldBe setOf("entry_id", "label")
+        node.requiredNames() shouldBe setOf("entry_id", "label")
     }
 
     @Test
@@ -266,7 +288,7 @@ class ReflectionIntrospectorJacksonTest {
         val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
 
         node.properties.map { it.name } shouldNotContain "internalId"
-        node.required shouldNotContain "internalId"
+        node.requiredNames() shouldNotContain "internalId"
     }
 
     @Test
@@ -277,7 +299,7 @@ class ReflectionIntrospectorJacksonTest {
         val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
 
         node.properties.map { it.name } shouldNotContain "internalToken"
-        node.required shouldNotContain "internalToken"
+        node.requiredNames() shouldNotContain "internalToken"
     }
 
     @Test
@@ -300,9 +322,9 @@ class ReflectionIntrospectorJacksonTest {
         val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
         val timeoutProp = node.properties.first { it.name == "timeout" }
 
-        timeoutProp.hasDefaultValue shouldBe true
-        timeoutProp.defaultValue shouldBe "30"
-        node.required shouldNotContain "timeout"
+        timeoutProp.optional shouldBe false
+        timeoutProp.value shouldBe PropertyValue.Default(Literal.Str("30"))
+        node.requiredNames() shouldNotContain "timeout"
     }
 
     @Test
@@ -312,7 +334,7 @@ class ReflectionIntrospectorJacksonTest {
         val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
         val node = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>()
 
-        node.properties.first { it.name == "label" }.defaultValue shouldBe "REAL"
+        node.properties.first { it.name == "label" }.value shouldBe PropertyValue.Default(Literal.Str("REAL"))
     }
 
     //region Jackson databind node types

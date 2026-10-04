@@ -11,6 +11,9 @@ import kotlin.reflect.KProperty1
  * It works by attempting to create an instance of the class using its primary constructor,
  * providing "mock" values for required parameters and letting Kotlin fill in the defaults
  * for optional parameters.
+ *
+ * The returned map has an entry for every property whose value could be read, so a `null` value
+ * (e.g. `val x: String? = null`) is distinct from a missing key (no value could be obtained).
  */
 internal object DefaultValueExtractor {
     private val cache = ConcurrentHashMap<KClass<*>, Map<String, Any?>>()
@@ -27,14 +30,13 @@ internal object DefaultValueExtractor {
     private fun KClass<*>.extractInstanceProperties(instance: Any): Map<String, Any?> =
         this.members
             .filterIsInstance<KProperty1<Any, *>>()
-            .associate { prop ->
-                prop.name to
-                    try {
-                        prop.get(instance)
-                    } catch (_: Exception) {
-                        null
-                    }
-            }.filterValues { it != null }
+            .mapNotNull { prop ->
+                try {
+                    prop.name to prop.get(instance)
+                } catch (_: Exception) {
+                    null
+                }
+            }.toMap()
 
     @Suppress("ReturnCount")
     private fun doExtractDefaultValues(klass: KClass<*>): Map<String, Any?> {
@@ -65,8 +67,9 @@ internal object DefaultValueExtractor {
                 return emptyMap()
             }
 
-        // Extract property values from the instance
-        return klass.extractInstanceProperties(instance)
+        // Values of required parameters are mocks, not defaults
+        val mockedNames = requiredParams.mapNotNull { it.name }.toSet()
+        return klass.extractInstanceProperties(instance) - mockedNames
     }
 
     @Suppress("CyclomaticComplexMethod")

@@ -369,8 +369,10 @@ Schemas follow JSON Schema Draft 2020-12 format. Example (pretty-printed):
 - Enums are `type: string` with `enum: []` and carry `@Description` as `description`.
 - Object properties include their inferred type schema and, when present, property-level `@Description` as`description`.
 - **Default values** are automatically extracted and included in the schema when using **runtime reflection** (e.g.,
-  `val country: String = "US"` → `"default": "US"`). Note: KSP (compile-time) tracks which properties have defaults but
-  cannot extract the actual values.
+  `val country: String = "US"` → `"default": "US"`; `val note: String? = null` → `"default": null`). KSP (compile-time)
+  records that a property has a default but cannot extract its value, so it emits no `default`. A property is *optional*
+  when it has a Kotlin default or an explicit optional marker; a known default also makes it non-required, and it is
+  emitted as `default` only for non-required properties.
 - Nullable properties are emitted as a union including `null`.
 - Collections: `List<T>`/`Set<T>` → `{ "type":"array", "items": T }`; `Map<String, V>` →
   `{ "type":"object", "additionalProperties": V }`.

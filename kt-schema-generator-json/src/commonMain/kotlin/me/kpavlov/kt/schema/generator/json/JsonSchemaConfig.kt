@@ -30,16 +30,15 @@ package me.kpavlov.kt.schema.generator.json
  */
 public open class JsonSchemaConfig(
     /**
-     * Whether to use hasDefaultValue from introspector to determine required fields.
+     * Whether to derive required fields from each property's optionality and default value.
      *
-     * When `true`: Fields without defaults are required; fields with defaults are optional.
-     * If [requireNullableFields] is also `true`, nullable fields are additionally required
-     * even when they carry a default value.
+     * When `true`: A property is required unless it is optional (it has a Kotlin default value or an
+     * explicit optional marker) or carries a known default; constants are always required. If
+     * [requireNullableFields] is also `true`, nullable fields are additionally required even when
+     * they carry a default value. A `default` is emitted only for properties that are not required.
      *
-     * When `false`: Uses [requireNullableFields] to determine required field behavior.
-     *
-     * **Note**: Does not work reliably with KSP because KSP cannot detect default values
-     * in the same compilation unit. Works best with reflection-based introspection.
+     * When `false`: Uses [requireNullableFields] to determine required field behavior, and no
+     * `default` is emitted for required fields.
      *
      * Default: `true`
      */
@@ -49,6 +48,7 @@ public open class JsonSchemaConfig(
      *
      * When [respectDefaultPresence] is `true`: additionally requires nullable fields
      * even when they have a default value (e.g. `val x: String? = null`).
+     * A required nullable field keeps its null marker (`["string", "null"]` or `"nullable": true`).
      *
      * When [respectDefaultPresence] is `false`:
      * - `true`: All fields are required (must be present, can be null).
@@ -164,10 +164,10 @@ public open class JsonSchemaConfig(
          *
          * - Uses default presence detection (fields with defaults are optional)
          * - Uses union types for nullable fields: `["string", "null"]`
-         * - Nullable fields are required (must be present in JSON)
+         * - Nullable fields without a default are required (must be present, may be `null`)
          *
-         * **Note**: Works best with reflection-based introspection.
-         * With KSP, behaves like [Strict] (all fields required).
+         * **Note**: Works best with reflection-based introspection, which also emits default values.
+         * KSP knows that a default exists but not its value, so such fields are optional without a `default`.
          */
         public val Default: JsonSchemaConfig =
             JsonSchemaConfig()
@@ -218,11 +218,13 @@ public open class JsonSchemaConfig(
             )
 
         /**
-         * Compact, permissive configuration: only non-nullable fields without defaults are required,
-         * nullable properties carry no null marker, and extra properties are allowed. Nullable collection
-         * elements and map values keep an `anyOf` null branch, since they cannot be omitted.
+         * Compact, permissive configuration: only non-nullable fields that are neither optional nor have a
+         * known default are required, nullable properties carry no null marker, and extra properties are
+         * allowed. Nullable collection elements and map values keep an `anyOf` null branch, since they
+         * cannot be omitted.
          *
-         * An absent field means `null`, so serialize payloads with `explicitNulls = false`.
+         * An absent field means `null`, so serialize payloads with `explicitNulls = false`. A `null`
+         * default is never emitted, since nullable properties carry no null marker.
          *
          *  - `respectDefaultPresence = true` - fields with defaults are optional
          *  - `requireNullableFields = false` - nullable fields are optional

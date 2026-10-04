@@ -20,11 +20,13 @@ import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
+import me.kpavlov.kt.schema.generator.core.ir.Literal
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.Property
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 
@@ -325,8 +327,8 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
 
     /**
      * Builds an ObjectNode from the primary constructor parameters, or from the public properties when there is
-     * none. Properties without defaults are required. KSP can't expose default value expressions
-     * (https://github.com/google/ksp/issues/1868), so only their presence is tracked.
+     * none. A property with a Kotlin default is optional. KSP can't expose default value expressions
+     * (https://github.com/google/ksp/issues/1868), so such a default is an [PropertyValue.UnknownDefault].
      */
     @Suppress("ReturnCount")
     private fun handleObjectOrClass(
@@ -345,24 +347,20 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
 
         withCycleDetection(type, id) {
             val props = ArrayList<Property>()
-            val required = LinkedHashSet<String>()
 
             // Kotlin declaration names (not the emitted ones), so a sealed-parent property already covered
             // by a renamed constructor override isn't re-added.
             val processedKotlinNames = HashSet<String>()
 
-            /** Adds a property; it's required unless it has a default value (or is constant). */
             fun addProperty(
                 kotlinName: String,
                 name: String,
                 type: TypeRef,
                 description: String?,
-                hasDefaultValue: Boolean,
-                defaultValue: String? = null,
-                isConstant: Boolean = false,
+                optional: Boolean,
+                value: PropertyValue,
             ) {
-                if (!hasDefaultValue || isConstant) required += name
-                props += createProperty(name, type, description, hasDefaultValue, defaultValue, isConstant)
+                props += createProperty(name, type, description, optional, value)
                 processedKotlinNames += kotlinName
             }
 
@@ -373,7 +371,6 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
             ObjectNode(
                 name = nameOverride ?: decl.qualifiedName?.asString() ?: decl.simpleName.asString(),
                 properties = props,
-                required = required,
                 description = extractDescription(decl) { decl.descriptionFromKdoc() },
             )
         }
@@ -382,8 +379,9 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     }
 
     /**
-     * Resolves a property's [TypeRef], whether it has a default value and the annotation-provided default value.
+     * Resolves a property's [TypeRef], whether it is optional and its [PropertyValue].
      * The type-name and `@Nullable`/`@Optional`-style conventions apply on top of [nativeHasDefault].
+     * KSP can't read a Kotlin default's value, so only an annotation-provided default is a known literal.
      *
      * @param annotationSources declarations whose annotations are checked (e.g. a parameter and its property)
      */
@@ -391,19 +389,24 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         resolvedType: KSType,
         nativeHasDefault: Boolean,
         vararg annotationSources: KSAnnotated?,
-    ): Triple<TypeRef, Boolean, String?> {
+    ): Triple<TypeRef, Boolean, PropertyValue> {
         val nullableAnnotated = annotationSources.any { it?.isNullableAnnotated() == true }
         val optionalAnnotated = annotationSources.any { it?.isOptionalAnnotated() == true }
         val defaultValue = annotationSources.firstNotNullOfOrNull { it?.let(::extractDefaultValueOverride) }
         val typeRef = toRef(resolvedType).let { if (nullableAnnotated) it.withNullable(true) else it }
-        val hasDefault =
-            nativeHasDefault || resolvedType.isOptionalByTypeName() || optionalAnnotated || defaultValue != null
-        return Triple(typeRef, hasDefault, defaultValue)
+        val optional = nativeHasDefault || resolvedType.isOptionalByTypeName() || optionalAnnotated
+        val value =
+            when {
+                defaultValue != null -> PropertyValue.Default(Literal.Str(defaultValue))
+                nativeHasDefault -> PropertyValue.UnknownDefault
+                else -> PropertyValue.None
+            }
+        return Triple(typeRef, optional, value)
     }
 
     private fun extractConstructorOrProperties(
         decl: KSClassDeclaration,
-        addProperty: (String, String, TypeRef, String?, Boolean, String?) -> Unit,
+        addProperty: (String, String, TypeRef, String?, Boolean, PropertyValue) -> Unit,
     ) {
         val declaredProperties = decl.getDeclaredProperties().associateBy { it.simpleName.asString() }
         val params = decl.primaryConstructor?.parameters.orEmpty()
@@ -415,7 +418,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 val propertyName =
                     extractNameOverride(p) ?: property?.let { extractNameOverride(it) } ?: kotlinName
                 val description = extractConstructorParamDescription(p, kotlinName, decl.docString, property)
-                val (typeRef, hasDefault, defaultValue) =
+                val (typeRef, optional, value) =
                     resolvePropertyTypeAndOptionality(
                         p.type.resolve(),
                         p.hasDefault,
@@ -423,7 +426,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                         property,
                         property?.getter,
                     )
-                addProperty(kotlinName, propertyName, typeRef, description, hasDefault, defaultValue)
+                addProperty(kotlinName, propertyName, typeRef, description, optional, value)
             }
         } else {
             declaredProperties.values
@@ -439,14 +442,14 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                             kdocTagName = "property",
                             elementKdocFallback = { prop.descriptionFromKdoc() },
                         )
-                    val (typeRef, hasDefault, defaultValue) =
+                    val (typeRef, optional, value) =
                         resolvePropertyTypeAndOptionality(
                             prop.type.resolve(),
                             nativeHasDefault = false,
                             prop,
                             prop.getter,
                         )
-                    addProperty(kotlinName, propertyName, typeRef, description, hasDefault, defaultValue)
+                    addProperty(kotlinName, propertyName, typeRef, description, optional, value)
                 }
         }
     }
@@ -454,7 +457,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     private fun extractInheritedSealedProperties(
         decl: KSClassDeclaration,
         processedKotlinNames: Set<String>,
-        addProperty: (String, String, TypeRef, String?, Boolean, String?, Boolean) -> Unit,
+        addProperty: (String, String, TypeRef, String?, Boolean, PropertyValue) -> Unit,
     ) {
         val sealedParents =
             decl.superTypes
@@ -501,8 +504,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                     typeRef,
                     description,
                     true, // Fixed value in the subclass
-                    null, // KSP cannot get the value
-                    false, // isConstant: not marked const since the value can't be extracted
+                    PropertyValue.UnknownDefault, // KSP cannot get the value, so it isn't a constant
                 )
             }
         }

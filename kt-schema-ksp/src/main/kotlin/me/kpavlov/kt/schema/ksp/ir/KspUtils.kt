@@ -4,6 +4,7 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSValueParameter
 import me.kpavlov.kt.schema.generator.core.ir.Property
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 
 /**
@@ -146,25 +147,22 @@ internal fun extractConstructorParamDescription(
  * @param name Property name
  * @param type Property type reference
  * @param description Property description (from annotations or KDoc)
- * @param hasDefaultValue Whether the property has a default value
- * @param defaultValue The property's default value, if known. KSP cannot extract a Kotlin
- *   default-value expression at compile-time, so this is only ever populated from an
- *   annotation (e.g. `@JsonProperty(defaultValue = "...")`).
- * @param isConstant Whether the property is constant (fixed value)
+ * @param optional Whether the property may be omitted
+ * @param value The property's default value. KSP cannot extract a Kotlin default-value expression
+ *   at compile-time, so a known literal only comes from an annotation
+ *   (e.g. `@JsonProperty(defaultValue = "...")`).
  */
 internal fun createProperty(
     name: String,
     type: TypeRef,
     description: String?,
-    hasDefaultValue: Boolean,
-    defaultValue: String? = null,
-    isConstant: Boolean = false,
+    optional: Boolean,
+    value: PropertyValue = PropertyValue.None,
 ): Property =
     Property(
         name = name,
         type = type,
         description = description,
-        hasDefaultValue = hasDefaultValue,
-        defaultValue = defaultValue,
-        isConstant = isConstant,
+        optional = optional,
+        value = value,
     )

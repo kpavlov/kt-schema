@@ -7,8 +7,11 @@ import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSValueParameter
+import com.google.devtools.ksp.symbol.Nullability
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.mockk.every
@@ -345,8 +348,44 @@ class SchemaExtensionProcessorTest {
             """.trimIndent()
     }
 
-    private fun generatedClassSchema(options: Map<String, String>): String {
-        val classDeclaration = schemaClassDeclaration()
+    @Test
+    fun `should leave defaulted property optional without default when config option is lenient`() {
+        // Given: a class with a defaulted constructor parameter (KSP can't read its value) and a plain one
+        val parameters =
+            listOf(
+                constructorParameter("priority", "kotlin.Int", hasDefault = true),
+                constructorParameter("text", "kotlin.String", hasDefault = false),
+            )
+
+        // When
+        val schema =
+            generatedClassSchema(
+                options = mapOf(SchemaExtensionProcessor.OPTION_CONFIG to "Lenient"),
+                constructorParameters = parameters,
+            )
+
+        // Then
+        schema shouldEqualJson
+            // language=json
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "test.Subject",
+              "type": "object",
+              "properties": {
+                "priority": { "type": "integer" },
+                "text": { "type": "string" }
+              },
+              "required": ["text"]
+            }
+            """.trimIndent()
+    }
+
+    private fun generatedClassSchema(
+        options: Map<String, String>,
+        constructorParameters: List<KSValueParameter> = emptyList(),
+    ): String {
+        val classDeclaration = schemaClassDeclaration(constructorParameters)
         val generated = ByteArrayOutputStream()
         every { codeGenerator.createNewFile(any(), any(), any()) } returns generated
         every { resolver.getSymbolsWithAnnotation("me.kpavlov.kt.schema.Schema") } returns
@@ -362,8 +401,8 @@ class SchemaExtensionProcessorTest {
             .replace($$"${'$'}", "$")
     }
 
-    /** A property-less `test.Subject` class annotated with `@Schema`, enough to tell the configs apart. */
-    private fun schemaClassDeclaration(): KSClassDeclaration {
+    /** A `test.Subject` class annotated with `@Schema`, with the given primary-constructor parameters. */
+    private fun schemaClassDeclaration(constructorParameters: List<KSValueParameter>): KSClassDeclaration {
         val type = mockk<KSType>(relaxed = true)
         val declaration =
             mockk<KSClassDeclaration>(relaxed = true) {
@@ -375,9 +414,36 @@ class SchemaExtensionProcessorTest {
                 every { accept<Any?, Boolean>(any(), any()) } returns true
                 every { containingFile } returns mockk<KSFile>(relaxed = true)
                 every { asStarProjectedType() } returns type
+                every { declarations } returns emptySequence()
+                every { primaryConstructor } returns
+                    mockk { every { parameters } returns constructorParameters }
             }
         every { type.declaration } returns declaration
         return declaration
+    }
+
+    private fun constructorParameter(
+        parameterName: String,
+        typeQualifiedName: String,
+        hasDefault: Boolean,
+    ): KSValueParameter {
+        val typeDeclaration =
+            mockk<KSDeclaration> {
+                every { qualifiedName } returns ksName(typeQualifiedName)
+                every { simpleName } returns ksName(typeQualifiedName.substringAfterLast('.'))
+            }
+        val resolvedType =
+            mockk<KSType>(relaxed = true) {
+                every { declaration } returns typeDeclaration
+                every { nullability } returns Nullability.NOT_NULL
+                every { isMarkedNullable } returns false
+            }
+        return mockk(relaxed = true) {
+            every { name } returns ksName(parameterName)
+            every { type } returns mockk { every { resolve() } returns resolvedType }
+            every { this@mockk.hasDefault } returns hasDefault
+            every { annotations } returns emptySequence()
+        }
     }
 
     private fun validClassDeclaration(annotations: List<KSAnnotation>): KSClassDeclaration =

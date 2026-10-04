@@ -7,7 +7,10 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import me.kpavlov.kt.schema.generator.core.ir.Literal
 import me.kpavlov.kt.schema.generator.core.ir.Property
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
+import me.kpavlov.kt.schema.generator.core.ir.toKotlinValue
 import me.kpavlov.kt.schema.json.AdditionalPropertiesConstraint
 import me.kpavlov.kt.schema.json.AllOfPropertyDefinition
 import me.kpavlov.kt.schema.json.AnyOfPropertyDefinition
@@ -151,18 +154,26 @@ private fun coerceNumericDefault(
  * Applies a property's constant or default value to its definition, if applicable.
  *
  * A constant property gets its value emitted via `const`; a non-required property with a known
- * default value gets it emitted via `default`. Shared by both the plain JSON Schema and function
- * calling transformers.
+ * default value gets it emitted via `default`. A `null` default is skipped when [omitsNullMarker],
+ * since the property's type then doesn't admit `null`. Shared by both the plain JSON Schema and
+ * function calling transformers.
  */
 internal fun applyDefaultOrConst(
     propertyDef: PropertyDefinition,
     property: Property,
     isRequired: Boolean,
+    omitsNullMarker: Boolean,
 ): PropertyDefinition =
-    when {
-        property.isConstant -> setConstValue(propertyDef, property.defaultValue)
-        !isRequired && property.defaultValue != null -> setDefaultValue(propertyDef, property.defaultValue)
-        else -> propertyDef
+    when (val v = property.value) {
+        is PropertyValue.Const -> setConstValue(propertyDef, v.literal.toKotlinValue())
+        is PropertyValue.Default ->
+            if (isRequired || (omitsNullMarker && v.literal == Literal.Null)) {
+                propertyDef
+            } else {
+                setDefaultValue(propertyDef, v.literal.toKotlinValue())
+            }
+
+        PropertyValue.None, PropertyValue.UnknownDefault -> propertyDef
     }
 
 /**
@@ -185,19 +196,6 @@ internal fun setDescription(
         is ReferencePropertyDefinition -> propertyDef.copy(description = description)
         is JsonSchema -> propertyDef.copy(description = description)
         is BooleanSchemaDefinition -> propertyDef // no description field
-    }
-
-/**
- * Removes the nullable flag from a property definition.
- */
-internal fun removeNullableFlag(propertyDef: PropertyDefinition): PropertyDefinition =
-    when (propertyDef) {
-        is StringPropertyDefinition -> propertyDef.copy(nullable = null)
-        is NumericPropertyDefinition -> propertyDef.copy(nullable = null)
-        is BooleanPropertyDefinition -> propertyDef.copy(nullable = null)
-        is ArrayPropertyDefinition -> propertyDef.copy(nullable = null)
-        is ObjectPropertyDefinition -> propertyDef.copy(nullable = null)
-        else -> propertyDef
     }
 
 /**
