@@ -4,7 +4,6 @@ package me.kpavlov.kt.schema.generator.json
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.kotest.assertions.json.shouldEqualJson
-import kotlinx.serialization.SerialInfo
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray

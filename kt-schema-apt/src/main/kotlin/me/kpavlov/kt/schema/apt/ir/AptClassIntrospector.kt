@@ -4,7 +4,6 @@ package me.kpavlov.kt.schema.apt.ir
 import me.kpavlov.kt.schema.generator.core.ir.SchemaIntrospector
 import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
-import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
 import javax.lang.model.util.Types

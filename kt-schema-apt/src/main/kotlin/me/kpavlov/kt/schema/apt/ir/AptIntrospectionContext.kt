@@ -93,11 +93,16 @@ internal class AptIntrospectionContext(
     private fun handleTypeVariable(type: TypeMirror): TypeRef {
         val upperBound = (type as TypeVariable).upperBound
         return when (upperBound.kind) {
-            TypeKind.DECLARED -> toRef(upperBound)
-            else -> error(
-                "Unsupported type parameter $type for kt-schema-apt " +
-                    "(only upper-bounded type variables are supported)",
-            )
+            TypeKind.DECLARED -> {
+                toRef(upperBound)
+            }
+
+            else -> {
+                error(
+                    "Unsupported type parameter $type for kt-schema-apt " +
+                        "(only upper-bounded type variables are supported)",
+                )
+            }
         }
     }
 
@@ -154,7 +159,10 @@ internal class AptIntrospectionContext(
      */
     private fun handleList(type: DeclaredType): TypeRef {
         val elementRef =
-            type.typeArguments.firstOrNull()?.resolveWildcard()?.let(::toRef)
+            type.typeArguments
+                .firstOrNull()
+                ?.resolveWildcard()
+                ?.let(::toRef)
                 ?: TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING))
         return TypeRef.Inline(ListNode(elementRef))
     }
@@ -167,10 +175,16 @@ internal class AptIntrospectionContext(
      */
     private fun handleMap(type: DeclaredType): TypeRef {
         val keyRef =
-            type.typeArguments.getOrNull(0)?.resolveWildcard()?.let(::toRef)
+            type.typeArguments
+                .getOrNull(0)
+                ?.resolveWildcard()
+                ?.let(::toRef)
                 ?: TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING))
         val valueRef =
-            type.typeArguments.getOrNull(1)?.resolveWildcard()?.let(::toRef)
+            type.typeArguments
+                .getOrNull(1)
+                ?.resolveWildcard()
+                ?.let(::toRef)
                 ?: TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING))
         return TypeRef.Inline(MapNode(keyRef, valueRef))
     }
@@ -203,7 +217,8 @@ internal class AptIntrospectionContext(
     private fun containerKindOf(type: DeclaredType): ContainerInfo? {
         val element = asTypeElement(type) ?: return null
         val name = element.qualifiedName.toString()
-        return containerKinds.getOrPut(name) { computeContainerKind(type, name) }
+        return containerKinds
+            .getOrPut(name) { computeContainerKind(type, name) }
             ?.let { kind -> ContainerInfo(kind, resolveContainerType(type, kind) ?: type) }
     }
 
@@ -212,14 +227,25 @@ internal class AptIntrospectionContext(
         name: String,
     ): ContainerKind? =
         when (name) {
-            "java.lang.Object" -> null
-            "java.util.Map" -> ContainerKind.MAP
-            "java.lang.Iterable" -> ContainerKind.ITERABLE
-            else ->
-                types.directSupertypes(type)
+            "java.lang.Object" -> {
+                null
+            }
+
+            "java.util.Map" -> {
+                ContainerKind.MAP
+            }
+
+            "java.lang.Iterable" -> {
+                ContainerKind.ITERABLE
+            }
+
+            else -> {
+                types
+                    .directSupertypes(type)
                     .filterIsInstance<DeclaredType>()
                     .firstNotNullOfOrNull(::containerKindOf)
                     ?.kind
+            }
         }
 
     private fun resolveContainerType(
@@ -228,13 +254,24 @@ internal class AptIntrospectionContext(
     ): DeclaredType? {
         val element = asTypeElement(type) ?: return null
         return when (element.qualifiedName.toString()) {
-            "java.util.Map" -> if (kind == ContainerKind.MAP) type else null
-            "java.lang.Iterable" -> if (kind == ContainerKind.ITERABLE) type else null
-            "java.lang.Object" -> null
-            else ->
-                types.directSupertypes(type)
+            "java.util.Map" -> {
+                if (kind == ContainerKind.MAP) type else null
+            }
+
+            "java.lang.Iterable" -> {
+                if (kind == ContainerKind.ITERABLE) type else null
+            }
+
+            "java.lang.Object" -> {
+                null
+            }
+
+            else -> {
+                types
+                    .directSupertypes(type)
                     .filterIsInstance<DeclaredType>()
                     .firstNotNullOfOrNull { resolveContainerType(it, kind) }
+            }
         }
     }
 
@@ -416,15 +453,19 @@ internal class AptIntrospectionContext(
         when {
             methodName.length > GET_PREFIX.length &&
                 methodName.startsWith(GET_PREFIX) &&
-                methodName[GET_PREFIX.length].isUpperCase() ->
+                methodName[GET_PREFIX.length].isUpperCase() -> {
                 decapitalize(methodName.substring(GET_PREFIX.length))
+            }
 
             methodName.length > IS_PREFIX.length &&
                 methodName.startsWith(IS_PREFIX) &&
-                methodName[IS_PREFIX.length].isUpperCase() ->
+                methodName[IS_PREFIX.length].isUpperCase() -> {
                 decapitalize(methodName.substring(IS_PREFIX.length))
+            }
 
-            else -> methodName
+            else -> {
+                methodName
+            }
         }
 
     /**
@@ -479,16 +520,26 @@ internal class AptIntrospectionContext(
 
     private fun registerRefs(typeRef: TypeRef) {
         when (typeRef) {
-            is TypeRef.Ref -> toRef(nodeCache.getValue(typeRef.id).type)
-            is TypeRef.Inline ->
+            is TypeRef.Ref -> {
+                toRef(nodeCache.getValue(typeRef.id).type)
+            }
+
+            is TypeRef.Inline -> {
                 when (val node = typeRef.node) {
-                    is ListNode -> registerRefs(node.element)
+                    is ListNode -> {
+                        registerRefs(node.element)
+                    }
+
                     is MapNode -> {
                         registerRefs(node.key)
                         registerRefs(node.value)
                     }
-                    else -> Unit
+
+                    else -> {
+                        Unit
+                    }
                 }
+            }
         }
     }
 
@@ -580,8 +631,7 @@ internal class AptIntrospectionContext(
      * Returns the first name-override value (e.g. from `@JsonProperty`, `@JsonTypeName`)
      * found across the given annotation targets, in order, or null if none provides one.
      */
-    private fun nameOverrideFor(targets: List<Element>): String? =
-        targets.firstNotNullOfOrNull(::extractNameOverride)
+    private fun nameOverrideFor(targets: List<Element>): String? = targets.firstNotNullOfOrNull(::extractNameOverride)
 
     /**
      * Returns the first default-value override (e.g. from `@JsonProperty(defaultValue = "...")`)
@@ -622,8 +672,7 @@ internal class AptIntrospectionContext(
      * Returns `true` if any of the given annotation targets carries a recognized
      * ignore annotation (e.g. `@JsonIgnore`).
      */
-    private fun isIgnored(targets: List<Element>): Boolean =
-        targets.any(::isIgnoreAnnotation)
+    private fun isIgnored(targets: List<Element>): Boolean = targets.any(::isIgnoreAnnotation)
 
     private fun isIgnoreAnnotation(element: Element): Boolean =
         element.annotationMirrors.any { mirror ->
@@ -638,14 +687,12 @@ internal class AptIntrospectionContext(
      * Returns `true` if any of the given annotation targets carries a recognized nullable
      * marker (e.g. `@Nullable`).
      */
-    private fun isNullableAnnotated(targets: List<Element>): Boolean =
-        targets.any(::isNullableAnnotation)
+    private fun isNullableAnnotated(targets: List<Element>): Boolean = targets.any(::isNullableAnnotation)
 
     private fun isNullableAnnotation(element: Element): Boolean =
         element.annotationMirrors.any(::isNullableAnnotationMirror)
 
-    private fun TypeMirror.isNullableTypeAnnotated(): Boolean =
-        annotationMirrors.any(::isNullableAnnotationMirror)
+    private fun TypeMirror.isNullableTypeAnnotated(): Boolean = annotationMirrors.any(::isNullableAnnotationMirror)
 
     private fun isNullableAnnotationMirror(mirror: AnnotationMirror): Boolean {
         val annotationElement = mirror.annotationType.asElement() as TypeElement
@@ -659,8 +706,7 @@ internal class AptIntrospectionContext(
      * Returns `true` if any of the given annotation targets carries a recognized optional
      * marker (e.g. `@Optional`).
      */
-    private fun isOptionalAnnotated(targets: List<Element>): Boolean =
-        targets.any(::isOptionalAnnotation)
+    private fun isOptionalAnnotated(targets: List<Element>): Boolean = targets.any(::isOptionalAnnotation)
 
     private fun isOptionalAnnotation(element: Element): Boolean =
         element.annotationMirrors.any { mirror ->

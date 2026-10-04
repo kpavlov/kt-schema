@@ -17,7 +17,7 @@ keeping behavior consistent across JVM, JS, Native, and Wasm.
 
 ## Overview
 
-The library implements the following pipeline: 
+The library implements the following pipeline:
 
 ```mermaid
 graph LR
@@ -92,11 +92,14 @@ graph LR
 
 **The Transformation Story:**
 
-1. **Sources** — Kotlin classes, Java classes/records, Kotlin functions, or [SerialDescriptor][kser-descriptor] serve as input
-2. **Introspectors** — Extract type information at compile-time (KSP, [Java APT](apt.md)) or runtime (Reflection, Serialization)
+1. **Sources** — Kotlin classes, Java classes/records, Kotlin functions, or [SerialDescriptor][kser-descriptor] serve as
+   input
+2. **Introspectors** — Extract type information at compile-time (KSP, [Java APT](apt.md)) or runtime (Reflection,
+   Serialization)
 3. **TypeGraph** — Unified internal representation containing all type metadata
 4. **Transformers** — Convert TypeGraph to JSON Schema or Function Calling format
-5. **Outputs** — Generated Kotlin code, a generated `.json` resource (Java APT), JsonSchema, FunctionCallingSchema, and then to JsonObject, or JSON strings
+5. **Outputs** — Generated Kotlin code, a generated `.json` resource (Java APT), JsonSchema, FunctionCallingSchema, and
+   then to JsonObject, or JSON strings
 
 ## Module Dependencies
 
@@ -135,7 +138,8 @@ Top-level modules you might interact with:
 
 - **kt-schema-annotations** — runtime annotations: @Schema and @Description
 - **kt-schema-json** — type-safe models and DSL for building JSON Schema definitions programmatically
-- **kt-schema-generator-core** — core abstractions, intermediate representation (IR) for schema descriptions, introspection utils,
+- **kt-schema-generator-core** — core abstractions, intermediate representation (IR) for schema descriptions,
+  introspection utils,
   generator interfaces
 - **kt-schema-generator-json** — JSON Schema transformer from the IR, kotlinx-serialization schema generator
 - **kt-schema-ksp-processor** — KSP processor that scans your code and generates the extension properties:

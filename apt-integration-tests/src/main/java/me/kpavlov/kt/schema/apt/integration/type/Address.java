@@ -8,6 +8,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  */
 @JsonTypeName("Address")
 public record Address(
-        @JsonPropertyDescription("City or town name") String city,
-        @JsonPropertyDescription("Street name and number") String street) {
+    @JsonPropertyDescription("City or town name") String city,
+    @JsonPropertyDescription("Street name and number") String street) {
 }

@@ -2,14 +2,22 @@
 
 package me.kpavlov.kt.schema.generator.json
 
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import me.kpavlov.kt.schema.generator.core.ir.Property
+import me.kpavlov.kt.schema.json.AdditionalPropertiesConstraint
 import me.kpavlov.kt.schema.json.AllOfPropertyDefinition
 import me.kpavlov.kt.schema.json.AnyOfPropertyDefinition
 import me.kpavlov.kt.schema.json.ArrayPropertyDefinition
 import me.kpavlov.kt.schema.json.BooleanPropertyDefinition
 import me.kpavlov.kt.schema.json.BooleanSchemaDefinition
+import me.kpavlov.kt.schema.json.DenyAdditionalProperties
 import me.kpavlov.kt.schema.json.GenericPropertyDefinition
 import me.kpavlov.kt.schema.json.JsonSchema
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.NULL_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.NUMBER
 import me.kpavlov.kt.schema.json.NumericPropertyDefinition
 import me.kpavlov.kt.schema.json.ObjectPropertyDefinition
@@ -17,13 +25,34 @@ import me.kpavlov.kt.schema.json.OneOfPropertyDefinition
 import me.kpavlov.kt.schema.json.PropertyDefinition
 import me.kpavlov.kt.schema.json.ReferencePropertyDefinition
 import me.kpavlov.kt.schema.json.StringPropertyDefinition
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonNull
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import kotlin.jvm.JvmName
 import kotlin.math.floor
+
+/** Whether nullable types get no null marker at all, so a nullable property can only be expressed by omitting it. */
+internal val JsonSchemaConfig.omitsNullMarker: Boolean
+    get() = !useUnionTypes && !useNullableField
+
+/** The `additionalProperties` constraint for object schemas: `null` (allowed) or [DenyAdditionalProperties]. */
+internal val JsonSchemaConfig.objectAdditionalProperties: AdditionalPropertiesConstraint?
+    get() = if (allowAdditionalProperties) null else DenyAdditionalProperties
+
+/** Returns `true` for `"nullable": true` (legacy OpenAPI) and `null` otherwise. */
+internal fun JsonSchemaConfig.nullableFlag(nullable: Boolean): Boolean? =
+    if (!useUnionTypes && nullable && useNullableField) true else null
+
+/**
+ * Returns this definition with an explicit `null` branch (`anyOf: [this, {"type": "null"}]`).
+ * A [GenericPropertyDefinition] (`{}`) already accepts `null` and is returned unchanged.
+ */
+internal fun PropertyDefinition.withNullBranch(): PropertyDefinition =
+    if (this is GenericPropertyDefinition) {
+        this
+    } else {
+        AnyOfPropertyDefinition(
+            anyOf = listOf(this, StringPropertyDefinition(type = NULL_TYPE, description = null, nullable = null)),
+            description = null,
+        )
+    }
 
 /**
  * Sets the const value on a property definition.
@@ -81,12 +110,19 @@ private fun coerceToDeclaredType(
 ): Any? {
     if (value !is String) return value
     return when (propertyDef) {
-        is NumericPropertyDefinition -> coerceNumericDefault(propertyDef, value)
-        is BooleanPropertyDefinition ->
+        is NumericPropertyDefinition -> {
+            coerceNumericDefault(propertyDef, value)
+        }
+
+        is BooleanPropertyDefinition -> {
             requireNotNull(value.toBooleanStrictOrNull()) {
                 "Annotation default '$value' is not a valid boolean for type ${propertyDef.type}"
             }
-        else -> value
+        }
+
+        else -> {
+            value
+        }
     }
 }
 

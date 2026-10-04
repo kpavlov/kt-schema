@@ -2,8 +2,8 @@ package me.kpavlov.kt.schema.ksp.generator
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import me.kpavlov.kt.schema.generator.core.AbstractSchemaGenerator
 import kotlinx.serialization.json.Json
+import me.kpavlov.kt.schema.generator.core.AbstractSchemaGenerator
 import kotlin.reflect.KClass
 
 /**
@@ -61,6 +61,8 @@ internal class UnifiedKspSchemaGenerator<T : Any, R : Any>(
         Json {
             prettyPrint = config.jsonPrettyPrint
             encodeDefaults = config.jsonEncodeDefaults
+            // A non-strict function schema sets `strict` to null; omit it rather than emit `"strict": null`
+            explicitNulls = false
         }
 
     /**

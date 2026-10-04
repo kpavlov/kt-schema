@@ -15,54 +15,54 @@ import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 class CatalogSchemaTest {
 
     private static final String RESOURCE_PATH =
-            "META-INF/kt-schema/schemas/me/kpavlov/kt/schema/apt/integration/type/Catalog.json";
+        "META-INF/kt-schema/schemas/me/kpavlov/kt/schema/apt/integration/type/Catalog.json";
 
     @Test
     void shouldGenerateCompleteSchemaWithNestedRefs() throws IOException {
         // language=json
         assertThatJson(readGeneratedSchema()).isEqualTo("""
-                {
-                  "$schema": "https://json-schema.org/draft/2020-12/schema",
-                  "$id": "me.kpavlov.kt.schema.apt.integration.type.Catalog",
-                  "description": "A catalog of addresses.",
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "me.kpavlov.kt.schema.apt.integration.type.Catalog",
+              "description": "A catalog of addresses.",
+              "type": "object",
+              "properties": {
+                "addresses": {
+                  "type": "array",
+                  "description": "Addresses in the catalog",
+                  "items": {
+                    "$ref": "#/$defs/Address"
+                  }
+                },
+                "byCity": {
                   "type": "object",
-                  "properties": {
-                    "addresses": {
-                      "type": "array",
-                      "description": "Addresses in the catalog",
-                      "items": {
-                        "$ref": "#/$defs/Address"
-                      }
-                    },
-                    "byCity": {
-                      "type": "object",
-                      "description": "Addresses grouped by city",
-                      "additionalProperties": {
-                        "$ref": "#/$defs/Address"
-                      }
-                    }
-                  },
-                  "additionalProperties": false,
-                  "required": ["addresses", "byCity"],
-                  "$defs": {
-                    "Address": {
-                      "type": "object",
-                      "properties": {
-                        "city": {
-                          "type": "string",
-                          "description": "City or town name"
-                        },
-                        "street": {
-                          "type": "string",
-                          "description": "Street name and number"
-                        }
-                      },
-                      "required": ["city", "street"],
-                      "additionalProperties": false
-                    }
+                  "description": "Addresses grouped by city",
+                  "additionalProperties": {
+                    "$ref": "#/$defs/Address"
                   }
                 }
-                """);
+              },
+              "additionalProperties": false,
+              "required": ["addresses", "byCity"],
+              "$defs": {
+                "Address": {
+                  "type": "object",
+                  "properties": {
+                    "city": {
+                      "type": "string",
+                      "description": "City or town name"
+                    },
+                    "street": {
+                      "type": "string",
+                      "description": "Street name and number"
+                    }
+                  },
+                  "required": ["city", "street"],
+                  "additionalProperties": false
+                }
+              }
+            }
+            """);
     }
 
     private static String readGeneratedSchema() throws IOException {

@@ -8,6 +8,7 @@ package me.kpavlov.kt.schema.generator.json
  *
  * @property strictMode Whether to set `strict: true` flag in function calling schema output.
  *                      Required for OpenAI Structured Outputs and function calling strict mode.
+ *                      Requires [allowAdditionalProperties] to be `false`.
  *
  * @see [OpenAI Function Calling](https://platform.openai.com/docs/guides/function-calling)
  */
@@ -26,13 +27,40 @@ public class FunctionCallingSchemaConfig(
      * Default: `true`
      */
     public val strictMode: Boolean = true,
+    allowAdditionalProperties: Boolean = false,
 ) : JsonSchemaConfig(
         respectDefaultPresence = respectDefaultPresence,
         requireNullableFields = requireNullableFields,
         useUnionTypes = useUnionTypes,
         useNullableField = useNullableField,
         includePolymorphicDiscriminator = includePolymorphicDiscriminator,
+        allowAdditionalProperties = allowAdditionalProperties,
     ) {
+    // Binary compatibility with callers compiled before allowAdditionalProperties was added
+    @Deprecated("Kept for binary compatibility", level = DeprecationLevel.HIDDEN)
+    public constructor(
+        respectDefaultPresence: Boolean,
+        requireNullableFields: Boolean,
+        useUnionTypes: Boolean,
+        useNullableField: Boolean,
+        includePolymorphicDiscriminator: Boolean,
+        strictMode: Boolean,
+    ) : this(
+        respectDefaultPresence = respectDefaultPresence,
+        requireNullableFields = requireNullableFields,
+        useUnionTypes = useUnionTypes,
+        useNullableField = useNullableField,
+        includePolymorphicDiscriminator = includePolymorphicDiscriminator,
+        strictMode = strictMode,
+        allowAdditionalProperties = false,
+    )
+
+    init {
+        require(!(strictMode && allowAdditionalProperties)) {
+            "strictMode requires allowAdditionalProperties = false"
+        }
+    }
+
     public companion object {
         /**
          * Strict configuration for function calling schemas (strict mode enabled).
@@ -66,6 +94,42 @@ public class FunctionCallingSchemaConfig(
                 useNullableField = false,
                 includePolymorphicDiscriminator = false,
                 strictMode = false,
+            )
+
+        /**
+         * Compact, permissive configuration for function calling schemas.
+         *
+         * Mirrors [JsonSchemaConfig.Lenient]: only non-nullable fields without defaults are required,
+         * nullable properties carry no null marker, and extra properties are allowed.
+         * The strict flag is disabled, so a missing field means `null`.
+         */
+        public val Lenient: FunctionCallingSchemaConfig =
+            FunctionCallingSchemaConfig(
+                respectDefaultPresence = JsonSchemaConfig.Lenient.respectDefaultPresence,
+                requireNullableFields = JsonSchemaConfig.Lenient.requireNullableFields,
+                useUnionTypes = JsonSchemaConfig.Lenient.useUnionTypes,
+                useNullableField = JsonSchemaConfig.Lenient.useNullableField,
+                includePolymorphicDiscriminator = JsonSchemaConfig.Lenient.includePolymorphicDiscriminator,
+                strictMode = false,
+                allowAdditionalProperties = JsonSchemaConfig.Lenient.allowAdditionalProperties,
+            )
+
+        /**
+         * OpenAPI 3.x flavoured configuration for function calling schemas.
+         *
+         * Mirrors [JsonSchemaConfig.OpenAPI] (nullable types use `"nullable": true`), except for the
+         * OpenAPI polymorphic discriminator, which function calling schemas do not support.
+         * The strict flag is disabled.
+         */
+        public val OpenAPI: FunctionCallingSchemaConfig =
+            FunctionCallingSchemaConfig(
+                respectDefaultPresence = JsonSchemaConfig.OpenAPI.respectDefaultPresence,
+                requireNullableFields = JsonSchemaConfig.OpenAPI.requireNullableFields,
+                useUnionTypes = JsonSchemaConfig.OpenAPI.useUnionTypes,
+                useNullableField = JsonSchemaConfig.OpenAPI.useNullableField,
+                includePolymorphicDiscriminator = JsonSchemaConfig.OpenAPI.includePolymorphicDiscriminator,
+                strictMode = false,
+                allowAdditionalProperties = JsonSchemaConfig.OpenAPI.allowAdditionalProperties,
             )
 
         /**

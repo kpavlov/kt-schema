@@ -4,6 +4,7 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import me.kpavlov.kt.schema.generator.json.FunctionCallingSchemaConfig
 import me.kpavlov.kt.schema.generator.json.TypeGraphToFunctionCallingSchemaTransformer
 import me.kpavlov.kt.schema.json.FunctionCallingSchema
 import me.kpavlov.kt.schema.ksp.SourceCodeGeneratorHelpers
@@ -43,7 +44,9 @@ import me.kpavlov.kt.schema.ksp.strategy.shouldGenerateSchemaObject
  * - Functions declared at package level (parentDeclaration is null or KSFile)
  * - Extension functions declared at package level
  */
-internal class TopLevelFunctionStrategy : SchemaGenerationStrategy<KSFunctionDeclaration> {
+internal class TopLevelFunctionStrategy(
+    config: FunctionCallingSchemaConfig = FunctionCallingSchemaConfig.Default,
+) : SchemaGenerationStrategy<KSFunctionDeclaration> {
     /**
      * Unified schema generator configured for function schemas.
      *
@@ -56,7 +59,7 @@ internal class TopLevelFunctionStrategy : SchemaGenerationStrategy<KSFunctionDec
         UnifiedKspSchemaGenerator(
             KspSchemaGeneratorConfig(
                 introspector = KspFunctionIntrospector(),
-                transformer = TypeGraphToFunctionCallingSchemaTransformer(),
+                transformer = TypeGraphToFunctionCallingSchemaTransformer(config),
                 serializer = FunctionCallingSchema.serializer(),
                 jsonPrettyPrint = false,
                 jsonEncodeDefaults = false,

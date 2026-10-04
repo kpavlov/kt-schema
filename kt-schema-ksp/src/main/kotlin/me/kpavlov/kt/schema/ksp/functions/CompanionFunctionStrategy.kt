@@ -4,6 +4,7 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import me.kpavlov.kt.schema.generator.json.FunctionCallingSchemaConfig
 import me.kpavlov.kt.schema.generator.json.TypeGraphToFunctionCallingSchemaTransformer
 import me.kpavlov.kt.schema.json.FunctionCallingSchema
 import me.kpavlov.kt.schema.ksp.SourceCodeGeneratorHelpers.buildKClassExtensions
@@ -48,7 +49,9 @@ import me.kpavlov.kt.schema.ksp.strategy.SchemaGenerationStrategy
  * - Functions declared inside companion objects
  * - Both regular and suspend companion functions
  */
-internal class CompanionFunctionStrategy : SchemaGenerationStrategy<KSFunctionDeclaration> {
+internal class CompanionFunctionStrategy(
+    config: FunctionCallingSchemaConfig = FunctionCallingSchemaConfig.Default,
+) : SchemaGenerationStrategy<KSFunctionDeclaration> {
     /**
      * Unified schema generator configured for function schemas.
      *
@@ -61,7 +64,7 @@ internal class CompanionFunctionStrategy : SchemaGenerationStrategy<KSFunctionDe
         UnifiedKspSchemaGenerator(
             KspSchemaGeneratorConfig(
                 introspector = KspFunctionIntrospector(),
-                transformer = TypeGraphToFunctionCallingSchemaTransformer(),
+                transformer = TypeGraphToFunctionCallingSchemaTransformer(config),
                 serializer = FunctionCallingSchema.serializer(),
                 jsonPrettyPrint = false,
                 jsonEncodeDefaults = false,

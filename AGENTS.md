@@ -28,8 +28,8 @@
 
 - Readable > comprehensive. Tests are documentation.
 - Parameterized tests for 3+ input/output variations:
-  - `@CsvSource` — short scalars inline.
-  - `@MethodSource` + `@TestInstance(PER_CLASS)` — complex types, no `companion object`.
+    - `@CsvSource` — short scalars inline.
+    - `@MethodSource` + `@TestInstance(PER_CLASS)` — complex types, no `companion object`.
 - JVM tests only unless asked otherwise.
 - Backtick test names: `` fun `should do X`() ``.
 - No KDocs on tests.
@@ -54,7 +54,8 @@
 - Nullable refs: `oneOf: [{ "$ref": "..." }, { "type": "null" }]`.
 - Root schema: `$id`, `$defs`, `$ref`.
 - Small functions, small reversible changes.
-- `git mv` for moving files. Never commit or push unattended — only when the user explicitly asks, in that moment; not as a reflexive/autonomous step after finishing work.
+- `git mv` for moving files. Never commit or push unattended — only when the user explicitly asks, in that moment; not
+  as a reflexive/autonomous step after finishing work.
 
 ## Workflow
 

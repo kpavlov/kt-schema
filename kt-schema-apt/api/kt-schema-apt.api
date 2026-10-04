@@ -1,4 +1,5 @@
 public final class me/kpavlov/kt/schema/apt/JsonSchemaProcessor : javax/annotation/processing/AbstractProcessor {
+	public static final field CONFIG_OPTION Ljava/lang/String;
 	public static final field Companion Lme/kpavlov/kt/schema/apt/JsonSchemaProcessor$Companion;
 	public static final field EXCLUDE_OPTION Ljava/lang/String;
 	public static final field INCLUDE_OPTION Ljava/lang/String;
