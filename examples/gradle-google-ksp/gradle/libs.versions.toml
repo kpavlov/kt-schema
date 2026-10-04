@@ -1,9 +1,9 @@
 [versions]
 koog = "1.1.1"
 kotest = "6.1.11"
-kotlin = "2.3.0"
+kotlin = "2.3.21"
 kotlinxSerialization = "1.10.0"
-ksp = "2.3.6"
+ksp = "2.3.12"
 ktor = "3.4.1"
 mcp = "0.11.0"
 slf4j = "2.0.17"

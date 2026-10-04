@@ -49,12 +49,11 @@ kotlin {
     }
 }
 
-tasks.named("compileKotlinJvm") {
-    dependsOn("kspCommonMainKotlinMetadata")
-}
-
-tasks.named("compileKotlinJs") {
-    dependsOn("kspCommonMainKotlinMetadata")
+// The generated commonMain sources are an input of every compilation and, since KSP 2.3.10, of the target KSP tasks.
+// The KSP tasks are registered late, hence configureEach rather than named.
+val dependsOnCommonKsp = setOf("compileKotlinJvm", "compileKotlinJs", "kspKotlinJvm", "kspKotlinJs")
+tasks.configureEach {
+    if (name in dependsOnCommonKsp) dependsOn("kspCommonMainKotlinMetadata")
 }
 
 // Configure KSP arguments
