@@ -9,17 +9,21 @@ import me.kpavlov.kt.schema.generator.core.ir.Discriminator
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.Introspections
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
+import me.kpavlov.kt.schema.generator.core.ir.Literal
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.Property
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.SubtypeRef
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.toLiteral
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeParameter
@@ -386,12 +390,8 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         var defaultValue: String? = null
         val entries =
             enumConstants.map { constant ->
-                val annotations =
-                    klass.java
-                        .getField(constant.name)
-                        .annotations
-                        .toList()
-                val entryName = extractNameOverride(annotations) ?: constant.name
+                val annotations = enumEntryAnnotations(constant)
+                val entryName = enumEntryName(constant, annotations)
                 if (defaultValue == null && isEnumDefaultAnnotated(annotations)) defaultValue = entryName
                 entryName
             }
@@ -404,13 +404,24 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         )
     }
 
+    private fun enumEntryAnnotations(constant: Enum<*>): List<Annotation> =
+        constant.declaringJavaClass
+            .getField(constant.name)
+            .annotations
+            .toList()
+
+    /** The entry name emitted in the schema's `enum` array: the name override if present, else the constant name. */
+    private fun enumEntryName(
+        constant: Enum<*>,
+        annotations: List<Annotation> = enumEntryAnnotations(constant),
+    ): String = extractNameOverride(annotations) ?: constant.name
+
     /**
      * Creates an [ObjectNode] from a [KClass].
      */
     @Suppress("LongMethod", "CyclomaticComplexMethod")
     private fun createObjectNode(klass: KClass<*>): ObjectNode {
         val properties = mutableListOf<Property>()
-        val requiredProperties = mutableSetOf<String>()
 
         // Find sealed parent classes to inherit property descriptions
         val sealedParents =
@@ -439,7 +450,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         val defaultValues = defaultValueExtractor.extractDefaultValues(klass)
 
         // Extract properties from primary constructor using shared method
-        val (constructorProperties, constructorRequired) = extractConstructorProperties(klass, defaultValues)
+        val constructorProperties = extractConstructorProperties(klass, defaultValues)
 
         // Track which properties were processed from constructor
         val processedProperties = constructorProperties.map { it.name }.toMutableSet()
@@ -469,8 +480,6 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             properties += constructorProperties
         }
 
-        requiredProperties += constructorRequired
-
         // Add inherited properties from sealed parents that weren't in the constructor
         val inheritedPropertyNames = parentProperties - constructorParameterNames
         inheritedPropertyNames.forEach { propertyName ->
@@ -485,10 +494,6 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                 ) ?: return@forEach
 
             properties += extra
-            // Inherited properties with fixed values are required; a property that's also
-            // optional by convention (type-name pattern or explicit optional annotation) and
-            // has no fixed value is excluded, the same way a Kotlin default value is handled.
-            if (!extra.hasDefaultValue || extra.isConstant) requiredProperties += extra.name
             processedProperties += propertyName
             processedProperties += extra.name
         }
@@ -503,7 +508,6 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                     val extra = buildExtraProperty(prop, defaultValues) ?: return@forEach
 
                     properties += extra
-                    if (!extra.hasDefaultValue || extra.isConstant) requiredProperties += extra.name
                     processedProperties += prop.name
                     processedProperties += extra.name
                 }
@@ -513,7 +517,6 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         return ObjectNode(
             name = nameOverride ?: klass.qualifiedName ?: klass.simpleName ?: "UnknownClass",
             properties = properties,
-            required = requiredProperties,
             description = extractDescription(klass.java.annotations.toList()),
         )
     }
@@ -542,20 +545,27 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             toRef(property.returnType).let {
                 if (isNullableAnnotated(annotations)) it.withNullable(true) else it
             }
+        // An inherited property with a fixed value is a constant (and thus required);
+        // otherwise it's optional by convention (type-name pattern or explicit optional annotation).
         val fixedValue = defaultValues[property.name]
         val annotationDefault = extractDefaultValueOverride(annotations)
-        val hasDefaultValue =
-            fixedValue != null ||
-                annotationDefault != null ||
-                isOptionalTypeName(property.returnType.klass) ||
-                isOptionalAnnotated(annotations)
+        val fixedLiteral = fixedValue?.toLiteral(::enumEntryName)
+        val value =
+            when {
+                fixedLiteral != null -> PropertyValue.Const(fixedLiteral)
+                annotationDefault != null && fixedValue == null ->
+                    PropertyValue.Default(Literal.Str(annotationDefault))
+
+                else -> PropertyValue.None
+            }
         return Property(
             name = extractNameOverride(annotations) ?: fallbackNameOverride ?: property.name,
             type = typeRef,
             description = extractDescription(annotations) ?: fallbackDescription,
-            hasDefaultValue = hasDefaultValue,
-            defaultValue = fixedValue ?: annotationDefault,
-            isConstant = fixedValue != null,
+            optional =
+                fixedValue == null &&
+                    (isOptionalTypeName(property.returnType.klass) || isOptionalAnnotated(annotations)),
+            value = value,
         )
     }
 
@@ -618,14 +628,13 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      *
      * @param klass The class whose constructor to analyse
      * @param defaultValues Map of property names to their default values (from DefaultValueExtractor)
-     * @return Pair of (list of properties, set of required property names)
+     * @return the constructor properties
      */
     private fun extractConstructorProperties(
         klass: KClass<*>,
         defaultValues: Map<String, Any?>,
-    ): Pair<List<Property>, Set<String>> {
+    ): List<Property> {
         val properties = mutableListOf<Property>()
-        val requiredProperties = mutableSetOf<String>()
 
         val constructor = findPrimaryConstructor(klass)
 
@@ -647,20 +656,12 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                     if (isNullableAnnotated(annotations)) it.withNullable(true) else it
                 }
 
-            // Real Kotlin default value takes precedence; fall back to an annotation-provided
-            // default (e.g. `@JsonProperty(defaultValue = "...")`) when there is no real value —
-            // mainly matters for front ends without native default-value support.
-            val annotationDefault = extractDefaultValueOverride(annotations)
-            val defaultValue = (if (param.isOptional) defaultValues[kotlinName] else null) ?: annotationDefault
-
-            // A property is optional (excluded from `required`) when it has a Kotlin default
-            // value, a known default value, or when it's marked nullable/optional by convention
-            // (type-name pattern or `@Nullable`-style annotation) — the latter mainly matters for
-            // front ends without native default-value support, but applies uniformly here for
-            // consistency.
-            val hasDefault =
+            // A property is optional when it has a Kotlin default value, or when it's marked
+            // optional by convention (type-name pattern or `@Nullable`-style annotation) — the latter
+            // mainly matters for front ends without native default-value support, but applies
+            // uniformly here for consistency.
+            val optional =
                 param.isOptional ||
-                    annotationDefault != null ||
                     isOptionalTypeName(propertyType.klass) ||
                     isOptionalAnnotated(annotations)
 
@@ -669,16 +670,46 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                     name = propertyName,
                     type = typeRef,
                     description = extractDescription(annotations),
-                    hasDefaultValue = hasDefault,
-                    defaultValue = defaultValue,
+                    optional = optional,
+                    value =
+                        defaultValueOf(
+                            param = param,
+                            kotlinDefaults = defaultValues,
+                            annotationDefault = extractDefaultValueOverride(annotations),
+                        ),
                 )
-
-            if (!hasDefault) {
-                requiredProperties += propertyName
-            }
         }
 
-        return properties to requiredProperties
+        return properties
+    }
+
+    /**
+     * Resolves the [PropertyValue] of a constructor [param]: a real Kotlin default takes precedence;
+     * an annotation-provided default (e.g. `@JsonProperty(defaultValue = "...")`) fills in when there
+     * is no real non-null value — mainly matters for front ends without native default-value support.
+     */
+    private fun defaultValueOf(
+        param: KParameter,
+        kotlinDefaults: Map<String, Any?>,
+        annotationDefault: String?,
+    ): PropertyValue {
+        val obtained = param.isOptional && param.name in kotlinDefaults
+        val kotlinValue = if (obtained) kotlinDefaults[param.name] else null
+        return when {
+            kotlinValue != null ->
+                kotlinValue
+                    .toLiteral(::enumEntryName)
+                    ?.let(PropertyValue::Default)
+                    ?: PropertyValue.UnknownDefault
+
+            annotationDefault != null -> PropertyValue.Default(Literal.Str(annotationDefault))
+
+            obtained -> PropertyValue.Default(Literal.Null)
+
+            param.isOptional -> PropertyValue.UnknownDefault
+
+            else -> PropertyValue.None
+        }
     }
 
     private companion object {

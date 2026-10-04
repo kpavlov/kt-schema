@@ -23,6 +23,21 @@
 
 ### Changed
 
+- Breaking, IR migration ([#148](https://github.com/kpavlov/kt-schema/issues/148)): `Property` now stores facts instead
+  of derived flags, and `ObjectNode` no longer stores `required`; emitters derive requiredness from these facts and
+  their config. The deprecated shims were dropped, so callers of the IR must migrate:
+    - `Property.hasDefaultValue` → `Property.optional` (set only by explicit markers: a Kotlin default, an optional
+      type-name convention or an optional annotation; a default literal alone does not set it, but still makes the
+      property non-required at emission)
+    - `Property.defaultValue` / `isConstant` → `Property.value`: `PropertyValue.None`, `UnknownDefault`,
+      `Default(Literal)` or `Const(Literal)`. `Default(Literal.Null)` distinguishes "default is `null`" from "no default"
+    - `ObjectNode.required` is removed; use `Property.isPresenceRequired()` (internal API)
+    - `Property.copy`/`componentN` and `ObjectNode.copy`/`componentN` change signature
+- `val x: T? = null` now emits `"default": null` in reflection-based schemas (not under configs that omit the null
+  marker, such as `Lenient`)
+- Enum property defaults use the emitted entry name (`@SerialName`/`@JsonProperty` override) instead of the constant
+  name, so `default` is always one of the schema's `enum` values
+- `"nullable": true` is no longer stripped from a required nullable property
 - Breaking: a sealed subtype that declares a property named like the polymorphic discriminator (default `type`, or the
   name from `@JsonClassDiscriminator`/`@JsonTypeInfo`) now fails schema generation with an `IllegalStateException`, in
   the JSON Schema and function-calling emitters, instead of silently dropping the discriminator `const`

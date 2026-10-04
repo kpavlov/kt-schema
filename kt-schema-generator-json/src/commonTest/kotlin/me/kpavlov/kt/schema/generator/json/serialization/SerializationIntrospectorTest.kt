@@ -17,8 +17,10 @@ import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.isPresenceRequired
 import kotlin.jvm.JvmInline
 import kotlin.test.Test
 import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassSchemaIntrospector as SerializationIntrospector
@@ -112,6 +114,18 @@ class SerializationIntrospectorTest {
     private val introspector = SerializationIntrospector()
 
     @Test
+    fun `element with a default is optional with unknown default`() {
+        val graph = introspector.introspect(serializer<User>().descriptor)
+        val root = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        val props = graph.nodes[root.id].shouldBeInstanceOf<ObjectNode>().properties.associateBy { it.name }
+
+        props.getValue("email").optional shouldBe true
+        props.getValue("email").value shouldBe PropertyValue.UnknownDefault
+        props.getValue("name").optional shouldBe false
+        props.getValue("name").value shouldBe PropertyValue.None
+    }
+
+    @Test
     @Suppress("LongMethod")
     fun `introspects object with primitives list map nullability and defaults`() {
         val descriptor = serializer<User>().descriptor
@@ -128,7 +142,10 @@ class SerializationIntrospectorTest {
         userNode.description.shouldBeNull()
 
         // Required should include all without defaults: name, age, tags, attributes (email has default)
-        userNode.required.shouldContainExactlyInAnyOrder(setOf("name", "age", "tags", "attributes"))
+        userNode.properties
+            .filter { it.isPresenceRequired() }
+            .map { it.name }
+            .shouldContainExactlyInAnyOrder("name", "age", "tags", "attributes")
 
         // Check property description and types
         val props = userNode.properties.associateBy { it.name }

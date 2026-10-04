@@ -7,11 +7,13 @@ import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.Introspections
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
+import me.kpavlov.kt.schema.generator.core.ir.Literal
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.Property
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
@@ -295,7 +297,6 @@ internal class AptIntrospectionContext(
         withCycleDetection(type, id) {
             buildOrGet(type, id) {
                 val props = ArrayList<Property>()
-                val required = LinkedHashSet<String>()
 
                 element.recordComponents.forEach { component ->
                     val name = component.simpleName.toString()
@@ -306,17 +307,14 @@ internal class AptIntrospectionContext(
                     val propertyName = nameOverrideFor(targets) ?: name
                     val componentType = component.asType()
                     val defaultValue = defaultValueFor(targets)
-                    // Optional by convention (type-name pattern, @Nullable-style annotation, or a
-                    // known default value) — excluded from `required`, the same way a Kotlin
-                    // default value is handled.
-                    val optional =
-                        isOptionalByTypeName(componentType) || isOptionalAnnotated(targets) || defaultValue != null
-                    if (!optional) required += propertyName
+                    // Optional by convention (type-name pattern or @Nullable-style annotation); a known
+                    // default value makes the property optional at emission.
+                    val optional = isOptionalByTypeName(componentType) || isOptionalAnnotated(targets)
                     val description = recordComponentDescription(component, field)
                     props += toProperty(propertyName, componentType, description, targets, optional, defaultValue)
                 }
 
-                objectNode(element, props, required)
+                objectNode(element, props)
             }
         }
 
@@ -365,7 +363,6 @@ internal class AptIntrospectionContext(
         withCycleDetection(type, id) {
             buildOrGet(type, id) {
                 val props = ArrayList<Property>()
-                val required = LinkedHashSet<String>()
 
                 element.enclosedElements
                     .filterIsInstance<VariableElement>()
@@ -377,11 +374,7 @@ internal class AptIntrospectionContext(
                         val propertyName = nameOverrideFor(listOf(field)) ?: name
                         val fieldType = field.asType()
                         val defaultValue = defaultValueFor(listOf(field))
-                        val optional =
-                            isOptionalByTypeName(fieldType) ||
-                                isOptionalAnnotated(listOf(field)) ||
-                                defaultValue != null
-                        if (!optional) required += propertyName
+                        val optional = isOptionalByTypeName(fieldType) || isOptionalAnnotated(listOf(field))
                         props +=
                             toProperty(
                                 propertyName,
@@ -393,7 +386,7 @@ internal class AptIntrospectionContext(
                             )
                     }
 
-                objectNode(element, props, required)
+                objectNode(element, props)
             }
         }
 
@@ -409,7 +402,6 @@ internal class AptIntrospectionContext(
         withCycleDetection(type, id) {
             buildOrGet(type, id) {
                 val props = ArrayList<Property>()
-                val required = LinkedHashSet<String>()
 
                 element.enclosedElements
                     .filterIsInstance<ExecutableElement>()
@@ -422,11 +414,7 @@ internal class AptIntrospectionContext(
                         val name = nameOverrideFor(listOf(method)) ?: propertyName(method.simpleName.toString())
                         val returnType = method.returnType
                         val defaultValue = defaultValueFor(listOf(method))
-                        val optional =
-                            isOptionalByTypeName(returnType) ||
-                                isOptionalAnnotated(listOf(method)) ||
-                                defaultValue != null
-                        if (!optional) required += name
+                        val optional = isOptionalByTypeName(returnType) || isOptionalAnnotated(listOf(method))
                         props +=
                             toProperty(
                                 name,
@@ -438,7 +426,7 @@ internal class AptIntrospectionContext(
                             )
                     }
 
-                objectNode(element, props, required)
+                objectNode(element, props)
             }
         }
 
@@ -568,19 +556,17 @@ internal class AptIntrospectionContext(
                     if (nullable) it.withNullable(true) else it
                 },
             description = description,
-            hasDefaultValue = optional,
-            defaultValue = defaultValue,
+            optional = optional,
+            value = defaultValue?.let { PropertyValue.Default(Literal.Str(it)) } ?: PropertyValue.None,
         )
 
     private fun objectNode(
         element: TypeElement,
         properties: List<Property>,
-        required: Set<String>,
     ): ObjectNode =
         ObjectNode(
             name = nameOverrideFor(listOf(element)) ?: element.qualifiedName.toString(),
             properties = properties,
-            required = required,
             description = extractDescription(element),
         )
 

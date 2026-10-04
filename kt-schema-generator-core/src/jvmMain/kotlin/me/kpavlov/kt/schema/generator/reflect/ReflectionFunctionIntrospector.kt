@@ -2,6 +2,7 @@ package me.kpavlov.kt.schema.generator.reflect
 
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.Property
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.SchemaIntrospector
 import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
@@ -44,7 +45,6 @@ public object ReflectionFunctionIntrospector : SchemaIntrospector<KCallable<*>, 
 
         // Create an ObjectNode representing the function parameters
         val properties = mutableListOf<Property>()
-        val requiredProperties = mutableSetOf<String>()
 
         root.parameters.forEach { param ->
             // Skip instance parameter for member functions
@@ -52,7 +52,7 @@ public object ReflectionFunctionIntrospector : SchemaIntrospector<KCallable<*>, 
 
             val paramName = param.name ?: return@forEach
             val paramType = param.type
-            val hasDefault = param.isOptional
+            val optional = param.isOptional
 
             val typeRef = context.toRef(paramType)
 
@@ -69,12 +69,9 @@ public object ReflectionFunctionIntrospector : SchemaIntrospector<KCallable<*>, 
                     name = paramName,
                     type = typeRef,
                     description = description,
-                    hasDefaultValue = hasDefault,
+                    optional = optional,
+                    value = if (optional) PropertyValue.UnknownDefault else PropertyValue.None,
                 )
-
-            if (!hasDefault) {
-                requiredProperties += paramName
-            }
         }
 
         // Find all annotations on the function and on the parent functions too
@@ -84,7 +81,6 @@ public object ReflectionFunctionIntrospector : SchemaIntrospector<KCallable<*>, 
             ObjectNode(
                 name = functionName,
                 properties = properties,
-                required = requiredProperties,
                 description = extractDescription(allFunctionAnnotations),
             )
 

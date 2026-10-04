@@ -3,9 +3,11 @@ package me.kpavlov.kt.schema.generator.reflect
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import me.kpavlov.kt.schema.generator.core.ir.Literal
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import kotlin.test.Test
 
@@ -41,11 +43,11 @@ class ReflectionIntrospectorNullabilityTest {
 
         // No default `introspector.optional.type.names` pattern — matching a nullable-by-convention
         // type name doesn't by itself exclude the property from `required`.
-        node.required.shouldContainExactlyInAnyOrder(setOf("name", "email"))
+        node.requiredNames().shouldContainExactlyInAnyOrder(setOf("name", "email"))
 
         val props = node.properties.associateBy { it.name }
         props.getValue("email").apply {
-            hasDefaultValue shouldBe false
+            optional shouldBe false
             type.nullable shouldBe true
         }
     }
@@ -56,11 +58,11 @@ class ReflectionIntrospectorNullabilityTest {
         val rootRef = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
         val node = graph.nodes[rootRef.id].shouldBeInstanceOf<ObjectNode>()
 
-        node.required.shouldContainExactlyInAnyOrder(setOf("name", "phone"))
+        node.requiredNames().shouldContainExactlyInAnyOrder(setOf("name", "phone"))
 
         val props = node.properties.associateBy { it.name }
         props.getValue("phone").apply {
-            hasDefaultValue shouldBe false
+            optional shouldBe false
             type.nullable shouldBe true
             type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
                 inline.node.shouldBeInstanceOf<PrimitiveNode> { prim ->
@@ -81,12 +83,81 @@ class ReflectionIntrospectorNullabilityTest {
         val rootRef = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
         val node = graph.nodes[rootRef.id].shouldBeInstanceOf<ObjectNode>()
 
-        node.required.shouldContainExactlyInAnyOrder(setOf("name", "nickname"))
+        node.requiredNames().shouldContainExactlyInAnyOrder(setOf("name", "nickname"))
 
         val props = node.properties.associateBy { it.name }
         props.getValue("nickname").apply {
-            hasDefaultValue shouldBe false
+            optional shouldBe false
             type.nullable shouldBe true
         }
     }
+
+    //region Optional and value
+
+    data class NullableWithNullDefault(
+        val x: String? = null,
+    )
+
+    data class NullableWithoutDefault(
+        val x: String?,
+    )
+
+    data class WithKotlinDefault(
+        val x: String = "a",
+    )
+
+    data class WithNumberDefaults(
+        val big: Long = Long.MAX_VALUE,
+        val ratio: Float = 0.1f,
+        val count: Int = 3,
+    )
+
+    @Test
+    fun `nullable property with null default is optional with Default Null`() {
+        val property = introspectProperty(NullableWithNullDefault::class, "x")
+
+        property.optional shouldBe true
+        property.value shouldBe PropertyValue.Default(Literal.Null)
+    }
+
+    @Test
+    fun `nullable property without default is not optional and has no value`() {
+        val property = introspectProperty(NullableWithoutDefault::class, "x")
+
+        property.optional shouldBe false
+        property.value shouldBe PropertyValue.None
+    }
+
+    @Test
+    fun `property with Kotlin default is optional with Default literal`() {
+        val property = introspectProperty(WithKotlinDefault::class, "x")
+
+        property.optional shouldBe true
+        property.value shouldBe PropertyValue.Default(Literal.Str("a"))
+    }
+
+    @Test
+    fun `number defaults keep integer and decimal literals`() {
+        val node = introspectObject(WithNumberDefaults::class)
+
+        node.properties.associate { it.name to it.value } shouldBe
+            mapOf(
+                "big" to PropertyValue.Default(Literal.Integer(Long.MAX_VALUE)),
+                "ratio" to PropertyValue.Default(Literal.Decimal(0.1)),
+                "count" to PropertyValue.Default(Literal.Integer(3)),
+            )
+    }
+
+    private fun introspectObject(klass: kotlin.reflect.KClass<*>): ObjectNode {
+        val graph = introspector.introspect(klass)
+        val rootRef = graph.root.shouldBeInstanceOf<TypeRef.Ref>()
+        return graph.nodes[rootRef.id].shouldBeInstanceOf<ObjectNode>()
+    }
+
+    private fun introspectProperty(
+        klass: kotlin.reflect.KClass<*>,
+        name: String,
+    ) = introspectObject(klass).properties.first { it.name == name }
+
+    //endregion
 }

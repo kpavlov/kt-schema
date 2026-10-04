@@ -96,11 +96,14 @@ public data class EnumNode(
     override val description: String? = null,
 ) : NamedTypeNode
 
-/** Object node with named properties and required set. */
+/**
+ * Object node with named properties.
+ *
+ * Requiredness is not stored: emitters derive it from [Property.optional], [Property.value] and their config.
+ */
 public data class ObjectNode(
     override val name: String,
     val properties: List<Property>,
-    val required: Set<String>,
     override val description: String? = null,
 ) : NamedTypeNode
 
@@ -130,17 +133,146 @@ public data class PolymorphicNode(
     override val description: String? = null,
 ) : NamedTypeNode
 
-/** Property of an object. */
+/** The value attached to a [Property]: nothing, an unknown default, a default literal, or a constant. */
+public sealed interface PropertyValue {
+    /** No default or constant is declared. */
+    public data object None : PropertyValue
+
+    /**
+     * A default is declared but its value can't be obtained, so the schema gets no `default`.
+     * Implies [Property.optional].
+     */
+    public data object UnknownDefault : PropertyValue
+
+    /** A known default value. */
+    public data class Default(
+        val literal: Literal,
+    ) : PropertyValue
+
+    /** A fixed value; the property is always required and the schema gets a `const`. */
+    public data class Const(
+        val literal: Literal,
+    ) : PropertyValue
+}
+
+/** A JSON-compatible literal value, independent of any schema dialect; used for defaults and constants. */
+public sealed interface Literal {
+    /** The JSON `null` literal. */
+    public data object Null : Literal
+
+    /** A JSON boolean. */
+    public data class Bool(
+        val value: Boolean,
+    ) : Literal
+
+    /** A JSON integer. */
+    public data class Integer(
+        val value: Long,
+    ) : Literal
+
+    /** A JSON number with a fractional part or exponent; always finite. */
+    public data class Decimal(
+        val value: Double,
+    ) : Literal
+
+    /** A JSON string. */
+    public data class Str(
+        val value: String,
+    ) : Literal
+
+    /** A JSON array. */
+    public data class ListOf(
+        val items: List<Literal>,
+    ) : Literal
+
+    /** A JSON object with string keys. */
+    public data class MapOf(
+        val entries: Map<String, Literal>,
+    ) : Literal
+}
+
+/**
+ * Property of an object.
+ *
+ * @property optional whether the property may be omitted, as declared by an explicit marker in the source
+ *   (a Kotlin default value, an optional type-name convention or an optional annotation).
+ *   A default literal alone does not set it. Ignored for [PropertyValue.Const], which is always required.
+ * @property value the default or constant attached to the property, if any.
+ */
 public data class Property(
     val name: String,
     val type: TypeRef,
     val description: String? = null,
     val deprecated: Boolean = false,
-    val hasDefaultValue: Boolean = false,
-    val defaultValue: Any? = null,
-    val isConstant: Boolean = false,
+    val optional: Boolean = false,
+    val value: PropertyValue = PropertyValue.None,
     val annotations: Map<String, String?> = emptyMap(),
 )
+
+/**
+ * Returns whether this property must be present under the base presence rule: constants always are,
+ * otherwise it is unless it is [Property.optional] or has a known default.
+ *
+ * Emitters apply their config on top of this.
+ */
+@InternalSchemaGeneratorApi
+public fun Property.isPresenceRequired(): Boolean =
+    value is PropertyValue.Const || !(optional || value is PropertyValue.Default)
+
+/**
+ * Converts this Kotlin value to a [Literal], or returns `null` if it has no JSON representation
+ * (e.g. a non-finite decimal).
+ *
+ * Enums are converted by [enumEntryName]; elements and entries that can't be converted are dropped
+ * from collections.
+ */
+@InternalSchemaGeneratorApi
+@Suppress("CyclomaticComplexMethod")
+public fun Any?.toLiteral(enumEntryName: (Enum<*>) -> String = { it.name }): Literal? =
+    when (this) {
+        null -> Literal.Null
+        is Boolean -> Literal.Bool(this)
+        is Byte, is Short, is Int, is Long -> Literal.Integer((this as Number).toLong())
+        // toString() avoids widening artifacts such as 0.1f -> 0.10000000149011612
+        is Float -> if (isFinite()) Literal.Decimal(toString().toDouble()) else null
+        is Double -> if (isFinite()) Literal.Decimal(this) else null
+        is Number -> {
+            val text = toString()
+            text.toLongOrNull()?.let(Literal::Integer)
+                ?: if (text.removePrefix("-").all { it in '0'..'9' }) {
+                    null // An integer beyond Long has no exact literal; a Double would silently round it
+                } else {
+                    toDouble().takeIf { it.isFinite() }?.let(Literal::Decimal)
+                }
+        }
+        is String -> Literal.Str(this)
+        is Char -> Literal.Str(toString())
+        is Enum<*> -> Literal.Str(enumEntryName(this))
+        is Iterable<*> -> Literal.ListOf(mapNotNull { it.toLiteral(enumEntryName) })
+        is Array<*> -> Literal.ListOf(mapNotNull { it.toLiteral(enumEntryName) })
+        is Map<*, *> ->
+            Literal.MapOf(
+                entries.mapNotNull { (k, v) ->
+                    val key = (k as? Enum<*>)?.let(enumEntryName) ?: k?.toString() ?: return@mapNotNull null
+                    val literal = v.toLiteral(enumEntryName) ?: return@mapNotNull null
+                    key to literal
+                }.toMap(),
+            )
+        else -> null
+    }
+
+/** Converts this literal to the equivalent Kotlin value (`Long`, `Double`, `String`, `List`, `Map`, ...). */
+@InternalSchemaGeneratorApi
+public fun Literal.toKotlinValue(): Any? =
+    when (this) {
+        Literal.Null -> null
+        is Literal.Bool -> value
+        is Literal.Integer -> value
+        is Literal.Decimal -> value
+        is Literal.Str -> value
+        is Literal.ListOf -> items.map { it.toKotlinValue() }
+        is Literal.MapOf -> entries.mapValues { it.value.toKotlinValue() }
+    }
 
 /** Reference to a subtype in a polymorphic hierarchy. */
 public data class SubtypeRef(

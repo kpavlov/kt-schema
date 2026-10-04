@@ -35,14 +35,12 @@ class TypeGraphToJsonSchemaTransformerTest {
             ObjectNode(
                 name = "Good",
                 properties = listOf(Property(name = "x", type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING)))),
-                required = setOf("x"),
             )
         // Bad references a type that doesn't exist in the graph
         val badNode =
             ObjectNode(
                 name = "Bad",
                 properties = listOf(Property(name = "missing", type = TypeRef.Ref(danglingId))),
-                required = setOf("missing"),
             )
         val polyNode =
             PolymorphicNode(
@@ -55,7 +53,6 @@ class TypeGraphToJsonSchemaTransformerTest {
             ObjectNode(
                 name = "Root",
                 properties = listOf(Property(name = "base", type = TypeRef.Ref(baseId))),
-                required = setOf("base"),
             )
         val rootId = TypeId("Root")
 
@@ -101,7 +98,6 @@ class TypeGraphToJsonSchemaTransformerTest {
                             type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.DOUBLE)),
                         ),
                     ),
-                required = setOf("radius"),
             )
         val squareNode =
             ObjectNode(
@@ -113,7 +109,6 @@ class TypeGraphToJsonSchemaTransformerTest {
                             type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.DOUBLE)),
                         ),
                     ),
-                required = setOf("side"),
             )
         val shapeNode =
             PolymorphicNode(
@@ -132,7 +127,6 @@ class TypeGraphToJsonSchemaTransformerTest {
                         Property(name = "primaryCircle", type = TypeRef.Ref(circleId)),
                         Property(name = "shape", type = TypeRef.Ref(shapeId)),
                     ),
-                required = setOf("primaryCircle", "shape"),
             )
 
         val graph =
@@ -219,7 +213,6 @@ class TypeGraphToJsonSchemaTransformerTest {
                             type = TypeRef.Ref(TypeId("com.example.orgchart.Compensation")),
                         ),
                     ),
-                required = setOf("compensation"),
             )
         val compensationId = TypeId("com.example.orgchart.Compensation")
         val compensationNode =
@@ -233,7 +226,6 @@ class TypeGraphToJsonSchemaTransformerTest {
                             type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.INT)),
                         ),
                     ),
-                required = setOf("baseSalary"),
             )
 
         val graph =
@@ -289,7 +281,6 @@ class TypeGraphToJsonSchemaTransformerTest {
                             type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.DOUBLE)),
                         ),
                     ),
-                required = setOf("radius"),
             )
         val squareNode =
             ObjectNode(
@@ -301,7 +292,6 @@ class TypeGraphToJsonSchemaTransformerTest {
                             type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.DOUBLE)),
                         ),
                     ),
-                required = setOf("side"),
             )
         val shapeNode =
             PolymorphicNode(
@@ -386,13 +376,11 @@ class TypeGraphToJsonSchemaTransformerTest {
                             type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING)),
                         ),
                     ),
-                required = setOf("value"),
             )
         val successBNode =
             ObjectNode(
                 name = "Success",
                 properties = listOf(Property(name = "code", type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.INT)))),
-                required = setOf("code"),
             )
         val resultANode =
             PolymorphicNode(
@@ -414,7 +402,6 @@ class TypeGraphToJsonSchemaTransformerTest {
                         Property(name = "resultA", type = TypeRef.Ref(resultAId)),
                         Property(name = "resultB", type = TypeRef.Ref(resultBId)),
                     ),
-                required = setOf("resultA", "resultB"),
             )
 
         val graph =
@@ -495,7 +482,7 @@ class TypeGraphToJsonSchemaTransformerTest {
         val yId = TypeId("com.example.Y")
         val wId = TypeId("com.example.W")
 
-        fun node(name: String) = ObjectNode(name = name, properties = emptyList(), required = emptySet())
+        fun node(name: String) = ObjectNode(name = name, properties = emptyList())
 
         val graph =
             TypeGraph(
@@ -524,7 +511,6 @@ class TypeGraphToJsonSchemaTransformerTest {
             ObjectNode(
                 name = "Root",
                 properties = listOf(Property(name = "status", type = TypeRef.Ref(statusId))),
-                required = setOf("status"),
             )
         val graph =
             TypeGraph(
@@ -594,13 +580,11 @@ class TypeGraphToJsonSchemaTransformerTest {
             ObjectNode(
                 name = "Other",
                 properties = listOf(Property(name = "id", type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING)))),
-                required = setOf("id"),
             )
         val innerNode =
             ObjectNode(
                 name = "Inner",
                 properties = listOf(Property(name = "leaf", type = TypeRef.Ref(otherId))),
-                required = setOf("leaf"),
             )
         val msgNode =
             ObjectNode(
@@ -622,7 +606,6 @@ class TypeGraphToJsonSchemaTransformerTest {
                             ),
                         ),
                     ),
-                required = setOf("text", "count", "ref", "inner", "tags"),
             )
         val graph =
             TypeGraph(
@@ -677,7 +660,6 @@ class TypeGraphToJsonSchemaTransformerTest {
             ObjectNode(
                 name = "Other",
                 properties = listOf(Property(name = "id", type = TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING)))),
-                required = setOf("id"),
             )
         val bagNode =
             ObjectNode(
@@ -717,7 +699,6 @@ class TypeGraphToJsonSchemaTransformerTest {
                             ),
                         ),
                     ),
-                required = setOf("names", "refs", "scores"),
             )
         val graph = TypeGraph(root = TypeRef.Ref(bagId), nodes = mapOf(bagId to bagNode, otherId to otherNode))
 

@@ -319,8 +319,9 @@ public object Introspections {
     /**
      * Checks whether the given annotation is recognized as an optional marker.
      *
-     * A property carrying a matching annotation is excluded from the emitted schema's `required`
-     * array, the same way a Kotlin default value is handled — mainly useful for front ends
+     * A property carrying a matching annotation is marked [Property.optional] and so is excluded
+     * from the emitted schema's `required` array, the same way a Kotlin default value is handled — mainly
+     * useful for front ends
      * without native default-value support (e.g. Java/APT).
      *
      * Simple annotation names are matched **case-insensitively**; fully qualified names are matched

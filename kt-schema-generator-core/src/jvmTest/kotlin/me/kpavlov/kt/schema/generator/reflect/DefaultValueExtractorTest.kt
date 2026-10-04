@@ -54,4 +54,14 @@ class DefaultValueExtractorTest {
         val defaults = DefaultValueExtractor.extractDefaultValues(ClassWithUnknownType::class)
         defaults shouldBe emptyMap()
     }
+
+    data class ClassWithNullDefault(
+        val tag: String? = null,
+    )
+
+    @Test
+    fun `reports a null default distinctly from a missing value`() {
+        val defaults = DefaultValueExtractor.extractDefaultValues(ClassWithNullDefault::class)
+        defaults shouldBe mapOf("tag" to null)
+    }
 }

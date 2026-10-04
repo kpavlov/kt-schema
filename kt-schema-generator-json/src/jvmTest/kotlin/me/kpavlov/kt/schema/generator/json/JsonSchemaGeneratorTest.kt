@@ -141,7 +141,8 @@ class JsonSchemaGeneratorTest {
                   "type": [
                     "string",
                     "null"
-                  ]
+                  ],
+                  "default": null
                 },
                 "listProperty": {
                   "type": "array",
