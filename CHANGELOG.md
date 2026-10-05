@@ -73,6 +73,9 @@
 - KSP: processing errors point at the offending declaration and include the stack trace.
 - KSP: inline value classes declared in another module (read from compiled output, where KSP reports `INLINE` instead
   of `VALUE`) are flattened to their wrapped type; previously they were emitted as an object with a `value` property
+- `kt-schema-apt`: Kotlin `@JvmInline` value classes used as types in Java classes (detected by the
+  `kotlin.jvm.JvmInline` annotation on the compiled box class) are flattened to their wrapped type, type arguments
+  included; previously they were emitted as an object with a `value` property
 
 ### Dependencies
 

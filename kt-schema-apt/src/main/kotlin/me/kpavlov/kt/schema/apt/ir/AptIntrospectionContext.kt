@@ -39,7 +39,8 @@ import javax.lang.model.util.Types
  *
  * Supports Java records, plain classes, interfaces and enums with primitive/boxed/String fields,
  * nested references, collections (`List`/`Set`/`Collection`/`Iterable`), maps (`Map`),
- * arrays, `Object` and upper-bounded type variables. Java has no notion of nullability or
+ * arrays, `Object` and upper-bounded type variables. Kotlin `@JvmInline` value classes are
+ * flattened to their wrapped type. Java has no notion of nullability or
  * optionality/default values, so every property is non-nullable/required by default — except
  * where marked nullable/optional by convention (a type-name glob pattern, e.g. `*Opt`, or a
  * `@Nullable`-style annotation; see [Introspections.isNullableTypeName]/[Introspections.isNullableAnnotation]
@@ -111,6 +112,7 @@ internal class AptIntrospectionContext(
     private fun handleReferenceType(type: TypeMirror): TypeRef =
         handleRecord(type)
             ?: handleEnum(type)
+            ?: handleKotlinValueClass(type)
             ?: handleClass(type)
             ?: handleInterface(type)
             ?: error(
@@ -393,6 +395,35 @@ internal class AptIntrospectionContext(
         return TypeRef.Ref(id)
     }
 
+    /**
+     * Flattens a Kotlin `@JvmInline value class`, which javac sees as its box class, to the type of its single
+     * wrapped field, with type arguments substituted. Returns null if [type] isn't one or the wrapped field
+     * can't be determined.
+     */
+    private fun handleKotlinValueClass(type: TypeMirror): TypeRef? {
+        val element =
+            asTypeElement(type)?.takeIf { candidate ->
+                candidate.annotationMirrors.any {
+                    (it.annotationType.asElement() as TypeElement).qualifiedName.contentEquals(JVM_INLINE)
+                }
+            }
+        val wrapped =
+            element
+                ?.enclosedElements
+                ?.filterIsInstance<VariableElement>()
+                ?.singleOrNull { it.kind == ElementKind.FIELD && Modifier.STATIC !in it.modifiers }
+        if (element == null || wrapped == null) return null
+
+        val wrappedType = (type as? DeclaredType)?.let { types.asMemberOf(it, wrapped) } ?: wrapped.asType()
+        return flattenValueClass(
+            key = type,
+            id = TypeId(element.qualifiedName.toString()),
+            nullable = false,
+            wrappedNullable = false,
+            description = extractDescription(element),
+        ) { toRef(wrappedType) }
+    }
+
     private fun handleInterface(type: TypeMirror): TypeRef? {
         val element = asTypeElement(type)
         if (element == null || element.kind != ElementKind.INTERFACE) return null
@@ -534,6 +565,7 @@ internal class AptIntrospectionContext(
     private companion object {
         const val GET_PREFIX: String = "get"
         const val IS_PREFIX: String = "is"
+        const val JVM_INLINE: String = "kotlin.jvm.JvmInline"
     }
 
     //endregion

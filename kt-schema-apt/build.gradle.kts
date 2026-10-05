@@ -30,5 +30,6 @@ kotlin {
         testImplementation(libs.kotest.assertions.core)
         testImplementation(libs.kotest.assertions.json)
         testImplementation(libs.kotlin.test)
+        testImplementation(project(":test-fixtures"))
     }
 }
