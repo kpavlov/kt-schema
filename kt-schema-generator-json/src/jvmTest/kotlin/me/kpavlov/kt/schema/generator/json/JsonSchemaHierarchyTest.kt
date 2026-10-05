@@ -55,7 +55,6 @@ class JsonSchemaHierarchyTest {
           "$id": "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal",
           "description": "Represents an animal",
           "type": "object",
-          "additionalProperties": false,
           "oneOf": [
             {
               "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal.Cat"
@@ -225,7 +224,6 @@ class JsonSchemaHierarchyTest {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
               "$id": "me.kpavlov.kt.schema.generator.json.JsonSchemaHierarchyTest.Animal",
               "type": "object",
-              "additionalProperties": false,
               "description": "Represents an animal",
               "oneOf": [
                 {

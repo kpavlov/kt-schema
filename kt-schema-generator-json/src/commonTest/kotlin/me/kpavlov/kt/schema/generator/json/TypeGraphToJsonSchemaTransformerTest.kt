@@ -321,7 +321,6 @@ class TypeGraphToJsonSchemaTransformerTest {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
               "$id": "com.example.Shape",
               "type": "object",
-              "additionalProperties": false,
               "oneOf": [
                 { "$ref": "#/$defs/com.example.Circle" },
                 { "$ref": "#/$defs/com.example.Square" }

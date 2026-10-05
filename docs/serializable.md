@@ -584,7 +584,6 @@ Each subtype gets a required discriminator property containing the subtype's ser
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "com.example.Shape",
     "type": "object",
-    "additionalProperties": false,
     "oneOf": [
         {
             "$ref": "#/$defs/com.example.Shape.Circle"

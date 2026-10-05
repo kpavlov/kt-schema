@@ -63,7 +63,6 @@ class CustomDiscriminatorSchemaTest {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
               "$id": "me.kpavlov.kt.schema.generator.json.CustomDiscriminatorSchemaTest.Response",
               "type": "object",
-              "additionalProperties": false,
               "oneOf": [
                 { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.CustomDiscriminatorSchemaTest.Response.Failure" },
                 { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.CustomDiscriminatorSchemaTest.Response.Ok" }

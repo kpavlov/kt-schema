@@ -96,7 +96,6 @@ class TreeNodeSchemaTest {
               "$id": "me.kpavlov.kt.schema.integration.type.TreeNode",
               "description": "A node in a tree structure",
               "type": "object",
-              "additionalProperties": false,
               "oneOf": [
                 { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.TreeNode.Branch" },
                 { "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.TreeNode.Leaf" }
