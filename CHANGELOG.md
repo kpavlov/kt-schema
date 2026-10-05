@@ -53,6 +53,16 @@
 
 ### Fixed
 
+- Reflection, KSP, APT and kotlinx.serialization front ends: generic classes are resolved against their type arguments.
+  `Box<String>` and `Box<Int>` get separate definitions with `value` typed accordingly, instead of failing with
+  "Unsupported classifier" (reflection), typing `value` as any value (KSP, APT) or merging the applications into one
+  definition (kotlinx.serialization); star projections and generic roots treat type parameters as `Any?`. Behavior
+  change: a `TypeId` of an applied generic ends with its arguments (`pkg.Box<kotlin.String>`), and its schema name does
+  too (`Box_of_String`, `Pair_of_String_and_Int`, `Box_of_nullable_String`); applications of one generic class under
+  one `@JsonTypeName` now fail like any duplicate name. Recursive applications of one generic value class no longer
+  share a definition. kotlinx.serialization names a class this way only when it is used with several type arguments,
+  after the properties whose types differ; polymorphically recursive classes are cut off after 8 levels
+  ([#146](https://github.com/kpavlov/kt-schema/issues/146))
 - Distinct types sharing a name override (`@JsonTypeName`, `@SerialName`) are no longer merged into one node; behavior
   change: `TypeId.value` is now the declaration FQN even with an override, and duplicate explicit type names
   (including ambiguous discriminator values) now fail fast instead of silently falling back to the FQN.

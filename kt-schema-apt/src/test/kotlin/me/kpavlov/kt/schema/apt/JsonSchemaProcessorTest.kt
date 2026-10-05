@@ -1094,6 +1094,62 @@ class JsonSchemaProcessorTest {
     }
 
     @Test
+    fun `should generate a definition per applied generic argument`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val box =
+            """
+            package com.example;
+
+            public record Box<T>(T value) {}
+            """.trimIndent()
+
+        // language=java
+        val payload =
+            """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Payload(Box<String> text, Box<Integer> count) {}
+            """.trimIndent()
+
+        val outputDir = compile(listOf(box, payload), tempDir)
+
+        // language=json
+        outputDir.readSchema("com.example.Payload") shouldEqualJson
+            $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "com.example.Payload",
+                "type": "object",
+                "properties": {
+                    "text": { "$ref": "#/$defs/com.example.Box_of_String" },
+                    "count": { "$ref": "#/$defs/com.example.Box_of_Integer" }
+                },
+                "additionalProperties": false,
+                "required": ["text", "count"],
+                "$defs": {
+                    "com.example.Box_of_String": {
+                        "type": "object",
+                        "properties": { "value": { "type": "string" } },
+                        "required": ["value"],
+                        "additionalProperties": false
+                    },
+                    "com.example.Box_of_Integer": {
+                        "type": "object",
+                        "properties": { "value": { "type": "integer" } },
+                        "required": ["value"],
+                        "additionalProperties": false
+                    }
+                }
+            }
+            """.trimIndent()
+    }
+
+    @Test
     fun `should generate schema for record with iterable subclass component`(
         @TempDir tempDir: Path,
     ) {

@@ -7,8 +7,10 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeAlias
+import com.google.devtools.ksp.symbol.KSTypeArgument
 import com.google.devtools.ksp.symbol.KSTypeParameter
 import com.google.devtools.ksp.symbol.KSValueParameter
 import com.google.devtools.ksp.symbol.Modifier
@@ -27,12 +29,15 @@ import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.Property
 import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
+import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 
 /**
  * Resolves [KSType]s to [TypeRef]s for the KSP introspectors, on top of the state and cycle detection of
  * [BaseIntrospectionContext]. Typealiases are resolved through the aliased type first, see [toAliasedRef].
+ * Generic objects are resolved against their type arguments, each application getting its own definition; a star
+ * projection is treated as `Any?`.
  *
  * Resolution order:
  * 1. Primitives and collections ([resolveBasicTypeOrNull])
@@ -218,7 +223,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         val wrappedRef =
             flattenValueClass(
                 key = type.makeNotNullable(),
-                id = decl.typeId(),
+                id = createTypeId(decl, type),
                 nullable = nullable,
                 wrappedNullable = wrappedType.isMarkedNullable,
                 description = extractDescription(decl) { decl.descriptionFromKdoc() },
@@ -237,12 +242,38 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         wrappedParam: KSValueParameter,
         type: KSType,
     ): KSType {
-        val declaredType = wrappedParam.type.resolve()
-        if (decl.typeParameters.isEmpty()) return declaredType
-
         val wrappedProperty =
             decl.getDeclaredProperties().firstOrNull { it.simpleName.asString() == wrappedParam.name?.asString() }
-        return wrappedProperty?.asMemberOf(type.makeNotNullable())?.takeUnless { it.isError } ?: declaredType
+        return typeAsMemberOf(wrappedProperty, type, wrappedParam.type.resolve())
+    }
+
+    /**
+     * The type of [property] as a member of [owner] ([KSPropertyDeclaration.asMemberOf]), so type parameters become
+     * [owner]'s arguments. Falls back to the [declared] type if there is no [property], [owner] binds no type
+     * (it has no arguments, or only star projections) or the substitution fails.
+     */
+    private fun typeAsMemberOf(
+        property: KSPropertyDeclaration?,
+        owner: KSType,
+        declared: KSType,
+    ): KSType {
+        if (property == null || owner.arguments.all { it.type == null }) return declared
+        return property.asMemberOf(owner.makeNotNullable()).takeUnless { it.isError } ?: declared
+    }
+
+    /**
+     * Creates the [TypeId] of [decl] applied to the arguments of [type], such as `pkg.Box<kotlin.String?>`, see
+     * [applicationId].
+     */
+    private fun createTypeId(
+        decl: KSDeclaration,
+        type: KSType,
+    ): TypeId =
+        applicationId(decl.qualifiedName?.asString() ?: decl.simpleName.asString(), type.arguments.map(::argumentId))
+
+    private fun argumentId(argument: KSTypeArgument): String? {
+        val type = argument.type?.resolve()?.takeUnless { it.declaration is KSTypeParameter } ?: return null
+        return createTypeId(type.declaration, type).value + if (type.isMarkedNullable) "?" else ""
     }
 
     /** Builds a PolymorphicNode over the sealed subclasses not marked as ignored, registering each of them. */
@@ -343,7 +374,10 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
             return TypeRef.Inline(AnyNode(), nullable)
         }
 
-        val id = decl.typeId()
+        if (type.arguments.isNotEmpty() && exceedsApplicationNesting { it.declaration == decl }) {
+            return TypeRef.Inline(AnyNode(), nullable)
+        }
+        val id = createTypeId(decl, type)
 
         withCycleDetection(type, id) {
             val props = ArrayList<Property>()
@@ -364,12 +398,12 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 processedKotlinNames += kotlinName
             }
 
-            extractConstructorOrProperties(decl, ::addProperty)
+            extractConstructorOrProperties(decl, type, ::addProperty)
             extractInheritedSealedProperties(decl, processedKotlinNames, ::addProperty)
 
             val nameOverride = extractNameOverride(decl)
             ObjectNode(
-                name = nameOverride ?: decl.qualifiedName?.asString() ?: decl.simpleName.asString(),
+                name = nameOverride ?: id.value,
                 properties = props,
                 description = extractDescription(decl) { decl.descriptionFromKdoc() },
             )
@@ -406,6 +440,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
 
     private fun extractConstructorOrProperties(
         decl: KSClassDeclaration,
+        owner: KSType,
         addProperty: (String, String, TypeRef, String?, Boolean, PropertyValue) -> Unit,
     ) {
         val declaredProperties = decl.getDeclaredProperties().associateBy { it.simpleName.asString() }
@@ -420,7 +455,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                 val description = extractConstructorParamDescription(p, kotlinName, decl.docString, property)
                 val (typeRef, optional, value) =
                     resolvePropertyTypeAndOptionality(
-                        p.type.resolve(),
+                        typeAsMemberOf(property, owner, p.type.resolve()),
                         p.hasDefault,
                         p,
                         property,
@@ -444,7 +479,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                         )
                     val (typeRef, optional, value) =
                         resolvePropertyTypeAndOptionality(
-                            prop.type.resolve(),
+                            typeAsMemberOf(prop, owner, prop.type.resolve()),
                             nativeHasDefault = false,
                             prop,
                             prop.getter,

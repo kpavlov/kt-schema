@@ -1,8 +1,13 @@
+@file:OptIn(InternalSchemaGeneratorApi::class)
+
 package me.kpavlov.kt.schema.generator.json
 
+import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
+import me.kpavlov.kt.schema.generator.core.ir.AppliedTypeName
 import me.kpavlov.kt.schema.generator.core.ir.NamedTypeNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
+import me.kpavlov.kt.schema.generator.core.ir.parseApplied
 
 /**
  * Resolves the JSON type name for every node id in the graph, used for `$defs` keys, `$ref`
@@ -11,6 +16,11 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeId
  * An explicit name (a node name differing from its id, e.g. from `@JsonTypeName`) is honored
  * exactly. Names derived from the id are the full id, or with [shortNames] start as the simple
  * name and grow one package segment at a time while they collide.
+ *
+ * A generic application such as `pkg.Box<kotlin.String>` is named after its type arguments,
+ * `Box_of_String`: `_of_` precedes the arguments, `_and_` separates them and `nullable_` marks a
+ * nullable one. Arguments use simple names; a collision expands the declaration and every argument
+ * by one package segment together. Without [shortNames] the declaration stays fully qualified.
  *
  * @throws IllegalStateException if two declarations resolve to the same name.
  *
@@ -22,8 +32,7 @@ internal fun TypeGraph.jsonTypeNames(shortNames: Boolean = false): Map<TypeId, S
             val name = (node as? NamedTypeNode)?.name
             when {
                 name != null && name != id.value -> listOf(name)
-                shortNames -> id.value.dottedSuffixes()
-                else -> listOf(id.value)
+                else -> id.nameCandidates(shortNames)
             }
         }
     val chosen = candidates.mapValuesTo(LinkedHashMap()) { 0 }
@@ -57,10 +66,27 @@ internal fun TypeGraph.jsonTypeNames(shortNames: Boolean = false): Map<TypeId, S
     return resolved
 }
 
-// ponytail: type arguments stay attached to the last segment; #146 may put them into ids.
-private fun String.dottedSuffixes(): List<String> {
-    val head = substringBefore('<')
-    val tail = substring(head.length)
-    val segments = head.split('.')
-    return segments.indices.reversed().map { segments.drop(it).joinToString(".") + tail }
+/** The most dotted segments of any declaration in this type. */
+private fun AppliedTypeName.maxSegments(): Int =
+    maxOf(declaration.count { it == '.' } + 1, arguments.maxOfOrNull { it.type.maxSegments() } ?: 0)
+
+/** Renders with each declaration cut to its last [segments] segments; the root one stays full if [keepRoot]. */
+private fun AppliedTypeName.render(
+    segments: Int,
+    keepRoot: Boolean,
+): String {
+    val name = if (keepRoot) declaration else declaration.split('.').takeLast(segments).joinToString(".")
+    if (arguments.isEmpty()) return name
+    return arguments.joinToString("_and_", "${name}_of_") {
+        (if (it.nullable) "nullable_" else "") + it.type.render(segments, keepRoot = false)
+    }
+}
+
+/**
+ * Candidate names for an id, shortest first: each step grows every declaration by one package segment.
+ * Without [shortNames] the root declaration stays fully qualified, so only its arguments grow.
+ */
+private fun TypeId.nameCandidates(shortNames: Boolean): List<String> {
+    val name = parseApplied() ?: AppliedTypeName(value)
+    return (1..name.maxSegments()).map { name.render(it, keepRoot = !shortNames) }.distinct()
 }

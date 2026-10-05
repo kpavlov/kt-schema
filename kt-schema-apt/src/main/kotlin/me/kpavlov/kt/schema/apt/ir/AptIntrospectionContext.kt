@@ -17,6 +17,7 @@ import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.appliedTypeId
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
@@ -28,6 +29,7 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.element.VariableElement
 import javax.lang.model.type.ArrayType
 import javax.lang.model.type.DeclaredType
+import javax.lang.model.type.ExecutableType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.type.TypeVariable
@@ -39,8 +41,9 @@ import javax.lang.model.util.Types
  *
  * Supports Java records, plain classes, interfaces and enums with primitive/boxed/String fields,
  * nested references, collections (`List`/`Set`/`Collection`/`Iterable`), maps (`Map`),
- * arrays, `Object` and upper-bounded type variables. Kotlin `@JvmInline` value classes are
- * flattened to their wrapped type. Java has no notion of nullability or
+ * arrays, `Object` and upper-bounded type variables. Generic classes are resolved against their type
+ * arguments, each application getting its own definition; an unbounded wildcard is treated as `Object`.
+ * Kotlin `@JvmInline` value classes are flattened to their wrapped type. Java has no notion of nullability or
  * optionality/default values, so every property is non-nullable/required by default — except
  * where marked nullable/optional by convention (a type-name glob pattern, e.g. `*Opt`, or a
  * `@Nullable`-style annotation; see [Introspections.isNullableTypeName]/[Introspections.isNullableAnnotation]
@@ -68,6 +71,8 @@ internal class AptIntrospectionContext(
                 ?: when (type.kind) {
                     TypeKind.ARRAY -> handleArray(type)
                     TypeKind.TYPEVAR -> handleTypeVariable(type)
+                    // A member of `Box<? extends Number>` is typed by the wildcard itself, see memberType.
+                    TypeKind.WILDCARD -> type.resolveWildcard()?.let(::toRef) ?: TypeRef.Inline(AnyNode())
                     TypeKind.DECLARED -> handleDeclared(type as DeclaredType) ?: handleReferenceType(type)
                     else -> handleReferenceType(type)
                 }
@@ -109,8 +114,9 @@ internal class AptIntrospectionContext(
         }
     }
 
-    private fun handleReferenceType(type: TypeMirror): TypeRef =
-        handleRecord(type)
+    private fun handleReferenceType(type: TypeMirror): TypeRef {
+        if (exceedsNesting(type)) return TypeRef.Inline(AnyNode())
+        return handleRecord(type)
             ?: handleEnum(type)
             ?: handleKotlinValueClass(type)
             ?: handleClass(type)
@@ -120,6 +126,14 @@ internal class AptIntrospectionContext(
                     "(only records, classes, interfaces, enums, primitives, String, collections, maps and arrays " +
                     "are supported): $type",
             )
+    }
+
+    /** See [exceedsApplicationNesting]: applications of one generic class are nested too deeply. */
+    private fun exceedsNesting(type: TypeMirror): Boolean {
+        val element = asTypeElement(type)
+        val isApplication = !(type as? DeclaredType)?.typeArguments.isNullOrEmpty()
+        return element != null && isApplication && exceedsApplicationNesting { asTypeElement(it) == element }
+    }
 
     private fun primitiveKindFor(type: TypeMirror): PrimitiveKind? =
         when (type.kind) {
@@ -294,7 +308,7 @@ internal class AptIntrospectionContext(
         val element = asTypeElement(type)
         if (element == null || element.kind != ElementKind.RECORD) return null
 
-        val id = TypeId(element.qualifiedName.toString())
+        val id = createTypeId(element, type)
 
         withCycleDetection(type, id) {
             buildOrGet(type, id) {
@@ -307,7 +321,7 @@ internal class AptIntrospectionContext(
                     // Skip components marked with an ignore annotation (e.g. @JsonIgnore)
                     if (isIgnored(targets)) return@forEach
                     val propertyName = nameOverrideFor(targets) ?: name
-                    val componentType = component.asType()
+                    val componentType = memberType(type, field ?: component.accessor, component.asType())
                     val defaultValue = defaultValueFor(targets)
                     // Optional by convention (type-name pattern or @Nullable-style annotation); a known
                     // default value makes the property optional at emission.
@@ -316,7 +330,7 @@ internal class AptIntrospectionContext(
                     props += toProperty(propertyName, componentType, description, targets, optional, defaultValue)
                 }
 
-                objectNode(element, props)
+                objectNode(element, id, props)
             }
         }
 
@@ -360,7 +374,7 @@ internal class AptIntrospectionContext(
         val element = asTypeElement(type)
         if (element == null || element.kind != ElementKind.CLASS) return null
 
-        val id = TypeId(element.qualifiedName.toString())
+        val id = createTypeId(element, type)
 
         withCycleDetection(type, id) {
             buildOrGet(type, id) {
@@ -374,7 +388,7 @@ internal class AptIntrospectionContext(
                         // Skip fields marked with an ignore annotation (e.g. @JsonIgnore)
                         if (isIgnored(listOf(field))) return@forEach
                         val propertyName = nameOverrideFor(listOf(field)) ?: name
-                        val fieldType = field.asType()
+                        val fieldType = memberType(type, field, field.asType())
                         val defaultValue = defaultValueFor(listOf(field))
                         val optional = isOptionalByTypeName(fieldType) || isOptionalAnnotated(listOf(field))
                         props +=
@@ -388,7 +402,7 @@ internal class AptIntrospectionContext(
                             )
                     }
 
-                objectNode(element, props)
+                objectNode(element, id, props)
             }
         }
 
@@ -417,7 +431,7 @@ internal class AptIntrospectionContext(
         val wrappedType = (type as? DeclaredType)?.let { types.asMemberOf(it, wrapped) } ?: wrapped.asType()
         return flattenValueClass(
             key = type,
-            id = TypeId(element.qualifiedName.toString()),
+            id = createTypeId(element, type),
             nullable = false,
             wrappedNullable = false,
             description = extractDescription(element),
@@ -428,7 +442,7 @@ internal class AptIntrospectionContext(
         val element = asTypeElement(type)
         if (element == null || element.kind != ElementKind.INTERFACE) return null
 
-        val id = TypeId(element.qualifiedName.toString())
+        val id = createTypeId(element, type)
 
         withCycleDetection(type, id) {
             buildOrGet(type, id) {
@@ -443,7 +457,7 @@ internal class AptIntrospectionContext(
                         // Skip accessors marked with an ignore annotation (e.g. @JsonIgnore)
                         if (isIgnored(listOf(method))) return@forEach
                         val name = nameOverrideFor(listOf(method)) ?: propertyName(method.simpleName.toString())
-                        val returnType = method.returnType
+                        val returnType = memberType(type, method, method.returnType)
                         val defaultValue = defaultValueFor(listOf(method))
                         val optional = isOptionalByTypeName(returnType) || isOptionalAnnotated(listOf(method))
                         props +=
@@ -457,12 +471,60 @@ internal class AptIntrospectionContext(
                             )
                     }
 
-                objectNode(element, props)
+                objectNode(element, id, props)
             }
         }
 
         return TypeRef.Ref(id)
     }
+
+    /**
+     * Creates the [TypeId] of [element] applied to the type arguments of [type], such as
+     * `com.example.Box<java.lang.String>`, see [applicationId].
+     */
+    private fun createTypeId(
+        element: TypeElement,
+        type: TypeMirror,
+    ): TypeId =
+        applicationId(
+            element.qualifiedName.toString(),
+            (type as? DeclaredType)?.typeArguments.orEmpty().map(::argumentId),
+        )
+
+    private fun argumentId(argument: TypeMirror): String? =
+        when (val type = argument.resolveWildcard()) {
+            null -> null
+            is DeclaredType -> createTypeId(type.asElement() as TypeElement, type).value
+            is ArrayType -> appliedTypeId("array", listOf(argumentId(type.componentType) ?: ANY_ARGUMENT_ID)).value
+            else -> type.kind.takeIf { it.isPrimitive }?.name?.lowercase()
+        }
+
+    /**
+     * The type of [member] as a member of [owner] ([Types.asMemberOf]) — the return type for a method — so type
+     * variables become [owner]'s type arguments; a wildcard argument is substituted as is. Falls back to the
+     * [declared] type if [owner] binds no type (it has no arguments, or only type variables and unbounded
+     * wildcards) or [member] is not a member of [owner], for which [Types.asMemberOf] throws.
+     */
+    private fun memberType(
+        owner: TypeMirror,
+        member: Element?,
+        declared: TypeMirror,
+    ): TypeMirror {
+        val declaredOwner = owner as? DeclaredType
+        if (declaredOwner == null || member == null || declaredOwner.typeArguments.all { it.isUnbound() }) {
+            return declared
+        }
+        val resolved =
+            try {
+                types.asMemberOf(declaredOwner, member)
+            } catch (_: IllegalArgumentException) {
+                null
+            }
+        return (resolved as? ExecutableType)?.returnType ?: resolved ?: declared
+    }
+
+    private fun TypeMirror.isUnbound(): Boolean =
+        kind == TypeKind.TYPEVAR || (this is WildcardType && extendsBound == null && superBound == null)
 
     /**
      * Maps a no-arg accessor method to a property name using the JavaBeans convention:
@@ -514,7 +576,7 @@ internal class AptIntrospectionContext(
     ): T {
         nodeCache[id]?.let { cached ->
             registerRefs(cached.node)
-            // Safe: id is always element.qualifiedName, and a qualified name has exactly one
+            // Safe: an id starts with element.qualifiedName, and a qualified name has exactly one
             // ElementKind, so the same id is never built with a different T.
             @Suppress("UNCHECKED_CAST")
             return cached.node as T
@@ -594,10 +656,11 @@ internal class AptIntrospectionContext(
 
     private fun objectNode(
         element: TypeElement,
+        id: TypeId,
         properties: List<Property>,
     ): ObjectNode =
         ObjectNode(
-            name = nameOverrideFor(listOf(element)) ?: element.qualifiedName.toString(),
+            name = nameOverrideFor(listOf(element)) ?: id.value,
             properties = properties,
             description = extractDescription(element),
         )

@@ -38,6 +38,12 @@ public abstract class BaseIntrospectionContext<TType : Any> {
     protected val visitingTypes: MutableSet<TType> = mutableSetOf()
 
     /**
+     * Ids of the types currently being visited. A type is also a cycle if another representation of it
+     * is being built, which equality of [TType] may not tell (e.g. javac type mirrors compare by identity).
+     */
+    private val visitingIds: MutableSet<TypeId> = mutableSetOf()
+
+    /**
      * Cache of type references to avoid redundant processing.
      * Stores non-nullable refs to declarations for reuse.
      */
@@ -78,17 +84,19 @@ public abstract class BaseIntrospectionContext<TType : Any> {
         id: TypeId,
         nodeBuilder: () -> TypeNode,
     ): Boolean {
-        if (id in _nodes || type in visitingTypes) {
+        if (id in _nodes || id in visitingIds) {
             return false
         }
 
         visitingTypes += type
+        visitingIds += id
         try {
             val node = nodeBuilder()
             _nodes[id] = node
             return true
         } finally {
             visitingTypes -= type
+            visitingIds -= id
         }
     }
 
@@ -146,11 +154,35 @@ public abstract class BaseIntrospectionContext<TType : Any> {
         // Kotlin rejects a value class whose underlying type is itself, so the cycle always runs
         // through an inline collection here.
         val node = checkNotNull((describedRef as? TypeRef.Inline)?.node) { "Unexpected inline cycle via $wrappedRef" }
-        // ponytail: TypeId is per class, so two recursive instantiations of one generic value class
-        // share a definition; put type arguments into the id if that ever matters.
+        // The id must carry the type arguments (see appliedTypeId), or two recursive applications of one
+        // generic value class would share a definition.
         withCycleDetection(key, id) { node }
         return TypeRef.Ref(id, nullable || wrappedRef.nullable)
     }
+
+    /**
+     * Returns the [TypeId] of [declaration] applied to [arguments], each the id value of an argument type, followed
+     * by `?` if nullable, or null for an unbound one (a star projection or an unbound type variable), which is
+     * treated as `Any?`. With no bound argument this is the plain declaration id, so a generic root keeps the types
+     * its members are declared with.
+     */
+    protected fun applicationId(
+        declaration: String,
+        arguments: List<String?>,
+    ): TypeId =
+        if (arguments.all { it == null }) {
+            TypeId(declaration)
+        } else {
+            appliedTypeId(declaration, arguments.map { it ?: ANY_ARGUMENT_ID })
+        }
+
+    /**
+     * Returns whether [MAX_APPLICATION_NESTING] or more types matching [isSameDeclaration] are being built inside
+     * one another. Each application of a polymorphically recursive generic class
+     * (`class Skew<T>(val next: Skew<List<T>>?)`) is a new type, so callers cut such nesting off as "any value".
+     */
+    protected fun exceedsApplicationNesting(isSameDeclaration: (TType) -> Boolean): Boolean =
+        visitingTypes.count(isSameDeclaration) >= MAX_APPLICATION_NESTING
 
     /**
      * Registers the [NamedTypeNode] built by [nodeBuilder] for [id] (idempotent via
@@ -180,7 +212,15 @@ public abstract class BaseIntrospectionContext<TType : Any> {
         typeAndSupertypes: Sequence<D>,
         declaredName: (D) -> String?,
     ): String = typeAndSupertypes.firstNotNullOfOrNull(declaredName) ?: Discriminator.DEFAULT_NAME
+
+    protected companion object {
+        /** Id of a type argument that is a star projection or an unbound type parameter: it is treated as `Any?`. */
+        protected const val ANY_ARGUMENT_ID: String = "kotlin.Any?"
+    }
 }
 
 /** Maximum number of value classes flattened directly inside one another. */
 private const val MAX_FLATTENING_DEPTH = 8
+
+/** Maximum number of applications of one generic class being built inside one another. */
+private const val MAX_APPLICATION_NESTING = 8

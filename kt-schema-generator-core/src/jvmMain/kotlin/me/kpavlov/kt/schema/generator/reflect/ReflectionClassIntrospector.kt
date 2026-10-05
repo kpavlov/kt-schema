@@ -3,7 +3,7 @@ package me.kpavlov.kt.schema.generator.reflect
 import me.kpavlov.kt.schema.generator.core.ir.SchemaIntrospector
 import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
 import kotlin.reflect.KClass
-import kotlin.reflect.full.createType
+import kotlin.reflect.full.starProjectedType
 
 /**
  * Introspects Kotlin classes using reflection to build a [TypeGraph].
@@ -18,14 +18,14 @@ import kotlin.reflect.full.createType
  *
  * ## Limitations
  * - Requires classes to have a primary constructor
- * - Type parameters are not fully supported
+ * - A generic root is introspected with its type parameters as `Any?`
  */
 public object ReflectionClassIntrospector : SchemaIntrospector<KClass<*>, Unit> {
     override val config: Unit = Unit
 
     override fun introspect(root: KClass<*>): TypeGraph {
         val context = ReflectionIntrospectionContext()
-        val rootRef = context.toRef(root.createType())
+        val rootRef = context.toRef(root.starProjectedType)
         return TypeGraph(root = rootRef, nodes = context.nodes)
     }
 }

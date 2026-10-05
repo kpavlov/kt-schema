@@ -62,9 +62,46 @@ public final class me/kpavlov/kt/schema/generator/core/ir/AnyNode : me/kpavlov/k
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class me/kpavlov/kt/schema/generator/core/ir/AppliedTypeIdKt {
+	public static final fun appliedTypeId (Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
+	public static final fun parseApplied-pc9fj0g (Ljava/lang/String;)Lme/kpavlov/kt/schema/generator/core/ir/AppliedTypeName;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/AppliedTypeName {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lme/kpavlov/kt/schema/generator/core/ir/AppliedTypeName;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/AppliedTypeName;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/AppliedTypeName;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArguments ()Ljava/util/List;
+	public final fun getDeclaration ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/AppliedTypeName$Argument {
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/AppliedTypeName;Z)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/AppliedTypeName;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lme/kpavlov/kt/schema/generator/core/ir/AppliedTypeName;
+	public final fun component2 ()Z
+	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/AppliedTypeName;Z)Lme/kpavlov/kt/schema/generator/core/ir/AppliedTypeName$Argument;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/AppliedTypeName$Argument;Lme/kpavlov/kt/schema/generator/core/ir/AppliedTypeName;ZILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/AppliedTypeName$Argument;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNullable ()Z
+	public final fun getType ()Lme/kpavlov/kt/schema/generator/core/ir/AppliedTypeName;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract class me/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionContext {
+	protected static final field ANY_ARGUMENT_ID Ljava/lang/String;
+	protected static final field Companion Lme/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionContext$Companion;
 	public fun <init> ()V
+	protected final fun applicationId-HaSG5Tk (Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
 	protected final fun discriminatorName (Lkotlin/sequences/Sequence;Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
+	protected final fun exceedsApplicationNesting (Lkotlin/jvm/functions/Function1;)Z
 	protected final fun flattenValueClass-YT6qU6Q (Ljava/lang/Object;Ljava/lang/String;ZZLjava/lang/String;Lkotlin/jvm/functions/Function0;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
 	public final fun getNodes ()Ljava/util/Map;
 	protected final fun getTypeRefCache ()Ljava/util/Map;
@@ -73,6 +110,9 @@ public abstract class me/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionCo
 	public static synthetic fun namedRef-b1Ot--I$default (Lme/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionContext;Ljava/lang/Object;Ljava/lang/String;ZLkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;
 	public abstract fun toRef (Ljava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
 	protected final fun withCycleDetection-EEGM9QQ (Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Z
+}
+
+protected final class me/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionContext$Companion {
 }
 
 public abstract interface class me/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor {

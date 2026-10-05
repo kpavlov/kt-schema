@@ -22,7 +22,9 @@ class JsonTypeNamesTest {
         return TypeGraph(root = TypeRef.Ref(nodes.keys.first()), nodes = nodes)
     }
 
-    fun cases(): List<Arguments> =
+    fun cases(): List<Arguments> = plainCases() + genericNameCases() + genericCollisionCases()
+
+    private fun plainCases(): List<Arguments> =
         listOf(
             Arguments.of(
                 "short off keeps FQNs",
@@ -74,6 +76,90 @@ class JsonTypeNamesTest {
             ),
         )
 
+    private fun genericNameCases(): List<Arguments> =
+        listOf(
+            Arguments.of(
+                "generic arguments are appended to the full id",
+                false,
+                listOf("com.acme.Box<kotlin.String>" to "com.acme.Box<kotlin.String>"),
+                mapOf("com.acme.Box<kotlin.String>" to "com.acme.Box_of_String"),
+            ),
+            Arguments.of(
+                "generic arguments are appended to the short name",
+                true,
+                listOf("com.acme.Box<kotlin.String>" to "com.acme.Box<kotlin.String>"),
+                mapOf("com.acme.Box<kotlin.String>" to "Box_of_String"),
+            ),
+            Arguments.of(
+                "nested, several and nullable arguments",
+                true,
+                listOf(
+                    "a.Pair<kotlin.String,a.Box<kotlin.collections.List<kotlin.Int>>>" to
+                        "a.Pair<kotlin.String,a.Box<kotlin.collections.List<kotlin.Int>>>",
+                    "a.Box<kotlin.String?>" to "a.Box<kotlin.String?>",
+                ),
+                mapOf(
+                    "a.Pair<kotlin.String,a.Box<kotlin.collections.List<kotlin.Int>>>" to
+                        "Pair_of_String_and_Box_of_List_of_Int",
+                    "a.Box<kotlin.String?>" to "Box_of_nullable_String",
+                ),
+            ),
+            Arguments.of(
+                "explicit name on an applied id is kept as is",
+                true,
+                listOf("a.Box<kotlin.String>" to "Thing"),
+                mapOf("a.Box<kotlin.String>" to "Thing"),
+            ),
+        )
+
+    private fun genericCollisionCases(): List<Arguments> =
+        listOf(
+            Arguments.of(
+                "same argument name in different packages expands every name, short off",
+                false,
+                listOf("p.Box<a.User>" to "p.Box<a.User>", "p.Box<b.User>" to "p.Box<b.User>"),
+                mapOf("p.Box<a.User>" to "p.Box_of_a.User", "p.Box<b.User>" to "p.Box_of_b.User"),
+            ),
+            Arguments.of(
+                "same argument name in different packages expands every name, short on",
+                true,
+                listOf("p.Box<a.User>" to "p.Box<a.User>", "p.Box<b.User>" to "p.Box<b.User>"),
+                mapOf("p.Box<a.User>" to "p.Box_of_a.User", "p.Box<b.User>" to "p.Box_of_b.User"),
+            ),
+            Arguments.of(
+                "generic without a clash keeps its short name next to a clashing one",
+                true,
+                listOf(
+                    "p.Box<a.User>" to "p.Box<a.User>",
+                    "p.Box<b.User>" to "p.Box<b.User>",
+                    "p.Box<kotlin.String>" to "p.Box<kotlin.String>",
+                ),
+                mapOf(
+                    "p.Box<a.User>" to "p.Box_of_a.User",
+                    "p.Box<b.User>" to "p.Box_of_b.User",
+                    "p.Box<kotlin.String>" to "Box_of_String",
+                ),
+            ),
+            Arguments.of(
+                "same-named classes of different arity are told apart by package",
+                true,
+                listOf(
+                    "p.Pair<x.Box<k.A>,k.B>" to "p.Pair<x.Box<k.A>,k.B>",
+                    "p.Pair<y.Box<k.A,k.B>>" to "p.Pair<y.Box<k.A,k.B>>",
+                ),
+                mapOf(
+                    "p.Pair<x.Box<k.A>,k.B>" to "p.Pair_of_x.Box_of_k.A_and_k.B",
+                    "p.Pair<y.Box<k.A,k.B>>" to "p.Pair_of_y.Box_of_k.A_and_k.B",
+                ),
+            ),
+            Arguments.of(
+                "generic name colliding with a plain class escalates the generic one",
+                false,
+                listOf("a.Box<kotlin.String>" to "a.Box<kotlin.String>", "a.Box_of_String" to "a.Box_of_String"),
+                mapOf("a.Box<kotlin.String>" to "a.Box_of_kotlin.String", "a.Box_of_String" to "a.Box_of_String"),
+            ),
+        )
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("cases")
     fun `should resolve names independently of insertion order`(
@@ -104,6 +190,12 @@ class JsonTypeNamesTest {
                 true,
                 listOf("a.TextValue" to "Shared", "a.CountValue" to "Shared"),
                 "Type name 'Shared' is used by multiple declarations: a.CountValue, a.TextValue.",
+            ),
+            Arguments.of(
+                "one explicit name on two applications of a generic class",
+                true,
+                listOf("a.Box<kotlin.String>" to "Shared", "a.Box<kotlin.Int>" to "Shared"),
+                "Type name 'Shared' is used by multiple declarations: a.Box<kotlin.Int>, a.Box<kotlin.String>.",
             ),
             Arguments.of(
                 "override equal to another node's full id",

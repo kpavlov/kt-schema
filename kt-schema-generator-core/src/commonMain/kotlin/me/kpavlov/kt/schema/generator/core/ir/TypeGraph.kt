@@ -10,11 +10,12 @@ public data class TypeGraph(
 )
 
 /**
- * Declaration identity of a type, used for deduplication and `$ref` linking.
+ * Identity of a type, used for deduplication and `$ref` linking.
  *
  * The value is the declaration's fully qualified name in the reflection, KSP and APT front ends, and
- * the serial name in the kotlinx.serialization front end. It is never a name override such as
- * `@JsonTypeName`; see [NamedTypeNode.name] for that.
+ * the serial name in the kotlinx.serialization front end. A generic class applied to type arguments
+ * appends them, as built by [appliedTypeId]: `pkg.Box<kotlin.String>`. It is never a name override such
+ * as `@JsonTypeName`; see [NamedTypeNode.name] for that.
  */
 @JvmInline
 public value class TypeId(
@@ -75,8 +76,8 @@ public sealed interface TypeNode {
  * Contract of [name]:
  * - The requested schema name, also used as the polymorphic discriminator value. Populated for
  *   classes, enums, and sealed/polymorphic hierarchies alike. The reflection, KSP, and APT front
- *   ends populate it with the `@JsonTypeName` override when present, otherwise with the declared
- *   type name. The serialization front end uses the raw `@SerialName` value without an FQN fallback.
+ *   ends populate it with the `@JsonTypeName` override when present, otherwise with the [TypeId] value.
+ *   The serialization front end uses the raw `@SerialName` value without an FQN fallback.
  * - `$ref`/`$id`/`$defs` emission for nodes reachable via [TypeId] is driven by [name] through
  *   [TypeGraph.jsonTypeNames]. An explicit name (one that differs from the [TypeId] value) is
  *   honored exactly; if two declarations resolve to the same name, schema generation fails. The
