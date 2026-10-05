@@ -183,6 +183,45 @@ class AptClassIntrospectorTest {
     }
 
     @Test
+    fun `should flatten kotlin JvmInline value class field to its wrapped type`() {
+        val graph =
+            graph(
+                root = "com.example.Holder",
+                javaClass(
+                    "com.example",
+                    "Holder",
+                    "public me.kpavlov.kt.schema.test.fixtures.WorkspacePath workspace;",
+                ),
+            )
+
+        graph.rootNode().properties.single().type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<PrimitiveNode> { prim -> prim.kind shouldBe PrimitiveKind.STRING }
+            inline.nullable shouldBe false
+        }
+
+        graph.nodes.keys.map { it.value } shouldBe listOf("com.example.Holder")
+    }
+
+    @Test
+    fun `should resolve type arguments of generic kotlin JvmInline value class field`() {
+        val graph =
+            graph(
+                root = "com.example.Holder",
+                javaClass(
+                    "com.example",
+                    "Holder",
+                    "public me.kpavlov.kt.schema.test.fixtures.Wrapper<Integer> count;",
+                ),
+            )
+
+        graph.rootNode().properties.single().type.shouldBeInstanceOf<TypeRef.Inline> { inline ->
+            inline.node.shouldBeInstanceOf<PrimitiveNode> { prim -> prim.kind shouldBe PrimitiveKind.INT }
+        }
+
+        graph.nodes.keys.map { it.value } shouldBe listOf("com.example.Holder")
+    }
+
+    @Test
     fun `should introspect list set and collection fields as inline list nodes`() {
         val graph =
             graph(
