@@ -722,7 +722,8 @@ println(schema.encodeToString(Json { prettyPrint = true }))
 - **Fully qualified names by default**: `$defs` keys and discriminator `const` values use fully qualified class names
   (e.g., `com.example.Animal.Dog`) to avoid collisions across packages
 - **Name overrides**: a subtype annotated with `@SerialName`/`@JsonTypeName` (or another recognized name-override
-  annotation) uses that short name instead of its FQN — like `Cat` above, overridden via `@SerialName("Cat")`
+  annotation) uses that short name instead of its FQN — like `Cat` above, overridden via `@SerialName("Cat")`.
+  Two declarations with the same explicit name fail schema generation instead of being renamed
 - **Discriminator property**: A `type` field with a `const` value is automatically added to each subtype for runtime
   dispatch. The reflection and KSP front ends take the name from `@JsonClassDiscriminator("...")` or
   `@JsonTypeInfo(property = "...")` on the sealed type or its supertypes; a subtype declaring a property with that name

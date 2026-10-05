@@ -6,6 +6,7 @@ import kotlinx.serialization.serializer
 import me.kpavlov.kt.schema.generator.core.AbstractSchemaGenerator
 import me.kpavlov.kt.schema.generator.json.JsonSchemaConfig
 import me.kpavlov.kt.schema.generator.json.TypeGraphToJsonSchemaTransformer
+import me.kpavlov.kt.schema.generator.json.withoutShortDefinitionNames
 import me.kpavlov.kt.schema.json.JsonSchema
 import kotlin.reflect.KClass
 
@@ -30,7 +31,8 @@ public class SerializationClassJsonSchemaGenerator(
         introspector = SerializationClassSchemaIntrospector(introspectorConfig, json),
         typeGraphTransformer =
             TypeGraphToJsonSchemaTransformer(
-                config = jsonSchemaConfig,
+                // A descriptor's serial name can't be told from an explicit @SerialName, so never shorten.
+                config = jsonSchemaConfig.withoutShortDefinitionNames(),
                 json = json,
             ),
     ) {

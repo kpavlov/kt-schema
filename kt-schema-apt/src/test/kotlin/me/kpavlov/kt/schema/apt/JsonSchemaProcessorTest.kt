@@ -278,6 +278,50 @@ class JsonSchemaProcessorTest {
     }
 
     @Test
+    fun `should fail the build when two types share a JsonTypeName`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source =
+            """
+            package com.example;
+
+            import com.fasterxml.jackson.annotation.JsonTypeName;
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema
+            public record Holder(TextValue textValue, CountValue countValue) {
+                @JsonTypeName("Shared")
+                public record TextValue(String text) {}
+
+                @JsonTypeName("Shared")
+                public record CountValue(int count) {}
+            }
+            """.trimIndent()
+
+        // Stand-in declared under Jackson's real FQN; this module doesn't depend on Jackson.
+        // language=java
+        val jsonTypeName =
+            """
+            package com.fasterxml.jackson.annotation;
+
+            public @interface JsonTypeName {
+                String value();
+            }
+            """.trimIndent()
+
+        val exception =
+            assertFailsWith<IllegalStateException> {
+                compile(listOf(jsonTypeName, source), tempDir)
+            }
+
+        assertSoftly(exception) {
+            message shouldContain "Type name 'Shared' is used by multiple declarations"
+            message shouldContain "com.example.Holder.CountValue, com.example.Holder.TextValue"
+        }
+    }
+
+    @Test
     fun `should fail the build when an enum has no constants`(
         @TempDir tempDir: Path,
     ) {
@@ -1660,7 +1704,7 @@ class JsonSchemaProcessorTest {
             $$"""
             {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
-                "$id": "com.example.Message",
+                "$id": "Message",
                 "type": "object",
                 "properties": {
                     "text": { "type": "string" },

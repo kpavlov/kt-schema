@@ -21,6 +21,10 @@
 - Reflection and KSP front ends: `kotlin.time.Instant` maps to `string`, matching kotlinx.serialization's default
   `Instant` serializer; previously it was expanded into an `epochSeconds`/`nanosecondsOfSecond` object
 
+- `JsonSchemaConfig.shortDefinitionNames` (enabled in `Lenient`): `$defs` keys, `$ref`s, the root `$id` and discriminator
+  `const` values use the shortest unique dotted suffix of the qualified name; annotation names are kept and
+  kotlinx.serialization schemas are never shortened
+
 ### Deprecated
 
 - `FunctionCallingSchemaConfig.Default`: identical to `Strict`; use `Strict` (IDE quick-fix available). It will be
@@ -49,6 +53,11 @@
 
 ### Fixed
 
+- Distinct types sharing a name override (`@JsonTypeName`, `@SerialName`) are no longer merged into one node; behavior
+  change: `TypeId.value` is now the declaration FQN even with an override, and duplicate explicit type names
+  (including ambiguous discriminator values) now fail fast instead of silently falling back to the FQN.
+  kotlinx.serialization also fails fast when distinct types share a serial
+  name with different property names ([#147](https://github.com/kpavlov/kt-schema/issues/147))
 - Generic inline value classes (e.g. `Wrapper<Int>`) now resolve their type arguments in the reflection and KSP front
   ends; previously reflection threw and KSP emitted an empty schema
 - Self-wrapping inline value classes (e.g. `value class Tree(val children: List<Tree>)`) get a `$defs` entry of their

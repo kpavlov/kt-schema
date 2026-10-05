@@ -265,9 +265,8 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                         .SubtypeRef(it.typeId())
                 }
 
-            // Keys must match the `const` values emitted for each subtype's discriminator property.
             val discriminatorMapping =
-                sealedSubclasses.associate { it.typeId().value to it.typeId() }
+                sealedSubclasses.associate { (extractNameOverride(it) ?: it.typeId().value) to it.typeId() }
 
             sealedSubclasses.forEach { toRef(it.asStarProjectedType()) }
 

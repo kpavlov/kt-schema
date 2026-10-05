@@ -79,7 +79,7 @@ public class TypeGraphToJsonSchemaTransformer
             rootName: String,
         ): JsonSchema {
             val definitions = mutableMapOf<String, PropertyDefinition>()
-            val jsonTypeNames = graph.jsonTypeNames()
+            val jsonTypeNames = graph.jsonTypeNames(config.shortDefinitionNames)
             // Resolve the root node directly to avoid the root becoming a bare $ref
             val (rootNode, rootJsonName) =
                 when (val root = graph.root) {
@@ -628,8 +628,8 @@ public class TypeGraphToJsonSchemaTransformer
 
             // Convert discriminator with proper $ref paths if OpenAPI polymorphic discriminator is enabled.
             // Mapping keys are the discriminator values and must match the subtype `const` values
-            // injected above, so they are derived from the resolved type names rather than taken
-            // from the introspector-provided keys (which are front-end specific and may be FQNs).
+            // injected above, so they are derived from the resolved type names of `node.subtypes`
+            // rather than taken from the introspector-provided keys (front-end specific, may be absent).
             val discriminator =
                 if (
                     config.includePolymorphicDiscriminator &&
@@ -637,11 +637,12 @@ public class TypeGraphToJsonSchemaTransformer
                 ) {
                     node.discriminator.let { disc ->
                         val mapping =
-                            disc.mapping
-                                ?.map { (_, typeId) ->
-                                    val typeName = jsonTypeNames.getValue(typeId)
+                            disc.mapping?.let {
+                                node.subtypes.associate { subtype ->
+                                    val typeName = jsonTypeNames.getValue(subtype.id)
                                     typeName to $$"#/$defs/$$typeName"
-                                }?.toMap()
+                                }
+                            }
                         Discriminator(
                             propertyName = disc.name,
                             mapping = mapping,

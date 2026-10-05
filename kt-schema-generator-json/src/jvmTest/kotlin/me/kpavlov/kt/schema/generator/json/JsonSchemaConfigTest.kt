@@ -124,7 +124,8 @@ class JsonSchemaConfigTest {
             "useNullableField=${config.useNullableField}, " +
             "includePolymorphicDiscriminator=${config.includePolymorphicDiscriminator}, " +
             "includeOpenAPIPolymorphicDiscriminator=${config.includeOpenAPIPolymorphicDiscriminator}, " +
-            "allowAdditionalProperties=${config.allowAdditionalProperties}" +
+            "allowAdditionalProperties=${config.allowAdditionalProperties}, " +
+            "shortDefinitionNames=${config.shortDefinitionNames}" +
             ")"
     }
 
@@ -136,6 +137,22 @@ class JsonSchemaConfigTest {
         denying shouldBe JsonSchemaConfig.Default
         denying shouldNotBeEqual allowing
         denying.hashCode() shouldNotBe allowing.hashCode()
+    }
+
+    @Test
+    fun `shortDefinitionNames should take part in equals and hashCode`() {
+        val full = JsonSchemaConfig(shortDefinitionNames = false)
+        val short = JsonSchemaConfig(shortDefinitionNames = true)
+
+        full shouldBe JsonSchemaConfig.Default
+        full shouldNotBeEqual short
+        full.hashCode() shouldNotBe short.hashCode()
+    }
+
+    @Test
+    fun `only Lenient should enable shortDefinitionNames`() {
+        listOf(JsonSchemaConfig.Default, JsonSchemaConfig.Strict, JsonSchemaConfig.OpenAPI, JsonSchemaConfig.Lenient)
+            .map { it.shortDefinitionNames } shouldBe listOf(false, false, false, true)
     }
 
     @Test

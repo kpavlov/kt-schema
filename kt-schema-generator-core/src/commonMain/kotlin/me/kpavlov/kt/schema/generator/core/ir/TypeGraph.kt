@@ -9,7 +9,13 @@ public data class TypeGraph(
     val nodes: Map<TypeId, TypeNode>,
 )
 
-/** A stable identifier for a type definition used for deduplication and $ref linking. */
+/**
+ * Declaration identity of a type, used for deduplication and `$ref` linking.
+ *
+ * The value is the declaration's fully qualified name in the reflection, KSP and APT front ends, and
+ * the serial name in the kotlinx.serialization front end. It is never a name override such as
+ * `@JsonTypeName`; see [NamedTypeNode.name] for that.
+ */
 @JvmInline
 public value class TypeId(
     public val value: String,
@@ -67,13 +73,14 @@ public sealed interface TypeNode {
  * A named type node.
  *
  * Contract of [name]:
- * - Populated for classes, enums, and sealed/polymorphic hierarchies alike. The reflection, KSP,
- *   and APT front ends populate it with the `@JsonTypeName` override when present, otherwise with
- *   the declared type name. The serialization front end uses the raw `@SerialName` value without
- *   an FQN fallback.
+ * - The requested schema name, also used as the polymorphic discriminator value. Populated for
+ *   classes, enums, and sealed/polymorphic hierarchies alike. The reflection, KSP, and APT front
+ *   ends populate it with the `@JsonTypeName` override when present, otherwise with the declared
+ *   type name. The serialization front end uses the raw `@SerialName` value without an FQN fallback.
  * - `$ref`/`$id`/`$defs` emission for nodes reachable via [TypeId] is driven by [name] through
- *   [TypeGraph.jsonTypeNames], which falls back to the [TypeId] value only when two different
- *   nodes resolve to the same [name] (e.g. two distinct types sharing the same override).
+ *   [TypeGraph.jsonTypeNames]. An explicit name (one that differs from the [TypeId] value) is
+ *   honored exactly; if two declarations resolve to the same name, schema generation fails. The
+ *   discriminator `const` always equals the resolved `$defs` key.
  */
 public sealed interface NamedTypeNode : TypeNode {
     public val name: String
