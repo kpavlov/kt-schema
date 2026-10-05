@@ -25,17 +25,23 @@ import me.kpavlov.kt.schema.json.Discriminator
 import me.kpavlov.kt.schema.json.GenericPropertyDefinition
 import me.kpavlov.kt.schema.json.JsonSchema
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.JSON_SCHEMA_ID_DRAFT202012
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.ARRAY
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.ARRAY_OR_NULL_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.ARRAY_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.BOOLEAN
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.BOOLEAN_OR_NULL_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.BOOLEAN_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.INTEGER_OR_NULL_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.INTEGER_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.NULL
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.NULL_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.NUMBER
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.NUMBER_OR_NULL_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.NUMBER_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.OBJECT
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.OBJECT_OR_NULL_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.OBJECT_TYPE
+import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.STRING
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.STRING_OR_NULL_TYPE
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.STRING_TYPE
 import me.kpavlov.kt.schema.json.NumericPropertyDefinition
@@ -45,6 +51,12 @@ import me.kpavlov.kt.schema.json.PropertyDefinition
 import me.kpavlov.kt.schema.json.ReferencePropertyDefinition
 import me.kpavlov.kt.schema.json.StringPropertyDefinition
 import kotlin.jvm.JvmOverloads
+
+/**
+ * Type list accepting any JSON value, equivalent to an empty schema `{}`.
+ * `integer` is omitted as a subset of `number`.
+ */
+private val ANY_TYPE: List<String> = listOf(ARRAY, BOOLEAN, NULL, NUMBER, OBJECT, STRING)
 
 /**
  * Transforms [TypeGraph] IR into JSON Schema Draft 2020-12 format.
@@ -123,6 +135,10 @@ public class TypeGraphToJsonSchemaTransformer
 
                     is ArrayPropertyDefinition -> {
                         createArraySchemaDefinition(rootJsonName, rootDefinition, definitions)
+                    }
+
+                    is GenericPropertyDefinition -> {
+                        createUnconstrainedSchemaDefinition(rootJsonName, rootDefinition, definitions)
                     }
 
                     else -> {
@@ -249,6 +265,25 @@ public class TypeGraphToJsonSchemaTransformer
                 type = rootDefinition.type,
                 description = rootDefinition.description,
                 items = rootDefinition.items,
+                properties = emptyMap(),
+                required = emptyList(),
+                additionalProperties = null,
+                defs = definitions.takeIf { it.isNotEmpty() },
+            )
+
+        /**
+         * Creates schema definition for unconstrained root types, accepting any JSON value.
+         */
+        private fun createUnconstrainedSchemaDefinition(
+            rootName: String,
+            rootDefinition: GenericPropertyDefinition,
+            definitions: Map<String, PropertyDefinition>,
+        ): JsonSchema =
+            JsonSchema(
+                schema = JSON_SCHEMA_ID_DRAFT202012,
+                id = rootName,
+                type = ANY_TYPE,
+                description = rootDefinition.description,
                 properties = emptyMap(),
                 required = emptyList(),
                 additionalProperties = null,
