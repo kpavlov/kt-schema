@@ -26,6 +26,7 @@ include(
     ":kt-schema-ksp",
     ":kt-schema-apt",
     ":ksp-integration-tests",
+    ":test-fixtures",
     ":apt-integration-tests",
     ":docs",
 )

@@ -198,7 +198,8 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     }
 
     /**
-     * Flattens an inline value class ([Modifier.VALUE]) to its wrapped type, since it serializes as the inner value.
+     * Flattens an inline value class ([Modifier.VALUE], or [Modifier.INLINE] when read from a compiled module)
+     * to its wrapped type, since it serializes as the inner value.
      * Type parameters of the wrapped type are substituted with the use-site arguments (`Wrapper<Int>` is an integer)
      * and the class description is carried over to the flattened node. Recursion is handled by [flattenValueClass].
      *
@@ -210,7 +211,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         nullable: Boolean,
     ): TypeRef? {
         val decl = type.declaration as? KSClassDeclaration ?: return null
-        if (Modifier.VALUE !in decl.modifiers) return null
+        if (Modifier.VALUE !in decl.modifiers && Modifier.INLINE !in decl.modifiers) return null
         val wrappedParam = decl.primaryConstructor?.parameters?.singleOrNull() ?: return null
 
         val wrappedType = resolveWrappedTypeAsMemberOf(decl, wrappedParam, type)

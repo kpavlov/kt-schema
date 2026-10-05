@@ -13,6 +13,7 @@ kotlin {
 
 dependencies {
     implementation(project(":kt-schema-annotations"))
+    implementation(project(":test-fixtures"))
     implementation(libs.kotlinx.serialization.json)
 
     // Third-party annotation libraries for testing description extraction
