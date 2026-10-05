@@ -34,6 +34,7 @@ kotlin {
                 implementation(libs.junit.pioneer)
                 implementation(libs.junit.jupiter.params)
                 implementation(libs.mockk)
+                implementation(libs.networknt.json.schema.validator)
                 implementation(project(":test-fixtures"))
                 implementation(dependencies.platform(libs.jackson.bom))
                 implementation(libs.jackson.annotations)
