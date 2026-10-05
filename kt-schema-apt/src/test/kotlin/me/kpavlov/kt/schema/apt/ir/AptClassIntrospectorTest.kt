@@ -4,7 +4,6 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import me.kpavlov.kt.schema.apt.JavaSources
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
@@ -25,16 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
-import java.io.StringWriter
-import java.nio.file.Files
 import java.util.stream.Stream
-import javax.annotation.processing.AbstractProcessor
-import javax.annotation.processing.RoundEnvironment
-import javax.lang.model.SourceVersion
-import javax.lang.model.element.TypeElement
-import javax.tools.DiagnosticCollector
-import javax.tools.JavaFileObject
-import javax.tools.ToolProvider
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AptClassIntrospectorTest {
@@ -727,72 +717,6 @@ class AptClassIntrospectorTest {
                 },
             ),
         )
-
-    private fun graph(
-        root: String,
-        @Language("java")
-        vararg sources: String,
-    ): TypeGraph {
-        val compiler =
-            ToolProvider.getSystemJavaCompiler()
-                ?: error("No system Java compiler available — run on JDK, not JRE")
-
-        val rootDir = Files.createTempDirectory("kt-schema-apt-test")
-        val outputDir = rootDir.resolve("classes").also { Files.createDirectories(it) }
-        try {
-            val diagnostics = DiagnosticCollector<JavaFileObject>()
-            val sourceFiles = sources.map(JavaSources::of)
-
-            val processor =
-                object : AbstractProcessor() {
-                    var capturedGraph: TypeGraph? = null
-
-                    override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
-
-                    override fun getSupportedAnnotationTypes(): MutableSet<String> = mutableSetOf("*")
-
-                    override fun process(
-                        annotations: MutableSet<out TypeElement>,
-                        roundEnv: RoundEnvironment,
-                    ): Boolean {
-                        if (capturedGraph == null) {
-                            val element =
-                                roundEnv.rootElements
-                                    .filterIsInstance<TypeElement>()
-                                    .firstOrNull { it.qualifiedName.contentEquals(root) }
-                            if (element != null) {
-                                // Introspect while the JSR 269 round is active so the elements
-                                // and processing environment stay valid.
-                                capturedGraph = AptClassIntrospector(processingEnv).introspect(element)
-                            }
-                        }
-                        return false
-                    }
-                }
-
-            val writer = StringWriter()
-            val task =
-                compiler.getTask(
-                    writer,
-                    null,
-                    diagnostics,
-                    listOf("-d", outputDir.toFile().absolutePath),
-                    null,
-                    sourceFiles,
-                )
-            task.setProcessors(listOf(processor))
-
-            val success = task.call()
-            if (!success) {
-                val messages = diagnostics.diagnostics.joinToString("\n") { it.toString() }
-                error("Compilation failed:\n$messages\nCompiler output:\n$writer")
-            }
-
-            return processor.capturedGraph ?: error("Type $root not found in compilation")
-        } finally {
-            rootDir.toFile().deleteRecursively()
-        }
-    }
 
     @Language("java")
     private fun javaClass(

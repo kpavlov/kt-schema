@@ -595,9 +595,15 @@ data class Container<T>(
 
 <!--- KNIT example-knit-readme-06.kt -->
 
-Generic type parameters are resolved at the usage site. Unbound type parameters (like `T`) and `kotlin.Any`-typed
-properties map to `{}` — the empty JSON Schema that accepts any JSON value. For more specific typing, instantiate the
-generic class with concrete types when you need them.
+Generic type parameters are resolved at the usage site. Unbound type parameters (like `T`), star projections and
+`kotlin.Any`-typed properties map to `{}` — the empty JSON Schema that accepts any JSON value. For more specific typing,
+instantiate the generic class with concrete types when you need them.
+
+Each application of a generic class gets its own definition, named after its type arguments: `Box<String>` and
+`Box<Int>` in one schema become `Box_of_String` and `Box_of_Int`, `Pair<String, Int>` becomes `Pair_of_String_and_Int`
+and `Box<String?>` becomes `Box_of_nullable_String`. If the argument names clash, package segments are added. With
+kotlinx.serialization a class is named this way only when it is used with several type arguments, after the
+properties whose types differ, as a descriptor can't tell type arguments from other properties.
 
 ### Sealed class polymorphism
 

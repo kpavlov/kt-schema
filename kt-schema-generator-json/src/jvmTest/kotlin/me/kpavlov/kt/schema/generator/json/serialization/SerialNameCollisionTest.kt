@@ -1,11 +1,16 @@
 package me.kpavlov.kt.schema.generator.json.serialization
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import me.kpavlov.kt.schema.generator.json.serialization.SerializationClassJsonSchemaGenerator.Companion.jsonSchemaOf
+import me.kpavlov.kt.schema.json.encodeToString
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -239,8 +244,22 @@ class SerialNameCollisionTest {
     }
 
     @Test
-    fun `should accept generic applications of the same class`() {
-        jsonSchemaOf<BoxHolder>()
+    fun `should keep a definition per application of a generic class`() {
+        val schema = Json.parseToJsonElement(jsonSchemaOf<BoxHolder>().encodeToString()).jsonObject
+
+        schema.getValue($$"$defs").jsonObject.mapValues { (_, definition) ->
+            definition.jsonObject
+                .getValue("properties")
+                .jsonObject
+                .getValue("value")
+                .jsonObject
+                .getValue("type")
+                .jsonPrimitive.content
+        } shouldBe
+            mapOf(
+                "me.kpavlov.kt.schema.generator.json.serialization.SerialNameCollisionTest.Box_of_String" to "string",
+                "me.kpavlov.kt.schema.generator.json.serialization.SerialNameCollisionTest.Box_of_Int" to "integer",
+            )
     }
 
     @Test

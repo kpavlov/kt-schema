@@ -47,6 +47,9 @@ internal class SerializationIntrospectionContext(
 ) : BaseIntrospectionContext<SerialDescriptor>() {
     private val typeShapes = mutableMapOf<TypeId, Pair<SerialKind, List<String>>>()
 
+    /** Tells apart the applications of generic classes, see [GenericApplications]. */
+    val genericApplications = GenericApplications()
+
     /** Refs by descriptor instance: [SerialDescriptor.equals] ignores element names and sealed subtypes. */
     private val refCache = mutableMapOf<DescriptorKey, TypeRef>()
 
@@ -202,7 +205,7 @@ internal class SerializationIntrospectionContext(
         val innerRef =
             flattenValueClass(
                 key = descriptor.nonNullOriginal,
-                id = descriptorId(descriptor),
+                id = genericApplications.idOf(descriptor),
                 nullable = nullable,
                 wrappedNullable = wrappedDescriptor.isNullable,
                 description = extractDescription(descriptor),
@@ -229,14 +232,20 @@ internal class SerializationIntrospectionContext(
     private fun SerialDescriptor.elementNamesList(): List<String> = List(elementsCount, ::getElementName)
 
     /**
-     * Handles object/class types by creating an [ObjectNode] with properties.
+     * Handles object/class types by creating an [ObjectNode] with properties. Each application of a generic class
+     * gets its own node, see [GenericApplications].
      */
     private fun handleObjectType(
         descriptor: SerialDescriptor,
         nullable: Boolean,
     ): TypeRef {
-        val id = descriptorId(descriptor)
-        failOnSerialNameClash(id, descriptor)
+        failOnSerialNameClash(descriptorId(descriptor), descriptor)
+        // Each application of a polymorphically recursive class is a new type, so the nesting is cut off.
+        val name = descriptor.unwrapSerialName()
+        if (exceedsApplicationNesting { it.unwrapSerialName() == name }) {
+            return TypeRef.Inline(AnyNode(), nullable)
+        }
+        val id = genericApplications.idOf(descriptor)
 
         withCycleDetection(descriptor, id) {
             val properties = mutableListOf<Property>()

@@ -36,7 +36,9 @@ import kotlin.reflect.typeOf
 
 /**
  * Reflection-based introspection context based on [KType].
- * Only supports [KClass] classifiers for introspection, generics are not supported.
+ *
+ * Only [KClass] classifiers are supported. Generic objects are resolved against their type arguments,
+ * with each application getting its own definition; a star projection is treated as `Any?`.
  */
 @OptIn(InternalSchemaGeneratorApi::class)
 @Suppress("TooManyFunctions")
@@ -253,11 +255,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         val declaredWrappedType =
             findPrimaryConstructor(klass)?.parameters?.singleOrNull()?.type ?: return handleObjectType(type)
 
-        // A star projection (`Wrapper<*>`) carries no type, so it is treated as `Any?`.
-        val bindings =
-            klass.typeParameters.zip(type.arguments).associate { (parameter, argument) ->
-                parameter to (argument.type ?: typeOf<Any?>())
-            }
+        val bindings = typeArgumentBindings(type)
         val wrappedType =
             if (bindings.isEmpty()) declaredWrappedType else substituteTypeParameters(declaredWrappedType, bindings)
 
@@ -265,7 +263,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         val wrappedRef =
             flattenValueClass(
                 key = type.withNullability(false),
-                id = createTypeId(klass),
+                id = createAppliedTypeId(type),
                 nullable = nullable,
                 wrappedNullable = wrappedType.isMarkedNullable,
                 description = extractDescription(klass.java.annotations.toList()),
@@ -331,10 +329,13 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      */
     private fun handleObjectType(type: KType): TypeRef {
         val klass = type.klass
-        val id = createTypeId(klass)
+        if (type.arguments.isNotEmpty() && exceedsApplicationNesting { it.classifier == klass }) {
+            return TypeRef.Inline(AnyNode(), type.effectiveNullable())
+        }
+        val id = createAppliedTypeId(type)
 
         withCycleDetection(type, id) {
-            createObjectNode(klass)
+            createObjectNode(klass, id, typeArgumentBindings(type))
         }
 
         val ref = TypeRef.Ref(id, type.effectiveNullable())
@@ -376,6 +377,24 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
     private fun createTypeId(klass: KClass<*>): TypeId = TypeId(klass.qualifiedName ?: klass.java.name)
 
     /**
+     * Creates the [TypeId] of [type] including its type arguments, such as `pkg.Box<kotlin.String?>`, see
+     * [applicationId].
+     */
+    private fun createAppliedTypeId(type: KType): TypeId =
+        applicationId(createTypeId(type.klass).value, type.arguments.map(::argumentId))
+
+    private fun argumentId(projection: KTypeProjection): String? {
+        val type = projection.type?.takeIf { it.classifier is KClass<*> } ?: return null
+        return createAppliedTypeId(type).value + if (type.isMarkedNullable) "?" else ""
+    }
+
+    /** Binds each type parameter of [type]'s class to its argument; a star projection binds `Any?`. */
+    private fun typeArgumentBindings(type: KType): Map<KTypeParameter, KType> =
+        type.klass.typeParameters.zip(type.arguments).associate { (parameter, argument) ->
+            parameter to (argument.type ?: typeOf<Any?>())
+        }
+
+    /**
      * Creates an [EnumNode] from an enum [KClass].
      *
      * Respects `@SerialName` on the enum class (overrides the class name)
@@ -414,10 +433,15 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
     ): String = extractNameOverride(annotations) ?: constant.name
 
     /**
-     * Creates an [ObjectNode] from a [KClass].
+     * Creates an [ObjectNode] for the application of [klass] identified by [id], resolving the type
+     * parameters of its properties with [bindings].
      */
     @Suppress("LongMethod", "CyclomaticComplexMethod")
-    private fun createObjectNode(klass: KClass<*>): ObjectNode {
+    private fun createObjectNode(
+        klass: KClass<*>,
+        id: TypeId,
+        bindings: Map<KTypeParameter, KType>,
+    ): ObjectNode {
         val properties = mutableListOf<Property>()
 
         // Find sealed parent classes to inherit property descriptions
@@ -447,7 +471,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         val defaultValues = defaultValueExtractor.extractDefaultValues(klass)
 
         // Extract properties from primary constructor using shared method
-        val constructorProperties = extractConstructorProperties(klass, defaultValues)
+        val constructorProperties = extractConstructorProperties(klass, defaultValues, bindings)
 
         // Track which properties were processed from constructor
         val processedProperties = constructorProperties.map { it.name }.toMutableSet()
@@ -485,6 +509,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             val extra =
                 buildExtraProperty(
                     property = property,
+                    bindings = bindings,
                     defaultValues = defaultValues,
                     fallbackDescription = parentPropertyDescriptions[propertyName],
                     fallbackNameOverride = parentPropertyNameOverrides[propertyName],
@@ -502,7 +527,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                 .filter { it.visibility == KVisibility.PUBLIC }
                 .forEach { prop ->
                     if (prop.name in processedProperties) return@forEach
-                    val extra = buildExtraProperty(prop, defaultValues) ?: return@forEach
+                    val extra = buildExtraProperty(prop, bindings, defaultValues) ?: return@forEach
 
                     properties += extra
                     processedProperties += prop.name
@@ -511,8 +536,10 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         }
 
         val nameOverride = extractNameOverride(klass.java.annotations.toList())
+        // A local or anonymous class has no qualified name, so its simple name stands in for the id.
+        val declaredName = if (klass.qualifiedName != null) id.value else klass.simpleName ?: "UnknownClass"
         return ObjectNode(
-            name = nameOverride ?: klass.qualifiedName ?: klass.simpleName ?: "UnknownClass",
+            name = nameOverride ?: declaredName,
             properties = properties,
             description = extractDescription(klass.java.annotations.toList()),
         )
@@ -531,6 +558,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      */
     private fun buildExtraProperty(
         property: KProperty<*>,
+        bindings: Map<KTypeParameter, KType>,
         defaultValues: Map<String, Any?>,
         fallbackDescription: String? = null,
         fallbackNameOverride: String? = null,
@@ -538,8 +566,9 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         val annotations = collectPropertyAnnotations(property)
         if (isSchemaIgnored(annotations)) return null
 
+        val propertyType = substituteTypeParameters(property.returnType, bindings)
         val typeRef =
-            toRef(property.returnType).let {
+            toRef(propertyType).let {
                 if (isNullableAnnotated(annotations)) it.withNullable(true) else it
             }
         // An inherited property with a fixed value is a constant (and thus required);
@@ -561,7 +590,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             description = extractDescription(annotations) ?: fallbackDescription,
             optional =
                 fixedValue == null &&
-                    (isOptionalTypeName(property.returnType.klass) || isOptionalAnnotated(annotations)),
+                    (isOptionalTypeName(propertyType.klass) || isOptionalAnnotated(annotations)),
             value = value,
         )
     }
@@ -624,11 +653,13 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
      *
      * @param klass The class whose constructor to analyse
      * @param defaultValues Map of property names to their default values (from DefaultValueExtractor)
+     * @param bindings Type arguments of the class, applied to the types of its parameters
      * @return the constructor properties
      */
     private fun extractConstructorProperties(
         klass: KClass<*>,
         defaultValues: Map<String, Any?>,
+        bindings: Map<KTypeParameter, KType>,
     ): List<Property> {
         val properties = mutableListOf<Property>()
 
@@ -646,7 +677,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
             // Name override (e.g. @SerialName, @JsonProperty), else Kotlin property name
             val propertyName = extractNameOverride(annotations) ?: kotlinName
 
-            val propertyType = param.type
+            val propertyType = substituteTypeParameters(param.type, bindings)
             val typeRef =
                 toRef(propertyType).let {
                     if (isNullableAnnotated(annotations)) it.withNullable(true) else it
