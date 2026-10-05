@@ -1,4 +1,4 @@
-package me.kpavlov.kt.schema.testfixtures
+package me.kpavlov.kt.schema.test.fixtures
 
 @JvmInline
 value class WorkspacePath private constructor(
