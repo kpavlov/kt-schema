@@ -45,7 +45,10 @@ internal class SerializationIntrospectionContext(
     private val json: Json,
     private val config: SerializationClassSchemaIntrospector.Config,
 ) : BaseIntrospectionContext<SerialDescriptor>() {
-    private val objectDescriptors = mutableMapOf<TypeId, SerialDescriptor>()
+    private val typeShapes = mutableMapOf<TypeId, Pair<SerialKind, List<String>>>()
+
+    /** Refs by descriptor instance: [SerialDescriptor.equals] ignores element names and sealed subtypes. */
+    private val refCache = mutableMapOf<DescriptorKey, TypeRef>()
 
     /**
      * Converts a [SerialDescriptor] to a [TypeRef].
@@ -62,7 +65,7 @@ internal class SerializationIntrospectionContext(
     @Suppress("ReturnCount")
     override fun toRef(type: SerialDescriptor): TypeRef {
         // Check cache first
-        typeRefCache[type]?.let { cachedRef ->
+        refCache[DescriptorKey(type)]?.let { cachedRef ->
             return if (type.isNullable && !cachedRef.nullable) {
                 cachedRef.withNullable(true)
             } else {
@@ -78,7 +81,7 @@ internal class SerializationIntrospectionContext(
         // Try primitives first (always inlined)
         primitiveFor(type)?.let { primitiveNode ->
             val ref = TypeRef.Inline(primitiveNode, nullable)
-            if (!nullable) typeRefCache[type] = ref
+            if (!nullable) refCache[DescriptorKey(type)] = ref
             return ref
         }
 
@@ -162,6 +165,7 @@ internal class SerializationIntrospectionContext(
         nullable: Boolean,
     ): TypeRef {
         val id = descriptorId(descriptor)
+        failOnSerialNameClash(id, descriptor)
 
         val ref =
             namedRef(descriptor, id, nullable) {
@@ -172,7 +176,7 @@ internal class SerializationIntrospectionContext(
                     description = extractDescription(descriptor),
                 )
             }
-        if (!nullable) typeRefCache[descriptor] = ref
+        if (!nullable) refCache[DescriptorKey(descriptor)] = ref
         return ref
     }
 
@@ -204,21 +208,21 @@ internal class SerializationIntrospectionContext(
                 description = extractDescription(descriptor),
             ) { toRef(wrappedDescriptor) }
 
-        if (!nullable) typeRefCache[descriptor] = innerRef
+        if (!nullable) refCache[DescriptorKey(descriptor)] = innerRef
         return if (nullable && !innerRef.nullable) innerRef.withNullable(true) else innerRef
     }
 
     // ponytail: structurally identical distinct classes still merge; descriptors carry no FQN.
-    // Only element names are compared: element descriptors differ between generic applications.
+    // Only element names (subtype serial names for polymorphic types) are compared: element descriptors
+    // differ between generic applications.
     private fun failOnSerialNameClash(
         id: TypeId,
         descriptor: SerialDescriptor,
+        shape: List<String> = descriptor.elementNamesList(),
     ) {
-        val known = objectDescriptors.getOrPut(id) { descriptor }
-        val knownNames = known.elementNamesList()
-        val names = descriptor.elementNamesList()
-        check(known.kind == descriptor.kind && knownNames == names) {
-            "Distinct types share serial name '${id.value}' with different shapes: $knownNames vs $names"
+        val (knownKind, knownShape) = typeShapes.getOrPut(id) { descriptor.kind to shape }
+        check(knownKind == descriptor.kind && knownShape == shape) {
+            "Distinct types share serial name '${id.value}' with different shapes: $knownShape vs $shape"
         }
     }
 
@@ -263,7 +267,7 @@ internal class SerializationIntrospectionContext(
         }
 
         val ref = TypeRef.Ref(id, nullable)
-        if (!nullable) typeRefCache[descriptor] = ref
+        if (!nullable) refCache[DescriptorKey(descriptor)] = ref
         return ref
     }
 
@@ -276,9 +280,8 @@ internal class SerializationIntrospectionContext(
     ): TypeRef {
         val elementDescriptor = descriptor.getElementDescriptor(0)
         val elementRef = toRef(elementDescriptor)
-        val node = ListNode(element = elementRef)
-        val ref = TypeRef.Inline(node, nullable)
-        if (!nullable) typeRefCache[descriptor] = ref
+        val ref = TypeRef.Inline(ListNode(element = elementRef), nullable)
+        if (!nullable) refCache[DescriptorKey(descriptor)] = ref
         return ref
     }
 
@@ -293,9 +296,8 @@ internal class SerializationIntrospectionContext(
         val valueDescriptor = descriptor.getElementDescriptor(1)
         val keyRef = toRef(keyDescriptor)
         val valueRef = toRef(valueDescriptor)
-        val node = MapNode(key = keyRef, value = valueRef)
-        val ref = TypeRef.Inline(node, nullable)
-        if (!nullable) typeRefCache[descriptor] = ref
+        val ref = TypeRef.Inline(MapNode(key = keyRef, value = valueRef), nullable)
+        if (!nullable) refCache[DescriptorKey(descriptor)] = ref
         return ref
     }
 
@@ -312,11 +314,13 @@ internal class SerializationIntrospectionContext(
     ): TypeRef {
         val id = descriptorId(descriptor)
 
+        // Extract subtypes from the nested structure, excluding @SerialSchemaIgnore-annotated ones
+        val subtypeDescriptors =
+            extractPolymorphicSubtypes(descriptor)
+                .filter { subtype -> !subtype.isSchemaIgnored() }
+        failOnSerialNameClash(id, descriptor, subtypeDescriptors.map { it.serialName }.sorted())
+
         withCycleDetection(descriptor, id) {
-            // Extract subtypes from the nested structure, excluding @SerialSchemaIgnore-annotated ones
-            val subtypeDescriptors =
-                extractPolymorphicSubtypes(descriptor)
-                    .filter { subtype -> !subtype.isSchemaIgnored() }
             val subtypes =
                 subtypeDescriptors
                     .sortedBy { it.serialName }
@@ -347,7 +351,7 @@ internal class SerializationIntrospectionContext(
         }
 
         val ref = TypeRef.Ref(id, nullable)
-        if (!nullable) typeRefCache[descriptor] = ref
+        if (!nullable) refCache[DescriptorKey(descriptor)] = ref
         return ref
     }
 
@@ -484,7 +488,7 @@ internal class SerializationIntrospectionContext(
         }
 
         val ref = TypeRef.Ref(id, nullable)
-        if (!nullable) typeRefCache[descriptor] = ref
+        if (!nullable) refCache[DescriptorKey(descriptor)] = ref
         return ref
     }
 
@@ -553,4 +557,13 @@ internal class SerializationIntrospectionContext(
             .filterIsInstance<JsonClassDiscriminator>()
             .firstOrNull()
             ?.discriminator ?: json.configuration.classDiscriminator
+}
+
+/** Identity map key; the hash is structural, so equal-but-distinct descriptors only share a bucket. */
+private class DescriptorKey(
+    val descriptor: SerialDescriptor,
+) {
+    override fun equals(other: Any?): Boolean = other is DescriptorKey && other.descriptor === descriptor
+
+    override fun hashCode(): Int = descriptor.hashCode()
 }
