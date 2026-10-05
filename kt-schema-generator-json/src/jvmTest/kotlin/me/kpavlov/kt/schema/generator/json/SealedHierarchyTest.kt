@@ -24,7 +24,6 @@ class SealedHierarchyTest {
                    "$schema": "https://json-schema.org/draft/2020-12/schema",
                    "$id": "me.kpavlov.kt.schema.generator.json.ExampleA",
                    "type": "object",
-                   "additionalProperties": false,
                    "oneOf": [
                      {
                        "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.ExampleA.ExampleB"

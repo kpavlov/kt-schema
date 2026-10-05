@@ -82,7 +82,6 @@ class SealedPolymorphismSchemaGeneratorTest {
               "$id": "Shape",
               "description": "A geometric shape",
               "type": "object",
-              "additionalProperties": false,
               "oneOf": [
                 { "$ref": "#/$defs/Circle" },
                 { "$ref": "#/$defs/Rect" }
@@ -137,7 +136,6 @@ class SealedPolymorphismSchemaGeneratorTest {
               "$id": "Shape",
               "description": "A geometric shape",
               "type": "object",
-              "additionalProperties": false,
               "oneOf": [
                 { "$ref": "#/$defs/Circle" },
                 { "$ref": "#/$defs/Rect" }
@@ -184,7 +182,6 @@ class SealedPolymorphismSchemaGeneratorTest {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
               "$id": "Button",
               "type": "object",
-              "additionalProperties": false,
               "oneOf": [
                 { "$ref": "#/$defs/BIG" },
                 { "$ref": "#/$defs/SMALL" }
@@ -259,7 +256,6 @@ class SealedPolymorphismSchemaGeneratorTest {
               "$id": "Event",
               "description": "An application event",
               "type": "object",
-              "additionalProperties": false,
               "oneOf": [
                 { "$ref": "#/$defs/Click" },
                 { "$ref": "#/$defs/PageView" }

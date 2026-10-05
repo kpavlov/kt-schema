@@ -164,7 +164,7 @@ public class TypeGraphToJsonSchemaTransformer
                 id = rootName,
                 properties = emptyMap(),
                 required = emptyList(),
-                additionalProperties = config.objectAdditionalProperties,
+                additionalProperties = null,
                 description = rootDefinition.description,
                 oneOf = rootDefinition.oneOf,
                 discriminator =

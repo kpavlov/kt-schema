@@ -65,7 +65,6 @@ class OpenPolymorphismSchemaGeneratorTest {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
               "$id": "Flying",
               "type": "object",
-              "additionalProperties": false,
               "oneOf": [
                 { "$ref": "#/$defs/Bird" },
                 { "$ref": "#/$defs/Kite" }
@@ -121,7 +120,6 @@ class OpenPolymorphismSchemaGeneratorTest {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
               "$id": "Flying",
               "type": "object",
-              "additionalProperties": false,
               "oneOf": [
                 { "$ref": "#/$defs/Kite" }
               ],

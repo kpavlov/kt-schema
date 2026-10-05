@@ -45,7 +45,6 @@ class ShapeSchemaTest {
             "$id": "com.example.shapes.Shape",
             "description": "A geometric shape. This sealed class demonstrates polymorphic schema generation.",
             "type": "object",
-            "additionalProperties": false,
             "oneOf": [
                 {
                     "$ref": "#/$defs/com.example.shapes.Circle"

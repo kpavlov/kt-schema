@@ -20,7 +20,6 @@ class EventSchemaTest {
               "$id": "me.kpavlov.kt.schema.integration.type.Event",
               "description": "An application event",
               "type": "object",
-              "additionalProperties": false,
               "oneOf": [
                 {
                   "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.Event.Click"

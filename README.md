@@ -670,7 +670,6 @@ println(schema.encodeToString(Json { prettyPrint = true }))
     "$id": "me.kpavlov.kt.schema.integration.type.Animal",
     "description": "Multicellular eukaryotic organism of the kingdom Metazoa",
     "type": "object",
-    "additionalProperties": false,
     "oneOf": [
         {
             "$ref": "#/$defs/Cat"

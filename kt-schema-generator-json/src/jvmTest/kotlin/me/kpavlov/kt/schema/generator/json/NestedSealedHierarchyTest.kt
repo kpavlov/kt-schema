@@ -121,7 +121,6 @@ class NestedSealedHierarchyTest {
               "$schema": "https://json-schema.org/draft/2020-12/schema",
               "$id": "me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle",
               "type": "object",
-              "additionalProperties": false,
               "oneOf": [
                 { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Bicycle" },
                 { "$ref": "#/$defs/me.kpavlov.kt.schema.generator.json.NestedSealedHierarchyTest.Vehicle.Motorized" }

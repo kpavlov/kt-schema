@@ -19,7 +19,6 @@ class JacksonShapeSchemaTest {
               "$id": "me.kpavlov.kt.schema.integration.type.JacksonShape",
               "description": "A shape described with Jackson @JsonTypeName annotations.",
               "type": "object",
-              "additionalProperties": false,
               "oneOf": [
                 {
                   "$ref": "#/$defs/circle"

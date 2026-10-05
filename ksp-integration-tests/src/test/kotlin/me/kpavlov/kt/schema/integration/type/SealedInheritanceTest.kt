@@ -15,7 +15,6 @@ class SealedInheritanceTest {
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "$id": "me.kpavlov.kt.schema.integration.type.SealedBase",
                 "type": "object",
-                "additionalProperties": false,
                 "oneOf": [
                     {
                         "$ref": "#/$defs/me.kpavlov.kt.schema.integration.type.SealedBase.SubclassA"
