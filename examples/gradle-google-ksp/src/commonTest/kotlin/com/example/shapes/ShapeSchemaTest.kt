@@ -1,6 +1,5 @@
 package com.example.shapes
 
-import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.assertions.json.shouldEqualSpecifiedJson
 import kotlin.test.Test
 
@@ -37,7 +36,7 @@ class ShapeSchemaTest {
     fun `Shape sealed class generates oneOf schema`() {
         val schema = Shape::class.jsonSchemaString
 
-        schema shouldEqualJson
+        schema shouldEqualSpecifiedJson
             $$"""
             {
               "$schema": "https://json-schema.org/draft/2020-12/schema",

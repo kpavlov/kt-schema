@@ -17,6 +17,7 @@ ksp = "2.3.12"
 langchain4j = "1.21.0"
 logging = "8.0.4"
 mockk = "1.14.11"
+networknt-json-schema-validator = "3.0.8"
 slf4j = "2.0.20"
 vanniktechMavenPublish = "0.37.0"
 json-unit-assertj = "6.2.0"
@@ -47,6 +48,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 langchain4j-core = { module = "dev.langchain4j:langchain4j-core", version.ref = "langchain4j" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+networknt-json-schema-validator = { module = "com.networknt:json-schema-validator", version.ref = "networknt-json-schema-validator" }
 slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
 
 ksp-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }

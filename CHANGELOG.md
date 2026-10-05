@@ -86,11 +86,13 @@
 - `kt-schema-apt`: Kotlin `@JvmInline` value classes used as types in Java classes (detected by the
   `kotlin.jvm.JvmInline` annotation on the compiled box class) are flattened to their wrapped type, type arguments
   included; previously they were emitted as an object with a `value` property
+- Root polymorphic (`oneOf`) schemas no longer emit `"additionalProperties": false` beside `oneOf`. With no sibling
+  `properties`, it rejected every valid subtype payload; subtype definitions in `$defs` stay closed
 
 ### Dependencies
 
 - Gradle 9.8.0, kotlinx.serialization 1.9.0, KSP 2.3.12, Kotest 6.2.5, JUnit 6.1.3, Jackson BOM 3.2.3 (test-only),
-  detekt 2.0.0-alpha.6, Kover 0.9.11, slf4j 2.0.20, langchain4j 1.21.0, Koog 1.3.0 (examples)
+  networknt json-schema-validator 3.0.8 (test-only), detekt 2.0.0-alpha.6, Kover 0.9.11, slf4j 2.0.20, langchain4j 1.21.0, Koog 1.3.0 (examples)
 
 ---
 
