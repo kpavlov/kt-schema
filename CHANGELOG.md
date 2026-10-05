@@ -1,5 +1,9 @@
 ## Unreleased
 
+## 0.9.0
+
+Published: 2026-10-05
+
 ### Added
 
 - `JsonSchemaConfig.Lenient` preset and `allowAdditionalProperties` flag (also on `FunctionCallingSchemaConfig`,
