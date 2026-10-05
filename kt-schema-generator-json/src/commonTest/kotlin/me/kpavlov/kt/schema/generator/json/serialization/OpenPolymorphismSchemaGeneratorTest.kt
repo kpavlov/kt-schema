@@ -142,6 +142,119 @@ class OpenPolymorphismSchemaGeneratorTest {
             """.trimIndent()
     }
 
+    @Serializable
+    @SerialName("Holder")
+    data class Holder(
+        val a: Flying,
+        val b: Flying?,
+    )
+
+    @Serializable
+    @SerialName("NullableOnlyHolder")
+    data class NullableOnlyHolder(
+        val b: Flying?,
+    )
+
+    private val birdOnlyGenerator =
+        SerializationClassJsonSchemaGenerator(
+            json =
+                Json {
+                    serializersModule =
+                        SerializersModule {
+                            polymorphic(Flying::class) { subclass(Bird::class) }
+                        }
+                },
+        )
+
+    @Test
+    fun `nullable and non-null open polymorphic properties share one definition`() {
+        val schema = birdOnlyGenerator.generateSchemaString(Holder.serializer().descriptor)
+
+        schema shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "Holder",
+              "type": "object",
+              "properties": {
+                "a": { "$ref": "#/$defs/Flying" },
+                "b": {
+                  "oneOf": [
+                    { "type": "null" },
+                    { "$ref": "#/$defs/Flying" }
+                  ]
+                }
+              },
+              "required": ["a", "b"],
+              "additionalProperties": false,
+              "$defs": {
+                "Flying": {
+                  "description": "Something that flies",
+                  "oneOf": [
+                    { "$ref": "#/$defs/Bird" }
+                  ]
+                },
+                "Bird": {
+                  "type": "object",
+                  "description": "A flying bird",
+                  "properties": {
+                    "type": { "type": "string", "const": "Bird" },
+                    "name": { "type": "string", "description": "Bird name" },
+                    "wingspan": { "type": "number", "description": "Wingspan in meters" }
+                  },
+                  "required": ["type", "name", "wingspan"],
+                  "additionalProperties": false
+                }
+              }
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `nullable-only open polymorphic property resolves subtypes`() {
+        val schema = birdOnlyGenerator.generateSchemaString(NullableOnlyHolder.serializer().descriptor)
+
+        schema shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "NullableOnlyHolder",
+              "type": "object",
+              "properties": {
+                "b": {
+                  "oneOf": [
+                    { "type": "null" },
+                    { "$ref": "#/$defs/Flying" }
+                  ]
+                }
+              },
+              "required": ["b"],
+              "additionalProperties": false,
+              "$defs": {
+                "Flying": {
+                  "description": "Something that flies",
+                  "oneOf": [
+                    { "$ref": "#/$defs/Bird" }
+                  ]
+                },
+                "Bird": {
+                  "type": "object",
+                  "description": "A flying bird",
+                  "properties": {
+                    "type": { "type": "string", "const": "Bird" },
+                    "name": { "type": "string", "description": "Bird name" },
+                    "wingspan": { "type": "number", "description": "Wingspan in meters" }
+                  },
+                  "required": ["type", "name", "wingspan"],
+                  "additionalProperties": false
+                }
+              }
+            }
+            """.trimIndent()
+    }
+
     @Test
     fun `empty module fails with descriptive message`() {
         val generator = SerializationClassJsonSchemaGenerator()

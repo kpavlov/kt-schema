@@ -171,7 +171,7 @@ internal class SerializationIntrospectionContext(
             namedRef(descriptor, id, nullable) {
                 val entries = (0 until descriptor.elementsCount).map { descriptor.getElementName(it) }
                 EnumNode(
-                    name = descriptor.unwrapSerialName().removeSuffix("?"),
+                    name = descriptor.unwrapSerialName(),
                     entries = entries,
                     description = extractDescription(descriptor),
                 )
@@ -260,7 +260,7 @@ internal class SerializationIntrospectionContext(
             }
 
             ObjectNode(
-                name = descriptor.unwrapSerialName().removeSuffix("?"),
+                name = descriptor.unwrapSerialName(),
                 properties = properties,
                 description = extractDescription(descriptor),
             )
@@ -420,8 +420,9 @@ internal class SerializationIntrospectionContext(
      *
      * @throws IllegalStateException if no subtypes are registered for this base type
      */
+    @OptIn(ExperimentalSerializationApi::class)
     private fun extractOpenSubtypes(descriptor: SerialDescriptor): List<SerialDescriptor> {
-        val baseSerialName = descriptor.serialName
+        val baseSerialName = descriptor.nonNullOriginal.serialName
         val subtypeDescriptors = mutableListOf<SerialDescriptor>()
         val baseClassSerialNames = mutableMapOf<KClass<*>, String>()
 
@@ -481,7 +482,7 @@ internal class SerializationIntrospectionContext(
 
         withCycleDetection(descriptor, id) {
             ObjectNode(
-                name = descriptor.unwrapSerialName().removeSuffix("?"),
+                name = descriptor.unwrapSerialName(),
                 properties = emptyList(),
                 description = extractDescription(descriptor),
             )
@@ -499,7 +500,7 @@ internal class SerializationIntrospectionContext(
      * wrapper to extract the inner type name.
      */
     private fun descriptorId(descriptor: SerialDescriptor): TypeId =
-        TypeId(descriptor.unwrapSerialName().removeSuffix("?"))
+        TypeId(descriptor.unwrapSerialName())
 
     /**
      * Returns a cached [AnyNode] ref if [serialName] is a known opaque type, null otherwise.
