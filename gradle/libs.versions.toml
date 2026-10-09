@@ -20,7 +20,7 @@ mockk = "1.14.11"
 networknt-json-schema-validator = "3.0.8"
 slf4j = "2.0.20"
 vanniktechMavenPublish = "0.37.0"
-json-unit-assertj = "6.2.0"
+json-unit-assertj = "6.3.0"
 
 [libraries]
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
