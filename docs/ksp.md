@@ -25,7 +25,8 @@ Configure the KSP processor with the Google KSP Gradle plugin.
 
 ### Google KSP gradle plugin
 
-Add the [Google KSP plugin](https://kotlinlang.org/docs/ksp-quickstart.html) and processor dependency to your project.
+Add the [Google KSP plugin](https://kotlinlang.org/docs/ksp-quickstart.html) (2.3.1 or newer) and processor
+dependency to your project.
 
 #### Multiplatform projects
 
@@ -172,6 +173,10 @@ Access generated functions:
 val functionCallSchemaString: String = calculateAreaJsonSchemaString() // <function name> + "jsonSchemaString()" 
 val functionCallSchema: JsonObject = calculateAreaJsonSchema() // <function name> + "jsonSchema()" 
 ```
+
+A parameter with a Kotlin default value (e.g. `unit: String = "celsius"`) is optional: with the `lenient`, `openapi`
+or a custom non-strict `config` it is left out of `required`. The default `strict` config requires every parameter,
+as OpenAI strict mode demands. KSP reports only that a default exists, not its value, so no `default` is emitted.
 
 ## See Also
 
