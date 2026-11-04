@@ -7,8 +7,11 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.json.Json
+import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
+import me.kpavlov.kt.schema.generator.core.ir.Constraint
 import me.kpavlov.kt.schema.generator.core.ir.Discriminator
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
+import me.kpavlov.kt.schema.generator.core.ir.Literal
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
@@ -340,5 +343,63 @@ class TypeGraphToFunctionCallingSchemaTransformerTest {
             description shouldBe "A shape"
         }
         nullOptions.shouldBeEmpty()
+    }
+
+    @OptIn(ExperimentalSchemaGeneratorApi::class)
+    @Test
+    fun `constraints on parameter type refs are emitted as validation keywords`() {
+        // Given
+        val limitId = TypeId("limit")
+        val graph =
+            TypeGraph(
+                root = TypeRef.Ref(limitId),
+                nodes =
+                    mapOf(
+                        limitId to
+                            ObjectNode(
+                                name = "limit",
+                                properties =
+                                    listOf(
+                                        Property(
+                                            "count",
+                                            TypeRef.Inline(
+                                                PrimitiveNode(PrimitiveKind.INT),
+                                                constraints = listOf(Constraint.Minimum(Literal.Integer(1))),
+                                            ),
+                                        ),
+                                        Property(
+                                            "name",
+                                            TypeRef.Inline(
+                                                PrimitiveNode(PrimitiveKind.STRING),
+                                                constraints = listOf(Constraint.Size(max = 8)),
+                                            ),
+                                        ),
+                                    ),
+                            ),
+                    ),
+            )
+        val transformer = TypeGraphToFunctionCallingSchemaTransformer(FunctionCallingSchemaConfig.Lenient)
+
+        // When
+        val schema = transformer.transform(graph, "limit")
+
+        // Then
+        schema.encode() shouldEqualJson
+            // language=json
+            """
+            {
+              "type": "function",
+              "name": "limit",
+              "description": "",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "count": { "type": "integer", "minimum": 1 },
+                  "name": { "type": "string", "maxLength": 8 }
+                },
+                "required": ["count", "name"]
+              }
+            }
+            """.trimIndent()
     }
 }

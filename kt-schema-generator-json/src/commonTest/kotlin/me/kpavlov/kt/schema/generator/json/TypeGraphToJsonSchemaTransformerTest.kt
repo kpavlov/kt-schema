@@ -3,9 +3,12 @@ package me.kpavlov.kt.schema.generator.json
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
+import me.kpavlov.kt.schema.generator.core.ir.Constraint
 import me.kpavlov.kt.schema.generator.core.ir.Discriminator
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
+import me.kpavlov.kt.schema.generator.core.ir.Literal
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PolymorphicNode
@@ -492,6 +495,72 @@ class TypeGraphToJsonSchemaTransformerTest {
             """.trimIndent()
     }
 
+    @OptIn(ExperimentalSchemaGeneratorApi::class)
+    @Test
+    fun `constraints on an inline root ref are emitted on the root schema`() {
+        val graph =
+            TypeGraph(
+                root =
+                    TypeRef.Inline(
+                        ListNode(
+                            element =
+                                TypeRef.Inline(
+                                    PrimitiveNode(PrimitiveKind.INT),
+                                    constraints = listOf(Constraint.Minimum(Literal.Integer(0))),
+                                ),
+                        ),
+                        constraints = listOf(Constraint.Size(min = 1, max = 5), Constraint.UniqueItems),
+                    ),
+                nodes = emptyMap(),
+            )
+
+        val schemaJson = transformer.transform(graph, "Ids").encodeToString(json)
+
+        schemaJson shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "Ids",
+              "type": "array",
+              "items": { "type": "integer", "minimum": 0 },
+              "minItems": 1,
+              "maxItems": 5,
+              "uniqueItems": true
+            }
+            """.trimIndent()
+    }
+
+    @OptIn(ExperimentalSchemaGeneratorApi::class)
+    @Test
+    fun `constraints on a named root ref are emitted on the root schema`() {
+        val codeId = TypeId("Code")
+        val graph =
+            TypeGraph(
+                root =
+                    TypeRef.Ref(
+                        codeId,
+                        constraints = listOf(Constraint.Pattern("^[A-Z]{2}$"), Constraint.Size(max = 2)),
+                    ),
+                nodes = mapOf(codeId to EnumNode(name = "Code", entries = listOf("US", "DE"))),
+            )
+
+        val schemaJson = transformer.transform(graph, "Code").encodeToString(json)
+
+        schemaJson shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "Code",
+              "type": "string",
+              "enum": ["US", "DE"],
+              "pattern": "^[A-Z]{2}$",
+              "maxLength": 2
+            }
+            """.trimIndent()
+    }
+
     @Test
     fun `Lenient omits null markers and additionalProperties and keeps nullable fields optional`() {
         // Given: Msg(text: String, count: Int?, ref: Other?, inner: Inner, tags: Map<String, Int>?)
@@ -657,6 +726,78 @@ class TypeGraphToJsonSchemaTransformerTest {
                   "required": ["id"]
                 }
               }
+            }
+            """.trimIndent()
+    }
+
+    @OptIn(ExperimentalSchemaGeneratorApi::class)
+    @Test
+    fun `constraints on type refs are emitted as validation keywords`() {
+        val rootId = TypeId("Form")
+        val rootNode =
+            ObjectNode(
+                name = "Form",
+                properties =
+                    listOf(
+                        Property(
+                            name = "age",
+                            type =
+                                TypeRef.Inline(
+                                    PrimitiveNode(PrimitiveKind.INT),
+                                    constraints =
+                                        listOf(
+                                            Constraint.Minimum(Literal.Integer(1)),
+                                            Constraint.Maximum(Literal.Integer(120), exclusive = true),
+                                        ),
+                                ),
+                        ),
+                        Property(
+                            name = "slug",
+                            type =
+                                TypeRef.Inline(
+                                    PrimitiveNode(PrimitiveKind.STRING),
+                                    nullable = true,
+                                    constraints = listOf(Constraint.Pattern("^[a-z-]+$"), Constraint.Size(max = 20)),
+                                ),
+                        ),
+                        Property(
+                            name = "tags",
+                            type =
+                                TypeRef.Inline(
+                                    ListNode(
+                                        element =
+                                            TypeRef.Inline(
+                                                PrimitiveNode(PrimitiveKind.STRING),
+                                                constraints = listOf(Constraint.Size(max = 3)),
+                                            ),
+                                    ),
+                                    constraints = listOf(Constraint.Size(min = 1)),
+                                ),
+                        ),
+                    ),
+            )
+        val graph = TypeGraph(root = TypeRef.Ref(rootId), nodes = mapOf(rootId to rootNode))
+
+        val schemaJson = transformer.transform(graph, "Form").encodeToString(json)
+
+        schemaJson shouldEqualJson
+            // language=JSON
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "Form",
+              "type": "object",
+              "properties": {
+                "age": { "type": "integer", "minimum": 1, "exclusiveMaximum": 120 },
+                "slug": { "type": ["string", "null"], "pattern": "^[a-z-]+$", "maxLength": 20 },
+                "tags": {
+                  "type": "array",
+                  "items": { "type": "string", "maxLength": 3 },
+                  "minItems": 1
+                }
+              },
+              "required": ["age", "slug", "tags"],
+              "additionalProperties": false
             }
             """.trimIndent()
     }

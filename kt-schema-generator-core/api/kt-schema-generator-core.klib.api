@@ -6,6 +6,10 @@
 // - Show declarations: true
 
 // Library unique name: <me.kpavlov.kt.schema:kt-schema-generator-core>
+open annotation class me.kpavlov.kt.schema.generator.core/ExperimentalSchemaGeneratorApi : kotlin/Annotation { // me.kpavlov.kt.schema.generator.core/ExperimentalSchemaGeneratorApi|null[0]
+    constructor <init>() // me.kpavlov.kt.schema.generator.core/ExperimentalSchemaGeneratorApi.<init>|<init>(){}[0]
+}
+
 open annotation class me.kpavlov.kt.schema.generator.core/InternalSchemaGeneratorApi : kotlin/Annotation { // me.kpavlov.kt.schema.generator.core/InternalSchemaGeneratorApi|null[0]
     constructor <init>() // me.kpavlov.kt.schema.generator.core/InternalSchemaGeneratorApi.<init>|<init>(){}[0]
 }
@@ -51,7 +55,91 @@ abstract interface <#A: kotlin/Any?, #B: kotlin/Any?> me.kpavlov.kt.schema.gener
     abstract fun transform(me.kpavlov.kt.schema.generator.core.ir/TypeGraph, kotlin/String): #A // me.kpavlov.kt.schema.generator.core.ir/TypeGraphTransformer.transform|transform(me.kpavlov.kt.schema.generator.core.ir.TypeGraph;kotlin.String){}[0]
 }
 
+sealed interface me.kpavlov.kt.schema.generator.core.ir/Constraint { // me.kpavlov.kt.schema.generator.core.ir/Constraint|null[0]
+    final class Format : me.kpavlov.kt.schema.generator.core.ir/Constraint { // me.kpavlov.kt.schema.generator.core.ir/Constraint.Format|null[0]
+        constructor <init>(kotlin/String) // me.kpavlov.kt.schema.generator.core.ir/Constraint.Format.<init>|<init>(kotlin.String){}[0]
+
+        final val name // me.kpavlov.kt.schema.generator.core.ir/Constraint.Format.name|{}name[0]
+            final fun <get-name>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Constraint.Format.name.<get-name>|<get-name>(){}[0]
+
+        final fun component1(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Constraint.Format.component1|component1(){}[0]
+        final fun copy(kotlin/String = ...): me.kpavlov.kt.schema.generator.core.ir/Constraint.Format // me.kpavlov.kt.schema.generator.core.ir/Constraint.Format.copy|copy(kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Constraint.Format.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/Constraint.Format.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Constraint.Format.toString|toString(){}[0]
+    }
+
+    final class Maximum : me.kpavlov.kt.schema.generator.core.ir/Constraint { // me.kpavlov.kt.schema.generator.core.ir/Constraint.Maximum|null[0]
+        constructor <init>(me.kpavlov.kt.schema.generator.core.ir/Literal.Numeric, kotlin/Boolean = ...) // me.kpavlov.kt.schema.generator.core.ir/Constraint.Maximum.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.Literal.Numeric;kotlin.Boolean){}[0]
+
+        final val exclusive // me.kpavlov.kt.schema.generator.core.ir/Constraint.Maximum.exclusive|{}exclusive[0]
+            final fun <get-exclusive>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Constraint.Maximum.exclusive.<get-exclusive>|<get-exclusive>(){}[0]
+        final val value // me.kpavlov.kt.schema.generator.core.ir/Constraint.Maximum.value|{}value[0]
+            final fun <get-value>(): me.kpavlov.kt.schema.generator.core.ir/Literal.Numeric // me.kpavlov.kt.schema.generator.core.ir/Constraint.Maximum.value.<get-value>|<get-value>(){}[0]
+
+        final fun component1(): me.kpavlov.kt.schema.generator.core.ir/Literal.Numeric // me.kpavlov.kt.schema.generator.core.ir/Constraint.Maximum.component1|component1(){}[0]
+        final fun component2(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Constraint.Maximum.component2|component2(){}[0]
+        final fun copy(me.kpavlov.kt.schema.generator.core.ir/Literal.Numeric = ..., kotlin/Boolean = ...): me.kpavlov.kt.schema.generator.core.ir/Constraint.Maximum // me.kpavlov.kt.schema.generator.core.ir/Constraint.Maximum.copy|copy(me.kpavlov.kt.schema.generator.core.ir.Literal.Numeric;kotlin.Boolean){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Constraint.Maximum.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/Constraint.Maximum.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Constraint.Maximum.toString|toString(){}[0]
+    }
+
+    final class Minimum : me.kpavlov.kt.schema.generator.core.ir/Constraint { // me.kpavlov.kt.schema.generator.core.ir/Constraint.Minimum|null[0]
+        constructor <init>(me.kpavlov.kt.schema.generator.core.ir/Literal.Numeric, kotlin/Boolean = ...) // me.kpavlov.kt.schema.generator.core.ir/Constraint.Minimum.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.Literal.Numeric;kotlin.Boolean){}[0]
+
+        final val exclusive // me.kpavlov.kt.schema.generator.core.ir/Constraint.Minimum.exclusive|{}exclusive[0]
+            final fun <get-exclusive>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Constraint.Minimum.exclusive.<get-exclusive>|<get-exclusive>(){}[0]
+        final val value // me.kpavlov.kt.schema.generator.core.ir/Constraint.Minimum.value|{}value[0]
+            final fun <get-value>(): me.kpavlov.kt.schema.generator.core.ir/Literal.Numeric // me.kpavlov.kt.schema.generator.core.ir/Constraint.Minimum.value.<get-value>|<get-value>(){}[0]
+
+        final fun component1(): me.kpavlov.kt.schema.generator.core.ir/Literal.Numeric // me.kpavlov.kt.schema.generator.core.ir/Constraint.Minimum.component1|component1(){}[0]
+        final fun component2(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Constraint.Minimum.component2|component2(){}[0]
+        final fun copy(me.kpavlov.kt.schema.generator.core.ir/Literal.Numeric = ..., kotlin/Boolean = ...): me.kpavlov.kt.schema.generator.core.ir/Constraint.Minimum // me.kpavlov.kt.schema.generator.core.ir/Constraint.Minimum.copy|copy(me.kpavlov.kt.schema.generator.core.ir.Literal.Numeric;kotlin.Boolean){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Constraint.Minimum.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/Constraint.Minimum.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Constraint.Minimum.toString|toString(){}[0]
+    }
+
+    final class Pattern : me.kpavlov.kt.schema.generator.core.ir/Constraint { // me.kpavlov.kt.schema.generator.core.ir/Constraint.Pattern|null[0]
+        constructor <init>(kotlin/String) // me.kpavlov.kt.schema.generator.core.ir/Constraint.Pattern.<init>|<init>(kotlin.String){}[0]
+
+        final val regex // me.kpavlov.kt.schema.generator.core.ir/Constraint.Pattern.regex|{}regex[0]
+            final fun <get-regex>(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Constraint.Pattern.regex.<get-regex>|<get-regex>(){}[0]
+
+        final fun component1(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Constraint.Pattern.component1|component1(){}[0]
+        final fun copy(kotlin/String = ...): me.kpavlov.kt.schema.generator.core.ir/Constraint.Pattern // me.kpavlov.kt.schema.generator.core.ir/Constraint.Pattern.copy|copy(kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Constraint.Pattern.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/Constraint.Pattern.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Constraint.Pattern.toString|toString(){}[0]
+    }
+
+    final class Size : me.kpavlov.kt.schema.generator.core.ir/Constraint { // me.kpavlov.kt.schema.generator.core.ir/Constraint.Size|null[0]
+        constructor <init>(kotlin/Int? = ..., kotlin/Int? = ...) // me.kpavlov.kt.schema.generator.core.ir/Constraint.Size.<init>|<init>(kotlin.Int?;kotlin.Int?){}[0]
+
+        final val max // me.kpavlov.kt.schema.generator.core.ir/Constraint.Size.max|{}max[0]
+            final fun <get-max>(): kotlin/Int? // me.kpavlov.kt.schema.generator.core.ir/Constraint.Size.max.<get-max>|<get-max>(){}[0]
+        final val min // me.kpavlov.kt.schema.generator.core.ir/Constraint.Size.min|{}min[0]
+            final fun <get-min>(): kotlin/Int? // me.kpavlov.kt.schema.generator.core.ir/Constraint.Size.min.<get-min>|<get-min>(){}[0]
+
+        final fun component1(): kotlin/Int? // me.kpavlov.kt.schema.generator.core.ir/Constraint.Size.component1|component1(){}[0]
+        final fun component2(): kotlin/Int? // me.kpavlov.kt.schema.generator.core.ir/Constraint.Size.component2|component2(){}[0]
+        final fun copy(kotlin/Int? = ..., kotlin/Int? = ...): me.kpavlov.kt.schema.generator.core.ir/Constraint.Size // me.kpavlov.kt.schema.generator.core.ir/Constraint.Size.copy|copy(kotlin.Int?;kotlin.Int?){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Constraint.Size.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/Constraint.Size.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Constraint.Size.toString|toString(){}[0]
+    }
+
+    final object UniqueItems : me.kpavlov.kt.schema.generator.core.ir/Constraint { // me.kpavlov.kt.schema.generator.core.ir/Constraint.UniqueItems|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Constraint.UniqueItems.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/Constraint.UniqueItems.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Constraint.UniqueItems.toString|toString(){}[0]
+    }
+}
+
 sealed interface me.kpavlov.kt.schema.generator.core.ir/Literal { // me.kpavlov.kt.schema.generator.core.ir/Literal|null[0]
+    sealed interface Numeric : me.kpavlov.kt.schema.generator.core.ir/Literal // me.kpavlov.kt.schema.generator.core.ir/Literal.Numeric|null[0]
+
     final class Bool : me.kpavlov.kt.schema.generator.core.ir/Literal { // me.kpavlov.kt.schema.generator.core.ir/Literal.Bool|null[0]
         constructor <init>(kotlin/Boolean) // me.kpavlov.kt.schema.generator.core.ir/Literal.Bool.<init>|<init>(kotlin.Boolean){}[0]
 
@@ -65,7 +153,7 @@ sealed interface me.kpavlov.kt.schema.generator.core.ir/Literal { // me.kpavlov.
         final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Literal.Bool.toString|toString(){}[0]
     }
 
-    final class Decimal : me.kpavlov.kt.schema.generator.core.ir/Literal { // me.kpavlov.kt.schema.generator.core.ir/Literal.Decimal|null[0]
+    final class Decimal : me.kpavlov.kt.schema.generator.core.ir/Literal.Numeric { // me.kpavlov.kt.schema.generator.core.ir/Literal.Decimal|null[0]
         constructor <init>(kotlin/Double) // me.kpavlov.kt.schema.generator.core.ir/Literal.Decimal.<init>|<init>(kotlin.Double){}[0]
 
         final val value // me.kpavlov.kt.schema.generator.core.ir/Literal.Decimal.value|{}value[0]
@@ -78,7 +166,7 @@ sealed interface me.kpavlov.kt.schema.generator.core.ir/Literal { // me.kpavlov.
         final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Literal.Decimal.toString|toString(){}[0]
     }
 
-    final class Integer : me.kpavlov.kt.schema.generator.core.ir/Literal { // me.kpavlov.kt.schema.generator.core.ir/Literal.Integer|null[0]
+    final class Integer : me.kpavlov.kt.schema.generator.core.ir/Literal.Numeric { // me.kpavlov.kt.schema.generator.core.ir/Literal.Integer|null[0]
         constructor <init>(kotlin/Long) // me.kpavlov.kt.schema.generator.core.ir/Literal.Integer.<init>|<init>(kotlin.Long){}[0]
 
         final val value // me.kpavlov.kt.schema.generator.core.ir/Literal.Integer.value|{}value[0]
@@ -188,12 +276,17 @@ sealed interface me.kpavlov.kt.schema.generator.core.ir/TypeNode { // me.kpavlov
 }
 
 sealed interface me.kpavlov.kt.schema.generator.core.ir/TypeRef { // me.kpavlov.kt.schema.generator.core.ir/TypeRef|null[0]
+    abstract val constraints // me.kpavlov.kt.schema.generator.core.ir/TypeRef.constraints|{}constraints[0]
+        abstract fun <get-constraints>(): kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Constraint> // me.kpavlov.kt.schema.generator.core.ir/TypeRef.constraints.<get-constraints>|<get-constraints>(){}[0]
     abstract val nullable // me.kpavlov.kt.schema.generator.core.ir/TypeRef.nullable|{}nullable[0]
         abstract fun <get-nullable>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeRef.nullable.<get-nullable>|<get-nullable>(){}[0]
 
     final class Inline : me.kpavlov.kt.schema.generator.core.ir/TypeRef { // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline|null[0]
         constructor <init>(me.kpavlov.kt.schema.generator.core.ir/TypeNode, kotlin/Boolean = ...) // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.TypeNode;kotlin.Boolean){}[0]
+        constructor <init>(me.kpavlov.kt.schema.generator.core.ir/TypeNode, kotlin/Boolean = ..., kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Constraint> = ...) // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.TypeNode;kotlin.Boolean;kotlin.collections.List<me.kpavlov.kt.schema.generator.core.ir.Constraint>){}[0]
 
+        final val constraints // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.constraints|{}constraints[0]
+            final fun <get-constraints>(): kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Constraint> // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.constraints.<get-constraints>|<get-constraints>(){}[0]
         final val node // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.node|{}node[0]
             final fun <get-node>(): me.kpavlov.kt.schema.generator.core.ir/TypeNode // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.node.<get-node>|<get-node>(){}[0]
         final val nullable // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.nullable|{}nullable[0]
@@ -201,7 +294,9 @@ sealed interface me.kpavlov.kt.schema.generator.core.ir/TypeRef { // me.kpavlov.
 
         final fun component1(): me.kpavlov.kt.schema.generator.core.ir/TypeNode // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.component1|component1(){}[0]
         final fun component2(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.component2|component2(){}[0]
+        final fun component3(): kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Constraint> // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.component3|component3(){}[0]
         final fun copy(me.kpavlov.kt.schema.generator.core.ir/TypeNode = ..., kotlin/Boolean = ...): me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.copy|copy(me.kpavlov.kt.schema.generator.core.ir.TypeNode;kotlin.Boolean){}[0]
+        final fun copy(me.kpavlov.kt.schema.generator.core.ir/TypeNode = ..., kotlin/Boolean = ..., kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Constraint> = ...): me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.copy|copy(me.kpavlov.kt.schema.generator.core.ir.TypeNode;kotlin.Boolean;kotlin.collections.List<me.kpavlov.kt.schema.generator.core.ir.Constraint>){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Inline.toString|toString(){}[0]
@@ -209,7 +304,10 @@ sealed interface me.kpavlov.kt.schema.generator.core.ir/TypeRef { // me.kpavlov.
 
     final class Ref : me.kpavlov.kt.schema.generator.core.ir/TypeRef { // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref|null[0]
         constructor <init>(me.kpavlov.kt.schema.generator.core.ir/TypeId, kotlin/Boolean = ...) // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.TypeId;kotlin.Boolean){}[0]
+        constructor <init>(me.kpavlov.kt.schema.generator.core.ir/TypeId, kotlin/Boolean = ..., kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Constraint> = ...) // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.<init>|<init>(me.kpavlov.kt.schema.generator.core.ir.TypeId;kotlin.Boolean;kotlin.collections.List<me.kpavlov.kt.schema.generator.core.ir.Constraint>){}[0]
 
+        final val constraints // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.constraints|{}constraints[0]
+            final fun <get-constraints>(): kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Constraint> // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.constraints.<get-constraints>|<get-constraints>(){}[0]
         final val id // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.id|{}id[0]
             final fun <get-id>(): me.kpavlov.kt.schema.generator.core.ir/TypeId // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.id.<get-id>|<get-id>(){}[0]
         final val nullable // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.nullable|{}nullable[0]
@@ -217,7 +315,9 @@ sealed interface me.kpavlov.kt.schema.generator.core.ir/TypeRef { // me.kpavlov.
 
         final fun component1(): me.kpavlov.kt.schema.generator.core.ir/TypeId // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.component1|component1(){}[0]
         final fun component2(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.component2|component2(){}[0]
+        final fun component3(): kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Constraint> // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.component3|component3(){}[0]
         final fun copy(me.kpavlov.kt.schema.generator.core.ir/TypeId = ..., kotlin/Boolean = ...): me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.copy|copy(me.kpavlov.kt.schema.generator.core.ir.TypeId;kotlin.Boolean){}[0]
+        final fun copy(me.kpavlov.kt.schema.generator.core.ir/TypeId = ..., kotlin/Boolean = ..., kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Constraint> = ...): me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.copy|copy(me.kpavlov.kt.schema.generator.core.ir.TypeId;kotlin.Boolean;kotlin.collections.List<me.kpavlov.kt.schema.generator.core.ir.Constraint>){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/TypeRef.Ref.toString|toString(){}[0]
@@ -446,10 +546,8 @@ final class me.kpavlov.kt.schema.generator.core.ir/PrimitiveNode : me.kpavlov.kt
 }
 
 final class me.kpavlov.kt.schema.generator.core.ir/Property { // me.kpavlov.kt.schema.generator.core.ir/Property|null[0]
-    constructor <init>(kotlin/String, me.kpavlov.kt.schema.generator.core.ir/TypeRef, kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., me.kpavlov.kt.schema.generator.core.ir/PropertyValue = ..., kotlin.collections/Map<kotlin/String, kotlin/String?> = ...) // me.kpavlov.kt.schema.generator.core.ir/Property.<init>|<init>(kotlin.String;me.kpavlov.kt.schema.generator.core.ir.TypeRef;kotlin.String?;kotlin.Boolean;kotlin.Boolean;me.kpavlov.kt.schema.generator.core.ir.PropertyValue;kotlin.collections.Map<kotlin.String,kotlin.String?>){}[0]
+    constructor <init>(kotlin/String, me.kpavlov.kt.schema.generator.core.ir/TypeRef, kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., me.kpavlov.kt.schema.generator.core.ir/PropertyValue = ...) // me.kpavlov.kt.schema.generator.core.ir/Property.<init>|<init>(kotlin.String;me.kpavlov.kt.schema.generator.core.ir.TypeRef;kotlin.String?;kotlin.Boolean;kotlin.Boolean;me.kpavlov.kt.schema.generator.core.ir.PropertyValue){}[0]
 
-    final val annotations // me.kpavlov.kt.schema.generator.core.ir/Property.annotations|{}annotations[0]
-        final fun <get-annotations>(): kotlin.collections/Map<kotlin/String, kotlin/String?> // me.kpavlov.kt.schema.generator.core.ir/Property.annotations.<get-annotations>|<get-annotations>(){}[0]
     final val deprecated // me.kpavlov.kt.schema.generator.core.ir/Property.deprecated|{}deprecated[0]
         final fun <get-deprecated>(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Property.deprecated.<get-deprecated>|<get-deprecated>(){}[0]
     final val description // me.kpavlov.kt.schema.generator.core.ir/Property.description|{}description[0]
@@ -469,8 +567,7 @@ final class me.kpavlov.kt.schema.generator.core.ir/Property { // me.kpavlov.kt.s
     final fun component4(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Property.component4|component4(){}[0]
     final fun component5(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Property.component5|component5(){}[0]
     final fun component6(): me.kpavlov.kt.schema.generator.core.ir/PropertyValue // me.kpavlov.kt.schema.generator.core.ir/Property.component6|component6(){}[0]
-    final fun component7(): kotlin.collections/Map<kotlin/String, kotlin/String?> // me.kpavlov.kt.schema.generator.core.ir/Property.component7|component7(){}[0]
-    final fun copy(kotlin/String = ..., me.kpavlov.kt.schema.generator.core.ir/TypeRef = ..., kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., me.kpavlov.kt.schema.generator.core.ir/PropertyValue = ..., kotlin.collections/Map<kotlin/String, kotlin/String?> = ...): me.kpavlov.kt.schema.generator.core.ir/Property // me.kpavlov.kt.schema.generator.core.ir/Property.copy|copy(kotlin.String;me.kpavlov.kt.schema.generator.core.ir.TypeRef;kotlin.String?;kotlin.Boolean;kotlin.Boolean;me.kpavlov.kt.schema.generator.core.ir.PropertyValue;kotlin.collections.Map<kotlin.String,kotlin.String?>){}[0]
+    final fun copy(kotlin/String = ..., me.kpavlov.kt.schema.generator.core.ir/TypeRef = ..., kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., me.kpavlov.kt.schema.generator.core.ir/PropertyValue = ...): me.kpavlov.kt.schema.generator.core.ir/Property // me.kpavlov.kt.schema.generator.core.ir/Property.copy|copy(kotlin.String;me.kpavlov.kt.schema.generator.core.ir.TypeRef;kotlin.String?;kotlin.Boolean;kotlin.Boolean;me.kpavlov.kt.schema.generator.core.ir.PropertyValue){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/Property.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // me.kpavlov.kt.schema.generator.core.ir/Property.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // me.kpavlov.kt.schema.generator.core.ir/Property.toString|toString(){}[0]
@@ -550,6 +647,7 @@ final fun (me.kpavlov.kt.schema.generator.core.ir/Literal).me.kpavlov.kt.schema.
 final fun (me.kpavlov.kt.schema.generator.core.ir/Property).me.kpavlov.kt.schema.generator.core.ir/isPresenceRequired(): kotlin/Boolean // me.kpavlov.kt.schema.generator.core.ir/isPresenceRequired|isPresenceRequired@me.kpavlov.kt.schema.generator.core.ir.Property(){}[0]
 final fun (me.kpavlov.kt.schema.generator.core.ir/TypeId).me.kpavlov.kt.schema.generator.core.ir/parseApplied(): me.kpavlov.kt.schema.generator.core.ir/AppliedTypeName? // me.kpavlov.kt.schema.generator.core.ir/parseApplied|parseApplied@me.kpavlov.kt.schema.generator.core.ir.TypeId(){}[0]
 final fun (me.kpavlov.kt.schema.generator.core.ir/TypeNode).me.kpavlov.kt.schema.generator.core.ir/withDescription(kotlin/String): me.kpavlov.kt.schema.generator.core.ir/TypeNode // me.kpavlov.kt.schema.generator.core.ir/withDescription|withDescription@me.kpavlov.kt.schema.generator.core.ir.TypeNode(kotlin.String){}[0]
+final fun (me.kpavlov.kt.schema.generator.core.ir/TypeRef).me.kpavlov.kt.schema.generator.core.ir/withConstraints(kotlin.collections/List<me.kpavlov.kt.schema.generator.core.ir/Constraint>): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/withConstraints|withConstraints@me.kpavlov.kt.schema.generator.core.ir.TypeRef(kotlin.collections.List<me.kpavlov.kt.schema.generator.core.ir.Constraint>){}[0]
 final fun (me.kpavlov.kt.schema.generator.core.ir/TypeRef).me.kpavlov.kt.schema.generator.core.ir/withNullable(kotlin/Boolean): me.kpavlov.kt.schema.generator.core.ir/TypeRef // me.kpavlov.kt.schema.generator.core.ir/withNullable|withNullable@me.kpavlov.kt.schema.generator.core.ir.TypeRef(kotlin.Boolean){}[0]
 final fun me.kpavlov.kt.schema.generator.core.ir/appliedTypeId(kotlin/String, kotlin.collections/List<kotlin/String>): me.kpavlov.kt.schema.generator.core.ir/TypeId // me.kpavlov.kt.schema.generator.core.ir/appliedTypeId|appliedTypeId(kotlin.String;kotlin.collections.List<kotlin.String>){}[0]
 final fun me.kpavlov.kt.schema.generator.core/defaultOpaqueTypeNames(): kotlin.collections/Set<kotlin/String> // me.kpavlov.kt.schema.generator.core/defaultOpaqueTypeNames|defaultOpaqueTypeNames(){}[0]

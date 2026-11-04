@@ -1,6 +1,7 @@
 package me.kpavlov.kt.schema.generator.json
 
 import kotlinx.serialization.json.JsonPrimitive
+import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.ir.AbstractTypeGraphTransformer
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
@@ -176,6 +177,7 @@ public class TypeGraphToFunctionCallingSchemaTransformer
             return required.filterNot { it in optional }
         }
 
+        @OptIn(ExperimentalSchemaGeneratorApi::class)
         private fun convertTypeRef(
             typeRef: TypeRef,
             graph: TypeGraph,
@@ -185,6 +187,7 @@ public class TypeGraphToFunctionCallingSchemaTransformer
             when (typeRef) {
                 is TypeRef.Inline -> {
                     convertInlineNode(typeRef.node, typeRef.nullable, graph, jsonTypeNames, depth)
+                        .applyConstraints(typeRef.constraints)
                 }
 
                 is TypeRef.Ref -> {

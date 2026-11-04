@@ -1,5 +1,6 @@
 package me.kpavlov.kt.schema.generator.core.ir
 
+import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
 import kotlin.jvm.JvmInline
 
@@ -22,22 +23,63 @@ public value class TypeId(
     public val value: String,
 )
 
-/** Reference to a type: either inline node or reference by [TypeId]. */
+/**
+ * Reference to a type: either inline node or reference by [TypeId].
+ *
+ * Usage-site modifiers live here, not on the shared [TypeNode]: [nullable] and [constraints] describe
+ * one use of a type (a property, a function parameter, a list element, a map value) and never alter
+ * the node reachable through the reference.
+ */
 public sealed interface TypeRef {
     public val nullable: Boolean
+
+    /**
+     * Validation constraints applied at this usage site; empty when none are declared.
+     * Emitters apply them in order, so a later constraint overrides an earlier one for the same keyword.
+     */
+    @ExperimentalSchemaGeneratorApi
+    public val constraints: List<Constraint>
 
     /** Inline node reference (anonymous, not addressable by $ref). */
     public data class Inline(
         val node: TypeNode,
         override val nullable: Boolean = false,
-    ) : TypeRef
+        @property:ExperimentalSchemaGeneratorApi
+        override val constraints: List<Constraint> = emptyList(),
+    ) : TypeRef {
+        // Binary compatibility with the pre-constraints JVM signatures; invisible to Kotlin source.
+        @Deprecated(BINARY_COMPAT, level = DeprecationLevel.HIDDEN)
+        public constructor(node: TypeNode, nullable: Boolean = false) : this(node, nullable, emptyList())
+
+        @Deprecated(BINARY_COMPAT, level = DeprecationLevel.HIDDEN)
+        @OptIn(ExperimentalSchemaGeneratorApi::class)
+        public fun copy(
+            node: TypeNode = this.node,
+            nullable: Boolean = this.nullable,
+        ): Inline = copy(node = node, nullable = nullable, constraints = constraints)
+    }
 
     /** Reference a named/type-def node by its [TypeId]. */
     public data class Ref(
         val id: TypeId,
         override val nullable: Boolean = false,
-    ) : TypeRef
+        @property:ExperimentalSchemaGeneratorApi
+        override val constraints: List<Constraint> = emptyList(),
+    ) : TypeRef {
+        // Binary compatibility with the pre-constraints JVM signatures; invisible to Kotlin source.
+        @Deprecated(BINARY_COMPAT, level = DeprecationLevel.HIDDEN)
+        public constructor(id: TypeId, nullable: Boolean = false) : this(id, nullable, emptyList())
+
+        @Deprecated(BINARY_COMPAT, level = DeprecationLevel.HIDDEN)
+        @OptIn(ExperimentalSchemaGeneratorApi::class)
+        public fun copy(
+            id: TypeId = this.id,
+            nullable: Boolean = this.nullable,
+        ): Ref = copy(id = id, nullable = nullable, constraints = constraints)
+    }
 }
+
+private const val BINARY_COMPAT = "Kept for binary compatibility"
 
 /**
  * Returns a copy of this [TypeRef] with the specified nullable flag.
@@ -173,15 +215,18 @@ public sealed interface Literal {
         val value: Boolean,
     ) : Literal
 
+    /** A JSON number: an [Integer] or a [Decimal]. */
+    public sealed interface Numeric : Literal
+
     /** A JSON integer. */
     public data class Integer(
         val value: Long,
-    ) : Literal
+    ) : Numeric
 
     /** A JSON number with a fractional part or exponent; always finite. */
     public data class Decimal(
         val value: Double,
-    ) : Literal
+    ) : Numeric
 
     /** A JSON string. */
     public data class Str(
@@ -206,6 +251,7 @@ public sealed interface Literal {
  *   (a Kotlin default value, an optional type-name convention or an optional annotation).
  *   A default literal alone does not set it. Ignored for [PropertyValue.Const], which is always required.
  * @property value the default or constant attached to the property, if any.
+ * @property type the property's type reference; validation constraints live on it, see [TypeRef.constraints].
  */
 public data class Property(
     val name: String,
@@ -214,7 +260,6 @@ public data class Property(
     val deprecated: Boolean = false,
     val optional: Boolean = false,
     val value: PropertyValue = PropertyValue.None,
-    val annotations: Map<String, String?> = emptyMap(),
 )
 
 /**
