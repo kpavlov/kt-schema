@@ -376,6 +376,24 @@ Schemas follow JSON Schema Draft 2020-12 format. Example (pretty-printed):
 - Nullable properties are emitted as a union including `null`.
 - Collections: `List<T>`/`Set<T>` → `{ "type":"array", "items": T }`; `Map<String, V>` →
   `{ "type":"object", "additionalProperties": V }`.
+- **Built-in type constraints**: types with a fixed range or wire format carry it in the schema.
+
+  | Kotlin / Java type                                                                                                         | Emitted keywords                       |
+  |----------------------------------------------------------------------------------------------------------------------------|----------------------------------------|
+  | `Byte`, `Short`                                                                                                            | `minimum`, `maximum` of the type range |
+  | `UByte`, `UShort`, `UInt`                                                                                                  | `minimum: 0`, `maximum` of the type    |
+  | `ULong`                                                                                                                    | `minimum: 0`                           |
+  | `Char`                                                                                                                     | `minLength: 1`, `maxLength: 1`         |
+  | `java.util.UUID`, `kotlin.uuid.Uuid`                                                                                       | `format: "uuid"`                       |
+  | `kotlin.time.Instant`, `kotlinx.datetime.Instant`, `java.time.Instant`, `OffsetDateTime`, `ZonedDateTime`, `java.util.Date` | `format: "date-time"`                  |
+  | `kotlinx.datetime.LocalDate`, `java.time.LocalDate`                                                                        | `format: "date"`                       |
+  | `kotlinx.datetime.LocalTime`, `java.time.LocalTime`, `java.time.OffsetTime`                                                | `format: "time"`                       |
+
+  `Int` and `Long` stay plain `integer`; `LocalDateTime` is a plain `string` since JSON Schema has no format for a
+  zone-less date-time. The `java.*` types apply to reflection, KSP and APT; kotlinx.serialization sees only the
+  Kotlin types it has serializers for. Date/time types are always emitted as ISO-8601 strings: the generators never
+  see your `ObjectMapper`, so if you serialize with plain Jackson, disable
+  `SerializationFeature.WRITE_DATES_AS_TIMESTAMPS` so payloads match the schema.
 - `kotlin.Any` / unbound generic type parameters (e.g., `T`) map to the empty schema `{}`, which accepts any JSON value.
 - Named types (nested objects, enums, sealed classes) are deduplicated in a `$defs` section and referenced via `$ref` at
   every usage site.

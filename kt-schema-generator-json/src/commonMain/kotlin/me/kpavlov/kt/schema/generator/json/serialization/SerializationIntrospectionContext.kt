@@ -10,6 +10,7 @@ import kotlinx.serialization.descriptors.nonNullOriginal
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonClassDiscriminator
 import kotlinx.serialization.modules.SerializersModuleCollector
+import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
@@ -26,6 +27,8 @@ import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.SubtypeRef
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.builtInConstraintsFor
+import me.kpavlov.kt.schema.generator.core.ir.withConstraints
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 import me.kpavlov.kt.schema.generator.json.SerialSchemaIgnore
 import kotlin.reflect.KClass
@@ -39,7 +42,7 @@ import kotlinx.serialization.descriptors.PrimitiveKind as SerialPrimitiveKind
  *
  * @property json The [Json] configuration used to extract discriminator settings for polymorphic types
  */
-@OptIn(InternalSchemaGeneratorApi::class)
+@OptIn(InternalSchemaGeneratorApi::class, ExperimentalSchemaGeneratorApi::class)
 @Suppress("TooManyFunctions")
 internal class SerializationIntrospectionContext(
     private val json: Json,
@@ -83,7 +86,7 @@ internal class SerializationIntrospectionContext(
 
         // Try primitives first (always inlined)
         primitiveFor(type)?.let { primitiveNode ->
-            val ref = TypeRef.Inline(primitiveNode, nullable)
+            val ref = TypeRef.Inline(primitiveNode, nullable, builtInConstraintsFor(type.serialName.removeSuffix("?")))
             if (!nullable) refCache[DescriptorKey(type)] = ref
             return ref
         }
@@ -209,10 +212,17 @@ internal class SerializationIntrospectionContext(
                 nullable = nullable,
                 wrappedNullable = wrappedDescriptor.isNullable,
                 description = extractDescription(descriptor),
-            ) { toRef(wrappedDescriptor) }
+            ) { toRef(wrappedDescriptor) }.withBuiltInConstraints(descriptor)
 
         if (!nullable) refCache[DescriptorKey(descriptor)] = innerRef
         return if (nullable && !innerRef.nullable) innerRef.withNullable(true) else innerRef
+    }
+
+    /** Unsigned types are inline classes over a signed primitive; their own range replaces the wrapped one. */
+    private fun TypeRef.withBuiltInConstraints(descriptor: SerialDescriptor): TypeRef {
+        if (this !is TypeRef.Inline) return this
+        val constraints = builtInConstraintsFor(descriptor.serialName.removeSuffix("?"))
+        return if (constraints.isEmpty()) this else withConstraints(constraints)
     }
 
     // ponytail: structurally identical distinct classes still merge; descriptors carry no FQN.

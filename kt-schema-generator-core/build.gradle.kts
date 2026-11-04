@@ -50,6 +50,7 @@ kotlin {
                 implementation(dependencies.platform(libs.jackson.bom))
                 implementation(libs.jackson.annotations)
                 implementation(libs.jackson.databind)
+                implementation(project(":test-fixtures"))
                 runtimeOnly(libs.slf4j.simple)
             }
         }

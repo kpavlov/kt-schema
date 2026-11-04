@@ -34,8 +34,8 @@ class InstantSchemaTest {
               "$id": "me.kpavlov.kt.schema.generator.json.InstantSchemaTest.Event",
               "type": "object",
               "properties": {
-                "at": { "type": "string" },
-                "maybeAt": { "type": ["string", "null"] }
+                "at": { "type": "string", "format": "date-time" },
+                "maybeAt": { "type": ["string", "null"], "format": "date-time" }
               },
               "additionalProperties": false,
               "required": ["at"]
@@ -93,8 +93,8 @@ class InstantSchemaTest {
               "$id": "me.kpavlov.kt.schema.generator.json.InstantSchemaTest.Event",
               "type": "object",
               "properties": {
-                "at": { "type": "string" },
-                "maybeAt": { "type": ["string", "null"] }
+                "at": { "type": "string", "format": "date-time" },
+                "maybeAt": { "type": ["string", "null"], "format": "date-time" }
               },
               "additionalProperties": false,
               "required": ["at"]

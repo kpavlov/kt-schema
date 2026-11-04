@@ -118,6 +118,10 @@ public abstract class me/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionCo
 protected final class me/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionContext$Companion {
 }
 
+public final class me/kpavlov/kt/schema/generator/core/ir/BuiltInConstraintsKt {
+	public static final fun builtInConstraintsFor (Ljava/lang/String;)Ljava/util/List;
+}
+
 public abstract interface class me/kpavlov/kt/schema/generator/core/ir/Constraint {
 }
 

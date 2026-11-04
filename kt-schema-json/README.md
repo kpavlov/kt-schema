@@ -267,8 +267,8 @@ Serialization result:
         "age": {
             "type": "integer",
             "description": "User age",
-            "minimum": 18.0,
-            "maximum": 120.0
+            "minimum": 18,
+            "maximum": 120
         },
         "status": {
             "type": "string",

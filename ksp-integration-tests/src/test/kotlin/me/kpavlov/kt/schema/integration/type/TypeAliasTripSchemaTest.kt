@@ -43,7 +43,7 @@ class TypeAliasTripSchemaTest {
             "unique": { "type": "array", "items": { "type": "integer" } },
             "hashed": { "type": "array", "items": { "type": "string" } },
             "linked": { "type": "object", "additionalProperties": { "type": "integer" } },
-            "initial": { "type": "string" }
+            "initial": { "type": "string", "minLength": 1, "maxLength": 1 }
           },
           "required": ["scores", "names", "unique", "hashed", "linked", "initial"],
           "additionalProperties": false

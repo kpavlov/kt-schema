@@ -9,6 +9,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
 import java.io.File
@@ -1488,25 +1489,52 @@ class JsonSchemaProcessorTest {
         "String, string",
         "int, integer",
         "boolean, boolean",
-        "byte, integer",
-        "short, integer",
         "long, integer",
         "float, number",
         "double, number",
-        "char, string",
         "Boolean, boolean",
-        "Byte, integer",
-        "Short, integer",
         "Integer, integer",
         "Long, integer",
         "Float, number",
         "Double, number",
-        "Character, string",
+        "java.time.LocalDateTime, string",
     )
     fun `should map scalar component types to JSON Schema types`(
         javaType: String,
         expectedJsonType: String,
         @TempDir tempDir: Path,
+    ) {
+        assertScalarSchema(javaType, """{ "type": "$expectedJsonType" }""", tempDir)
+    }
+
+    @ParameterizedTest(name = "should map {0} to {1}")
+    @CsvSource(
+        delimiter = '|',
+        quoteCharacter = '\'',
+        textBlock = """
+            byte           | { "type": "integer", "minimum": -128, "maximum": 127 }
+            Byte           | { "type": "integer", "minimum": -128, "maximum": 127 }
+            short          | { "type": "integer", "minimum": -32768, "maximum": 32767 }
+            Short          | { "type": "integer", "minimum": -32768, "maximum": 32767 }
+            char           | { "type": "string", "minLength": 1, "maxLength": 1 }
+            Character      | { "type": "string", "minLength": 1, "maxLength": 1 }
+            java.util.UUID | { "type": "string", "format": "uuid" }
+            java.time.Instant | { "type": "string", "format": "date-time" }
+            java.time.LocalDate | { "type": "string", "format": "date" }
+            java.time.LocalTime | { "type": "string", "format": "time" }""",
+    )
+    fun `should emit built-in constraints for scalar component types`(
+        javaType: String,
+        expectedPropertySchema: String,
+        @TempDir tempDir: Path,
+    ) {
+        assertScalarSchema(javaType, expectedPropertySchema, tempDir)
+    }
+
+    private fun assertScalarSchema(
+        javaType: String,
+        @Language("json") expectedPropertySchema: String,
+        tempDir: Path,
     ) {
         // language=java
         val source =
@@ -1529,7 +1557,7 @@ class JsonSchemaProcessorTest {
                 "$id": "com.example.Scalars",
                 "type": "object",
                 "properties": {
-                    "value": { "type": "$$expectedJsonType" }
+                    "value": $$expectedPropertySchema
                 },
                 "additionalProperties": false,
                 "required": ["value"]

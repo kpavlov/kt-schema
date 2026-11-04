@@ -31,6 +31,7 @@ import me.kpavlov.kt.schema.generator.core.ir.Property
 import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.builtInConstraintsFor
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 
 /**
@@ -133,7 +134,9 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         val nullable = type.effectiveNullable()
 
         // collectionTypeRefOrNull sees only native nullability; re-apply `nullable` (incl. name convention).
-        return KspTypeMappers.primitiveFor(type)?.let { TypeRef.Inline(it, nullable) }
+        return KspTypeMappers
+            .primitiveFor(type)
+            ?.let { TypeRef.Inline(it, nullable, builtInConstraintsFor(type.name())) }
             ?: KspTypeMappers.collectionTypeRefOrNull(type, ::toRef)?.withNullableIf(nullable)
     }
 
@@ -189,9 +192,13 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
     /** Maps third-party types with a fixed JSON primitive shape (e.g. Jackson's `StringNode`) to [PrimitiveNode]. */
     private fun resolvePrimitiveTypeKindOrNull(type: KSType): TypeRef? {
         val nullable = type.effectiveNullable()
-        val qualifiedName = type.declaration.qualifiedName?.asString() ?: return null
-        return PRIMITIVE_TYPE_KINDS[qualifiedName]?.let { TypeRef.Inline(PrimitiveNode(it), nullable) }
+        val qualifiedName = type.name() ?: return null
+        return PRIMITIVE_TYPE_KINDS[qualifiedName]?.let {
+            TypeRef.Inline(PrimitiveNode(it), nullable, builtInConstraintsFor(qualifiedName))
+        }
     }
+
+    private fun KSType.name(): String? = declaration.qualifiedName?.asString()
 
     /** Falls back to [AnyNode] for type parameters (`T`) and declarations that aren't named classes. */
     private fun handleAnyFallback(type: KSType): TypeRef? {

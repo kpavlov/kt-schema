@@ -373,18 +373,26 @@ class FunctionCallingSchemaTransformerTest {
 
             numericProperty("byteVal") shouldNotBeNull {
                 type shouldBe listOf("integer")
+                minimum shouldBe -128.0
+                maximum shouldBe 127.0
             }
 
             numericProperty("shortVal") shouldNotBeNull {
                 type shouldBe listOf("integer")
+                minimum shouldBe -32768.0
+                maximum shouldBe 32767.0
             }
 
             numericProperty("nullableByte") shouldNotBeNull {
                 type shouldBe listOf("integer", "null")
+                minimum shouldBe -128.0
+                maximum shouldBe 127.0
             }
 
             numericProperty("nullableShort") shouldNotBeNull {
                 type shouldBe listOf("integer", "null")
+                minimum shouldBe -32768.0
+                maximum shouldBe 32767.0
             }
         }
     }

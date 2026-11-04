@@ -20,6 +20,7 @@ import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.SubtypeRef
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.builtInConstraintsFor
 import me.kpavlov.kt.schema.generator.core.ir.toLiteral
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 import kotlin.reflect.KClass
@@ -89,7 +90,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         // Try to convert to primitive type — either a Kotlin built-in or a known third-party
         // type with a single well-defined JSON primitive shape (e.g. Jackson's StringNode).
         primitiveKindFor(klass)?.let { primitiveKind ->
-            val ref = TypeRef.Inline(PrimitiveNode(primitiveKind), nullable)
+            val ref = TypeRef.Inline(PrimitiveNode(primitiveKind), nullable, builtInConstraintsFor(klass.qualifiedName))
             if (!nullable) typeRefCache[type] = ref
             return ref
         }
@@ -129,8 +130,8 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         when (klass) {
             String::class -> PrimitiveKind.STRING
             Boolean::class -> PrimitiveKind.BOOLEAN
-            Byte::class, Short::class, Int::class -> PrimitiveKind.INT
-            Long::class -> PrimitiveKind.LONG
+            Byte::class, Short::class, Int::class, UByte::class, UShort::class, UInt::class -> PrimitiveKind.INT
+            Long::class, ULong::class -> PrimitiveKind.LONG
             Float::class -> PrimitiveKind.FLOAT
             Double::class -> PrimitiveKind.DOUBLE
             Char::class -> PrimitiveKind.STRING

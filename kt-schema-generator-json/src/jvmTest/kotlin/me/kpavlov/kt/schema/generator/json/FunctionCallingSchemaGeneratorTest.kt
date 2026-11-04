@@ -84,10 +84,14 @@ class FunctionCallingSchemaGeneratorTest {
                     "description": "Person's age"
                   },
                   "byteVal": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": -128,
+                    "maximum": 127
                   },
                   "shortVal": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": -32768,
+                    "maximum": 32767
                   },
                   "intVal": {
                     "type": "integer"

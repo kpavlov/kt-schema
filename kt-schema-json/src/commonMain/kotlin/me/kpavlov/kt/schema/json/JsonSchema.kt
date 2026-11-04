@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalSerializationApi::class)
+@file:UseSerializers(WholeNumberSerializer::class)
 
 package me.kpavlov.kt.schema.json
 
@@ -29,10 +30,12 @@ import me.kpavlov.kt.schema.json.serializers.PolymorphicEnumSerializer
 import me.kpavlov.kt.schema.json.serializers.PropertyDefinitionSerializer
 import me.kpavlov.kt.schema.json.serializers.StringEnumSerializer
 import me.kpavlov.kt.schema.json.serializers.StringOrListSerializer
+import me.kpavlov.kt.schema.json.serializers.WholeNumberSerializer
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement

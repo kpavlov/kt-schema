@@ -311,7 +311,11 @@ String schema = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 - Java `interface`s — no-arg methods map to required properties, named per the JavaBeans convention (`getName()` →
   `name`, `isActive()` → `active`, and a bare `name()` accessor stays `name`)
 - Java `enum`s — emitted as `type: string` with an `enum` array listing the constants in declaration order
-- `String`, boxed and primitive numeric/boolean types
+- `String`, boxed and primitive numeric/boolean types; `byte`/`short` (and their boxes) carry their range as
+  `minimum`/`maximum`, `char` carries `minLength: 1`/`maxLength: 1`
+- `java.util.UUID` (`format: "uuid"`), `java.time.Instant`/`OffsetDateTime`/`ZonedDateTime`/`java.util.Date`
+  (`format: "date-time"`), `LocalDate` (`format: "date"`), `LocalTime`/`OffsetTime` (`format: "time"`) and
+  `LocalDateTime` (plain `string`) — all emitted as `string`
 - `Iterable`-derived collections (`List`, `Set`, `Collection`, custom subclasses) — emitted as `array` with
   `items` describing the element type
 - `Map` — emitted as `object` with `additionalProperties` describing the value type

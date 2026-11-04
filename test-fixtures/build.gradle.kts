@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    kotlin("plugin.serialization")
 }
 
 // Sample code for tests only. Applying any publishing plugin (including `publishing-convention`) fails the build.
@@ -9,4 +10,8 @@ plugins.withId("maven-publish") {
 
 kotlin {
     jvmToolchain(17)
+}
+
+dependencies {
+    implementation(libs.kotlinx.serialization.core)
 }

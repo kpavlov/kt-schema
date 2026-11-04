@@ -12,8 +12,8 @@ class InstantTripSchemaTest {
           "$id": "me.kpavlov.kt.schema.integration.type.InstantTrip",
           "type": "object",
           "properties": {
-            "departure": { "type": "string" },
-            "arrival": { "type": ["string", "null"] }
+            "departure": { "type": "string", "format": "date-time" },
+            "arrival": { "type": ["string", "null"], "format": "date-time" }
           },
           "required": ["departure", "arrival"],
           "additionalProperties": false

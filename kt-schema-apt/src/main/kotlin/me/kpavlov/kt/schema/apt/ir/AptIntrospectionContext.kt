@@ -2,6 +2,7 @@
 package me.kpavlov.kt.schema.apt.ir
 
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
+import me.kpavlov.kt.schema.generator.core.defaultPrimitiveTypeKinds
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
@@ -18,6 +19,7 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.generator.core.ir.appliedTypeId
+import me.kpavlov.kt.schema.generator.core.ir.builtInConstraintsFor
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
@@ -30,6 +32,7 @@ import javax.lang.model.element.VariableElement
 import javax.lang.model.type.ArrayType
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
+import javax.lang.model.type.PrimitiveType
 import javax.lang.model.type.TypeKind
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.type.TypeVariable
@@ -67,7 +70,9 @@ internal class AptIntrospectionContext(
     override fun toRef(type: TypeMirror): TypeRef {
         val nullable = isNullableByTypeName(type)
         val ref =
-            primitiveKindFor(type)?.let { TypeRef.Inline(PrimitiveNode(it)) }
+            primitiveKindFor(type)?.let {
+                TypeRef.Inline(PrimitiveNode(it), constraints = builtInConstraintsFor(type.className()))
+            }
                 ?: when (type.kind) {
                     TypeKind.ARRAY -> handleArray(type)
                     TypeKind.TYPEVAR -> handleTypeVariable(type)
@@ -148,7 +153,7 @@ internal class AptIntrospectionContext(
         }
 
     private fun boxedPrimitiveKindFor(type: TypeMirror): PrimitiveKind? =
-        when (asTypeElement(type)?.qualifiedName?.toString()) {
+        when (val name = type.className()) {
             "java.lang.String" -> PrimitiveKind.STRING
             "java.lang.Boolean" -> PrimitiveKind.BOOLEAN
             "java.lang.Integer", "java.lang.Short", "java.lang.Byte" -> PrimitiveKind.INT
@@ -156,7 +161,14 @@ internal class AptIntrospectionContext(
             "java.lang.Float" -> PrimitiveKind.FLOAT
             "java.lang.Double", "java.math.BigDecimal" -> PrimitiveKind.DOUBLE
             "java.lang.Character" -> PrimitiveKind.STRING
-            else -> null
+            else -> PRIMITIVE_TYPE_KINDS[name]
+        }
+
+    /** Fully qualified class name; a Java primitive reports its boxed class (`byte` -> `java.lang.Byte`). */
+    private fun TypeMirror.className(): String? =
+        when (this) {
+            is PrimitiveType -> types.boxedClass(this).qualifiedName.toString()
+            else -> asTypeElement(this)?.qualifiedName?.toString()
         }
 
     private fun asTypeElement(type: TypeMirror): TypeElement? = types.asElement(type) as? TypeElement
@@ -628,6 +640,7 @@ internal class AptIntrospectionContext(
         const val GET_PREFIX: String = "get"
         const val IS_PREFIX: String = "is"
         const val JVM_INLINE: String = "kotlin.jvm.JvmInline"
+        val PRIMITIVE_TYPE_KINDS: Map<String, PrimitiveKind> = defaultPrimitiveTypeKinds()
     }
 
     //endregion

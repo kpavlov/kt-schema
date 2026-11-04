@@ -36,13 +36,28 @@ internal val DEFAULT_OPAQUE_TYPE_NAMES: Set<String> =
  * with no fixed shape, mapped to the empty schema `{}`), every type listed here always represents
  * exactly one JSON primitive, so it resolves to the matching
  * [PrimitiveNode][me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode] instead. Currently
- * populated with `kotlin.time.Instant` (an ISO-8601 string under kotlinx.serialization's default
- * serializer) and the leaf/numeric-abstraction types from Jackson's databind node hierarchy
+ * populated with UUID and date/time types (ISO-8601 strings under their default serializers; their
+ * `format` comes from [builtInConstraintsFor][me.kpavlov.kt.schema.generator.core.ir.builtInConstraintsFor])
+ * and the leaf/numeric-abstraction types from Jackson's databind node hierarchy
  * (`tools.jackson.databind.node`); other fixed-shape types can be added the same way.
  */
 internal val DEFAULT_PRIMITIVE_TYPE_KINDS: Map<String, PrimitiveKind> =
     mapOf(
+        "java.util.UUID" to PrimitiveKind.STRING,
+        "kotlin.uuid.Uuid" to PrimitiveKind.STRING,
         "kotlin.time.Instant" to PrimitiveKind.STRING,
+        "kotlinx.datetime.Instant" to PrimitiveKind.STRING,
+        "kotlinx.datetime.LocalDate" to PrimitiveKind.STRING,
+        "kotlinx.datetime.LocalDateTime" to PrimitiveKind.STRING,
+        "kotlinx.datetime.LocalTime" to PrimitiveKind.STRING,
+        "java.time.Instant" to PrimitiveKind.STRING,
+        "java.time.OffsetDateTime" to PrimitiveKind.STRING,
+        "java.time.ZonedDateTime" to PrimitiveKind.STRING,
+        "java.time.LocalDate" to PrimitiveKind.STRING,
+        "java.time.LocalDateTime" to PrimitiveKind.STRING,
+        "java.time.LocalTime" to PrimitiveKind.STRING,
+        "java.time.OffsetTime" to PrimitiveKind.STRING,
+        "java.util.Date" to PrimitiveKind.STRING,
         "tools.jackson.databind.node.StringNode" to PrimitiveKind.STRING,
         "tools.jackson.databind.node.BinaryNode" to PrimitiveKind.STRING,
         "tools.jackson.databind.node.BooleanNode" to PrimitiveKind.BOOLEAN,

@@ -9,20 +9,23 @@ import me.kpavlov.kt.schema.generator.core.ir.MapNode
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.builtInConstraintsFor
 
 /** Type mapping shared by the KSP introspectors. */
 internal object KspTypeMappers {
     /**
-     * Maps a Kotlin primitive to a [PrimitiveNode], or null: String/Char -> STRING, Boolean, Int/Byte/Short -> INT,
-     * Long, Float, Double.
+     * Maps a Kotlin primitive to a [PrimitiveNode], or null: String/Char -> STRING, Boolean,
+     * Int/Byte/Short/UInt/UByte/UShort -> INT, Long/ULong -> LONG, Float, Double.
      */
     fun primitiveFor(type: KSType): PrimitiveNode? {
         val qn = type.declaration.qualifiedName?.asString()
         return when (qn) {
             "kotlin.String", "kotlin.Char" -> PrimitiveNode(PrimitiveKind.STRING)
             "kotlin.Boolean" -> PrimitiveNode(PrimitiveKind.BOOLEAN)
-            "kotlin.Int", "kotlin.Byte", "kotlin.Short" -> PrimitiveNode(PrimitiveKind.INT)
-            "kotlin.Long" -> PrimitiveNode(PrimitiveKind.LONG)
+            "kotlin.Int", "kotlin.Byte", "kotlin.Short", "kotlin.UInt", "kotlin.UByte", "kotlin.UShort" ->
+                PrimitiveNode(PrimitiveKind.INT)
+
+            "kotlin.Long", "kotlin.ULong" -> PrimitiveNode(PrimitiveKind.LONG)
             "kotlin.Float" -> PrimitiveNode(PrimitiveKind.FLOAT)
             "kotlin.Double" -> PrimitiveNode(PrimitiveKind.DOUBLE)
             else -> null
@@ -122,7 +125,11 @@ internal object KspTypeMappers {
 
         val elementRef =
             if (primitiveElemKind != null) {
-                TypeRef.Inline(PrimitiveNode(primitiveElemKind))
+                // `kotlin.ByteArray` elements carry the same built-in bounds as `kotlin.Byte`.
+                TypeRef.Inline(
+                    PrimitiveNode(primitiveElemKind),
+                    constraints = builtInConstraintsFor(qn?.removeSuffix("Array")),
+                )
             } else {
                 val elem =
                     type.arguments
