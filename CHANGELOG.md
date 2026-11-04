@@ -1,12 +1,40 @@
-## Unreleased
+## Unreleased 0.10.0
 
-## 0.10.0
+### Added
+
+- **Schemas now carry the limits built into standard types**
+  ([#86](https://github.com/kpavlov/kt-schema/issues/86)). All front ends (reflection, kotlinx.serialization, KSP,
+  APT) emit them automatically; no annotations needed.
+    - `Byte` and `Short` (and Java `byte`/`Byte`, `short`/`Short`) get `minimum`/`maximum`
+    - `UByte`, `UShort` and `UInt` get `minimum: 0` and their `maximum`; `ULong` gets `minimum: 0`. Unsigned types were
+      previously emitted as plain `Int`/`Long`
+    - `Char` (Java `char`/`Character`) becomes a string of length 1 (`minLength`/`maxLength`)
+    - `ByteArray`, `ShortArray` and `CharArray` elements get the same bounds (KSP)
+    - `Int` and `Long` are unchanged: plain `integer`
+- **UUID and date/time types are strings with a `format`**
+  ([#86](https://github.com/kpavlov/kt-schema/issues/86)). Previously reflection and APT expanded them into objects.
+    - `uuid`: `java.util.UUID`, `kotlin.uuid.Uuid`
+    - `date-time`: `kotlin.time.Instant`, `kotlinx.datetime.Instant`, `java.time.Instant`, `OffsetDateTime`,
+      `ZonedDateTime`, `java.util.Date`
+    - `date`: `kotlinx.datetime.LocalDate`, `java.time.LocalDate`
+    - `time`: `kotlinx.datetime.LocalTime`, `java.time.LocalTime`, `java.time.OffsetTime`
+    - `LocalDateTime` is a plain `string` (JSON Schema has no format for a zone-less date-time)
+- **Validation constraints in the IR** ([#181](https://github.com/kpavlov/kt-schema/pull/181)), for anyone building
+  on `kt-schema-generator-core`: `TypeRef.constraints` holds `Minimum`, `Maximum`, `Size`, `Pattern`, `Format` or
+  `UniqueItems`, and both emitters turn them into the matching JSON Schema keywords. On nullable types the constraints
+  apply to the non-null branch only. Experimental: opt in with `@ExperimentalSchemaGeneratorApi`
+
+### Changed
+
+- Whole-number bounds are written as integers: `"minimum": 18` instead of `18.0`
+- **Breaking** for direct users of the IR: `Property.annotations` was removed. Nothing read or wrote it
+  ([#181](https://github.com/kpavlov/kt-schema/pull/181))
 
 ### Fixed
 
-- KSP function schemas: a parameter with a Kotlin default value is now optional (`Property.optional`), so the
-  `simple`, `lenient` and `openapi` configs omit it from `required`; the `strict` config still requires every
-  parameter
+- KSP function schemas: a parameter with a Kotlin default value is no longer listed in `required` under the `simple`,
+  `lenient` and `openapi` configs. The `strict` config still requires every parameter
+  ([#180](https://github.com/kpavlov/kt-schema/pull/180))
 
 ## 0.9.0
 
