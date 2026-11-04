@@ -4,7 +4,7 @@ Compile-time JSON Schema generation via Kotlin Symbol Processing (KSP).
 
 KSP symbol processor that analyzes `@Schema`-annotated declarations at compile time, generating extension properties with zero runtime overhead.
 
-**Platform Support:** Multiplatform (generates platform-agnostic code) • Build-time only • Kotlin 2.2+ • KSP 2.0+
+**Platform Support:** Multiplatform (generates platform-agnostic code) • Build-time only • Kotlin 2.2+ • KSP 2.3.1+
 
 ## Generated Extensions
 

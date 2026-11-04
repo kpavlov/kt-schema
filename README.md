@@ -1187,6 +1187,8 @@ Generated schemas follow the [OpenAI function calling format](https://platform.o
 
 **OpenAI Strict Mode**: All parameters are marked as required by default, even those with default values. This ensures
 compatibility with [OpenAI Structured Outputs](https://platform.openai.com/docs/guides/function-calling#strict-mode).
+With a non-strict config (`lenient`, `openapi`), parameters that have a Kotlin default value are omitted from
+`required`; KSP can't read the default's value, so no `default` is emitted.
 
 #### KSP vs Runtime Reflection
 
@@ -1548,7 +1550,8 @@ For build instructions, development setup, and contribution guidelines, see [CON
 ## Requirements
 
 - Kotlin 2.2+
-- KSP 2 for compile-time KSP generation
+- KSP 2.3.1+ for compile-time KSP generation (earlier KSP2 builds report wrong annotation-argument origins, so
+  `@Schema` parameters can be mistaken for defaults)
 - _kotlinx-serialization-json_ for JsonObject support
 
 Tip: If you use `@Description` on primary constructor parameters, enable

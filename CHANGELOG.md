@@ -1,5 +1,13 @@
 ## Unreleased
 
+## 0.10.0
+
+### Fixed
+
+- KSP function schemas: a parameter with a Kotlin default value is now optional (`Property.optional`), so the
+  `simple`, `lenient` and `openapi` configs omit it from `required`; the `strict` config still requires every
+  parameter
+
 ## 0.9.0
 
 Published: 2026-10-05

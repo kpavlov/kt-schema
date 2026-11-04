@@ -3,6 +3,7 @@ package me.kpavlov.kt.schema.ksp.ir
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.Property
+import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.SchemaIntrospector
 import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
@@ -20,6 +21,7 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeRef
  * - Extension functions (receiver type handled separately)
  * - Generic functions (using star projection)
  * - Complex parameter types (data classes, enums, sealed classes)
+ * - Parameters with a Kotlin default value, which are optional ([PropertyValue.UnknownDefault])
  *
  * Does NOT support:
  * - Lambda parameters with complex signatures
@@ -53,15 +55,15 @@ internal class KspFunctionIntrospector : SchemaIntrospector<KSFunctionDeclaratio
                     elementKdocFallback = { null },
                 )
 
-            // KSP limitation: hasDefault doesn't reliably detect default values in the same compilation unit
-            // For function calling schemas, all parameters are marked as required by default (including nullable)
-            // Nullable types are represented with union types: ["string", "null"]
+            // A parameter with a Kotlin default is optional; KSP exposes only the presence of the default, not its
+            // value (https://github.com/google/ksp/issues/1868). Nullability alone doesn't make it optional.
             properties +=
                 createProperty(
                     name = paramName,
                     type = typeRef,
                     description = description,
-                    optional = false,
+                    optional = param.hasDefault,
+                    value = if (param.hasDefault) PropertyValue.UnknownDefault else PropertyValue.None,
                 )
         }
 
