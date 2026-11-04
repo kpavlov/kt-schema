@@ -32,6 +32,7 @@ import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.generator.core.ir.builtInConstraintsFor
+import me.kpavlov.kt.schema.generator.core.ir.withAddedConstraints
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 
 /**
@@ -424,17 +425,22 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
      * The type-name and `@Nullable`/`@Optional`-style conventions apply on top of [nativeHasDefault].
      * KSP can't read a Kotlin default's value, so only an annotation-provided default is a known literal.
      *
+     * @param member `Owner.property`, named in the error for contradictory constraints
      * @param annotationSources declarations whose annotations are checked (e.g. a parameter and its property)
      */
     private fun resolvePropertyTypeAndOptionality(
         resolvedType: KSType,
         nativeHasDefault: Boolean,
+        member: String,
         vararg annotationSources: KSAnnotated?,
     ): Triple<TypeRef, Boolean, PropertyValue> {
         val nullableAnnotated = annotationSources.any { it?.isNullableAnnotated() == true }
         val optionalAnnotated = annotationSources.any { it?.isOptionalAnnotated() == true }
         val defaultValue = annotationSources.firstNotNullOfOrNull { it?.let(::extractDefaultValueOverride) }
-        val typeRef = toRef(resolvedType).let { if (nullableAnnotated) it.withNullable(true) else it }
+        val typeRef =
+            toRef(resolvedType)
+                .let { if (nullableAnnotated) it.withNullable(true) else it }
+                .withAddedConstraints(member) { annotationSources.flatMap { it?.validationConstraints().orEmpty() } }
         val optional = nativeHasDefault || resolvedType.isOptionalByTypeName() || optionalAnnotated
         val value =
             when {
@@ -464,6 +470,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                     resolvePropertyTypeAndOptionality(
                         typeAsMemberOf(property, owner, p.type.resolve()),
                         p.hasDefault,
+                        "${decl.qualifiedName?.asString()}.$kotlinName",
                         p,
                         property,
                         property?.getter,
@@ -488,6 +495,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                         resolvePropertyTypeAndOptionality(
                             typeAsMemberOf(prop, owner, prop.type.resolve()),
                             nativeHasDefault = false,
+                            "${decl.qualifiedName?.asString()}.$kotlinName",
                             prop,
                             prop.getter,
                         )
@@ -535,6 +543,7 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
                     resolvePropertyTypeAndOptionality(
                         effectiveProp.type.resolve(),
                         nativeHasDefault = true,
+                        "${decl.qualifiedName?.asString()}.$kotlinName",
                         parentProp,
                         parentProp.getter,
                         overridingProp,

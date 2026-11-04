@@ -135,7 +135,7 @@ public class TypeGraphToFunctionCallingSchemaTransformer
 
             return FunctionCallingSchema(
                 name = node.name,
-                description = node.description.orEmpty(),
+                description = node.description,
                 strict = if (config.strictMode) true else null,
                 parameters =
                     ObjectPropertyDefinition(
@@ -203,6 +203,7 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                                 "should be present in the graph's nodes map."
                         }
                     convertNode(node, typeRef.nullable, graph, jsonTypeNames, depth + 1)
+                        .applyConstraints(typeRef.constraints)
                 }
             }
 

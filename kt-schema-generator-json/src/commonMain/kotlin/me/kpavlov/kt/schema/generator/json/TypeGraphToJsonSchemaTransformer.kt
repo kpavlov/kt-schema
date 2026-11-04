@@ -358,7 +358,7 @@ public class TypeGraphToJsonSchemaTransformer
                     val refDef =
                         ReferencePropertyDefinition(
                             ref = $$"#/$defs/$${jsonTypeNames.getValue(id)}",
-                        )
+                        ).withConstraints(node, typeRef.constraints)
                     if (typeRef.nullable && !config.omitsNullMarker) {
                         OneOfPropertyDefinition(
                             oneOf =

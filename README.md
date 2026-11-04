@@ -394,6 +394,35 @@ Schemas follow JSON Schema Draft 2020-12 format. Example (pretty-printed):
   Kotlin types it has serializers for. Date/time types are always emitted as ISO-8601 strings: the generators never
   see your `ObjectMapper`, so if you serialize with plain Jackson, disable
   `SerializationFeature.WRITE_DATES_AS_TIMESTAMPS` so payloads match the schema.
+- **Jakarta Bean Validation constraints** on properties (reflection, KSP and APT) and on function parameters
+  (reflection and KSP) are emitted as JSON Schema keywords. Annotations are matched by name in `jakarta.validation.constraints` (and the legacy
+  `javax.validation.constraints`), so `jakarta.validation-api` is not a dependency of kt-schema. When several
+  annotations, or an annotation and a built-in type range, bound the same property, the tighter bound wins
+  whatever the order (`@Min(0) val level: Byte` → `minimum: 0, maximum: 127`; `@Size(min = 2) @NotEmpty` →
+  `minLength: 2`); for `pattern` and `format` the last annotation wins.
+  The recognized packages are configurable via `introspector.annotations.constraint.names` in
+  `kt-schema.properties`; a matching annotation is mapped by its simple name, so a custom `com.acme.Size(min, max)`
+  works once `com.acme.*` is added.
+
+  | Annotation                                             | Emitted keywords                                                                      |
+  |--------------------------------------------------------|---------------------------------------------------------------------------------------|
+  | `@Min`, `@Max`                                         | `minimum`, `maximum`                                                                  |
+  | `@DecimalMin`, `@DecimalMax`                           | `minimum`/`maximum`, or `exclusiveMinimum`/`exclusiveMaximum` with `inclusive = false` |
+  | `@Positive`, `@PositiveOrZero`                         | `exclusiveMinimum: 0`, `minimum: 0`                                                   |
+  | `@Negative`, `@NegativeOrZero`                         | `exclusiveMaximum: 0`, `maximum: 0`                                                   |
+  | `@Size(min, max)`                                      | `minLength`/`maxLength`, `minItems`/`maxItems` or `minProperties`/`maxProperties`     |
+  | `@NotEmpty`                                            | `minLength: 1` / `minItems: 1` / `minProperties: 1`                                   |
+  | `@NotBlank`                                            | `minLength: 1` (blank strings are not excluded)                                       |
+  | `@Pattern(regexp)`                                     | `pattern`, copied as written; a `@Pattern` with `flags` is skipped with a warning     |
+  | `@Email`                                               | `format: "email"`                                                                     |
+
+  `@NotNull`, `@Digits`, `@Past`/`@Future` and `@AssertTrue`/`@AssertFalse` have no JSON Schema equivalent and are
+  ignored. JSON Schema validators expect ECMA-262 regular expressions, so keep `@Pattern` to that subset (no
+  possessive quantifiers or `\p{Alpha}`-style Java classes). Contradictory bounds (`@Size(min = 5, max = 2)`, or
+  `@Size(min = 2)` on a `Char`) fail generation with an error naming the property. A constraint on a property whose
+  type is emitted as a `$ref` (an object or enum) is wrapped as `allOf: [{ "$ref": ... }, { "minProperties": 1 }]`.
+  Constraints on type arguments (`List<@Size(max = 3) String>`) are not read. The kotlinx.serialization front
+  end cannot see these annotations.
 - `kotlin.Any` / unbound generic type parameters (e.g., `T`) map to the empty schema `{}`, which accepts any JSON value.
 - Named types (nested objects, enums, sealed classes) are deduplicated in a `$defs` section and referenced via `$ref` at
   every usage site.
@@ -1352,6 +1381,8 @@ introspector.annotations.name.attributes=value
 introspector.annotations.enumDefault.names=com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 introspector.annotations.defaultValue.names=com.fasterxml.jackson.annotation.JsonProperty
 introspector.annotations.defaultValue.attributes=defaultValue
+# Validation constraint annotations, mapped by simple name (Min, Max, Size, Pattern, ...)
+introspector.annotations.constraint.names=jakarta.validation.constraints.*,javax.validation.constraints.*
 # Polymorphic discriminator property name (reflection and KSP front ends; defaults to "type")
 introspector.annotations.discriminator.names=kotlinx.serialization.json.JsonClassDiscriminator,com.fasterxml.jackson.annotation.JsonTypeInfo
 introspector.annotations.discriminator.attributes=discriminator,property

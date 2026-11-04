@@ -7,6 +7,7 @@ import me.kpavlov.kt.schema.generator.core.ir.SchemaIntrospector
 import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.withAddedConstraints
 import kotlin.reflect.KCallable
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
@@ -54,14 +55,16 @@ public object ReflectionFunctionIntrospector : SchemaIntrospector<KCallable<*>, 
             val paramType = param.type
             val optional = param.isOptional
 
-            val typeRef = context.toRef(paramType)
-
             // Find all annotations on the same parameter in parent functions too
             val allParamAnnotations =
                 param.annotations + implementedMethods
                         .map { method -> method.parameters.first { it.name == paramName } }
                         .flatMap { it.annotations }
 
+            val typeRef =
+                context.toRef(paramType).withAddedConstraints("${root.name}.$paramName") {
+                    extractConstraints(allParamAnnotations)
+                }
             val description = extractDescription(allParamAnnotations)
 
             properties +=

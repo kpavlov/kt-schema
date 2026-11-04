@@ -1,10 +1,13 @@
 package me.kpavlov.kt.schema.apt.ir
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
+import me.kpavlov.kt.schema.generator.core.ir.Constraint
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
 import me.kpavlov.kt.schema.generator.core.ir.Literal
@@ -426,6 +429,27 @@ class AptClassIntrospectorTest {
         }
     }
 
+    @OptIn(ExperimentalSchemaGeneratorApi::class)
+    @Test
+    fun `should read TYPE_USE constraint on array field type`() {
+        val graph =
+            graph(
+                root = "com.example.Tags",
+                jakartaSize(),
+                javaClass(
+                    "com.example",
+                    "Tags",
+                    """
+                    public String @jakarta.validation.constraints.Size(min = 1) [] values;
+                    """.trimIndent(),
+                ),
+            )
+
+        val values = graph.rootNode().properties.single { it.name == "values" }
+
+        values.type.constraints shouldContainExactly listOf(Constraint.Size(min = 1))
+    }
+
     @Test
     fun `should treat TYPE_USE Nullable annotation on field type as nullable`() {
         val graph =
@@ -757,6 +781,23 @@ class AptClassIntrospectorTest {
 
         public enum $enumName {
         $constants
+        }
+        """.trimIndent()
+
+    /** Stand-in for Jakarta's `@Size`, declared under its real FQN with its real targets. */
+    @Language("java")
+    private fun jakartaSize(): String =
+        // language=java
+        """
+        package jakarta.validation.constraints;
+
+        import java.lang.annotation.ElementType;
+        import java.lang.annotation.Target;
+
+        @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE_USE})
+        public @interface Size {
+            int min() default 0;
+            int max() default Integer.MAX_VALUE;
         }
         """.trimIndent()
 

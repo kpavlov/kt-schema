@@ -21,6 +21,7 @@ dependencies {
     implementation(platform(libs.jackson.bom))
     implementation(libs.jackson.annotations)
     implementation(libs.jackson.databind)
+    implementation(libs.jakarta.validation.api)
     implementation(libs.langchain4j.core)
 
     testImplementation(kotlin("test"))

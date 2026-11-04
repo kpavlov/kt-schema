@@ -105,7 +105,6 @@ class TypeGraphToFunctionCallingSchemaTransformerTest {
             {
               "type": "function",
               "name": "send",
-              "description": "",
               "parameters": {
                 "type": "object",
                 "properties": {
@@ -189,7 +188,6 @@ class TypeGraphToFunctionCallingSchemaTransformerTest {
             {
               "type": "function",
               "name": "bag",
-              "description": "",
               "parameters": {
                 "type": "object",
                 "properties": {
@@ -236,7 +234,6 @@ class TypeGraphToFunctionCallingSchemaTransformerTest {
             {
               "type": "function",
               "name": "send",
-              "description": "",
               "parameters": {
                 "type": "object",
                 "properties": {
@@ -390,7 +387,6 @@ class TypeGraphToFunctionCallingSchemaTransformerTest {
             {
               "type": "function",
               "name": "limit",
-              "description": "",
               "parameters": {
                 "type": "object",
                 "properties": {

@@ -5,6 +5,7 @@ import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.defaultPrimitiveTypeKinds
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.BaseIntrospectionContext
+import me.kpavlov.kt.schema.generator.core.ir.Constraint
 import me.kpavlov.kt.schema.generator.core.ir.Discriminator
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.Introspections
@@ -22,6 +23,7 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.generator.core.ir.builtInConstraintsFor
 import me.kpavlov.kt.schema.generator.core.ir.toLiteral
+import me.kpavlov.kt.schema.generator.core.ir.withAddedConstraints
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
@@ -454,6 +456,7 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
         // Build a map of parent property descriptions, name overrides and properties
         val parentPropertyDescriptions = mutableMapOf<String, String>()
         val parentPropertyNameOverrides = mutableMapOf<String, String>()
+        val parentPropertyConstraints = mutableMapOf<String, List<Constraint>>()
         val parentProperties = mutableSetOf<String>()
         sealedParents.forEach { parent ->
             parent.members
@@ -465,6 +468,9 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                     val parentAnnotations = collectPropertyAnnotations(prop)
                     extractDescription(parentAnnotations)?.let { parentPropertyDescriptions[prop.name] = it }
                     extractNameOverride(parentAnnotations)?.let { parentPropertyNameOverrides[prop.name] = it }
+                    extractConstraints(parentAnnotations)
+                        .takeIf { it.isNotEmpty() }
+                        ?.let { parentPropertyConstraints[prop.name] = it }
                 }
         }
 
@@ -487,15 +493,17 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
                 ?.toSet()
                 .orEmpty()
 
-        // If there are sealed parents, update descriptions to inherit from parent if needed
+        // If there are sealed parents, inherit descriptions and constraints from the parent if needed
         if (sealedParents.isNotEmpty()) {
             constructorProperties.forEach { prop ->
                 val updatedProp =
-                    if (prop.description == null && parentPropertyDescriptions.containsKey(prop.name)) {
-                        prop.copy(description = parentPropertyDescriptions[prop.name])
-                    } else {
-                        prop
-                    }
+                    prop.copy(
+                        description = prop.description ?: parentPropertyDescriptions[prop.name],
+                        type =
+                            prop.type.withAddedConstraints("${klass.qualifiedName}.${prop.name}") {
+                                parentPropertyConstraints[prop.name].orEmpty()
+                            },
+                    )
                 properties += updatedProp
             }
         } else {
@@ -569,9 +577,9 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
 
         val propertyType = substituteTypeParameters(property.returnType, bindings)
         val typeRef =
-            toRef(propertyType).let {
-                if (isNullableAnnotated(annotations)) it.withNullable(true) else it
-            }
+            toRef(propertyType)
+                .let { if (isNullableAnnotated(annotations)) it.withNullable(true) else it }
+                .withAddedConstraints(property.memberName()) { extractConstraints(annotations) }
         // An inherited property with a fixed value is a constant (and thus required);
         // otherwise it's optional by convention (type-name pattern or explicit optional annotation).
         val fixedValue = defaultValues[property.name]
@@ -680,9 +688,9 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
 
             val propertyType = substituteTypeParameters(param.type, bindings)
             val typeRef =
-                toRef(propertyType).let {
-                    if (isNullableAnnotated(annotations)) it.withNullable(true) else it
-                }
+                toRef(propertyType)
+                    .let { if (isNullableAnnotated(annotations)) it.withNullable(true) else it }
+                    .withAddedConstraints("${klass.qualifiedName}.$kotlinName") { extractConstraints(annotations) }
 
             // A property is optional when it has a Kotlin default value, or when it's marked
             // optional by convention (type-name pattern or `@Nullable`-style annotation) — the latter

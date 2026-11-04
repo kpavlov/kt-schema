@@ -77,7 +77,6 @@ class FunctionCallingGenericObjectTest {
             {
               "type": "function",
               "name": "send",
-              "description": "",
               "strict": true,
               "parameters": $parameters
             }
@@ -94,7 +93,6 @@ class FunctionCallingGenericObjectTest {
             {
               "type": "function",
               "name": "sendReversed",
-              "description": "",
               "strict": true,
               "parameters": {
                 "type": "object",

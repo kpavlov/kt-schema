@@ -1,7 +1,11 @@
 package me.kpavlov.kt.schema.generator.json
 
 import me.kpavlov.kt.schema.generator.core.ir.Constraint
+import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.Literal
+import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
+import me.kpavlov.kt.schema.generator.core.ir.TypeNode
+import me.kpavlov.kt.schema.json.AllOfPropertyDefinition
 import me.kpavlov.kt.schema.json.AnyOfPropertyDefinition
 import me.kpavlov.kt.schema.json.ArrayPropertyDefinition
 import me.kpavlov.kt.schema.json.JsonSchemaConstants.Types.NULL_TYPE
@@ -9,6 +13,7 @@ import me.kpavlov.kt.schema.json.NumericPropertyDefinition
 import me.kpavlov.kt.schema.json.ObjectPropertyDefinition
 import me.kpavlov.kt.schema.json.OneOfPropertyDefinition
 import me.kpavlov.kt.schema.json.PropertyDefinition
+import me.kpavlov.kt.schema.json.ReferencePropertyDefinition
 import me.kpavlov.kt.schema.json.StringPropertyDefinition
 
 /**
@@ -19,6 +24,28 @@ import me.kpavlov.kt.schema.json.StringPropertyDefinition
  */
 internal fun PropertyDefinition.applyConstraints(constraints: List<Constraint>): PropertyDefinition =
     if (constraints.isEmpty()) this else constraints.fold(this) { def, constraint -> def.applyConstraint(constraint) }
+
+/**
+ * Returns this `$ref` unchanged for an empty list; otherwise an `allOf` of the reference and a sibling
+ * definition shaped like the referenced [node] that carries [constraints]. A polymorphic node has no
+ * constrainable keyword, so it keeps the bare reference.
+ */
+internal fun ReferencePropertyDefinition.withConstraints(
+    node: TypeNode,
+    constraints: List<Constraint>,
+): PropertyDefinition {
+    val sibling =
+        when (node) {
+            is ObjectNode -> ObjectPropertyDefinition()
+            is EnumNode -> StringPropertyDefinition()
+            else -> null
+        }
+    return if (constraints.isEmpty() || sibling == null) {
+        this
+    } else {
+        AllOfPropertyDefinition(allOf = listOf(this, sibling.applyConstraints(constraints)))
+    }
+}
 
 private fun PropertyDefinition.applyConstraint(constraint: Constraint): PropertyDefinition =
     when (this) {

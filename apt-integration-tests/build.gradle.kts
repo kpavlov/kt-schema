@@ -12,6 +12,7 @@ dependencies {
     implementation(platform(libs.jackson.bom))
     implementation(libs.jackson.annotations)
     implementation(libs.jspecify)
+    implementation(libs.jakarta.validation.api)
     annotationProcessor(project(":kt-schema-apt"))
 
     testImplementation(libs.junit.jupiter.api)

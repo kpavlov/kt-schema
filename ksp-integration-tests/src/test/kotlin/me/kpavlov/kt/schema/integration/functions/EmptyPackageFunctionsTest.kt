@@ -54,7 +54,7 @@ class EmptyPackageFunctionsTest {
         Json.encodeToString(schema) shouldEqualJson schemaString
         schemaString shouldEqualJson
             """
-            {"type":"function","name":"classFunction","description":"","strict":true,
+            {"type":"function","name":"classFunction","strict":true,
             "parameters":{"type":"object","properties":{},"required":[],"additionalProperties":false}}
             """.trimIndent()
     }
@@ -67,7 +67,7 @@ class EmptyPackageFunctionsTest {
         Json.encodeToString(schema) shouldEqualJson schemaString
         schemaString shouldEqualJson
             """
-            {"type":"function","name":"objectFunction","description":"","strict":true,
+            {"type":"function","name":"objectFunction","strict":true,
             "parameters":{"type":"object","properties":{},"required":[],"additionalProperties":false}}
             """.trimIndent()
     }
@@ -80,7 +80,7 @@ class EmptyPackageFunctionsTest {
         Json.encodeToString(schema) shouldEqualJson schemaString
         schemaString shouldEqualJson
             """
-            {"type":"function","name":"companionFunction","description":"","strict":true,
+            {"type":"function","name":"companionFunction","strict":true,
             "parameters":{"type":"object","properties":{},"required":[],"additionalProperties":false}}
             """.trimIndent()
     }
