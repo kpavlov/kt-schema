@@ -20,6 +20,7 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeNode
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.generator.core.ir.appliedTypeId
 import me.kpavlov.kt.schema.generator.core.ir.builtInConstraintsFor
+import me.kpavlov.kt.schema.generator.core.ir.withAddedConstraints
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.Element
@@ -658,10 +659,11 @@ internal class AptIntrospectionContext(
         Property(
             name = name,
             type =
-                toRef(type).let {
-                    val nullable = isNullableAnnotated(annotationTargets) || type.isNullableTypeAnnotated()
-                    if (nullable) it.withNullable(true) else it
-                },
+                toRef(type)
+                    .let {
+                        val nullable = isNullableAnnotated(annotationTargets) || type.isNullableTypeAnnotated()
+                        if (nullable) it.withNullable(true) else it
+                    }.withAddedConstraints(constraintsOf(annotationTargets)),
             description = description,
             optional = optional,
             value = defaultValue?.let { PropertyValue.Default(Literal.Str(it)) } ?: PropertyValue.None,

@@ -32,6 +32,7 @@ import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.generator.core.ir.builtInConstraintsFor
+import me.kpavlov.kt.schema.generator.core.ir.withAddedConstraints
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 
 /**
@@ -434,7 +435,10 @@ internal class KspIntrospectionContext : BaseIntrospectionContext<KSType>() {
         val nullableAnnotated = annotationSources.any { it?.isNullableAnnotated() == true }
         val optionalAnnotated = annotationSources.any { it?.isOptionalAnnotated() == true }
         val defaultValue = annotationSources.firstNotNullOfOrNull { it?.let(::extractDefaultValueOverride) }
-        val typeRef = toRef(resolvedType).let { if (nullableAnnotated) it.withNullable(true) else it }
+        val typeRef =
+            toRef(resolvedType)
+                .let { if (nullableAnnotated) it.withNullable(true) else it }
+                .withAddedConstraints(annotationSources.flatMap { it?.validationConstraints().orEmpty() })
         val optional = nativeHasDefault || resolvedType.isOptionalByTypeName() || optionalAnnotated
         val value =
             when {

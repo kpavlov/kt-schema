@@ -14,4 +14,5 @@ kotlin {
 
 dependencies {
     implementation(libs.kotlinx.serialization.core)
+    api(libs.jakarta.validation.api)
 }

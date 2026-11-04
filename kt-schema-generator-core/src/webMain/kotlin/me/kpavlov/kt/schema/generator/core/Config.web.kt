@@ -27,6 +27,8 @@ internal actual object Config {
         get() = listOf("com.fasterxml.jackson.annotation.JsonProperty")
     actual val defaultValueAttributes: List<String>
         get() = listOf("defaultValue")
+    actual val constraintAnnotationNames: List<String>
+        get() = listOf("jakarta.validation.constraints.*", "javax.validation.constraints.*")
     actual val discriminatorAnnotationNames: List<String>
         get() =
             listOf(

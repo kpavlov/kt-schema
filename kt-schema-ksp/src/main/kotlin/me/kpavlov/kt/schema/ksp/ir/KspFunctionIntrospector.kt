@@ -8,6 +8,7 @@ import me.kpavlov.kt.schema.generator.core.ir.SchemaIntrospector
 import me.kpavlov.kt.schema.generator.core.ir.TypeGraph
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import me.kpavlov.kt.schema.generator.core.ir.withAddedConstraints
 
 /**
  * KSP-backed function introspector that converts function declarations to TypeGraph.
@@ -43,7 +44,7 @@ internal class KspFunctionIntrospector : SchemaIntrospector<KSFunctionDeclaratio
             val paramName = param.name?.asString() ?: return@forEach
             val paramType = param.type.resolve()
 
-            val typeRef = context.toRef(paramType)
+            val typeRef = context.toRef(paramType).withAddedConstraints(param.validationConstraints())
 
             // Extract description from annotations, then fall back to function KDoc @param tag
             val description =

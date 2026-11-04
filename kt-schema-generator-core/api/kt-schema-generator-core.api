@@ -244,10 +244,13 @@ public final class me/kpavlov/kt/schema/generator/core/ir/EnumNode : me/kpavlov/
 
 public final class me/kpavlov/kt/schema/generator/core/ir/Introspections {
 	public static final field INSTANCE Lme/kpavlov/kt/schema/generator/core/ir/Introspections;
+	public static final fun getConstraintsFromAnnotation (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/util/List;
 	public static final fun getDefaultValueFromAnnotation (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
 	public static final fun getDescriptionFromAnnotation (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
 	public static final fun getDiscriminatorPropertyName (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
 	public static final fun getNameOverride (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
+	public static final fun isConstraintAnnotation (Ljava/lang/String;Ljava/lang/String;)Z
+	public static synthetic fun isConstraintAnnotation$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Z
 	public static final fun isEnumDefaultAnnotation (Ljava/lang/String;Ljava/lang/String;)Z
 	public static synthetic fun isEnumDefaultAnnotation$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Z
 	public static final fun isIgnoreAnnotation (Ljava/lang/String;Ljava/lang/String;)Z
@@ -601,6 +604,11 @@ public final class me/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref : me/kpavl
 	public fun getNullable ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/ValidationConstraintsKt {
+	public static final fun validationConstraintsFor (Ljava/lang/String;Ljava/util/List;)Ljava/util/List;
+	public static final fun withAddedConstraints (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/util/List;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
 }
 
 public final class me/kpavlov/kt/schema/generator/reflect/ReflectionClassIntrospector : me/kpavlov/kt/schema/generator/core/ir/SchemaIntrospector {

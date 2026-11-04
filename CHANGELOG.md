@@ -19,6 +19,14 @@
     - `date`: `kotlinx.datetime.LocalDate`, `java.time.LocalDate`
     - `time`: `kotlinx.datetime.LocalTime`, `java.time.LocalTime`, `java.time.OffsetTime`
     - `LocalDateTime` is a plain `string` (JSON Schema has no format for a zone-less date-time)
+- **Jakarta Bean Validation annotations become schema constraints**
+  ([#86](https://github.com/kpavlov/kt-schema/issues/86)) in the reflection, KSP and APT front ends, on class properties
+  and function parameters: `@Min`/`@Max`, `@DecimalMin`/`@DecimalMax` (exclusive with `inclusive = false`),
+  `@Positive`/`@PositiveOrZero`, `@Negative`/`@NegativeOrZero`, `@Size`, `@NotEmpty`, `@NotBlank`, `@Pattern` and
+  `@Email`. Annotations are matched by name in `jakarta.validation.constraints` or `javax.validation.constraints`
+  (configurable via `introspector.annotations.constraint.names`), so the validation API is not a dependency. When
+  an annotation and a built-in type range bound the same property, the tighter bound wins
+- Function-calling schemas omit `description` for an undocumented function instead of emitting `"description": ""`
 - **Validation constraints in the IR** ([#181](https://github.com/kpavlov/kt-schema/pull/181)), for anyone building
   on `kt-schema-generator-core`: `TypeRef.constraints` holds `Minimum`, `Maximum`, `Size`, `Pattern`, `Format` or
   `UniqueItems`, and both emitters turn them into the matching JSON Schema keywords. On nullable types the constraints

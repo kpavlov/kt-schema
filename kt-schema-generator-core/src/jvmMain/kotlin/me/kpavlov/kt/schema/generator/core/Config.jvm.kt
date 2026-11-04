@@ -21,6 +21,7 @@ private const val OPTIONAL_TYPE_NAMES_KEY = "introspector.optional.type.names"
 private const val ENUM_DEFAULT_NAMES_KEY = "introspector.annotations.enumDefault.names"
 private const val DEFAULT_VALUE_NAMES_KEY = "introspector.annotations.defaultValue.names"
 private const val DEFAULT_VALUE_ATTRIBUTES_KEY = "introspector.annotations.defaultValue.attributes"
+private const val CONSTRAINT_NAMES_KEY = "introspector.annotations.constraint.names"
 private const val DISCRIMINATOR_NAMES_KEY = "introspector.annotations.discriminator.names"
 private const val DISCRIMINATOR_ATTRIBUTES_KEY = "introspector.annotations.discriminator.attributes"
 
@@ -112,6 +113,15 @@ private val DEFAULT_DEFAULT_VALUE_ANNOTATION_NAMES =
 private val DEFAULT_DEFAULT_VALUE_ATTRIBUTES =
     listOf(
         "defaultValue",
+    )
+
+/**
+ * Default fallback values if configuration loading fails
+ */
+private val DEFAULT_CONSTRAINT_ANNOTATION_NAMES =
+    listOf(
+        "jakarta.validation.constraints.*",
+        "javax.validation.constraints.*",
     )
 
 /**
@@ -239,6 +249,12 @@ internal actual object Config {
         loadConfiguration { properties ->
             parseListProperty(properties, DEFAULT_VALUE_ATTRIBUTES_KEY)
         } ?: DEFAULT_DEFAULT_VALUE_ATTRIBUTES
+    }
+
+    actual val constraintAnnotationNames: List<String> by lazy {
+        loadConfiguration { properties ->
+            parseListPropertyPreservingFqnCase(properties, CONSTRAINT_NAMES_KEY)
+        } ?: DEFAULT_CONSTRAINT_ANNOTATION_NAMES
     }
 
     actual val discriminatorAnnotationNames: List<String> by lazy {

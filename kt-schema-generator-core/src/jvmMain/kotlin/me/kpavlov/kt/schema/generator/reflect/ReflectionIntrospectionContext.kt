@@ -22,6 +22,7 @@ import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import me.kpavlov.kt.schema.generator.core.ir.builtInConstraintsFor
 import me.kpavlov.kt.schema.generator.core.ir.toLiteral
+import me.kpavlov.kt.schema.generator.core.ir.withAddedConstraints
 import me.kpavlov.kt.schema.generator.core.ir.withNullable
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
@@ -569,9 +570,9 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
 
         val propertyType = substituteTypeParameters(property.returnType, bindings)
         val typeRef =
-            toRef(propertyType).let {
-                if (isNullableAnnotated(annotations)) it.withNullable(true) else it
-            }
+            toRef(propertyType)
+                .let { if (isNullableAnnotated(annotations)) it.withNullable(true) else it }
+                .withAddedConstraints(extractConstraints(annotations))
         // An inherited property with a fixed value is a constant (and thus required);
         // otherwise it's optional by convention (type-name pattern or explicit optional annotation).
         val fixedValue = defaultValues[property.name]
@@ -680,9 +681,9 @@ internal class ReflectionIntrospectionContext : BaseIntrospectionContext<KType>(
 
             val propertyType = substituteTypeParameters(param.type, bindings)
             val typeRef =
-                toRef(propertyType).let {
-                    if (isNullableAnnotated(annotations)) it.withNullable(true) else it
-                }
+                toRef(propertyType)
+                    .let { if (isNullableAnnotated(annotations)) it.withNullable(true) else it }
+                    .withAddedConstraints(extractConstraints(annotations))
 
             // A property is optional when it has a Kotlin default value, or when it's marked
             // optional by convention (type-name pattern or `@Nullable`-style annotation) — the latter

@@ -76,6 +76,12 @@ class ConfigTest {
     }
 
     @Test
+    fun `loads constraint annotation names from properties`() {
+        Config.constraintAnnotationNames shouldContain "jakarta.validation.constraints.*"
+        Config.constraintAnnotationNames shouldContain "javax.validation.constraints.*"
+    }
+
+    @Test
     fun `loads default value annotation names and attributes from properties`() {
         Config.defaultValueAnnotationNames shouldContain "com.fasterxml.jackson.annotation.JsonProperty"
         Config.defaultValueAttributes shouldContain "defaultvalue"

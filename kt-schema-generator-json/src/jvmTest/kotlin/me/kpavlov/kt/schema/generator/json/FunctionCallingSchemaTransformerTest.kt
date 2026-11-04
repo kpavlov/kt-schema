@@ -346,7 +346,7 @@ class FunctionCallingSchemaTransformerTest {
     fun `Should handle function with no description`() {
         val schema = generator.generateSchema(NoDescriptionTest::noDescription)
 
-        schema.description shouldBe ""
+        schema.description shouldBe null
         schema.parameters.properties?.shouldHaveSize(1)
     }
 

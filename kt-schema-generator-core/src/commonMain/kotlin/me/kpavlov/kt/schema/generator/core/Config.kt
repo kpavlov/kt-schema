@@ -324,6 +324,20 @@ internal expect object Config {
     val defaultValueAttributes: List<String>
 
     /**
+     * Annotation name glob patterns recognized as validation constraints (e.g. Jakarta Bean Validation's
+     * `@Min`, `@Size`, `@Pattern`). A matching annotation is mapped to schema constraints by its simple name,
+     * see [me.kpavlov.kt.schema.generator.core.ir.Introspections.getConstraintsFromAnnotation].
+     *
+     * Matching follows the same rules as [nameAnnotationNames].
+     *
+     * Loaded lazily from the `introspector.annotations.constraint.names` property in
+     * `kt-schema.properties`. If loading fails, falls back to built-in defaults.
+     *
+     * Default value: jakarta.validation.constraints.*, javax.validation.constraints.*
+     */
+    val constraintAnnotationNames: List<String>
+
+    /**
      * Ordered list of annotation name glob patterns recognized as discriminator-property-name
      * providers for polymorphic (sealed) types (e.g. `@JsonClassDiscriminator("outcome")`).
      *

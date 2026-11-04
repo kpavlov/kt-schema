@@ -1,6 +1,7 @@
 package me.kpavlov.kt.schema.generator.reflect
 
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
+import me.kpavlov.kt.schema.generator.core.ir.Constraint
 import me.kpavlov.kt.schema.generator.core.ir.Introspections
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
 import kotlin.reflect.KClass
@@ -132,6 +133,26 @@ internal fun isEnumDefaultAnnotated(annotations: List<Annotation>): Boolean =
  */
 internal fun extractDefaultValueOverride(annotations: List<Annotation>): String? =
     annotations.firstIntrospected(Introspections::getDefaultValueFromAnnotation)
+
+/**
+ * Collects the constraints expressed by recognized constraint annotations (e.g. `@Min`, `@Size`).
+ *
+ * @see [Introspections.getConstraintsFromAnnotation]
+ */
+internal fun extractConstraints(annotations: List<Annotation>): List<Constraint> =
+    annotations
+        .filter { annotation ->
+            val javaClass = annotation.annotationClass.java
+            Introspections.isConstraintAnnotation(javaClass.simpleName, javaClass.name)
+        }
+        .flatMap { annotation ->
+            val javaClass = annotation.annotationClass.java
+            Introspections.getConstraintsFromAnnotation(
+                simpleName = javaClass.simpleName,
+                qualifiedName = javaClass.name,
+                annotationArguments = buildAnnotationArgs(annotation),
+            )
+        }
 
 /**
  * Applies an [Introspections] extractor to each annotation's class names and elements, returning the first hit.
