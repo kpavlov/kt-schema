@@ -3,26 +3,39 @@ package me.kpavlov.kt.schema.apt.ir
 
 import me.kpavlov.kt.schema.generator.core.ir.Constraint
 import me.kpavlov.kt.schema.generator.core.ir.Introspections
+import javax.lang.model.AnnotatedConstruct
 import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 
+/** `Owner.name` for error messages, from the first target's enclosing type; just [name] when there is none. */
+internal fun memberName(
+    name: String,
+    targets: List<Element>,
+): String {
+    val owner = (targets.firstOrNull()?.enclosingElement as? TypeElement)?.qualifiedName?.toString()
+    return listOfNotNull(owner, name).joinToString(".")
+}
+
 /**
- * Collects the constraints of recognized constraint annotations across [targets]. A record component's
- * annotations propagate to its field and accessor, so duplicates are dropped.
+ * Collects the constraints of recognized constraint annotations across [targets]: the declaring elements and
+ * the property's type, which carries `TYPE_USE` placements such as `String @Size(min = 1) []`. A record
+ * component's annotations propagate to its field and accessor; the merge in `withAddedConstraints` drops
+ * the duplicates.
  */
-internal fun constraintsOf(targets: List<Element>): List<Constraint> =
-    targets
-        .flatMap { element ->
-            element.annotationMirrors.flatMap { mirror ->
-                val annotationElement = mirror.annotationType.asElement() as TypeElement
+internal fun constraintsOf(targets: List<AnnotatedConstruct>): List<Constraint> =
+    targets.flatMap { target ->
+        target.annotationMirrors.flatMap { mirror ->
+            val annotationElement = mirror.annotationType.asElement() as TypeElement
+            val simpleName = annotationElement.simpleName.toString()
+            val qualifiedName = annotationElement.qualifiedName.toString()
+            if (Introspections.isConstraintAnnotation(simpleName, qualifiedName)) {
                 val args =
                     mirror.elementValues.entries.map { (attribute, value) ->
                         attribute.simpleName.toString() to value.value
                     }
-                Introspections.getConstraintsFromAnnotation(
-                    simpleName = annotationElement.simpleName.toString(),
-                    qualifiedName = annotationElement.qualifiedName.toString(),
-                    annotationArguments = args,
-                )
+                Introspections.getConstraintsFromAnnotation(simpleName, qualifiedName, args)
+            } else {
+                emptyList()
             }
-        }.distinct()
+        }
+    }

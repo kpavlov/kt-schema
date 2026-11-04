@@ -1,7 +1,10 @@
 package me.kpavlov.kt.schema.generator.reflect
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import jakarta.validation.constraints.Size
 import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.ir.Constraint
 import me.kpavlov.kt.schema.generator.core.ir.Literal
@@ -14,6 +17,25 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import kotlin.test.Test
+
+private data class Conflicting(
+    @param:Size(min = 2) val grade: Char,
+)
+
+@Suppress("unused")
+private fun conflicting(
+    @Size(min = 5, max = 2) code: String,
+): String = code
+
+private sealed interface Named {
+    @get:Size(min = 2)
+    val name: String
+}
+
+private data class Person(
+    override val name: String,
+) : Named
 
 @OptIn(ExperimentalSchemaGeneratorApi::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -73,6 +95,27 @@ class ReflectionIntrospectorValidationConstraintsTest {
         expected: List<Constraint>,
     ) {
         functionParameters.getValue(name) shouldContainExactly expected
+    }
+
+    @Test
+    fun `should inherit a sealed parent's constraint on a constructor override`() {
+        val constraints = ReflectionClassIntrospector.introspect(Person::class).rootConstraints()
+
+        constraints.getValue("name") shouldContainExactly listOf(Constraint.Size(min = 2))
+    }
+
+    @Test
+    fun `should name the property whose bounds conflict`() {
+        val e = shouldThrow<IllegalArgumentException> { ReflectionClassIntrospector.introspect(Conflicting::class) }
+
+        e.message shouldBe "${Conflicting::class.qualifiedName}.grade: Size min 2 exceeds max 1"
+    }
+
+    @Test
+    fun `should name the parameter whose bounds conflict`() {
+        val e = shouldThrow<IllegalArgumentException> { ReflectionFunctionIntrospector.introspect(::conflicting) }
+
+        e.message shouldBe "conflicting.code: Size min 5 exceeds max 2"
     }
 
     private fun TypeGraph.rootConstraints(): Map<String, List<Constraint>> =

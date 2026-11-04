@@ -20,12 +20,14 @@
     - `time`: `kotlinx.datetime.LocalTime`, `java.time.LocalTime`, `java.time.OffsetTime`
     - `LocalDateTime` is a plain `string` (JSON Schema has no format for a zone-less date-time)
 - **Jakarta Bean Validation annotations become schema constraints**
-  ([#86](https://github.com/kpavlov/kt-schema/issues/86)) in the reflection, KSP and APT front ends, on class properties
-  and function parameters: `@Min`/`@Max`, `@DecimalMin`/`@DecimalMax` (exclusive with `inclusive = false`),
+  ([#86](https://github.com/kpavlov/kt-schema/issues/86)) on class properties in the reflection, KSP and APT front
+  ends and on function parameters in reflection and KSP: `@Min`/`@Max`, `@DecimalMin`/`@DecimalMax` (exclusive with `inclusive = false`),
   `@Positive`/`@PositiveOrZero`, `@Negative`/`@NegativeOrZero`, `@Size`, `@NotEmpty`, `@NotBlank`, `@Pattern` and
   `@Email`. Annotations are matched by name in `jakarta.validation.constraints` or `javax.validation.constraints`
   (configurable via `introspector.annotations.constraint.names`), so the validation API is not a dependency. When
-  an annotation and a built-in type range bound the same property, the tighter bound wins
+  an annotation and a built-in type range bound the same property, the tighter bound wins; contradictory bounds
+  fail generation with an error naming the property. A constraint on a property emitted as a `$ref` (object or
+  enum) is wrapped as `allOf: [{ "$ref": ... }, { ... }]`. A `@Pattern` with `flags` is skipped with a warning
 - Function-calling schemas omit `description` for an undocumented function instead of emitting `"description": ""`
 - **Validation constraints in the IR** ([#181](https://github.com/kpavlov/kt-schema/pull/181)), for anyone building
   on `kt-schema-generator-core`: `TypeRef.constraints` holds `Minimum`, `Maximum`, `Size`, `Pattern`, `Format` or

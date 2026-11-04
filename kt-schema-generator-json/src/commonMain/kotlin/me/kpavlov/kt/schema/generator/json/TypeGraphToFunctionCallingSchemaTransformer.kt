@@ -203,6 +203,7 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                                 "should be present in the graph's nodes map."
                         }
                     convertNode(node, typeRef.nullable, graph, jsonTypeNames, depth + 1)
+                        .applyConstraints(typeRef.constraints)
                 }
             }
 

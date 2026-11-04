@@ -35,7 +35,9 @@ public sealed interface TypeRef {
 
     /**
      * Validation constraints applied at this usage site; empty when none are declared.
-     * Emitters apply them in order, so a later constraint overrides an earlier one for the same keyword.
+     * Emitters apply them in order, so a later `pattern` or `format` overrides an earlier one. Front ends
+     * merge bounds through [withAddedConstraints], which keeps the tighter `Size`, `Minimum` or `Maximum`
+     * whatever the order.
      */
     @ExperimentalSchemaGeneratorApi
     public val constraints: List<Constraint>

@@ -394,8 +394,8 @@ Schemas follow JSON Schema Draft 2020-12 format. Example (pretty-printed):
   Kotlin types it has serializers for. Date/time types are always emitted as ISO-8601 strings: the generators never
   see your `ObjectMapper`, so if you serialize with plain Jackson, disable
   `SerializationFeature.WRITE_DATES_AS_TIMESTAMPS` so payloads match the schema.
-- **Jakarta Bean Validation constraints** on properties and function parameters are emitted by the reflection, KSP
-  and APT front ends. Annotations are matched by name in `jakarta.validation.constraints` (and the legacy
+- **Jakarta Bean Validation constraints** on properties (reflection, KSP and APT) and on function parameters
+  (reflection and KSP) are emitted as JSON Schema keywords. Annotations are matched by name in `jakarta.validation.constraints` (and the legacy
   `javax.validation.constraints`), so `jakarta.validation-api` is not a dependency of kt-schema. When several
   annotations, or an annotation and a built-in type range, bound the same property, the tighter bound wins
   whatever the order (`@Min(0) val level: Byte` → `minimum: 0, maximum: 127`; `@Size(min = 2) @NotEmpty` →
@@ -413,12 +413,15 @@ Schemas follow JSON Schema Draft 2020-12 format. Example (pretty-printed):
   | `@Size(min, max)`                                      | `minLength`/`maxLength`, `minItems`/`maxItems` or `minProperties`/`maxProperties`     |
   | `@NotEmpty`                                            | `minLength: 1` / `minItems: 1` / `minProperties: 1`                                   |
   | `@NotBlank`                                            | `minLength: 1` (blank strings are not excluded)                                       |
-  | `@Pattern(regexp)`                                     | `pattern`, copied as written (flags are ignored)                                      |
+  | `@Pattern(regexp)`                                     | `pattern`, copied as written; a `@Pattern` with `flags` is skipped with a warning     |
   | `@Email`                                               | `format: "email"`                                                                     |
 
   `@NotNull`, `@Digits`, `@Past`/`@Future` and `@AssertTrue`/`@AssertFalse` have no JSON Schema equivalent and are
   ignored. JSON Schema validators expect ECMA-262 regular expressions, so keep `@Pattern` to that subset (no
-  possessive quantifiers or `\p{Alpha}`-style Java classes). A `@Size` with `min > max` fails generation. Constraints on type arguments (`List<@Size(max = 3) String>`) are not read. The kotlinx.serialization front
+  possessive quantifiers or `\p{Alpha}`-style Java classes). Contradictory bounds (`@Size(min = 5, max = 2)`, or
+  `@Size(min = 2)` on a `Char`) fail generation with an error naming the property. A constraint on a property whose
+  type is emitted as a `$ref` (an object or enum) is wrapped as `allOf: [{ "$ref": ... }, { "minProperties": 1 }]`.
+  Constraints on type arguments (`List<@Size(max = 3) String>`) are not read. The kotlinx.serialization front
   end cannot see these annotations.
 - `kotlin.Any` / unbound generic type parameters (e.g., `T`) map to the empty schema `{}`, which accepts any JSON value.
 - Named types (nested objects, enums, sealed classes) are deduplicated in a `$defs` section and referenced via `$ref` at

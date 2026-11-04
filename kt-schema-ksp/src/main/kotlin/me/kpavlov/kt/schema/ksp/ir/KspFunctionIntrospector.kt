@@ -44,7 +44,10 @@ internal class KspFunctionIntrospector : SchemaIntrospector<KSFunctionDeclaratio
             val paramName = param.name?.asString() ?: return@forEach
             val paramType = param.type.resolve()
 
-            val typeRef = context.toRef(paramType).withAddedConstraints(param.validationConstraints())
+            val typeRef =
+                context.toRef(paramType).withAddedConstraints("$functionName.$paramName") {
+                    param.validationConstraints()
+                }
 
             // Extract description from annotations, then fall back to function KDoc @param tag
             val description =

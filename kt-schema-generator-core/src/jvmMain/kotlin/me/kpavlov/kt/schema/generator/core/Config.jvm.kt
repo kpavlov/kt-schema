@@ -25,123 +25,6 @@ private const val CONSTRAINT_NAMES_KEY = "introspector.annotations.constraint.na
 private const val DISCRIMINATOR_NAMES_KEY = "introspector.annotations.discriminator.names"
 private const val DISCRIMINATOR_ATTRIBUTES_KEY = "introspector.annotations.discriminator.attributes"
 
-/**
- * Default fallback values if configuration loading fails
- */
-private val DEFAULT_ANNOTATION_NAMES =
-    listOf(
-        "description",
-        "llmdescription",
-        "jsonpropertydescription",
-        "jsonclassdescription",
-        "p",
-    )
-
-/**
- * Default fallback values if configuration loading fails
- */
-private val DEFAULT_VALUE_ATTRIBUTES =
-    listOf(
-        "value",
-        "description",
-    )
-
-/**
- * Default fallback values if configuration loading fails
- */
-private val DEFAULT_IGNORE_NAMES =
-    listOf(
-        "schemaignore",
-        "serialschemaignore",
-        "jsonignoretype",
-        "jsonignore",
-    )
-
-/**
- * Default fallback values if configuration loading fails
- */
-private val DEFAULT_NAME_ANNOTATION_NAMES =
-    listOf(
-        "kotlinx.serialization.SerialName",
-        "com.fasterxml.jackson.annotation.JsonProperty",
-        "com.fasterxml.jackson.annotation.JsonTypeName",
-    )
-
-/**
- * Default fallback values if configuration loading fails
- */
-private val DEFAULT_NAME_VALUE_ATTRIBUTES =
-    listOf(
-        "value",
-    )
-
-/**
- * Default fallback values if configuration loading fails
- */
-private val DEFAULT_NULLABLE_ANNOTATION_NAMES =
-    listOf(
-        "nullable",
-    )
-
-/**
- * Default fallback values if configuration loading fails
- */
-private val DEFAULT_NULLABLE_TYPE_PATTERNS =
-    listOf(
-        "*Opt",
-    )
-
-/**
- * Default fallback values if configuration loading fails
- */
-private val DEFAULT_ENUM_DEFAULT_ANNOTATION_NAMES =
-    listOf(
-        "com.fasterxml.jackson.annotation.JsonEnumDefaultValue",
-    )
-
-/**
- * Default fallback values if configuration loading fails
- */
-private val DEFAULT_DEFAULT_VALUE_ANNOTATION_NAMES =
-    listOf(
-        "com.fasterxml.jackson.annotation.JsonProperty",
-    )
-
-/**
- * Default fallback values if configuration loading fails
- */
-private val DEFAULT_DEFAULT_VALUE_ATTRIBUTES =
-    listOf(
-        "defaultValue",
-    )
-
-/**
- * Default fallback values if configuration loading fails
- */
-private val DEFAULT_CONSTRAINT_ANNOTATION_NAMES =
-    listOf(
-        "jakarta.validation.constraints.*",
-        "javax.validation.constraints.*",
-    )
-
-/**
- * Default fallback values if configuration loading fails
- */
-private val DEFAULT_DISCRIMINATOR_ANNOTATION_NAMES =
-    listOf(
-        "kotlinx.serialization.json.JsonClassDiscriminator",
-        "com.fasterxml.jackson.annotation.JsonTypeInfo",
-    )
-
-/**
- * Default fallback values if configuration loading fails
- */
-private val DEFAULT_DISCRIMINATOR_VALUE_ATTRIBUTES =
-    listOf(
-        "discriminator",
-        "property",
-    )
-
 private val logger = KotlinLogging.logger {}
 
 internal actual object Config {
@@ -160,7 +43,7 @@ internal actual object Config {
     actual val descriptionAnnotationNames: List<String> by lazy {
         loadConfiguration { properties ->
             parseListProperty(properties, DESCRIPTION_NAMES_KEY)
-        } ?: DEFAULT_ANNOTATION_NAMES
+        } ?: ConfigDefaults.descriptionAnnotationNames
     }
 
     /**
@@ -182,25 +65,25 @@ internal actual object Config {
     actual val descriptionValueAttributes: List<String> by lazy {
         loadConfiguration { properties ->
             parseListProperty(properties, DESCRIPTION_ATTRIBUTES_KEY)
-        } ?: DEFAULT_VALUE_ATTRIBUTES
+        } ?: ConfigDefaults.descriptionValueAttributes
     }
 
     actual val ignoreAnnotationNames: List<String> by lazy {
         loadConfiguration { properties ->
             parseListProperty(properties, IGNORE_NAMES_KEY)
-        } ?: DEFAULT_IGNORE_NAMES
+        } ?: ConfigDefaults.ignoreAnnotationNames
     }
 
     actual val nameAnnotationNames: List<String> by lazy {
         loadConfiguration { properties ->
             parseListPropertyPreservingFqnCase(properties, NAME_NAMES_KEY)
-        } ?: DEFAULT_NAME_ANNOTATION_NAMES
+        } ?: ConfigDefaults.nameAnnotationNames
     }
 
     actual val nameValueAttributes: List<String> by lazy {
         loadConfiguration { properties ->
             parseListProperty(properties, NAME_ATTRIBUTES_KEY)
-        } ?: DEFAULT_NAME_VALUE_ATTRIBUTES
+        } ?: ConfigDefaults.nameValueAttributes
     }
 
     actual val opaqueTypeNames: Set<String> by lazy {
@@ -212,13 +95,13 @@ internal actual object Config {
     actual val nullableAnnotationNames: List<String> by lazy {
         loadConfiguration { properties ->
             parseListPropertyPreservingFqnCase(properties, NULLABLE_ANNOTATION_NAMES_KEY)
-        } ?: DEFAULT_NULLABLE_ANNOTATION_NAMES
+        } ?: ConfigDefaults.nullableAnnotationNames
     }
 
     actual val nullableTypeNamePatterns: List<String> by lazy {
         loadConfiguration { properties ->
             parseListPropertyPreservingCase(properties, NULLABLE_TYPE_NAMES_KEY)
-        } ?: DEFAULT_NULLABLE_TYPE_PATTERNS
+        } ?: ConfigDefaults.nullableTypeNamePatterns
     }
 
     actual val optionalAnnotationNames: List<String> by lazy {
@@ -236,37 +119,37 @@ internal actual object Config {
     actual val enumDefaultAnnotationNames: List<String> by lazy {
         loadConfiguration { properties ->
             parseListPropertyPreservingFqnCase(properties, ENUM_DEFAULT_NAMES_KEY)
-        } ?: DEFAULT_ENUM_DEFAULT_ANNOTATION_NAMES
+        } ?: ConfigDefaults.enumDefaultAnnotationNames
     }
 
     actual val defaultValueAnnotationNames: List<String> by lazy {
         loadConfiguration { properties ->
             parseListPropertyPreservingFqnCase(properties, DEFAULT_VALUE_NAMES_KEY)
-        } ?: DEFAULT_DEFAULT_VALUE_ANNOTATION_NAMES
+        } ?: ConfigDefaults.defaultValueAnnotationNames
     }
 
     actual val defaultValueAttributes: List<String> by lazy {
         loadConfiguration { properties ->
             parseListProperty(properties, DEFAULT_VALUE_ATTRIBUTES_KEY)
-        } ?: DEFAULT_DEFAULT_VALUE_ATTRIBUTES
+        } ?: ConfigDefaults.defaultValueAttributes
     }
 
     actual val constraintAnnotationNames: List<String> by lazy {
         loadConfiguration { properties ->
             parseListPropertyPreservingFqnCase(properties, CONSTRAINT_NAMES_KEY)
-        } ?: DEFAULT_CONSTRAINT_ANNOTATION_NAMES
+        } ?: ConfigDefaults.constraintAnnotationNames
     }
 
     actual val discriminatorAnnotationNames: List<String> by lazy {
         loadConfiguration { properties ->
             parseListPropertyPreservingFqnCase(properties, DISCRIMINATOR_NAMES_KEY)
-        } ?: DEFAULT_DISCRIMINATOR_ANNOTATION_NAMES
+        } ?: ConfigDefaults.discriminatorAnnotationNames
     }
 
     actual val discriminatorValueAttributes: List<String> by lazy {
         loadConfiguration { properties ->
             parseListProperty(properties, DISCRIMINATOR_ATTRIBUTES_KEY)
-        } ?: DEFAULT_DISCRIMINATOR_VALUE_ATTRIBUTES
+        } ?: ConfigDefaults.discriminatorValueAttributes
     }
 
     private fun <T> loadConfiguration(extractor: (Properties) -> T): T? =

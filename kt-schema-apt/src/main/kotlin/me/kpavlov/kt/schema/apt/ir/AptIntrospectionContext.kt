@@ -663,7 +663,9 @@ internal class AptIntrospectionContext(
                     .let {
                         val nullable = isNullableAnnotated(annotationTargets) || type.isNullableTypeAnnotated()
                         if (nullable) it.withNullable(true) else it
-                    }.withAddedConstraints(constraintsOf(annotationTargets)),
+                    }.withAddedConstraints(memberName(name, annotationTargets)) {
+                        constraintsOf(annotationTargets + type)
+                    },
             description = description,
             optional = optional,
             value = defaultValue?.let { PropertyValue.Default(Literal.Str(it)) } ?: PropertyValue.None,

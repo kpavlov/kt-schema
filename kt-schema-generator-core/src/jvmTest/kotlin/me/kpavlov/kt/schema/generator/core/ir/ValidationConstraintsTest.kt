@@ -3,6 +3,7 @@ package me.kpavlov.kt.schema.generator.core.ir
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
 import org.junit.jupiter.api.TestInstance
@@ -65,6 +66,22 @@ class ValidationConstraintsTest {
     }
 
     @Test
+    fun `should map a simple name regardless of case`() {
+        validationConstraintsFor("min", listOf("value" to 3L)) shouldContainExactly
+            listOf(Constraint.Minimum(Literal.Integer(3)))
+    }
+
+    @Test
+    fun `should let an exclusive bound win a tie against an equal decimal bound`() {
+        val inclusiveZero = Constraint.Minimum(Literal.Decimal(0.0))
+        val positive = Constraint.Minimum(Literal.Integer(0), exclusive = true)
+        val ref = TypeRef.Inline(PrimitiveNode(PrimitiveKind.DOUBLE))
+
+        ref.withAddedConstraints(listOf(inclusiveZero, positive)).constraints shouldContainExactly listOf(positive)
+        ref.withAddedConstraints(listOf(positive, inclusiveZero)).constraints shouldContainExactly listOf(positive)
+    }
+
+    @Test
     fun `should ignore a non-finite decimal bound`() {
         validationConstraintsFor("DecimalMin", listOf("value" to "1e400")).shouldBeEmpty()
     }
@@ -72,6 +89,46 @@ class ValidationConstraintsTest {
     @Test
     fun `should reject an inverted Size`() {
         shouldThrow<IllegalArgumentException> { validationConstraintsFor("Size", listOf("min" to 5, "max" to 2)) }
+    }
+
+    @Test
+    fun `should skip a Pattern with flags`() {
+        validationConstraintsFor("Pattern", listOf("regexp" to "[a-z]+", "flags" to listOf("CASE_INSENSITIVE")))
+            .shouldBeEmpty()
+        validationConstraintsFor("Pattern", listOf("regexp" to "[a-z]+", "flags" to arrayOf("CASE_INSENSITIVE")))
+            .shouldBeEmpty()
+        validationConstraintsFor("Pattern", listOf("regexp" to "[a-z]+", "flags" to emptyList<String>()))
+            .shouldContainExactly(Constraint.Pattern("[a-z]+"))
+    }
+
+    @Test
+    fun `should name the member when bounds conflict`() {
+        val char =
+            TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING), constraints = builtInConstraintsFor("kotlin.Char"))
+
+        val e =
+            shouldThrow<IllegalArgumentException> {
+                char.withAddedConstraints("Grade.letter") { listOf(Constraint.Size(min = 2)) }
+            }
+
+        e.message shouldBe "Grade.letter: Size min 2 exceeds max 1"
+    }
+
+    @Test
+    fun `should drop a duplicate constraint`() {
+        val pattern = Constraint.Pattern("[a-z]+")
+        val ref = TypeRef.Inline(PrimitiveNode(PrimitiveKind.STRING), constraints = listOf(pattern))
+
+        ref.withAddedConstraints(listOf(pattern, pattern)).constraints shouldContainExactly listOf(pattern)
+    }
+
+    @Test
+    fun `should compare integer bounds exactly above 2^53`() {
+        val lower = Constraint.Minimum(Literal.Integer(9007199254740992))
+        val higher = Constraint.Minimum(Literal.Integer(9007199254740993))
+        val ref = TypeRef.Inline(PrimitiveNode(PrimitiveKind.LONG), constraints = listOf(lower))
+
+        ref.withAddedConstraints(listOf(higher)).constraints shouldContainExactly listOf(higher)
     }
 
     @Test

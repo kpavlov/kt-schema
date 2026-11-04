@@ -2,39 +2,35 @@ package me.kpavlov.kt.schema.generator.core
 
 internal actual object Config {
     actual val descriptionAnnotationNames: List<String>
-        get() = listOf("Description")
+        get() = ConfigDefaults.descriptionAnnotationNames
     actual val descriptionValueAttributes: List<String>
-        get() = listOf("value", "description")
+        get() = ConfigDefaults.descriptionValueAttributes
     actual val ignoreAnnotationNames: List<String>
-        get() = listOf("schemaignore")
+        get() = ConfigDefaults.ignoreAnnotationNames
     actual val nameAnnotationNames: List<String>
-        get() = listOf("kotlinx.serialization.SerialName")
+        get() = ConfigDefaults.nameAnnotationNames
     actual val nameValueAttributes: List<String>
-        get() = listOf("value")
+        get() = ConfigDefaults.nameValueAttributes
     actual val opaqueTypeNames: Set<String>
         get() = DEFAULT_OPAQUE_TYPE_NAMES
     actual val nullableAnnotationNames: List<String>
-        get() = listOf("Nullable")
+        get() = ConfigDefaults.nullableAnnotationNames
     actual val nullableTypeNamePatterns: List<String>
-        get() = listOf("*Opt")
+        get() = ConfigDefaults.nullableTypeNamePatterns
     actual val optionalAnnotationNames: List<String>
-        get() = emptyList()
+        get() = ConfigDefaults.optionalAnnotationNames
     actual val optionalTypeNamePatterns: List<String>
-        get() = emptyList()
+        get() = ConfigDefaults.optionalTypeNamePatterns
     actual val enumDefaultAnnotationNames: List<String>
-        get() = listOf("com.fasterxml.jackson.annotation.JsonEnumDefaultValue")
+        get() = ConfigDefaults.enumDefaultAnnotationNames
     actual val defaultValueAnnotationNames: List<String>
-        get() = listOf("com.fasterxml.jackson.annotation.JsonProperty")
+        get() = ConfigDefaults.defaultValueAnnotationNames
     actual val defaultValueAttributes: List<String>
-        get() = listOf("defaultValue")
+        get() = ConfigDefaults.defaultValueAttributes
     actual val constraintAnnotationNames: List<String>
-        get() = listOf("jakarta.validation.constraints.*", "javax.validation.constraints.*")
+        get() = ConfigDefaults.constraintAnnotationNames
     actual val discriminatorAnnotationNames: List<String>
-        get() =
-            listOf(
-                "kotlinx.serialization.json.JsonClassDiscriminator",
-                "com.fasterxml.jackson.annotation.JsonTypeInfo",
-            )
+        get() = ConfigDefaults.discriminatorAnnotationNames
     actual val discriminatorValueAttributes: List<String>
-        get() = listOf("discriminator", "property")
+        get() = ConfigDefaults.discriminatorValueAttributes
 }

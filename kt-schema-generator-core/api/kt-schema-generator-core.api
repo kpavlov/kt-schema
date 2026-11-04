@@ -201,6 +201,11 @@ public final class me/kpavlov/kt/schema/generator/core/ir/ConstraintKt {
 	public static final fun withConstraints (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/util/List;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
 }
 
+public final class me/kpavlov/kt/schema/generator/core/ir/ConstraintMergingKt {
+	public static final fun withAddedConstraints (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+	public static final fun withAddedConstraints (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/util/List;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+}
+
 public abstract interface class me/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor {
 	public abstract fun extract (Ljava/util/List;)Ljava/lang/String;
 }
@@ -608,7 +613,6 @@ public final class me/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref : me/kpavl
 
 public final class me/kpavlov/kt/schema/generator/core/ir/ValidationConstraintsKt {
 	public static final fun validationConstraintsFor (Ljava/lang/String;Ljava/util/List;)Ljava/util/List;
-	public static final fun withAddedConstraints (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/util/List;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
 }
 
 public final class me/kpavlov/kt/schema/generator/reflect/ReflectionClassIntrospector : me/kpavlov/kt/schema/generator/core/ir/SchemaIntrospector {

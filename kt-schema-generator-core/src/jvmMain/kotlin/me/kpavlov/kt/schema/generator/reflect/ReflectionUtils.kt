@@ -134,6 +134,10 @@ internal fun isEnumDefaultAnnotated(annotations: List<Annotation>): Boolean =
 internal fun extractDefaultValueOverride(annotations: List<Annotation>): String? =
     annotations.firstIntrospected(Introspections::getDefaultValueFromAnnotation)
 
+/** `declaring.Class.name` for error messages; just the property name when no declaring class is known. */
+internal fun KProperty<*>.memberName(): String =
+    listOfNotNull((javaField ?: getter.javaMethod)?.declaringClass?.name, name).joinToString(".")
+
 /**
  * Collects the constraints expressed by recognized constraint annotations (e.g. `@Min`, `@Size`).
  *

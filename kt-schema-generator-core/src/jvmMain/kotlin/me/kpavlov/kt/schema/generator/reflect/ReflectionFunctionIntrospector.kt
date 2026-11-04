@@ -61,7 +61,10 @@ public object ReflectionFunctionIntrospector : SchemaIntrospector<KCallable<*>, 
                         .map { method -> method.parameters.first { it.name == paramName } }
                         .flatMap { it.annotations }
 
-            val typeRef = context.toRef(paramType).withAddedConstraints(extractConstraints(allParamAnnotations))
+            val typeRef =
+                context.toRef(paramType).withAddedConstraints("${root.name}.$paramName") {
+                    extractConstraints(allParamAnnotations)
+                }
             val description = extractDescription(allParamAnnotations)
 
             properties +=

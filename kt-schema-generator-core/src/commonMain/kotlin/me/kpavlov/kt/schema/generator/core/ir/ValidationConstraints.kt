@@ -1,17 +1,21 @@
 package me.kpavlov.kt.schema.generator.core.ir
 
-import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
+import io.github.oshai.kotlinlogging.KotlinLogging
 import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Returns the constraints a Jakarta Bean Validation annotation named [simpleName] expresses, or an empty list
  * for an unknown name. Which annotations qualify is decided by the caller, see
- * [Introspections.getConstraintsFromAnnotation].
+ * [Introspections.getConstraintsFromAnnotation]; how the result combines with constraints already present
+ * is defined by [withAddedConstraints].
  *
  * [arguments] are the annotation's element values; an element missing from the list takes the annotation's
  * documented default. Supported: `Min`, `Max`, `DecimalMin`, `DecimalMax` (a value that is not a finite
  * decimal is ignored), `Positive`, `PositiveOrZero`, `Negative`, `NegativeOrZero`, `Size`, `NotEmpty`,
- * `NotBlank` (approximated as a minimum length of 1), `Pattern` (flags ignored) and `Email`.
+ * `NotBlank` (approximated as a minimum length of 1), `Pattern` and `Email`. A `Pattern` with `flags` is
+ * skipped with a warning, since JSON Schema has no portable way to express them.
  *
  * @throws IllegalArgumentException if a `Size` has `min` greater than `max`
  */
@@ -19,80 +23,13 @@ import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
 public fun validationConstraintsFor(
     simpleName: String,
     arguments: List<Pair<String, Any?>>,
-): List<Constraint> = VALIDATION_MAPPERS[simpleName]?.invoke(arguments.toMap()).orEmpty()
-
-/**
- * Returns this reference with [extra] merged into its constraints. A [Constraint.Size], [Constraint.Minimum]
- * or [Constraint.Maximum] already present is replaced by the tighter of the two bounds, whatever the order
- * (`@Size(min = 2) @NotEmpty` keeps `min = 2`; `@Min(0)` on a `Byte` keeps the built-in `max = 127`).
- * Other constraints are appended, so the emitter's last-wins rule applies to `pattern` and `format`.
- *
- * Callers need no [ExperimentalSchemaGeneratorApi] opt-in; this is the internal API's merge rule.
- */
-@InternalSchemaGeneratorApi
-@OptIn(ExperimentalSchemaGeneratorApi::class)
-public fun TypeRef.withAddedConstraints(extra: List<Constraint>): TypeRef =
-    if (extra.isEmpty()) this else withConstraints(extra.fold(constraints, ::tightened))
-
-private fun tightened(
-    acc: List<Constraint>,
-    next: Constraint,
-): List<Constraint> {
-    val prev = acc.firstOrNull { it.sameBoundAs(next) } ?: return acc + next
-    return acc - prev + tighter(prev, next)
-}
-
-private fun Constraint.sameBoundAs(other: Constraint): Boolean =
-    when (this) {
-        is Constraint.Size -> other is Constraint.Size
-        is Constraint.Minimum -> other is Constraint.Minimum
-        is Constraint.Maximum -> other is Constraint.Maximum
-        is Constraint.Pattern, is Constraint.Format, Constraint.UniqueItems -> false
-    }
-
-private fun tighter(
-    prev: Constraint,
-    next: Constraint,
-): Constraint =
-    when {
-        prev is Constraint.Size && next is Constraint.Size ->
-            Constraint.Size(maxOfNullable(prev.min, next.min), minOfNullable(prev.max, next.max))
-
-        prev is Constraint.Minimum && next is Constraint.Minimum ->
-            if (next.value.toDouble() > prev.value.toDouble() || next.tiesExclusively(prev)) next else prev
-
-        prev is Constraint.Maximum && next is Constraint.Maximum ->
-            if (next.value.toDouble() < prev.value.toDouble() || next.tiesExclusively(prev)) next else prev
-
-        else -> next
-    }
-
-private fun Constraint.Minimum.tiesExclusively(other: Constraint.Minimum): Boolean =
-    value == other.value && exclusive
-
-private fun Constraint.Maximum.tiesExclusively(other: Constraint.Maximum): Boolean =
-    value == other.value && exclusive
-
-private fun maxOfNullable(
-    a: Int?,
-    b: Int?,
-): Int? = if (a == null || b == null) a ?: b else maxOf(a, b)
-
-private fun minOfNullable(
-    a: Int?,
-    b: Int?,
-): Int? = if (a == null || b == null) a ?: b else minOf(a, b)
-
-private fun Literal.Numeric.toDouble(): Double =
-    when (this) {
-        is Literal.Integer -> value.toDouble()
-        is Literal.Decimal -> value
-    }
+): List<Constraint> = VALIDATION_MAPPERS[simpleName.lowercase()]?.invoke(arguments.toMap()).orEmpty()
 
 private val ZERO = Literal.Integer(0)
 
+/** Keyed by lowercase simple name, matching the case-insensitive simple-name patterns of [Introspections]. */
 private val VALIDATION_MAPPERS: Map<String, (Map<String, Any?>) -> List<Constraint>> =
-    mapOf(
+    mapOf<String, (Map<String, Any?>) -> List<Constraint>>(
         "Min" to { args -> args.integer("value")?.let { listOf(Constraint.Minimum(it)) }.orEmpty() },
         "Max" to { args -> args.integer("value")?.let { listOf(Constraint.Maximum(it)) }.orEmpty() },
         "DecimalMin" to { args ->
@@ -108,9 +45,9 @@ private val VALIDATION_MAPPERS: Map<String, (Map<String, Any?>) -> List<Constrai
         "Size" to ::size,
         "NotEmpty" to { _ -> listOf(Constraint.Size(min = 1)) },
         "NotBlank" to { _ -> listOf(Constraint.Size(min = 1)) },
-        "Pattern" to { args -> (args["regexp"] as? String)?.let { listOf(Constraint.Pattern(it)) }.orEmpty() },
+        "Pattern" to ::pattern,
         "Email" to { _ -> listOf(Constraint.Format("email")) },
-    )
+    ).mapKeys { it.key.lowercase() }
 
 private fun Map<String, Any?>.integer(name: String): Literal.Integer? =
     (this[name] as? Number)?.let { Literal.Integer(it.toLong()) }
@@ -128,6 +65,16 @@ private fun Map<String, Any?>.exclusive(): Boolean = this["inclusive"] == false
 private fun size(args: Map<String, Any?>): List<Constraint> {
     val min = (args["min"] as? Number)?.toInt()?.takeIf { it > 0 }
     val max = (args["max"] as? Number)?.toInt()?.takeIf { it < Int.MAX_VALUE }
-    require(min == null || max == null || min <= max) { "@Size has min $min greater than max $max" }
     return if (min == null && max == null) emptyList() else listOf(Constraint.Size(min, max))
+}
+
+/** Flags (`CASE_INSENSITIVE`, ...) have no portable ECMA-262 form, so a flagged pattern is not emitted. */
+private fun pattern(args: Map<String, Any?>): List<Constraint> {
+    val regexp = args["regexp"] as? String ?: return emptyList()
+    val flags = args["flags"]
+    val flagged = (flags as? Array<*>)?.isNotEmpty() == true || (flags as? Collection<*>)?.isNotEmpty() == true
+    if (flagged) {
+        logger.warn { "@Pattern(regexp = \"$regexp\") has flags, which JSON Schema cannot express; pattern skipped" }
+    }
+    return if (flagged) emptyList() else listOf(Constraint.Pattern(regexp))
 }
