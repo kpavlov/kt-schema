@@ -2,6 +2,7 @@ package me.kpavlov.kt.schema.generator.json
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
+import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.ir.AbstractTypeGraphTransformer
 import me.kpavlov.kt.schema.generator.core.ir.AnyNode
 import me.kpavlov.kt.schema.generator.core.ir.EnumNode
@@ -86,6 +87,7 @@ public class TypeGraphToJsonSchemaTransformer
          * roots (named roots resolve their name from the graph's node ids).
          * @return Complete JSON Schema definition
          */
+        @OptIn(ExperimentalSchemaGeneratorApi::class)
         override fun transform(
             graph: TypeGraph,
             rootName: String,
@@ -107,8 +109,12 @@ public class TypeGraphToJsonSchemaTransformer
                         node to jsonTypeNames.getValue(root.id)
                     }
                 }
+            // The root is resolved directly rather than as a `$ref`, so its usage-site constraints land on the schema
+            val rootDefinition =
+                convertNode(rootNode, nullable = false, graph, jsonTypeNames, definitions)
+                    .applyConstraints(graph.root.constraints)
             val schemaDefinition =
-                when (val rootDefinition = convertNode(rootNode, nullable = false, graph, jsonTypeNames, definitions)) {
+                when (rootDefinition) {
                     is ObjectPropertyDefinition -> {
                         createObjectSchemaDefinition(rootJsonName, rootDefinition, definitions)
                     }
@@ -164,6 +170,8 @@ public class TypeGraphToJsonSchemaTransformer
                 required = rootDefinition.required.orEmpty(),
                 additionalProperties = rootDefinition.additionalProperties,
                 description = rootDefinition.description,
+                minProperties = rootDefinition.minProperties,
+                maxProperties = rootDefinition.maxProperties,
                 defs = definitions.takeIf { it.isNotEmpty() },
             )
 
@@ -207,6 +215,10 @@ public class TypeGraphToJsonSchemaTransformer
                 `enum` = rootDefinition.enum?.map { JsonPrimitive(it) },
                 description = rootDefinition.description,
                 default = rootDefinition.default,
+                minLength = rootDefinition.minLength,
+                maxLength = rootDefinition.maxLength,
+                pattern = rootDefinition.pattern,
+                format = rootDefinition.format,
                 properties = emptyMap(),
                 required = emptyList(),
                 additionalProperties = null,
@@ -226,6 +238,10 @@ public class TypeGraphToJsonSchemaTransformer
                 id = rootName,
                 type = rootDefinition.type,
                 description = rootDefinition.description,
+                minimum = rootDefinition.minimum,
+                maximum = rootDefinition.maximum,
+                exclusiveMinimum = rootDefinition.exclusiveMinimum,
+                exclusiveMaximum = rootDefinition.exclusiveMaximum,
                 properties = emptyMap(),
                 required = emptyList(),
                 additionalProperties = null,
@@ -265,6 +281,9 @@ public class TypeGraphToJsonSchemaTransformer
                 type = rootDefinition.type,
                 description = rootDefinition.description,
                 items = rootDefinition.items,
+                minItems = rootDefinition.minItems,
+                maxItems = rootDefinition.maxItems,
+                uniqueItems = rootDefinition.uniqueItems,
                 properties = emptyMap(),
                 required = emptyList(),
                 additionalProperties = null,
@@ -314,6 +333,7 @@ public class TypeGraphToJsonSchemaTransformer
          * unless the config emits no null markers (then a plain `$ref`).
          * Inline types (primitives, lists, maps) are expanded directly.
          */
+        @OptIn(ExperimentalSchemaGeneratorApi::class)
         private fun convertTypeRef(
             typeRef: TypeRef,
             graph: TypeGraph,
@@ -323,6 +343,7 @@ public class TypeGraphToJsonSchemaTransformer
             when (typeRef) {
                 is TypeRef.Inline -> {
                     convertInlineNode(typeRef.node, typeRef.nullable, graph, jsonTypeNames, definitions)
+                        .applyConstraints(typeRef.constraints)
                 }
 
                 is TypeRef.Ref -> {

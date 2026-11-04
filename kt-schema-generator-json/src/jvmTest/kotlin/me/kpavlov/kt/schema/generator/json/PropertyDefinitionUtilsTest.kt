@@ -2,6 +2,9 @@ package me.kpavlov.kt.schema.generator.json
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
+import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
+import me.kpavlov.kt.schema.generator.core.ir.Constraint
 import me.kpavlov.kt.schema.generator.core.ir.Literal
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveKind
 import me.kpavlov.kt.schema.generator.core.ir.PrimitiveNode
@@ -29,7 +32,9 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.MethodSource
+import java.util.stream.Stream
 
+@OptIn(ExperimentalSchemaGeneratorApi::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PropertyDefinitionUtilsTest {
     @Test
@@ -173,4 +178,74 @@ class PropertyDefinitionUtilsTest {
             JsonSchema(description = null),
             BooleanSchemaDefinition(false),
         )
+
+    //region applyConstraints
+
+    data class ConstraintCase(
+        val definition: PropertyDefinition,
+        val constraint: Constraint,
+        val expected: PropertyDefinition,
+    )
+
+    fun constraintCases(): Stream<ConstraintCase> {
+        val string = StringPropertyDefinition()
+        val integer = NumericPropertyDefinition(type = listOf("integer"))
+        val array = ArrayPropertyDefinition()
+        val obj = ObjectPropertyDefinition()
+        val reference = ReferencePropertyDefinition(ref = "#/\$defs/Other")
+        return Stream.of(
+            ConstraintCase(string, Constraint.Size(min = 2, max = 5), string.copy(minLength = 2, maxLength = 5)),
+            ConstraintCase(string, Constraint.Pattern("^[a-z]+$"), string.copy(pattern = "^[a-z]+$")),
+            ConstraintCase(string, Constraint.Format("email"), string.copy(format = "email")),
+            ConstraintCase(string, Constraint.Minimum(Literal.Integer(1)), string),
+            ConstraintCase(integer, Constraint.Minimum(Literal.Integer(1)), integer.copy(minimum = 1.0)),
+            ConstraintCase(
+                integer,
+                Constraint.Minimum(Literal.Decimal(0.5), exclusive = true),
+                integer.copy(exclusiveMinimum = 0.5),
+            ),
+            ConstraintCase(integer, Constraint.Maximum(Literal.Integer(9)), integer.copy(maximum = 9.0)),
+            ConstraintCase(
+                integer,
+                Constraint.Maximum(Literal.Integer(9), exclusive = true),
+                integer.copy(exclusiveMaximum = 9.0),
+            ),
+            ConstraintCase(integer, Constraint.Size(max = 3), integer),
+            ConstraintCase(array, Constraint.Size(min = 1, max = 3), array.copy(minItems = 1, maxItems = 3)),
+            ConstraintCase(array, Constraint.UniqueItems, array.copy(uniqueItems = true)),
+            ConstraintCase(array, Constraint.Pattern("x"), array),
+            ConstraintCase(string, Constraint.UniqueItems, string),
+            ConstraintCase(obj, Constraint.Size(min = 1), obj.copy(minProperties = 1)),
+            ConstraintCase(reference, Constraint.Size(min = 1), reference),
+            ConstraintCase(BooleanPropertyDefinition(), Constraint.Format("x"), BooleanPropertyDefinition()),
+        )
+    }
+
+    @ParameterizedTest
+    @MethodSource("constraintCases")
+    fun `applyConstraints maps a constraint onto the matching definition`(case: ConstraintCase) {
+        case.definition.applyConstraints(listOf(case.constraint)) shouldBe case.expected
+    }
+
+    @Test
+    fun `applyConstraints applies to non-null branches of a nullable union only`() {
+        // Arrange
+        val nullBranch = StringPropertyDefinition(type = listOf("null"))
+        val union = AnyOfPropertyDefinition(anyOf = listOf(StringPropertyDefinition(), nullBranch))
+
+        // Act
+        val result = union.applyConstraints(listOf(Constraint.Size(max = 4)))
+
+        // Assert
+        result shouldBe union.copy(anyOf = listOf(StringPropertyDefinition(maxLength = 4), nullBranch))
+    }
+
+    @Test
+    fun `applyConstraints returns the same instance for an empty list`() {
+        val string = StringPropertyDefinition()
+
+        string.applyConstraints(emptyList()) shouldBeSameInstanceAs string
+    }
+
+    //endregion
 }

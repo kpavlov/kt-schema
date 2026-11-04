@@ -12,6 +12,9 @@ public final class me/kpavlov/kt/schema/generator/core/ConfigKt {
 	public static final fun defaultPrimitiveTypeKinds ()Ljava/util/Map;
 }
 
+public abstract interface annotation class me/kpavlov/kt/schema/generator/core/ExperimentalSchemaGeneratorApi : java/lang/annotation/Annotation {
+}
+
 public final class me/kpavlov/kt/schema/generator/core/GlobMatcher {
 	public fun <init> (Ljava/util/List;Ljava/util/List;)V
 	public final fun getExcludePatterns ()Ljava/util/List;
@@ -115,6 +118,85 @@ public abstract class me/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionCo
 protected final class me/kpavlov/kt/schema/generator/core/ir/BaseIntrospectionContext$Companion {
 }
 
+public abstract interface class me/kpavlov/kt/schema/generator/core/ir/Constraint {
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/Constraint$Format : me/kpavlov/kt/schema/generator/core/ir/Constraint {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Format;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Format;Ljava/lang/String;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Format;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/Constraint$Maximum : me/kpavlov/kt/schema/generator/core/ir/Constraint {
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/Literal$Numeric;Z)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/Literal$Numeric;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lme/kpavlov/kt/schema/generator/core/ir/Literal$Numeric;
+	public final fun component2 ()Z
+	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/Literal$Numeric;Z)Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Maximum;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Maximum;Lme/kpavlov/kt/schema/generator/core/ir/Literal$Numeric;ZILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Maximum;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExclusive ()Z
+	public final fun getValue ()Lme/kpavlov/kt/schema/generator/core/ir/Literal$Numeric;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/Constraint$Minimum : me/kpavlov/kt/schema/generator/core/ir/Constraint {
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/Literal$Numeric;Z)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/Literal$Numeric;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lme/kpavlov/kt/schema/generator/core/ir/Literal$Numeric;
+	public final fun component2 ()Z
+	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/Literal$Numeric;Z)Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Minimum;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Minimum;Lme/kpavlov/kt/schema/generator/core/ir/Literal$Numeric;ZILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Minimum;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExclusive ()Z
+	public final fun getValue ()Lme/kpavlov/kt/schema/generator/core/ir/Literal$Numeric;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/Constraint$Pattern : me/kpavlov/kt/schema/generator/core/ir/Constraint {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Pattern;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Pattern;Ljava/lang/String;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Pattern;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRegex ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/Constraint$Size : me/kpavlov/kt/schema/generator/core/ir/Constraint {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Integer;
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun copy (Ljava/lang/Integer;Ljava/lang/Integer;)Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Size;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Size;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/Constraint$Size;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMax ()Ljava/lang/Integer;
+	public final fun getMin ()Ljava/lang/Integer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/Constraint$UniqueItems : me/kpavlov/kt/schema/generator/core/ir/Constraint {
+	public static final field INSTANCE Lme/kpavlov/kt/schema/generator/core/ir/Constraint$UniqueItems;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class me/kpavlov/kt/schema/generator/core/ir/ConstraintKt {
+	public static final fun withConstraints (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/util/List;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
+}
+
 public abstract interface class me/kpavlov/kt/schema/generator/core/ir/DescriptionExtractor {
 	public abstract fun extract (Ljava/util/List;)Ljava/lang/String;
 }
@@ -202,7 +284,7 @@ public final class me/kpavlov/kt/schema/generator/core/ir/Literal$Bool : me/kpav
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class me/kpavlov/kt/schema/generator/core/ir/Literal$Decimal : me/kpavlov/kt/schema/generator/core/ir/Literal {
+public final class me/kpavlov/kt/schema/generator/core/ir/Literal$Decimal : me/kpavlov/kt/schema/generator/core/ir/Literal$Numeric {
 	public fun <init> (D)V
 	public final fun component1 ()D
 	public final fun copy (D)Lme/kpavlov/kt/schema/generator/core/ir/Literal$Decimal;
@@ -213,7 +295,7 @@ public final class me/kpavlov/kt/schema/generator/core/ir/Literal$Decimal : me/k
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class me/kpavlov/kt/schema/generator/core/ir/Literal$Integer : me/kpavlov/kt/schema/generator/core/ir/Literal {
+public final class me/kpavlov/kt/schema/generator/core/ir/Literal$Integer : me/kpavlov/kt/schema/generator/core/ir/Literal$Numeric {
 	public fun <init> (J)V
 	public final fun component1 ()J
 	public final fun copy (J)Lme/kpavlov/kt/schema/generator/core/ir/Literal$Integer;
@@ -251,6 +333,9 @@ public final class me/kpavlov/kt/schema/generator/core/ir/Literal$Null : me/kpav
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class me/kpavlov/kt/schema/generator/core/ir/Literal$Numeric : me/kpavlov/kt/schema/generator/core/ir/Literal {
 }
 
 public final class me/kpavlov/kt/schema/generator/core/ir/Literal$Str : me/kpavlov/kt/schema/generator/core/ir/Literal {
@@ -345,19 +430,17 @@ public final class me/kpavlov/kt/schema/generator/core/ir/PrimitiveNode : me/kpa
 }
 
 public final class me/kpavlov/kt/schema/generator/core/ir/Property {
-	public fun <init> (Ljava/lang/String;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ZZLme/kpavlov/kt/schema/generator/core/ir/PropertyValue;Ljava/util/Map;)V
-	public synthetic fun <init> (Ljava/lang/String;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ZZLme/kpavlov/kt/schema/generator/core/ir/PropertyValue;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ZZLme/kpavlov/kt/schema/generator/core/ir/PropertyValue;)V
+	public synthetic fun <init> (Ljava/lang/String;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ZZLme/kpavlov/kt/schema/generator/core/ir/PropertyValue;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Z
 	public final fun component5 ()Z
 	public final fun component6 ()Lme/kpavlov/kt/schema/generator/core/ir/PropertyValue;
-	public final fun component7 ()Ljava/util/Map;
-	public final fun copy (Ljava/lang/String;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ZZLme/kpavlov/kt/schema/generator/core/ir/PropertyValue;Ljava/util/Map;)Lme/kpavlov/kt/schema/generator/core/ir/Property;
-	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/Property;Ljava/lang/String;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ZZLme/kpavlov/kt/schema/generator/core/ir/PropertyValue;Ljava/util/Map;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/Property;
+	public final fun copy (Ljava/lang/String;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ZZLme/kpavlov/kt/schema/generator/core/ir/PropertyValue;)Lme/kpavlov/kt/schema/generator/core/ir/Property;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/Property;Ljava/lang/String;Lme/kpavlov/kt/schema/generator/core/ir/TypeRef;Ljava/lang/String;ZZLme/kpavlov/kt/schema/generator/core/ir/PropertyValue;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/Property;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAnnotations ()Ljava/util/Map;
 	public final fun getDeprecated ()Z
 	public final fun getDescription ()Ljava/lang/String;
 	public final fun getName ()Ljava/lang/String;
@@ -472,17 +555,24 @@ public abstract interface class me/kpavlov/kt/schema/generator/core/ir/TypeNode 
 }
 
 public abstract interface class me/kpavlov/kt/schema/generator/core/ir/TypeRef {
+	public abstract fun getConstraints ()Ljava/util/List;
 	public abstract fun getNullable ()Z
 }
 
 public final class me/kpavlov/kt/schema/generator/core/ir/TypeRef$Inline : me/kpavlov/kt/schema/generator/core/ir/TypeRef {
-	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;Z)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;Z)V
 	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;ZLjava/util/List;)V
+	public synthetic fun <init> (Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;ZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;
 	public final fun component2 ()Z
-	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;Z)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Inline;
+	public final fun component3 ()Ljava/util/List;
+	public final synthetic fun copy (Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;Z)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Inline;
+	public final fun copy (Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;ZLjava/util/List;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Inline;
 	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Inline;Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;ZILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Inline;
+	public static synthetic fun copy$default (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Inline;Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;ZLjava/util/List;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Inline;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getConstraints ()Ljava/util/List;
 	public final fun getNode ()Lme/kpavlov/kt/schema/generator/core/ir/TypeNode;
 	public fun getNullable ()Z
 	public fun hashCode ()I
@@ -491,12 +581,18 @@ public final class me/kpavlov/kt/schema/generator/core/ir/TypeRef$Inline : me/kp
 
 public final class me/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref : me/kpavlov/kt/schema/generator/core/ir/TypeRef {
 	public synthetic fun <init> (Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;ZLjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;ZLjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Ljava/lang/String;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-RCHVzKg ()Ljava/lang/String;
 	public final fun component2 ()Z
-	public final fun copy-ZF1VCzI (Ljava/lang/String;Z)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;
+	public final fun component3 ()Ljava/util/List;
+	public final synthetic fun copy-ZF1VCzI (Ljava/lang/String;Z)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;
 	public static synthetic fun copy-ZF1VCzI$default (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;Ljava/lang/String;ZILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;
+	public final fun copy-tiLf4_A (Ljava/lang/String;ZLjava/util/List;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;
+	public static synthetic fun copy-tiLf4_A$default (Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;Ljava/lang/String;ZLjava/util/List;ILjava/lang/Object;)Lme/kpavlov/kt/schema/generator/core/ir/TypeRef$Ref;
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getConstraints ()Ljava/util/List;
 	public final fun getId-RCHVzKg ()Ljava/lang/String;
 	public fun getNullable ()Z
 	public fun hashCode ()I
