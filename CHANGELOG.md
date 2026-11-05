@@ -21,13 +21,17 @@
     - `LocalDateTime` is a plain `string` (JSON Schema has no format for a zone-less date-time)
 - **Jakarta Bean Validation annotations become schema constraints**
   ([#86](https://github.com/kpavlov/kt-schema/issues/86)) on class properties in the reflection, KSP and APT front
-  ends and on function parameters in reflection and KSP: `@Min`/`@Max`, `@DecimalMin`/`@DecimalMax` (exclusive with `inclusive = false`),
-  `@Positive`/`@PositiveOrZero`, `@Negative`/`@NegativeOrZero`, `@Size`, `@NotEmpty`, `@NotBlank`, `@Pattern` and
-  `@Email`. Annotations are matched by name in `jakarta.validation.constraints` or `javax.validation.constraints`
-  (configurable via `introspector.annotations.constraint.names`), so the validation API is not a dependency. When
-  an annotation and a built-in type range bound the same property, the tighter bound wins; contradictory bounds
-  fail generation with an error naming the property. A constraint on a property emitted as a `$ref` (object or
-  enum) is wrapped as `allOf: [{ "$ref": ... }, { ... }]`. A `@Pattern` with `flags` is skipped with a warning
+  ends and on function parameters in reflection and KSP: `@Min`/`@Max`, `@DecimalMin`/`@DecimalMax` (exclusive with
+  `inclusive = false`), `@Positive`/`@PositiveOrZero`, `@Negative`/`@NegativeOrZero`, `@Size`, `@NotEmpty`,
+  `@NotBlank`, `@Pattern` and `@Email`. Annotations are matched by name in `jakarta.validation.constraints` or
+  `javax.validation.constraints` (configurable via `introspector.annotations.constraint.names`), so the validation
+  API is not a dependency. When an annotation and a built-in type range bound the same member, the tighter bound
+  wins; bounds that exclude every value (`@Min(200)` on a `Byte`) are emitted as written and logged as a warning
+  naming the member, unless the member is nullable, in which case `null` still satisfies them. A negative `@Size`
+  bound is ignored with a warning. An inconsistent annotation never fails generation, since the annotated source
+  may not be the user's to fix.
+  A constraint on a property emitted as a `$ref` (object or enum) is wrapped as `allOf: [{ "$ref": ... }, { ... }]`.
+  A `@Pattern` with `flags` is skipped with a warning
 - Function-calling schemas omit `description` for an undocumented function instead of emitting `"description": ""`
 - **Validation constraints in the IR** ([#181](https://github.com/kpavlov/kt-schema/pull/181)), for anyone building
   on `kt-schema-generator-core`: `TypeRef.constraints` holds `Minimum`, `Maximum`, `Size`, `Pattern`, `Format` or

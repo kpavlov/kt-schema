@@ -26,16 +26,13 @@ internal fun constraintsOf(targets: List<AnnotatedConstruct>): List<Constraint> 
     targets.flatMap { target ->
         target.annotationMirrors.flatMap { mirror ->
             val annotationElement = mirror.annotationType.asElement() as TypeElement
-            val simpleName = annotationElement.simpleName.toString()
-            val qualifiedName = annotationElement.qualifiedName.toString()
-            if (Introspections.isConstraintAnnotation(simpleName, qualifiedName)) {
-                val args =
-                    mirror.elementValues.entries.map { (attribute, value) ->
-                        attribute.simpleName.toString() to value.value
-                    }
-                Introspections.getConstraintsFromAnnotation(simpleName, qualifiedName, args)
-            } else {
-                emptyList()
+            Introspections.getConstraintsFromAnnotation(
+                annotationElement.simpleName.toString(),
+                annotationElement.qualifiedName.toString(),
+            ) {
+                mirror.elementValues.entries.map { (attribute, value) ->
+                    attribute.simpleName.toString() to value.value
+                }
             }
         }
     }

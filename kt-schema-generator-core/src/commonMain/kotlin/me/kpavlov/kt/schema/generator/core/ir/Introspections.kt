@@ -418,31 +418,21 @@ public object Introspections {
         }
 
     /**
-     * Checks whether the given annotation is recognized as a validation constraint
-     * ([Config.constraintAnnotationNames]); lets callers skip reading its arguments otherwise.
-     */
-    @JvmStatic
-    public fun isConstraintAnnotation(
-        simpleName: String,
-        qualifiedName: String? = null,
-    ): Boolean = matchesAnnotation(simpleName, qualifiedName, constraintNames)
-
-    /**
-     * Returns the schema constraints an annotation expresses, or an empty list if it is not a recognized
-     * constraint annotation ([isConstraintAnnotation]).
+     * Returns the schema constraints an annotation expresses, or an empty list if it matches no pattern in
+     * [Config.constraintAnnotationNames].
      *
-     * A recognized annotation is mapped by its [simpleName] with Jakarta Bean Validation semantics, see
-     * [validationConstraintsFor]. [annotationArguments] are its element values; a missing element takes
-     * the annotation's documented default.
+     * A matching annotation is mapped by its [simpleName] with Jakarta Bean Validation semantics, see
+     * [validationConstraintsFor]. [annotationArguments] supplies its element values and runs only for a matching
+     * annotation; a missing element takes the annotation's documented default.
      */
     @JvmStatic
     public fun getConstraintsFromAnnotation(
         simpleName: String,
         qualifiedName: String?,
-        annotationArguments: List<Pair<String, Any?>>,
+        annotationArguments: () -> List<Pair<String, Any?>>,
     ): List<Constraint> =
-        if (isConstraintAnnotation(simpleName, qualifiedName)) {
-            validationConstraintsFor(simpleName, annotationArguments)
+        if (matchesAnnotation(simpleName, qualifiedName, constraintNames)) {
+            validationConstraintsFor(simpleName, annotationArguments())
         } else {
             emptyList()
         }
