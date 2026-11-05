@@ -39,6 +39,7 @@
 - Whole-number bounds are written as integers: `"minimum": 18` instead of `18.0`
 - **Breaking** for direct users of the IR: `Property.annotations` was removed. Nothing read or wrote it
   ([#181](https://github.com/kpavlov/kt-schema/pull/181))
+- **Breaking**: drop support for _watchosArm32_ and _iosX64_ multiplatform targets.
 
 ### Fixed
 
