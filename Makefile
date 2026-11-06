@@ -6,7 +6,8 @@ MERMAID_VERSION ?= 12.2.0
 SITE_DIR ?= docs/public
 # Shown at the bottom of the site menu; Hugo reads HUGO_PARAMS_* as site.Params.
 VERSION := $(shell sed -n "s/^version=//p" gradle.properties)
-HUGO := HUGO_PARAMS_VERSION=$(VERSION) hugo
+VERSION_SUFFIX := $(shell sed -n "s/^versionSuffix=//p" gradle.properties)
+HUGO := HUGO_PARAMS_VERSION=$(VERSION)$(if $(VERSION_SUFFIX),-$(VERSION_SUFFIX)) hugo
 
 .PHONY: all
 all:clean lint build publish examples-snapshot knit

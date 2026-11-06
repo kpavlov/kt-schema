@@ -1,32 +1,21 @@
 :root {
   color-scheme: light dark;
-  --fg: #1f2328;
-  --muted: #59636e;
-  --bg: #fff;
-  --border: #d1d9e0;
-  --accent: #7048e8;
-  --code-bg: #f6f8fa;
-  --note: #0969da;
-  --tip: #1a7f37;
-  --important: #8250df;
-  --warning: #9a6700;
-  --caution: #cf222e;
+  --fg: light-dark(#1f2328, #e6edf3);
+  --muted: light-dark(#59636e, #9198a1);
+  --bg: light-dark(#fff, #0d1117);
+  --header-bg: light-dark(#f0f2f5, #010409);
+  --border: light-dark(#d1d9e0, #3d444d);
+  --accent: light-dark(#7048e8, #a98bff);
+  --code-bg: light-dark(#f6f8fa, #161b22);
+  --note: light-dark(#0969da, #4493f8);
+  --tip: light-dark(#1a7f37, #3fb950);
+  --important: light-dark(#8250df, #ab7df8);
+  --warning: light-dark(#9a6700, #d29922);
+  --caution: light-dark(#cf222e, #f85149);
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fg: #e6edf3;
-    --muted: #9198a1;
-    --bg: #0d1117;
-    --border: #3d444d;
-    --accent: #a98bff;
-    --code-bg: #161b22;
-    --note: #4493f8;
-    --tip: #3fb950;
-    --important: #ab7df8;
-    --warning: #d29922;
-    --caution: #f85149;
-  }
-}
+/* An explicit choice from the colour scheme selector; without one the system decides. */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
 /* Theme the Pagefind search box with the site colours (its own :root rules load first). */
 :root {
   --pf-text: var(--fg);
@@ -41,6 +30,8 @@
   --pf-skeleton: var(--code-bg);
   --pf-skeleton-shine: var(--border);
 }
+/* Pagefind's reset drops color-scheme, and light-dark() would then pick the light colours. */
+pagefind-searchbox, pagefind-searchbox * { color-scheme: inherit !important; }
 *, ::before, ::after { box-sizing: border-box; }
 /* Keeps linked headings clear of the sticky header. */
 html { scroll-padding-top: 5rem; }
@@ -52,7 +43,7 @@ body {
 }
 .skip { position: absolute; left: -9999px; z-index: 20; padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; }
 .skip:focus { left: 8px; top: 8px; }
-header { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--border); }
+header { position: sticky; top: 0; z-index: 10; background: var(--header-bg); border-bottom: 1px solid var(--border); }
 .bar, main, footer { max-width: 860px; margin: 0 auto; padding: 0 16px; }
 .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding-top: 10px; padding-bottom: 10px; }
 header nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; }
@@ -62,6 +53,12 @@ header nav svg { fill: currentColor; }
 /* The searchbox sits on the right next to the project links; on wide screens it keeps a fixed width. */
 .bar pagefind-searchbox { display: block; flex: 1 1 0; min-width: 0; margin-left: auto; }
 .icon-link { gap: 6px; }
+.theme { display: flex; align-items: center; justify-content: center; flex: none; width: 36px; height: 36px; padding: 0; color: var(--muted); background: none; border: 0; border-radius: 6px; cursor: pointer; }
+.theme:hover { color: var(--accent); }
+.theme svg { display: none; fill: currentColor; }
+.theme[data-choice="system"] .system, .theme[data-choice="light"] .light, .theme[data-choice="dark"] .dark { display: block; }
+/* It only works with JS (see the "js" class set in <head>). */
+html:not(.js) .theme { display: none; }
 .version { font-size: 0.75rem; color: var(--muted); }
 .brand { color: var(--fg); text-decoration: none; font-weight: 700; white-space: nowrap; }
 .menu-toggle { display: none; padding: 6px 12px; font: inherit; font-weight: 500; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
@@ -69,9 +66,11 @@ header nav svg { fill: currentColor; }
 /* Wide screens: the documentation menu is a fixed left sidebar under the header; the header keeps search and project links. */
 @media (min-width: 721px) {
   :root { --header-h: 60px; --sidebar-w: 220px; }
+  /* No overscroll bounce: it would drag the sticky header down when scrolling up past the top. */
+  html { overscroll-behavior-y: none; }
   .bar { height: var(--header-h); flex-wrap: nowrap; max-width: none; }
   .bar pagefind-searchbox { flex: 0 1 360px; }
-  #site-nav { position: fixed; top: var(--header-h); bottom: 0; left: 0; width: var(--sidebar-w); overflow-y: auto; flex-direction: column; align-items: stretch; gap: 0; padding: 16px 0; border-right: 1px solid var(--border); }
+  #site-nav { position: fixed; top: var(--header-h); bottom: 0; left: 0; width: var(--sidebar-w); overflow-y: auto; flex-flow: column nowrap; align-items: stretch; gap: 0; padding: 16px 0; border-right: 1px solid var(--border); }
   #site-nav a { padding: 6px 20px; }
   #site-nav a[aria-current] { border-left: 3px solid var(--accent); padding-left: 17px; }
   #site-nav .version { margin-top: auto; padding: 16px 20px 0; }
@@ -79,11 +78,15 @@ header nav svg { fill: currentColor; }
 }
 /* Collapse only when JS can reopen the menu (see the "js" class set in <head>). */
 @media (max-width: 720px) {
+  /* The header takes a lot of a small screen, so it scrolls away with the page instead of sticking. */
+  header { position: static; }
+  html { scroll-padding-top: 1rem; }
   .js .menu-toggle { display: inline-block; }
   .js #site-nav { display: none; order: 3; flex-basis: 100%; flex-direction: column; align-items: flex-start; gap: 8px; }
   .js #site-nav.open { display: flex; }
-  /* Row 1: brand, menu button, project links; row 2: search; row 3: the opened menu. */
-  .bar pagefind-searchbox { order: 2; flex-basis: 100%; margin-left: 0; }
+  /* Row 1: brand, menu button, project links; row 2: search and colour scheme; row 3: the opened menu. */
+  .bar pagefind-searchbox { order: 2; flex-basis: calc(100% - 56px); margin-left: 0; }
+  .theme { order: 2; }
   .project { margin-left: auto; }
   .icon-link .label { display: none; }
 }
@@ -97,8 +100,41 @@ img { max-width: 100%; height: auto; }
 .tagline { font-size: 1.125rem; color: var(--muted); }
 .toc { margin: 16px 0 24px; padding: 8px 16px; background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; }
 .toc summary { font-weight: 600; cursor: pointer; }
-.toc ul { margin: 4px 0; padding-left: 20px; }
-.toc > nav > ul { padding-left: 0; list-style: none; }
+.toc ul { margin: 4px 0; padding-left: 12px; list-style: none; }
+.toc > nav > ul { padding-left: 0; }
+.toc a { display: block; padding: 2px 0 2px 8px; color: var(--muted); text-decoration: none; border-left: 2px solid transparent; }
+.toc a:hover, .toc a[aria-current] { color: var(--accent); }
+.toc a[aria-current] { border-left-color: var(--accent); }
+/* Mobile: comfortable tap targets, and prose table columns that scroll rather than wrap word by word. */
+@media (max-width: 720px) {
+  .toc a { padding-block: 7px; }
+  td:last-child, th:last-child { min-width: 14rem; }
+}
+/* Wide screens: the table of contents moves to a fixed column beside the content, both centred right of the sidebar. */
+@media (min-width: 1200px) {
+  :root { --toc-w: 260px; --toc-right: max(0px, (100% - var(--sidebar-w) - var(--toc-w) - 860px) / 2); }
+  body:has(.toc) :is(main, footer) { margin-left: calc(var(--sidebar-w) + var(--toc-right)); margin-right: var(--toc-w); }
+  .toc { position: fixed; top: calc(var(--header-h) + 24px); right: var(--toc-right); width: var(--toc-w); max-height: calc(100vh - var(--header-h) - 48px); overflow-y: auto; margin: 0; padding: 0 16px 0 40px; background: none; border: 0; border-radius: 0; }
+  /* The column cannot fold, so it replaces the summary toggle with a plain title. */
+  .toc summary { display: none; }
+  .toc nav::before { content: "Table of contents"; display: block; font-weight: 600; }
+}
+.page-head { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 16px; margin-bottom: 16px; }
+.page-head h1 { flex: 1 1 auto; min-width: 0; margin: 0; }
+.page-actions { position: relative; display: inline-flex; margin-left: auto; font-size: 0.875rem; }
+.page-actions > button, .page-actions summary { display: flex; align-items: center; min-height: 36px; padding: 0 12px; font: inherit; font-weight: 500; color: var(--fg); background: var(--bg); border: 1px solid var(--border); cursor: pointer; }
+.page-actions > button:hover, .page-actions summary:hover, .page-actions details[open] summary { background: var(--code-bg); }
+.page-actions > button { border-radius: 6px 0 0 6px; }
+.page-actions summary { height: 100%; padding: 0 8px; margin-left: -1px; border-radius: 0 6px 6px 0; list-style: none; }
+.page-actions summary::-webkit-details-marker { display: none; }
+.page-actions summary svg { fill: currentColor; }
+.page-actions .menu { position: absolute; top: calc(100% + 4px); right: 0; z-index: 5; width: 280px; padding: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgb(0 0 0 / 0.15); }
+.page-actions .menu > * { display: block; width: 100%; padding: 8px 12px; font: inherit; color: var(--fg); text-align: left; text-decoration: none; background: none; border: 0; border-radius: 6px; cursor: pointer; }
+.page-actions .menu > :hover { background: var(--code-bg); }
+.page-actions .menu strong { display: block; font-weight: 500; }
+.page-actions .menu span { display: block; font-size: 0.8125rem; color: var(--muted); }
+/* Copying needs JS; the plain Markdown link does not. */
+html:not(.js) .copy-page { display: none; }
 code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 code { background: var(--code-bg); border-radius: 4px; padding: 1px 5px; font-size: 90%; }
 pre { overflow-x: auto; padding: 12px 16px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.875rem; line-height: 1.45; }
@@ -110,8 +146,6 @@ pre.chroma { background: var(--code-bg); }
 @media (hover: hover) { .copy { opacity: 0; } .code:hover .copy, .code:focus-within .copy { opacity: 1; } }
 /* The Kotlin lexer flags valid syntax such as $$"""; do not paint it as an error. */
 .chroma .err { color: inherit; background: none; }
-/* github-dark leaves these tokens unset, so the light style's dark colours would show through. */
-@media (prefers-color-scheme: dark) { .chroma .na, .chroma .nb, .chroma .bp, .chroma .p { color: inherit; } }
 pre code { background: none; padding: 0; font-size: inherit; }
 /* Mermaid replaces the source with an SVG, so the block must not look like code. */
 pre.mermaid { padding: 0; font-family: inherit; text-align: center; background: none; border: 0; }

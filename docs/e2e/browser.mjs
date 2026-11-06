@@ -12,7 +12,7 @@ export const SITE_DIR = resolve(process.env.SITE_DIR ?? join(import.meta.dirname
 export const SITE_PREFIX = "/kt-schema/"
 
 const MIME = {
-  ".html": "text/html; charset=utf-8", ".css": "text/css", ".js": "text/javascript", ".mjs": "text/javascript", ".json": "application/json",
+  ".html": "text/html; charset=utf-8", ".md": "text/markdown; charset=utf-8", ".css": "text/css", ".js": "text/javascript", ".mjs": "text/javascript", ".json": "application/json",
   ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp",
   ".xml": "application/xml", ".wasm": "application/wasm",
 }
@@ -96,6 +96,8 @@ export async function launchBrowser() {
       const page = {
         /** Runtime/console/network problems seen since the last [goto]. */
         problems,
+        /** Sends a raw DevTools command, e.g. to emulate a colour scheme or resize the viewport. */
+        send,
         async goto(url) {
           problems.length = 0
           const loaded = waitEvent("Page.loadEventFired")

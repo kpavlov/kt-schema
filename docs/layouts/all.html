@@ -5,12 +5,30 @@
     <p class="tagline">{{ site.Params.description }}</p>
     {{- end }}
     {{- /* The "# Title" line in the markdown is for GitHub; render-heading.html drops it and checks it against the front matter. */}}
-    <h1>{{ .Title }}</h1>
+    <div class="page-head">
+      <h1>{{ .Title }}</h1>
+      {{- with .OutputFormats.Get "markdown" }}
+      <div class="page-actions" data-pagefind-ignore>
+        <button class="copy-page" type="button" data-markdown="{{ .RelPermalink }}">Copy page</button>
+        <details>
+          <summary aria-label="More page actions">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4.2 6.2 8 10l3.8-3.8.9.9L8 11.8 3.3 7.1z"/></svg>
+          </summary>
+          <div class="menu">
+            <button class="copy-page" type="button" data-markdown="{{ .RelPermalink }}"><strong>Copy page</strong><span>Copy page as Markdown for LLMs</span></button>
+            <a href="{{ .RelPermalink }}"><strong>View as Markdown</strong><span>View this page as plain text</span></a>
+          </div>
+        </details>
+      </div>
+      {{- end }}
+    </div>
     {{- if not .IsHome }}
     <details class="toc" open data-pagefind-ignore>
       <summary>Table of contents</summary>
       {{ .TableOfContents }}
     </details>
+    {{- /* Runs before first paint, so the page does not jump. Without JS the list simply stays open. */}}
+    <script>if (matchMedia("(max-width: 720px)").matches) document.currentScript.previousElementSibling.open = false</script>
     {{- end }}
     {{ .Content }}
   </main>

@@ -8,9 +8,14 @@ copyright = "© 2026 Konstantin Pavlov and Contributors. Portions copyright JetB
   description = "Generate JSON schemas and LLM function calling schemas from Java and Kotlin code — including classes you don't own."
   repo = "https://github.com/kpavlov/kt-schema"
 
-# Highlighting comes from assets/syntax.css, generated with
-#   hugo gen chromastyles --style=github      (light)
-#   hugo gen chromastyles --style=github-dark (dark, wrapped in a prefers-color-scheme media query)
+# Every page also gets an index.md (layouts/all.md) for "Copy page" and "View as Markdown".
+[outputs]
+  home = ["html", "markdown"]
+  page = ["html", "markdown"]
+
+# Highlighting comes from generated styles; baseof.html switches the dark one on and off with its media attribute.
+#   hugo gen chromastyles --style=github      > assets/syntax.css
+#   hugo gen chromastyles --style=github-dark > assets/syntax-dark.css (keep the rule added at its end)
 [markup.highlight]
   noClasses = false
 
