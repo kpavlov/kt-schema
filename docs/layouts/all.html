@@ -1,0 +1,17 @@
+{{ define "main" }}
+  <main id="content" data-pagefind-body>
+    {{- if .IsHome }}
+    <img class="hero" src="{{ "social-preview-1.jpg" | relURL }}" width="1280" height="640" alt="kt-schema generator turning Kotlin and Java code into JSON schemas">
+    <p class="tagline">{{ site.Params.description }}</p>
+    {{- end }}
+    {{- /* The "# Title" line in the markdown is for GitHub; render-heading.html drops it and checks it against the front matter. */}}
+    <h1>{{ .Title }}</h1>
+    {{- if not .IsHome }}
+    <details class="toc" open data-pagefind-ignore>
+      <summary>Table of contents</summary>
+      {{ .TableOfContents }}
+    </details>
+    {{- end }}
+    {{ .Content }}
+  </main>
+{{ end }}

@@ -1,0 +1,34 @@
+baseURL = "https://kpavlov.github.io/kt-schema/"
+title = "kt-schema"
+locale = "en"
+disableKinds = ["rss", "taxonomy", "term"]
+copyright = "© 2026 Konstantin Pavlov and Contributors. Portions copyright JetBrains s.r.o. and contributors."
+
+[params]
+  description = "Generate JSON schemas and LLM function calling schemas from Java and Kotlin code — including classes you don't own."
+  repo = "https://github.com/kpavlov/kt-schema"
+
+# Highlighting comes from assets/syntax.css, generated with
+#   hugo gen chromastyles --style=github      (light)
+#   hugo gen chromastyles --style=github-dark (dark, wrapped in a prefers-color-scheme media query)
+[markup.highlight]
+  noClasses = false
+
+# The guides no longer carry a knit-generated table of contents; the layout renders this one.
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 4
+
+# docs/ is also the Gradle `docs` module (Dokka writes to public/api), so mount only the pages.
+# README.md is the home page. Add new guides to the list below; each declares its own `menus.main` entry
+# (name and weight) in its front matter.
+[module]
+  [module.hugoVersion]
+    min = "0.158.0"
+  [[module.mounts]]
+    source = "README.md"
+    target = "content/_index.md"
+  [[module.mounts]]
+    source = "."
+    target = "content"
+    files = ["{apt,architecture,ksp,serializable}.md"]

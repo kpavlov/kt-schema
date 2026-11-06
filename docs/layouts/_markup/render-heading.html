@@ -1,0 +1,6 @@
+{{- /* The layout renders the page title from front matter; the "# Title" line is there for GitHub and must match it. */ -}}
+{{- if eq .Level 1 -}}
+  {{- if ne .PlainText .Page.Title }}{{ errorf "%s: the # heading %q must match the front matter title %q" .Page.File.Path .PlainText .Page.Title }}{{ end -}}
+{{- else -}}
+<h{{ .Level }} id="{{ .Anchor }}">{{ .Text }}</h{{ .Level }}>
+{{- end -}}

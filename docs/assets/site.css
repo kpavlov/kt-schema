@@ -1,0 +1,111 @@
+:root {
+  color-scheme: light dark;
+  --fg: #1f2328;
+  --muted: #59636e;
+  --bg: #fff;
+  --border: #d1d9e0;
+  --accent: #7048e8;
+  --code-bg: #f6f8fa;
+  --note: #0969da;
+  --tip: #1a7f37;
+  --important: #8250df;
+  --warning: #9a6700;
+  --caution: #cf222e;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --bg: #0d1117;
+    --border: #3d444d;
+    --accent: #a98bff;
+    --code-bg: #161b22;
+    --note: #4493f8;
+    --tip: #3fb950;
+    --important: #ab7df8;
+    --warning: #d29922;
+    --caution: #f85149;
+  }
+}
+/* Theme the Pagefind search box with the site colours (its own :root rules load first). */
+:root {
+  --pf-text: var(--fg);
+  --pf-text-secondary: var(--muted);
+  --pf-text-muted: var(--muted);
+  --pf-background: var(--bg);
+  --pf-border: var(--border);
+  --pf-border-focus: var(--accent);
+  --pf-outline-focus: var(--accent);
+  --pf-hover: var(--code-bg);
+  --pf-mark: var(--fg);
+  --pf-skeleton: var(--code-bg);
+  --pf-skeleton-shine: var(--border);
+}
+*, ::before, ::after { box-sizing: border-box; }
+/* Keeps linked headings clear of the sticky header. */
+html { scroll-padding-top: 5rem; }
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font: 1rem/1.6 system-ui, sans-serif;
+}
+.skip { position: absolute; left: -9999px; z-index: 20; padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; }
+.skip:focus { left: 8px; top: 8px; }
+header { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--border); }
+.bar, main, footer { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding-top: 10px; padding-bottom: 10px; }
+header nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; }
+header nav a { display: inline-flex; align-items: center; color: var(--muted); text-decoration: none; font-weight: 500; }
+header nav a:hover, header nav a[aria-current] { color: var(--accent); }
+header nav svg { fill: currentColor; }
+/* The searchbox takes all the space between the documentation links and the project links. */
+.bar pagefind-searchbox { display: block; flex: 1 1 0; min-width: 0; }
+.project { margin-left: auto; }
+.menu-toggle { display: none; padding: 6px 12px; font: inherit; font-weight: 500; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+.menu-toggle[aria-expanded="true"] { color: var(--accent); border-color: var(--accent); }
+/* Collapse only when JS can reopen the menu (see the "js" class set in <head>). */
+@media (max-width: 720px) {
+  .js .menu-toggle { display: inline-block; }
+  .js #site-nav { display: none; order: 3; flex-basis: 100%; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .js #site-nav.open { display: flex; }
+}
+main { padding-top: 24px; padding-bottom: 48px; }
+footer { color: var(--muted); font-size: 0.875rem; padding-top: 16px; padding-bottom: 32px; border-top: 1px solid var(--border); }
+a { color: var(--accent); }
+h1, h2, h3, h4, h5, h6 { line-height: 1.25; }
+h2 { border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-top: 32px; }
+img { max-width: 100%; height: auto; }
+.hero { border-radius: 8px; }
+.tagline { font-size: 1.125rem; color: var(--muted); }
+.toc { margin: 16px 0 24px; padding: 8px 16px; background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; }
+.toc summary { font-weight: 600; cursor: pointer; }
+.toc ul { margin: 4px 0; padding-left: 20px; }
+.toc > nav > ul { padding-left: 0; list-style: none; }
+code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+code { background: var(--code-bg); border-radius: 4px; padding: 1px 5px; font-size: 90%; }
+pre { overflow-x: auto; padding: 12px 16px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.875rem; line-height: 1.45; }
+pre.chroma { background: var(--code-bg); }
+/* The Kotlin lexer flags valid syntax such as $$"""; do not paint it as an error. */
+.chroma .err { color: inherit; background: none; }
+/* github-dark leaves these tokens unset, so the light style's dark colours would show through. */
+@media (prefers-color-scheme: dark) { .chroma .na, .chroma .nb, .chroma .bp, .chroma .p { color: inherit; } }
+pre code { background: none; padding: 0; font-size: inherit; }
+/* Mermaid replaces the source with an SVG, so the block must not look like code. */
+pre.mermaid { padding: 0; font-family: inherit; text-align: center; background: none; border: 0; }
+pre.mermaid[role="button"] { cursor: zoom-in; }
+dialog.zoom { width: 95vw; max-width: none; max-height: 95vh; padding: 16px; color: var(--fg); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; cursor: zoom-out; }
+dialog.zoom::backdrop { background: rgb(0 0 0 / 0.6); }
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+table { border-collapse: collapse; }
+th, td { border: 1px solid var(--border); padding: 6px 12px; text-align: left; }
+.align-center { text-align: center; }
+.align-right { text-align: right; }
+blockquote { margin: 16px 0; padding: 0 16px; color: var(--muted); border-left: 4px solid var(--border); }
+.alert { --alert: var(--accent); margin: 16px 0; padding: 4px 16px; border-left: 4px solid var(--alert); background: var(--code-bg); }
+.alert strong { text-transform: capitalize; color: var(--alert); }
+.alert-note { --alert: var(--note); }
+.alert-tip { --alert: var(--tip); }
+.alert-important { --alert: var(--important); }
+.alert-warning { --alert: var(--warning); }
+.alert-caution { --alert: var(--caution); }

@@ -1,29 +1,14 @@
+---
+title: Serialization-Based Schema Generation
+description: Generate JSON Schema at runtime from any @Serializable class using its SerialDescriptor.
+menus:
+  main:
+    name: Serialization
+    weight: 40
+---
+
 # Serialization-Based Schema Generation
 
-**Table of contents**
-<!--- TOC -->
-
-* [Overview](#overview)
-* [Setup](#setup)
-* [Basic Usage](#basic-usage)
-* [@SerialName support](#@serialname-support)
-  * [Renaming properties](#renaming-properties)
-  * [Renaming enum entries](#renaming-enum-entries)
-* [Configuration](#configuration)
-  * [Introspector configuration](#introspector-configuration)
-  * [@SerialDescription support](#@serialdescription-support)
-  * [Custom description extraction](#custom-description-extraction)
-  * [Opaque JSON types](#opaque-json-types)
-  * [JSON Schema output configuration](#json-schema-output-configuration)
-  * [JsonSchemaConfig presets](#jsonschemaconfig-presets)
-  * [JsonSchemaConfig reference](#jsonschemaconfig-reference)
-* [Polymorphic types](#polymorphic-types)
-  * [Sealed polymorphism](#sealed-polymorphism)
-  * [Excluding subtypes with @SerialSchemaIgnore](#excluding-subtypes-with-@serialschemaignore)
-  * [Open polymorphism](#open-polymorphism)
-* [See Also](#see-also)
-
-<!--- END -->
 <!--- TEST_NAME ExampleKnitSerializableTest -->
 
 Generate JSON Schema at runtime from any `@Serializable` class using its `SerialDescriptor`.
@@ -36,7 +21,7 @@ It works with any `@Serializable` class across all supported platforms: JVM, JS/
 Use this approach when you need schema generation at runtime without a compile-time processing step,
 or when integrating with existing kotlinx.serialization descriptors directly.
 
-> [!NOTE]
+> [!TIP]
 > If you own the classes and target multiplatform, consider the [KSP processor](ksp.md) for zero-runtime-overhead compile-time generation.
 
 ## Setup
@@ -296,7 +281,7 @@ This code prints:
 }
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > Use `@property:SerialDescription(...)` on constructor parameters to ensure the annotation
 > reaches the backing property — required for the serialization runtime to include it in
 > `SerialDescriptor.getElementAnnotations()`.
@@ -391,17 +376,17 @@ This code prints:
 > [!TIP]
 > The extractor receives the full annotation list for each property or class. You can combine multiple annotation sources or apply fallback logic inside the lambda.
 
-> [!TIP]
+> [!NOTE]
 > Descriptions are propagated for all property types — including nested objects, sealed classes,
 > and collections. A description annotation on a property whose type is another class will appear
 > in the schema alongside the `$ref` for that class.
 
-> [!TIP]
+> [!NOTE]
 > For inline value classes, the **class-level** description annotation propagates to the flattened
 > primitive property in the schema. If the property itself also has a description annotation,
 > the property-level one takes precedence. Annotations on the inner `value` property are not used.
 
-> [!IMPORTANT]
+> [!WARNING]
 > `SerialDescriptor` only carries annotations marked with
 > [`@SerialInfo`](https://kotlinlang.org/api/kotlinx.serialization/kotlinx-serialization-core/kotlinx.serialization/-serial-info/).
 > The built-in `@Description` from `kt-schema-annotations` lacks `@SerialInfo` and is therefore **not** visible here.
@@ -725,7 +710,7 @@ println(schema)
 The output follows the same `oneOf` / `$defs` structure as sealed classes. Register only a subset
 of subtypes to produce a schema limited to those types.
 
-> [!NOTE]
+> [!TIP]
 > Use `PolymorphicSerializer(Base::class).descriptor` as the entry point for open polymorphic
 > types — `Base.serializer()` is not available for non-sealed abstract classes.
 

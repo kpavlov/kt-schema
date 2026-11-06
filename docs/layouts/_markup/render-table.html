@@ -1,0 +1,15 @@
+{{- /* Scrolls wide tables inside a wrapper instead of making <table> itself display: block. */ -}}
+<div class="table-wrap" tabindex="0">
+  <table>
+    <thead>
+      {{- range .THead }}
+      <tr>{{ range . }}<th{{ with .Alignment }} class="align-{{ . }}"{{ end }}>{{ .Text }}</th>{{ end }}</tr>
+      {{- end }}
+    </thead>
+    <tbody>
+      {{- range .TBody }}
+      <tr>{{ range . }}<td{{ with .Alignment }} class="align-{{ . }}"{{ end }}>{{ .Text }}</td>{{ end }}</tr>
+      {{- end }}
+    </tbody>
+  </table>
+</div>
