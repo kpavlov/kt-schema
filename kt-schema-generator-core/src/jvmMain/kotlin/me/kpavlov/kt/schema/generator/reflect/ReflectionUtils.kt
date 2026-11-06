@@ -4,6 +4,7 @@ import me.kpavlov.kt.schema.generator.core.InternalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.ir.Constraint
 import me.kpavlov.kt.schema.generator.core.ir.Introspections
 import me.kpavlov.kt.schema.generator.core.ir.TypeRef
+import java.lang.reflect.InaccessibleObjectException
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
@@ -144,19 +145,12 @@ internal fun KProperty<*>.memberName(): String =
  * @see [Introspections.getConstraintsFromAnnotation]
  */
 internal fun extractConstraints(annotations: List<Annotation>): List<Constraint> =
-    annotations
-        .filter { annotation ->
-            val javaClass = annotation.annotationClass.java
-            Introspections.isConstraintAnnotation(javaClass.simpleName, javaClass.name)
+    annotations.flatMap { annotation ->
+        val javaClass = annotation.annotationClass.java
+        Introspections.getConstraintsFromAnnotation(javaClass.simpleName, javaClass.name) {
+            buildAnnotationArgs(annotation)
         }
-        .flatMap { annotation ->
-            val javaClass = annotation.annotationClass.java
-            Introspections.getConstraintsFromAnnotation(
-                simpleName = javaClass.simpleName,
-                qualifiedName = javaClass.name,
-                annotationArguments = buildAnnotationArgs(annotation),
-            )
-        }
+    }
 
 /**
  * Applies an [Introspections] extractor to each annotation's class names and elements, returning the first hit.
@@ -185,6 +179,8 @@ private fun buildAnnotationArgs(annotation: Annotation): List<Pair<String, Any?>
                         method.isAccessible = true
                         method.invoke(annotation)
                     } catch (_: ReflectiveOperationException) {
+                        return@forEach
+                    } catch (_: InaccessibleObjectException) {
                         return@forEach
                     } catch (_: SecurityException) {
                         return@forEach

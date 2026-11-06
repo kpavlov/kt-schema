@@ -15,9 +15,10 @@ private val logger = KotlinLogging.logger {}
  * documented default. Supported: `Min`, `Max`, `DecimalMin`, `DecimalMax` (a value that is not a finite
  * decimal is ignored), `Positive`, `PositiveOrZero`, `Negative`, `NegativeOrZero`, `Size`, `NotEmpty`,
  * `NotBlank` (approximated as a minimum length of 1), `Pattern` and `Email`. A `Pattern` with `flags` is
- * skipped with a warning, since JSON Schema has no portable way to express them.
+ * skipped with a warning, since JSON Schema has no portable way to express them. A `Size` with `min` greater
+ * than `max` yields two one-sided [Constraint.Size]s, kept as written; a negative bound is ignored with a warning.
  *
- * @throws IllegalArgumentException if a `Size` has `min` greater than `max`
+ * An inconsistent annotation never fails generation: the annotated source may not be the caller's to fix.
  */
 @InternalSchemaGeneratorApi
 public fun validationConstraintsFor(
@@ -61,11 +62,20 @@ private fun Map<String, Any?>.decimal(name: String): Literal.Numeric? {
 
 private fun Map<String, Any?>.exclusive(): Boolean = this["inclusive"] == false
 
-/** `@Size` defaults (`min = 0`, `max = Integer.MAX_VALUE`) are unbounded. */
+/** `@Size` defaults (`min = 0`, `max = Integer.MAX_VALUE`) are unbounded; a negative bound is ignored. */
 private fun size(args: Map<String, Any?>): List<Constraint> {
-    val min = (args["min"] as? Number)?.toInt()?.takeIf { it > 0 }
-    val max = (args["max"] as? Number)?.toInt()?.takeIf { it < Int.MAX_VALUE }
-    return if (min == null && max == null) emptyList() else listOf(Constraint.Size(min, max))
+    val rawMin = (args["min"] as? Number)?.toInt()
+    val rawMax = (args["max"] as? Number)?.toInt()
+    if ((rawMin ?: 0) < 0 || (rawMax ?: 0) < 0) {
+        logger.warn { "@Size(min = $rawMin, max = $rawMax) has a negative bound, which is ignored" }
+    }
+    val min = rawMin?.takeIf { it > 0 }
+    val max = rawMax?.takeIf { it in 0 until Int.MAX_VALUE }
+    return when {
+        min == null && max == null -> emptyList()
+        min != null && max != null && min > max -> listOf(Constraint.Size(min = min), Constraint.Size(max = max))
+        else -> listOf(Constraint.Size(min, max))
+    }
 }
 
 /** Flags (`CASE_INSENSITIVE`, ...) have no portable ECMA-262 form, so a flagged pattern is not emitted. */

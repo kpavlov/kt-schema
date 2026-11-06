@@ -178,6 +178,9 @@ A parameter with a Kotlin default value (e.g. `unit: String = "celsius"`) is opt
 or a custom non-strict `config` it is left out of `required`. The default `strict` config requires every parameter,
 as OpenAI strict mode demands. KSP reports only that a default exists, not its value, so no `default` is emitted.
 
+Jakarta Bean Validation annotations on properties and function parameters (`@Min(1) quantity: Int`) become JSON Schema
+keywords. See the [constraint mapping](../README.md#what-gets-generated) in the README.
+
 ## See Also
 
 - [Serialization-Based Generator](serializable.md) — Runtime generation for any `@Serializable` class (no KSP required)

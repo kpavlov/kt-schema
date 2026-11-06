@@ -1,9 +1,8 @@
 package me.kpavlov.kt.schema.generator.reflect
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.Size
 import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.ir.Constraint
@@ -21,6 +20,10 @@ import kotlin.test.Test
 
 private data class Conflicting(
     @param:Size(min = 2) val grade: Char,
+)
+
+private data class NullOnly(
+    @param:Min(200) val level: Byte?,
 )
 
 @Suppress("unused")
@@ -43,7 +46,7 @@ class ReflectionIntrospectorValidationConstraintsTest {
     private val classProperties = ReflectionClassIntrospector.introspect(ValidatedOrder::class).rootConstraints()
     private val functionParameters = ReflectionFunctionIntrospector.introspect(::placeValidatedOrder).rootConstraints()
 
-    fun classCases(): List<Arguments> =
+    fun constraintCases(): List<Arguments> =
         listOf(
             Arguments.of(
                 "quantity",
@@ -73,7 +76,7 @@ class ReflectionIntrospectorValidationConstraintsTest {
         )
 
     @ParameterizedTest(name = "{0} -> {1}")
-    @MethodSource("classCases")
+    @MethodSource("constraintCases")
     fun `should attach Jakarta constraints to class properties`(
         name: String,
         expected: List<Constraint>,
@@ -81,15 +84,8 @@ class ReflectionIntrospectorValidationConstraintsTest {
         classProperties.getValue(name) shouldContainExactly expected
     }
 
-    fun functionCases(): List<Arguments> =
-        listOf(
-            Arguments.of("quantity", listOf(Constraint.Minimum(Literal.Integer(1)))),
-            Arguments.of("customer", listOf(Constraint.Size(min = 1))),
-            Arguments.of("tags", listOf(Constraint.Size(max = 3))),
-        )
-
     @ParameterizedTest(name = "{0} -> {1}")
-    @MethodSource("functionCases")
+    @MethodSource("constraintCases")
     fun `should attach Jakarta constraints to function parameters`(
         name: String,
         expected: List<Constraint>,
@@ -105,17 +101,25 @@ class ReflectionIntrospectorValidationConstraintsTest {
     }
 
     @Test
-    fun `should name the property whose bounds conflict`() {
-        val e = shouldThrow<IllegalArgumentException> { ReflectionClassIntrospector.introspect(Conflicting::class) }
+    fun `should keep conflicting bounds on a nullable property`() {
+        val constraints = ReflectionClassIntrospector.introspect(NullOnly::class).rootConstraints()
 
-        e.message shouldBe "${Conflicting::class.qualifiedName}.grade: Size min 2 exceeds max 1"
+        constraints.getValue("level") shouldContainExactly
+            listOf(Constraint.Maximum(Literal.Integer(127)), Constraint.Minimum(Literal.Integer(200)))
     }
 
     @Test
-    fun `should name the parameter whose bounds conflict`() {
-        val e = shouldThrow<IllegalArgumentException> { ReflectionFunctionIntrospector.introspect(::conflicting) }
+    fun `should keep conflicting bounds on a property`() {
+        val constraints = ReflectionClassIntrospector.introspect(Conflicting::class).rootConstraints()
 
-        e.message shouldBe "conflicting.code: Size min 5 exceeds max 2"
+        constraints.getValue("grade") shouldContainExactly listOf(Constraint.Size(min = 2), Constraint.Size(max = 1))
+    }
+
+    @Test
+    fun `should keep conflicting bounds on a parameter`() {
+        val constraints = ReflectionFunctionIntrospector.introspect(::conflicting).rootConstraints()
+
+        constraints.getValue("code") shouldContainExactly listOf(Constraint.Size(min = 5), Constraint.Size(max = 2))
     }
 
     private fun TypeGraph.rootConstraints(): Map<String, List<Constraint>> =

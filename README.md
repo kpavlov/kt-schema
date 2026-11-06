@@ -55,7 +55,8 @@ Quick Links:
 - **Polymorphic hierarchies** — sealed classes and open polymorphism (via `SerializersModule`) with automatic `oneOf`
   generation and discriminator field
 - **Union types** for nullable parameters (`["string", "null"]`)
-- **Type constraints** (min/max, patterns, formats) via the JSON Schema DSL
+- **Type constraints** (min/max, patterns, formats) from Jakarta Bean Validation annotations, built-in types and the
+  JSON Schema DSL
 - **Default values** (compile-time: tracked but not extracted; runtime: fully extracted)
 - **`$ref`/`$defs` deduplication**: named types appear once in `$defs` and are referenced everywhere via `$ref`
 - **`kotlin.Any`**: maps to the empty schema `{}` (accepts any JSON value)
@@ -394,15 +395,8 @@ Schemas follow JSON Schema Draft 2020-12 format. Example (pretty-printed):
   Kotlin types it has serializers for. Date/time types are always emitted as ISO-8601 strings: the generators never
   see your `ObjectMapper`, so if you serialize with plain Jackson, disable
   `SerializationFeature.WRITE_DATES_AS_TIMESTAMPS` so payloads match the schema.
-- **Jakarta Bean Validation constraints** on properties (reflection, KSP and APT) and on function parameters
-  (reflection and KSP) are emitted as JSON Schema keywords. Annotations are matched by name in `jakarta.validation.constraints` (and the legacy
-  `javax.validation.constraints`), so `jakarta.validation-api` is not a dependency of kt-schema. When several
-  annotations, or an annotation and a built-in type range, bound the same property, the tighter bound wins
-  whatever the order (`@Min(0) val level: Byte` → `minimum: 0, maximum: 127`; `@Size(min = 2) @NotEmpty` →
-  `minLength: 2`); for `pattern` and `format` the last annotation wins.
-  The recognized packages are configurable via `introspector.annotations.constraint.names` in
-  `kt-schema.properties`; a matching annotation is mapped by its simple name, so a custom `com.acme.Size(min, max)`
-  works once `com.acme.*` is added.
+- **Jakarta Bean Validation constraints** become JSON Schema keywords. They are read from properties (reflection, KSP
+  and APT) and from function parameters (reflection and KSP).
 
   | Annotation                                             | Emitted keywords                                                                      |
   |--------------------------------------------------------|---------------------------------------------------------------------------------------|
@@ -413,16 +407,28 @@ Schemas follow JSON Schema Draft 2020-12 format. Example (pretty-printed):
   | `@Size(min, max)`                                      | `minLength`/`maxLength`, `minItems`/`maxItems` or `minProperties`/`maxProperties`     |
   | `@NotEmpty`                                            | `minLength: 1` / `minItems: 1` / `minProperties: 1`                                   |
   | `@NotBlank`                                            | `minLength: 1` (blank strings are not excluded)                                       |
-  | `@Pattern(regexp)`                                     | `pattern`, copied as written; a `@Pattern` with `flags` is skipped with a warning     |
+  | `@Pattern(regexp)`                                     | `pattern`, copied as written                                                          |
   | `@Email`                                               | `format: "email"`                                                                     |
 
-  `@NotNull`, `@Digits`, `@Past`/`@Future` and `@AssertTrue`/`@AssertFalse` have no JSON Schema equivalent and are
-  ignored. JSON Schema validators expect ECMA-262 regular expressions, so keep `@Pattern` to that subset (no
-  possessive quantifiers or `\p{Alpha}`-style Java classes). Contradictory bounds (`@Size(min = 5, max = 2)`, or
-  `@Size(min = 2)` on a `Char`) fail generation with an error naming the property. A constraint on a property whose
-  type is emitted as a `$ref` (an object or enum) is wrapped as `allOf: [{ "$ref": ... }, { "minProperties": 1 }]`.
-  Constraints on type arguments (`List<@Size(max = 3) String>`) are not read. The kotlinx.serialization front
-  end cannot see these annotations.
+  - **Several bounds on one property:** the tighter bound wins whatever the order, including over a built-in type
+    range (`@Min(0) val level: Byte` gives `minimum: 0, maximum: 127`). For `pattern` and `format` the last annotation
+    wins.
+  - **Contradictions:** bounds that exclude every value (`@Size(min = 5, max = 2)`, `@Min(200)` on a `Byte`,
+    `@Size(min = 2)` on a `Char`, `@DecimalMin("0.5") @DecimalMax("0.9")` on an `Int`) are emitted as written
+    and logged as a warning naming the member; a negative `@Size` bound is ignored with a warning. Generation
+    never fails on an inconsistent annotation, since the annotated class may not be yours to fix. On a nullable
+    member nothing is logged, since `null` still satisfies them.
+  - **Object and enum properties:** a type emitted as a `$ref` keeps its reference, wrapped as
+    `allOf: [{ "$ref": ... }, { "minProperties": 1 }]`.
+  - **`@Pattern`:** JSON Schema validators expect ECMA-262 regular expressions, so avoid possessive quantifiers and
+    `\p{Alpha}`-style Java classes. A `@Pattern` with `flags` has no JSON Schema form. It is skipped and a warning is
+    logged through kotlin-logging, which prints to stderr during KSP and APT builds.
+  - **Not read:** `@NotNull`, `@Digits`, `@Past`/`@Future`, `@AssertTrue`/`@AssertFalse` and constraints on type
+    arguments (`List<@Size(max = 3) String>`). The kotlinx.serialization front end cannot see these annotations.
+  - **Custom annotations:** annotations are matched by name in `jakarta.validation.constraints` and
+    `javax.validation.constraints`, so `jakarta.validation-api` is not a dependency of kt-schema. Add packages through
+    `introspector.annotations.constraint.names` in `kt-schema.properties`. A match is mapped by its simple name, so
+    a `com.acme.Size(min, max)` works once `com.acme.*` is listed.
 - `kotlin.Any` / unbound generic type parameters (e.g., `T`) map to the empty schema `{}`, which accepts any JSON value.
 - Named types (nested objects, enums, sealed classes) are deduplicated in a `$defs` section and referenced via `$ref` at
   every usage site.

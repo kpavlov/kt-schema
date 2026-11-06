@@ -35,6 +35,7 @@ internal class KspFunctionIntrospector : SchemaIntrospector<KSFunctionDeclaratio
 
         // Extract function information
         val functionName = root.simpleName.asString()
+        val owner = root.qualifiedName?.asString() ?: functionName
         val id = TypeId(functionName)
 
         val properties = mutableListOf<Property>()
@@ -45,7 +46,7 @@ internal class KspFunctionIntrospector : SchemaIntrospector<KSFunctionDeclaratio
             val paramType = param.type.resolve()
 
             val typeRef =
-                context.toRef(paramType).withAddedConstraints("$functionName.$paramName") {
+                context.toRef(paramType).withAddedConstraints("$owner.$paramName") {
                     param.validationConstraints()
                 }
 

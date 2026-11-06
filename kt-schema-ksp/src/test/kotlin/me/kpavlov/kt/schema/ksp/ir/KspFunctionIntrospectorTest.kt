@@ -1,21 +1,27 @@
 package me.kpavlov.kt.schema.ksp.ir
 
+import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSValueArgument
 import com.google.devtools.ksp.symbol.KSValueParameter
 import com.google.devtools.ksp.symbol.Nullability
 import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
+import me.kpavlov.kt.schema.generator.core.ir.Constraint
 import me.kpavlov.kt.schema.generator.core.ir.ObjectNode
 import me.kpavlov.kt.schema.generator.core.ir.PropertyValue
 import me.kpavlov.kt.schema.generator.core.ir.TypeId
 import me.kpavlov.kt.schema.ksp.ksName
 import kotlin.test.Test
 
+@OptIn(ExperimentalSchemaGeneratorApi::class)
 class KspFunctionIntrospectorTest {
     @Test
     fun `should mark a parameter with a Kotlin default as optional`() {
@@ -61,12 +67,51 @@ class KspFunctionIntrospectorTest {
         node.properties.single().optional shouldBe false
     }
 
+    @Test
+    fun `should keep conflicting bounds on a parameter`() {
+        val code = parameterMock("code", hasDefault = false)
+        every { code.annotations } returns sequenceOf(sizeMock(min = 5, max = 2))
+        val function = functionMock("find", code)
+
+        val graph = KspFunctionIntrospector().introspect(function)
+
+        val node = graph.nodes[TypeId("find")] as ObjectNode
+        node.properties.single().type.constraints shouldContainExactly
+            listOf(Constraint.Size(min = 5), Constraint.Size(max = 2))
+    }
+
+    private fun sizeMock(
+        min: Int,
+        max: Int,
+    ): KSAnnotation {
+        val size =
+            mockk<KSClassDeclaration> {
+                every { simpleName } returns ksName("Size")
+                every { qualifiedName } returns ksName("jakarta.validation.constraints.Size")
+            }
+        return mockk {
+            every { annotationType } returns
+                mockk { every { resolve() } returns mockk { every { declaration } returns size } }
+            every { arguments } returns listOf(argumentMock("min", min), argumentMock("max", max))
+        }
+    }
+
+    private fun argumentMock(
+        argumentName: String,
+        argumentValue: Int,
+    ): KSValueArgument =
+        mockk {
+            every { name } returns ksName(argumentName)
+            every { value } returns argumentValue
+        }
+
     private fun functionMock(
         name: String,
         vararg params: KSValueParameter,
     ): KSFunctionDeclaration =
         mockk {
             every { simpleName } returns ksName(name)
+            every { qualifiedName } returns ksName("com.acme.$name")
             every { parameters } returns params.toList()
             every { docString } returns null
             every { annotations } returns emptySequence()

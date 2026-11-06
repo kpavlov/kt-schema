@@ -53,6 +53,8 @@
 - Nullable primitives: `type: ["<type>", "null"]`.
 - Nullable refs: `oneOf: [{ "$ref": "..." }, { "type": "null" }]`.
 - Root schema: `$id`, `$defs`, `$ref`.
+- Inconsistent user annotations (contradictory or invalid bounds) warn, never fail: the annotated source may not
+  be the user's to fix, and a hard failure blocks schema generation entirely.
 - Small functions, small reversible changes.
 - `git mv` for moving files. Never commit or push unattended — only when the user explicitly asks, in that moment; not
   as a reflexive/autonomous step after finishing work.

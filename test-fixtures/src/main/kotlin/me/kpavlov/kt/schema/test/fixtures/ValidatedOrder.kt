@@ -1,4 +1,4 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "LongParameterList", "MagicNumber")
 
 package me.kpavlov.kt.schema.test.fixtures
 
@@ -33,9 +33,19 @@ data class ValidatedOrder(
     @param:Min(0) val level: Byte,
 )
 
-/** A function whose parameters carry Jakarta Bean Validation constraints. */
+/** Takes the same constraints as [ValidatedOrder], on function parameters. */
 fun placeValidatedOrder(
-    @Min(1) quantity: Int,
-    @NotBlank customer: String,
-    @Size(max = 3) tags: List<String> = emptyList(),
-): String = "$quantity for $customer $tags"
+    @Min(1) @Max(100) quantity: Int,
+    @DecimalMin("0.01") @DecimalMax(value = "1000", inclusive = false) price: Double,
+    @Positive weight: Long,
+    @PositiveOrZero discount: Int,
+    @Negative debit: Int,
+    @NegativeOrZero credit: Int,
+    @Size(min = 2, max = 50) name: String,
+    @NotEmpty tags: List<String>,
+    @NotBlank note: String?,
+    @Pattern(regexp = "[A-Z]{3}") currency: String,
+    @Email contact: String,
+    @Size(max = 5) attributes: Map<String, String>,
+    @Min(0) level: Byte,
+): String = "$quantity of $name"
