@@ -1,0 +1,14 @@
+{{- /* docs/ is the site root, so relative links that leave it point into the repository. */ -}}
+{{- $u := urls.Parse .Destination -}}
+{{- $href := .Destination -}}
+{{- if strings.HasPrefix .Destination "../" -}}
+  {{- $href = printf "%s/blob/main/%s" site.Params.repo (strings.TrimPrefix "../" .Destination) -}}
+{{- else if and $u.Path (not $u.IsAbs) -}}
+  {{- with .PageInner.GetPage $u.Path -}}
+    {{- $href = .RelPermalink -}}
+    {{- with $u.Fragment }}{{ $href = printf "%s#%s" $href . }}{{ end -}}
+  {{- else -}}
+    {{- if strings.HasSuffix $u.Path ".md" }}{{ errorf "unresolved page link %q in %s" $.Destination $.Page.File.Path }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+<a href="{{ $href }}"{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text }}</a>

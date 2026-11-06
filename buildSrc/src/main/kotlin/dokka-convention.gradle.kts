@@ -6,6 +6,11 @@ plugins {
 }
 
 dokka {
+    pluginsConfiguration.html {
+        // Header link back to the Hugo site; set here so module pages get it, not only the aggregate index.
+        homepageLink = "https://kpavlov.github.io/kt-schema/"
+    }
+
     dokkaSourceSets.configureEach {
         includes.from("Module.md")
         sourceLink {

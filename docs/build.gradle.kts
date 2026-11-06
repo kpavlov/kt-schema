@@ -43,6 +43,7 @@ dokka {
             """
             (c) 2026 Konstantin Pavlov and Contributors. Portions copyright JetBrains s.r.o. and contributors.
             """.trimIndent()
+        homepageLink = "https://kpavlov.github.io/kt-schema/"
     }
 
     dokkaPublications.html {

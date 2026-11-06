@@ -111,6 +111,9 @@ ksp-integration-tests/build/generated/ksp/metadata/commonMain/kotlin
 
 - `make build` - Full build with verification and docs
 - `make apidocs` - Generate API docs (→ `docs/public/apidocs`)
+- `make site-dev` - Serve the documentation site locally with live reload and open it in the browser (requires [Hugo](https://gohugo.io/installation/))
+- `make site` - Build the production site bundle (→ `docs/public`)
+- `make site-test` - Build the site into `docs/build/site-test` and run browser tests against it (requires Node 22+ and Chrome/Chromium; set `CHROME_BIN` if it is not auto-detected)
 - `make lint` - Code style check with detekt
 - `make integration-test` - Runs KSP integration tests
 

@@ -1,0 +1,46 @@
+baseURL = "https://kpavlov.github.io/kt-schema/"
+title = "kt-schema"
+locale = "en"
+disableKinds = ["rss", "taxonomy", "term"]
+copyright = "© 2026 Konstantin Pavlov and Contributors. Portions copyright JetBrains s.r.o. and contributors."
+
+[params]
+  description = "Generate JSON schemas and LLM function calling schemas from Java and Kotlin code — including classes you don't own."
+  repo = "https://github.com/kpavlov/kt-schema"
+
+[markup.highlight]
+  style = "github"
+
+# docs/ is also the Gradle `docs` module (Dokka writes to public/api), so mount only the pages.
+# README.md is the home page. Add new guides to the list below and to the menu.
+[module]
+  [module.hugoVersion]
+    min = "0.158.0"
+  [[module.mounts]]
+    source = "README.md"
+    target = "content/_index.md"
+  [[module.mounts]]
+    source = "."
+    target = "content"
+    files = ["{apt,architecture,ksp,serializable}.md"]
+
+[[menus.main]]
+  name = "Home"
+  pageRef = "/"
+  weight = 10
+[[menus.main]]
+  name = "KSP"
+  pageRef = "/ksp"
+  weight = 20
+[[menus.main]]
+  name = "Java APT"
+  pageRef = "/apt"
+  weight = 30
+[[menus.main]]
+  name = "Serialization"
+  pageRef = "/serializable"
+  weight = 40
+[[menus.main]]
+  name = "Architecture"
+  pageRef = "/architecture"
+  weight = 50

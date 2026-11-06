@@ -1,0 +1,99 @@
+name: Publish Site
+
+# GitHub Pages serves a single artifact per repository, so the Hugo site (docs/) and
+# the Dokka API docs (/api/) are built and deployed together.
+on:
+  release:
+    types:
+      - published
+  push:
+    branches: [ main ]
+    paths:
+      - docs/**
+      - Makefile
+      - .github/workflows/pages.yaml
+  # Allow running this workflow manually from the Actions tab
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  JAVA_VERSION: 25
+  JAVA_DISTRIBUTION: temurin
+  HUGO_VERSION: 0.169.0
+
+jobs:
+  deploy:
+
+    permissions:
+      contents: read
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: ${{ env.HUGO_VERSION }}
+
+      - name: Set up Node.js (npx runs Pagefind to index the site for search)
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+
+      - name: Build site
+        run: make site
+
+      # API docs describe the latest release, not main. A release event is the release itself.
+      - name: Resolve API docs version
+        id: api
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          tag="${RELEASE_TAG:-$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)}"
+          echo "API docs version: $tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.api.outputs.tag }}
+          path: api-src
+          submodules: true  # Fetch Hugo themes (true OR recursive)
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v6
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6.4.1
+
+      - name: Generate Dokka Site
+        working-directory: api-src
+        run: |-
+          ./gradlew clean :docs:dokkaGenerate
+
+      - name: Add API docs to site
+        run: mv api-src/docs/public/api docs/public/api
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs/public
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
