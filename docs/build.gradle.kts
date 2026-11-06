@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":kt-schema-generator-json"))
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotest.assertions.json)
+    implementation(libs.jakarta.validation.api)
 
     dokka(project(":kt-schema-annotations"))
     dokka(project(":kt-schema-generator-core"))

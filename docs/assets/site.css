@@ -59,16 +59,33 @@ header nav { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px;
 header nav a { display: inline-flex; align-items: center; color: var(--muted); text-decoration: none; font-weight: 500; }
 header nav a:hover, header nav a[aria-current] { color: var(--accent); }
 header nav svg { fill: currentColor; }
-/* The searchbox takes all the space between the documentation links and the project links. */
-.bar pagefind-searchbox { display: block; flex: 1 1 0; min-width: 0; }
-.project { margin-left: auto; }
+/* The searchbox sits on the right next to the project links; on wide screens it keeps a fixed width. */
+.bar pagefind-searchbox { display: block; flex: 1 1 0; min-width: 0; margin-left: auto; }
+.icon-link { gap: 6px; }
+.version { font-size: 0.75rem; color: var(--muted); }
+.brand { color: var(--fg); text-decoration: none; font-weight: 700; white-space: nowrap; }
 .menu-toggle { display: none; padding: 6px 12px; font: inherit; font-weight: 500; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
 .menu-toggle[aria-expanded="true"] { color: var(--accent); border-color: var(--accent); }
+/* Wide screens: the documentation menu is a fixed left sidebar under the header; the header keeps search and project links. */
+@media (min-width: 721px) {
+  :root { --header-h: 60px; --sidebar-w: 220px; }
+  .bar { height: var(--header-h); flex-wrap: nowrap; max-width: none; }
+  .bar pagefind-searchbox { flex: 0 1 360px; }
+  #site-nav { position: fixed; top: var(--header-h); bottom: 0; left: 0; width: var(--sidebar-w); overflow-y: auto; flex-direction: column; align-items: stretch; gap: 0; padding: 16px 0; border-right: 1px solid var(--border); }
+  #site-nav a { padding: 6px 20px; }
+  #site-nav a[aria-current] { border-left: 3px solid var(--accent); padding-left: 17px; }
+  #site-nav .version { margin-top: auto; padding: 16px 20px 0; }
+  main, footer { margin-left: max(var(--sidebar-w), calc((100% - 860px) / 2)); }
+}
 /* Collapse only when JS can reopen the menu (see the "js" class set in <head>). */
 @media (max-width: 720px) {
   .js .menu-toggle { display: inline-block; }
   .js #site-nav { display: none; order: 3; flex-basis: 100%; flex-direction: column; align-items: flex-start; gap: 8px; }
   .js #site-nav.open { display: flex; }
+  /* Row 1: brand, menu button, project links; row 2: search; row 3: the opened menu. */
+  .bar pagefind-searchbox { order: 2; flex-basis: 100%; margin-left: 0; }
+  .project { margin-left: auto; }
+  .icon-link .label { display: none; }
 }
 main { padding-top: 24px; padding-bottom: 48px; }
 footer { color: var(--muted); font-size: 0.875rem; padding-top: 16px; padding-bottom: 32px; border-top: 1px solid var(--border); }
@@ -86,6 +103,11 @@ code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospac
 code { background: var(--code-bg); border-radius: 4px; padding: 1px 5px; font-size: 90%; }
 pre { overflow-x: auto; padding: 12px 16px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.875rem; line-height: 1.45; }
 pre.chroma { background: var(--code-bg); }
+.code { position: relative; }
+.code pre { padding-right: 120px; }
+.copy { position: absolute; top: 6px; right: 6px; padding: 2px 8px; font: inherit; font-size: 0.75rem; color: var(--muted); background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+.lang { position: absolute; top: 8px; right: 70px; font-size: 0.75rem; color: var(--muted); }
+@media (hover: hover) { .copy { opacity: 0; } .code:hover .copy, .code:focus-within .copy { opacity: 1; } }
 /* The Kotlin lexer flags valid syntax such as $$"""; do not paint it as an error. */
 .chroma .err { color: inherit; background: none; }
 /* github-dark leaves these tokens unset, so the light style's dark colours would show through. */

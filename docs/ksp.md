@@ -58,7 +58,7 @@ plugins {
 }
 
 dependencies {
-    ksp("me.kpavlov.kt.schemakt-schema-ksp:<version>")
+    ksp("me.kpavlov.kt.schema:kt-schema-ksp:<version>")
     implementation("me.kpavlov.kt.schema:kt-schema-annotations:<version>")
 }
 
@@ -171,7 +171,7 @@ or a custom non-strict `config` it is left out of `required`. The default `stric
 as OpenAI strict mode demands. KSP reports only that a default exists, not its value, so no `default` is emitted.
 
 Jakarta Bean Validation annotations on properties and function parameters (`@Min(1) quantity: Int`) become JSON Schema
-keywords. See the [constraint mapping](../README.md#what-gets-generated) in the README.
+keywords. See the [Validation Constraints guide](constraints.md).
 
 ## See Also
 

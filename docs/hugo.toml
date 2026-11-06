@@ -14,6 +14,10 @@ copyright = "© 2026 Konstantin Pavlov and Contributors. Portions copyright JetB
 [markup.highlight]
   noClasses = false
 
+# Guides use <details> to fold long generated schemas.
+[markup.goldmark.renderer]
+  unsafe = true
+
 # The guides no longer carry a knit-generated table of contents; the layout renders this one.
 [markup.tableOfContents]
   startLevel = 2
@@ -31,4 +35,4 @@ copyright = "© 2026 Konstantin Pavlov and Contributors. Portions copyright JetB
   [[module.mounts]]
     source = "."
     target = "content"
-    files = ["{apt,architecture,ksp,serializable}.md"]
+    files = ["{apt,architecture,configuration,constraints,dsl,function-calling,generated,ksp,reflection,serializable}.md"]

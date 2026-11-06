@@ -2,62 +2,176 @@
 title: Documentation
 menus:
   main:
-    name: Home
+    name: Overview
     weight: 1
 ---
 
 # Documentation
 
-kt-schema generates JSON Schema from Kotlin and Java models. Choose the generation path that matches how your
-models are built and deployed.
+kt-schema generates JSON Schema and LLM function calling schemas from Kotlin and Java code. Choose the generation
+path that matches how your models are built and deployed, annotate (or don't), and read the schema from a generated
+extension, a classpath resource or a runtime call.
 
-## Features
+## Why kt-schema?
 
-### Generation modes
+1. **🤖 LLM function calling**: generate OpenAI/Anthropic-compatible function schemas directly from Kotlin functions,
+   with proper type definitions and descriptions.
+2. **📦 Third-party classes**: create schemas for library classes without modifying their source (Spring entities,
+   Ktor models, etc.).
+3. **🔄 Multi-framework compatibility**: works with existing annotations from Jackson, LangChain4j, Koog and more, with
+   no code changes.
 
-- **Compile-time Java APT** — generates schema resources for plain Java records, classes, interfaces, and enums
-  with no runtime generation overhead. It runs on the JVM and does not require Kotlin in your application code.
-- **Compile-time KSP** — generates schemas for annotated Kotlin classes with no runtime generation overhead and
-  supports Kotlin Multiplatform.
-- **Runtime reflection** — generates schemas for any JVM class, including types from third-party libraries.
-- **Runtime serial descriptors** — generates schemas for Kotlin `@Serializable` classes across supported Kotlin
-  platforms, including open polymorphism configured through `SerializersModule`.
+## Choosing Your Approach
 
-### LLM function calling
+|                                   | 🔧 [KSP Processor](ksp.md) | ☕ [Java APT](apt.md) | 📦 [Serialization-based](serializable.md) | 🔍 [Runtime Reflection](reflection.md) |
+|:----------------------------------|:--------------------------:|:--------------------:|:-----------------------------------------:|:--------------------------------------:|
+| **Platforms**                     |    JVM + Multiplatform     |       JVM only       |            JVM + Multiplatform            |                JVM only                |
+| **When generated**                |        Compile-time        |     Compile-time     |                  Runtime                  |                Runtime                 |
+| **Requires annotation processor** |         Yes (KSP)          |      Yes (APT)       |                    No                     |                   No                   |
+| **Class must be `@Serializable`** |             No             |          No          |                    Yes                    |                   No                   |
+| **Annotate class with `@Schema`** |          Required          |    Not required¹     |               Not required                |              Not required              |
+| **KDoc extracted to description** |             ✅              |          ❌           |                     ❌                     |                   ❌                    |
+| **Extract default values**        |          Partial²          |       Partial²       |                     ❌                     |                   ✅                    |
+| **Third-party classes**           |             ❌              |          ❌           |         ✅ (only `@Serializable`)          |            ✅ any JVM class             |
 
-- Generates function-calling schemas for OpenAI and Anthropic formats.
-- Extracts function names and descriptions.
-- Supports strict mode and parameter validation.
+¹ with the `rootPackage` option — see [Java Annotation Processor Guide](apt.md#triggering-schema-generation).
 
-### Annotation interoperability
+² via Jackson's `@JsonEnumDefaultValue`, placed on an enum constant — shown as `default` on that enum's own schema
+in the generated output. `@JsonProperty(defaultValue = "...")` is also recognized and populates the property
+internally, but neither processor's standard generated resource surfaces it, since both mark every property
+required regardless of default presence (KSP/APT can't evaluate a real Kotlin/Java default-value expression at
+compile time, unlike reflection) — see [Multi-Framework Annotation Support](configuration.md#multi-framework-annotation-support).
 
-- Recognizes `@Description`, `@LLMDescription`, `@JsonPropertyDescription`, `@P`, and other configured
-  description annotations.
-- Extracts KDoc descriptions during KSP compile-time generation.
-- Reuses annotations from Jackson, LangChain4j, and Koog without changing the model.
+- **[Pick KSP](ksp.md)** when you own the classes, want zero runtime overhead, and target Multiplatform or need
+  KDoc in your schema.
+- **[Pick Java APT](apt.md)** when your code is plain Java (no Kotlin) and you want zero runtime overhead.
+  Supports Java records, classes, interfaces and enums.
+- **[Pick Serialization-based](serializable.md)** when your classes are already `@Serializable` and you need
+  Multiplatform support without a build-time processor.
+- **[Pick Reflection](reflection.md)** when you need JVM-only runtime generation for third-party classes, or
+  need to extract data class default values. Works equally well for `@Serializable` classes on JVM.
 
-### Type support
+## Quick Start
 
-- Supports enums, collections, maps, nested objects, nullability, and generics, including star projections.
-- Emits `oneOf` schemas and discriminator fields for sealed classes and serialization-based open polymorphism.
-- Represents nullable parameters as union types such as `["string", "null"]`.
-- Supports JSON Schema constraints, including minimum/maximum values, patterns, and formats, through the DSL.
-- Tracks compile-time defaults and extracts runtime defaults.
-- Deduplicates named types through `$ref` and `$defs`.
-- Maps `kotlin.Any` to `{}`, which accepts any JSON value.
+Refer to the [example projects](../examples).
 
-### Developer experience
+### Annotate Your Models
 
-- Provides a type-safe Kotlin DSL for programmatic JSON Schema construction.
-- Supports JVM, JavaScript/Wasm, and Kotlin/Native targets where the selected generation mode is available.
+<!--- CLEAR -->
+<!--- INCLUDE
+import me.kpavlov.kt.schema.Schema
+import me.kpavlov.kt.schema.Description
+import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Size
+-->
+
+```kotlin
+/**
+ * A postal address for deliveries and billing.
+ */
+@Schema
+data class Address(
+    @Description("Street address, including house number") @Size(max = 120) val street: String,
+    @Description("City or town name") @Size(min = 1, max = 80) val city: String,
+    @Description("Postal or ZIP code") @Pattern(regexp = "[0-9]{5}") val zipCode: String,
+    @Description("Two-letter ISO country code; defaults to US") @Pattern(regexp = "[A-Z]{2}") val country: String = "US",
+)
+```
+
+<!--- KNIT example-knit-home-01.kt -->
+
+<details>
+<summary>Generated JSON schema (KSP, default <code>strict</code> config)</summary>
+
+```json
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "com.example.Address",
+    "description": "A postal address for deliveries and billing.",
+    "type": "object",
+    "properties": {
+        "street": {
+            "type": "string",
+            "description": "Street address, including house number",
+            "maxLength": 120
+        },
+        "city": {
+            "type": "string",
+            "description": "City or town name",
+            "minLength": 1,
+            "maxLength": 80
+        },
+        "zipCode": {
+            "type": "string",
+            "description": "Postal or ZIP code",
+            "pattern": "[0-9]{5}"
+        },
+        "country": {
+            "type": "string",
+            "description": "Two-letter ISO country code; defaults to US",
+            "pattern": "[A-Z]{2}"
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "street",
+        "city",
+        "zipCode",
+        "country"
+    ]
+}
+```
+
+</details>
+
+> **Note:** KDoc comments on classes can also be used as descriptions. Jakarta Bean Validation annotations such as
+> `@Size` and `@Pattern` become `maxLength`, `minLength` and `pattern` — see
+> [Validation Constraints](constraints.md).
+
+### Quick Setup
+
+Add the Google KSP plugin and the processor dependency:
+
+```kotlin
+// Multiplatform (KMP)
+plugins {
+    kotlin("multiplatform")
+    id("com.google.devtools.ksp") version "<ksp-version>"
+}
+
+dependencies {
+    add("kspCommonMainMetadata", "me.kpavlov.kt.schema:kt-schema-ksp:<version>")
+    implementation("me.kpavlov.kt.schema:kt-schema-annotations:<version>")
+}
+
+kotlin {
+    sourceSets.commonMain.kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
+}
+```
+
+Then read the schema from the generated extension:
+
+```kotlin
+val schema: String = Address::class.jsonSchemaString
+```
+
+For JVM-only projects and all processor options, see the [KSP Configuration Guide](ksp.md). To see what the
+schema contains, see [Generated Schemas](generated.md).
 
 ## Guides
 
+- [Generated Schemas](generated.md) — what is emitted for data classes, enums, nested objects, generics and sealed
+  hierarchies; `@Schema` and `@Description`.
 - [KSP Configuration Guide](ksp.md) — compile-time schemas for annotated Kotlin models.
 - [Java Annotation Processor Guide](apt.md) — compile-time schema resources for Java records, classes,
   interfaces, and enums; includes Jackson enum-name support.
+- [Validation Constraints](constraints.md) — Jakarta Bean Validation annotations and built-in type ranges as JSON
+  Schema keywords.
 - [Serialization-Based Schema Generation](serializable.md) — runtime schemas from Kotlin serialization descriptors.
+- [Runtime Reflection](reflection.md) — runtime schemas for any JVM class, including third-party types.
+- [Function Calling](function-calling.md) — OpenAI/Anthropic function schemas from Kotlin functions, at runtime or
+  compile time.
+- [Configuration](configuration.md) — `strict`/`lenient`/`openapi` flavours and annotation detection for Jackson,
+  LangChain4j and Koog.
+- [JSON Schema DSL](dsl.md) — build schemas by hand with the type-safe Kotlin DSL.
 - [Project Architecture](architecture.md) — shared metadata, IR, and JSON Schema emission.
-
-For runtime reflection, function-calling schemas, annotation support, and the JSON Schema DSL, see the
-[project README](../README.md).

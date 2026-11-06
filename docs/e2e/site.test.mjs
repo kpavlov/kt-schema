@@ -75,11 +75,11 @@ describe("header", () => {
              toggleShown: shown(toggle), expanded: toggle.getAttribute("aria-expanded") } })()`
 
   it("shows every link and no menu button on desktop", () => withPage(DESKTOP, "", async (page) => {
-    assert.deepEqual(await page.eval(HEADER), { docsLinks: menuLinks, projectLinks: ["API", "GitHub"], toggleShown: false, expanded: "false" })
+    assert.deepEqual(await page.eval(HEADER), { docsLinks: menuLinks, projectLinks: ["API Docs", "GitHub"], toggleShown: false, expanded: "false" })
   }))
 
   it("collapses only the menu links behind a menu button on mobile, and toggles open and closed", () => withPage(MOBILE, "", async (page) => {
-    const project = ["API", "GitHub"]
+    const project = ["API Docs", "GitHub"]
     assert.deepEqual(await page.eval(HEADER), { docsLinks: 0, projectLinks: project, toggleShown: true, expanded: "false" })
     await page.click(".menu-toggle")
     assert.deepEqual(await page.eval(HEADER), { docsLinks: menuLinks, projectLinks: project, toggleShown: true, expanded: "true" })
@@ -88,13 +88,12 @@ describe("header", () => {
   }))
 
   for (const [name, viewport] of [["desktop", DESKTOP], ["mobile", MOBILE]]) {
-    it(`shows GitHub as an icon-only link with a title on ${name}`, () => withPage(viewport, "", async (page) => {
+    it(`shows GitHub as an icon plus label on ${name}`, () => withPage(viewport, "", async (page) => {
       const r = await page.eval(`(() => { const a = document.querySelector("nav.project a.icon-link"), svg = a.querySelector("svg")
-        return { title: a.title, label: a.getAttribute("aria-label"), href: a.href, text: a.textContent.trim(), iconWidth: svg.getBoundingClientRect().width } })()`)
+        return { title: a.title, href: a.href, text: a.textContent.trim(), iconWidth: svg.getBoundingClientRect().width } })()`)
       assert.equal(r.title, "GitHub")
-      assert.equal(r.label, "GitHub")
       assert.match(r.href, /github\.com\/kpavlov\/kt-schema\/?$/)
-      assert.equal(r.text, "", "icon-only link must not render text")
+      assert.equal(r.text, "GitHub")
       assert.ok(r.iconWidth >= 16, `icon too small: ${r.iconWidth}px`)
     }))
 
@@ -107,17 +106,51 @@ describe("header", () => {
     }))
   }
 
-  it("lets the search field fill the space between the menu links and API on desktop", () => withPage(DESKTOP, "", async (page) => {
+  it("shows the menu as a left sidebar and the search field on the right next to API on desktop", () => withPage(DESKTOP, "", async (page) => {
     await page.waitFor(SEARCH_INPUT)
     const r = await page.eval(`(() => { const rect = (el) => el.getBoundingClientRect()
-      const links = [...document.querySelectorAll("#site-nav a")], last = rect(links[links.length - 1])
+      const nav = rect(document.getElementById("site-nav")), header = rect(document.querySelector("header"))
+      const links = [...document.querySelectorAll("#site-nav a")].map(rect)
       const box = rect(document.querySelector("pagefind-searchbox")), input = rect(deep("pagefind-searchbox input")[0])
-      const api = rect(document.querySelector("nav.project a"))
-      return { gapBefore: box.left - last.right, gapAfter: api.left - box.right, boxWidth: box.width, inputWidth: input.width } })()`)
-    assert.ok(r.gapBefore >= 0 && r.gapBefore <= 40, `gap between the last menu link and the search field: ${r.gapBefore}px`)
+      const api = rect(document.querySelector("nav.project a")), main = rect(document.getElementById("content"))
+      const brand = rect(document.querySelector(".brand")), version = document.querySelector("#site-nav .version")
+      return { navLeft: nav.left, navTop: nav.top, headerBottom: header.bottom, navRight: nav.right, mainLeft: main.left,
+               stacked: links.every((l, i) => i === 0 || l.top >= links[i - 1].bottom),
+               versionText: version?.textContent, versionBelowLinks: version ? rect(version).top >= links[links.length - 1].bottom : false,
+               brandToBox: box.left - brand.right, gapAfter: api.left - box.right, boxWidth: box.width, inputWidth: input.width } })()`)
+    assert.equal(r.navLeft, 0, "sidebar must start at the left edge")
+    assert.ok(Math.abs(r.navTop - r.headerBottom) <= 1, `sidebar top ${r.navTop} must meet the header bottom ${r.headerBottom}`)
+    assert.ok(r.stacked, "sidebar links must be stacked vertically")
+    assert.ok(r.mainLeft >= r.navRight, `content (${r.mainLeft}) must not overlap the sidebar (${r.navRight})`)
+    assert.match(r.versionText ?? "", /^v\d+\.\d+/, "sidebar must end with the project version")
+    assert.ok(r.versionBelowLinks, "version must sit below the menu links")
+    assert.ok(r.brandToBox > 100, `search field should sit on the right, away from the brand (gap ${r.brandToBox}px)`)
     assert.ok(r.gapAfter >= 0 && r.gapAfter <= 40, `gap between the search field and API: ${r.gapAfter}px`)
-    assert.ok(r.boxWidth > 300, `search field should be wide, got ${r.boxWidth}px`)
-    assert.ok(r.inputWidth >= r.boxWidth * 0.9, `input (${r.inputWidth}px) should fill its container (${r.boxWidth}px)`)
+    assert.ok(r.boxWidth >= 300 && r.boxWidth <= 400, `search field should be capped, got ${r.boxWidth}px`)
+    assert.ok(r.inputWidth >= 280, `input should be wide, got ${r.inputWidth}px`)
+  }))
+})
+
+describe("code blocks", () => {
+  it("get a copy button that copies the raw code, except mermaid diagrams", () => withPage(DESKTOP, "ksp/", async (page) => {
+    const r = await page.eval(`(() => { const pres = [...document.querySelectorAll("pre.chroma")]
+      return { count: pres.length, withButton: pres.filter((p) => p.closest(".code")?.querySelector(":scope > button.copy")).length } })()`)
+    assert.ok(r.count > 0 && r.withButton === r.count, `every pre.chroma needs a copy button: ${JSON.stringify(r)}`)
+    assert.ok(await page.eval(`[...document.querySelectorAll(".code > .lang")].some((l) => l.textContent === "kotlin")`), "a kotlin block shows its language label")
+    // Headless Chrome has no clipboard permission, so capture what would be written.
+    const result = await page.eval(`(async () => {
+      let written; navigator.clipboard.writeText = async (t) => { written = t }
+      const button = document.querySelector("button.copy"); button.click()
+      return { label: button.textContent, ok: written === button.parentElement.querySelector("pre").textContent && written.length > 0 } })()`)
+    assert.deepEqual(result, { label: "Copied", ok: true })
+  }))
+
+  it("leave mermaid diagrams without one", () => withPage(DESKTOP, "architecture/", async (page) => {
+    const r = await page.eval(`({ diagrams: document.querySelectorAll("pre.mermaid").length,
+      buttons: [...document.querySelectorAll("pre.mermaid")].filter((p) => p.closest(".code")).length })`)
+    assert.ok(r.diagrams > 0)
+    assert.equal(r.buttons, 0)
+    assert.equal(await page.eval(`document.querySelectorAll(".lang").length`), 0)
   }))
 })
 

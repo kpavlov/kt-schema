@@ -4,7 +4,7 @@ description: How kt-schema turns Kotlin declarations and Java classes into JSON 
 menus:
   main:
     name: Architecture
-    weight: 15
+    weight: 90
 ---
 
 # Architecture

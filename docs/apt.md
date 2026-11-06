@@ -308,8 +308,9 @@ String schema = new String(in.readAllBytes(), StandardCharsets.UTF_8);
   `LocalDateTime` (plain `string`) — all emitted as `string`
 - Jakarta Bean Validation annotations on record components, fields and accessors (`@Min`, `@Max`, `@DecimalMin`,
   `@DecimalMax`, `@Positive`, `@PositiveOrZero`, `@Negative`, `@NegativeOrZero`, `@Size`, `@NotEmpty`, `@NotBlank`,
-  `@Pattern`, `@Email`) — emitted as the matching JSON Schema keywords; see the README for the mapping. The
-  annotations are matched by name, so `jakarta.validation-api` is only needed on your own compile classpath
+  `@Pattern`, `@Email`) — emitted as the matching JSON Schema keywords; see the
+  [Validation Constraints guide](constraints.md) for the mapping. The annotations are matched by name, so
+  `jakarta.validation-api` is only needed on your own compile classpath
 - `Iterable`-derived collections (`List`, `Set`, `Collection`, custom subclasses) — emitted as `array` with
   `items` describing the element type
 - `Map` — emitted as `object` with `additionalProperties` describing the value type

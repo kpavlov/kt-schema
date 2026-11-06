@@ -1,0 +1,2 @@
+{{- /* Generic fenced block: language label, Copy button (see the script in baseof.html) and highlighted code. Mermaid has its own hook. */ -}}
+<div class="code">{{ with .Type }}<span class="lang">{{ . }}</span>{{ end }}<button type="button" class="copy" aria-label="Copy code">Copy</button>{{ transform.Highlight .Inner .Type .Options }}</div>
