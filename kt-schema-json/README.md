@@ -479,7 +479,7 @@ Produces function schema serializable as JSON:
 - All parameters in `required` array (even nullable ones)
 - Nullable fields use union types: `type = listOf("string", "null")`
 - `additionalProperties = false` by default
-- `strict = true` enables [OpenAI Strict Mode](https://platform.openai.com/docs/guides/function-calling#strict-mode)
+- `strict = true` enables [OpenAI Strict Mode](https://developers.openai.com/api/docs/guides/function-calling#strict-mode)
 
 **Tests:** [FunctionCallingSchemaTest](src/commonTest/kotlin/me/kpavlov/kt/schema/json/FunctionCallingSchemaTest.kt)
 

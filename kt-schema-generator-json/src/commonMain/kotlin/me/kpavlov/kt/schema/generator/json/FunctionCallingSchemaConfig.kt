@@ -10,7 +10,7 @@ package me.kpavlov.kt.schema.generator.json
  *                      Required for OpenAI Structured Outputs and function calling strict mode.
  *                      Requires [allowAdditionalProperties] to be `false`.
  *
- * @see [OpenAI Function Calling](https://platform.openai.com/docs/guides/function-calling)
+ * @see [OpenAI Function Calling](https://developers.openai.com/api/docs/guides/function-calling)
  */
 public class FunctionCallingSchemaConfig(
     respectDefaultPresence: Boolean = JsonSchemaConfig.Default.respectDefaultPresence,

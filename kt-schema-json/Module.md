@@ -9,7 +9,7 @@ Provides Kotlin models for programmatic JSON Schema construction with full kotli
 ## Key Classes
 
 - [JsonSchema][me.kpavlov.kt.schema.json.JsonSchema] - root schema model with type-safe property definitions
-- [FunctionCallingSchema][me.kpavlov.kt.schema.json.FunctionCallingSchema] - OpenAI/Anthropic function calling format
+- [FunctionCallingSchema][me.kpavlov.kt.schema.json.FunctionCallingSchema] - OpenAI, Anthropic and MCP function calling
 - DSL builders - fluent API for schema construction
 
 ## Example
@@ -43,7 +43,7 @@ val schema = jsonSchema {
 ## Related Specifications
 
 - [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/schema)
-- [OpenAI Function Calling](https://platform.openai.com/docs/guides/function-calling)
+- [OpenAI Function Calling](https://developers.openai.com/api/docs/guides/function-calling)
 - [Anthropic Structured Outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs)
 
 # Package me.kpavlov.kt.schema.json

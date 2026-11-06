@@ -58,7 +58,7 @@ plugins {
 }
 
 dependencies {
-    ksp("me.kpavlov.kt.schemakt-schema-ksp:<version>")
+    ksp("me.kpavlov.kt.schema:kt-schema-ksp:<version>")
     implementation("me.kpavlov.kt.schema:kt-schema-annotations:<version>")
 }
 
@@ -79,7 +79,7 @@ Options can be set globally in your build configuration or overridden per-class 
 | `exclude`          | `String`  | `null`  | Comma- or semicolon-separated glob patterns. Matching symbols are always skipped.  |
 | `withSchemaObject` | `Boolean` | `false` | Generate `jsonSchema: JsonObject` property. Requires `kotlinx-serialization-json`. |
 | `visibility`       | `String`  | `""`    | Visibility modifier for generated extensions (`public`, `internal`, etc.).         |
-| `config`           | `String`  | `null`  | Schema flavour: `strict`, `lenient`, `openapi` or a `JsonSchemaConfig` class name. Unset: classes use `strict`, functions use the function-calling default. See [Schema configuration](../README.md#schema-configuration). |
+| `config`           | `String`  | `null`  | Schema flavour: `strict`, `lenient`, `openapi` or a `JsonSchemaConfig` class name. Unset: classes use `strict`, functions use the function-calling default. See [Schema configuration](configuration.md#schema-configuration). |
 
 ### Filtering by class/function name
 
@@ -171,12 +171,12 @@ or a custom non-strict `config` it is left out of `required`. The default `stric
 as OpenAI strict mode demands. KSP reports only that a default exists, not its value, so no `default` is emitted.
 
 Jakarta Bean Validation annotations on properties and function parameters (`@Min(1) quantity: Int`) become JSON Schema
-keywords. See the [constraint mapping](../README.md#what-gets-generated) in the README.
+keywords. See the [Validation Constraints guide](constraints.md).
 
 ## See Also
 
 - [Serialization-Based Generator](serializable.md) — Runtime generation for any `@Serializable` class (no KSP required)
-- [Annotation Reference](../README.md#using-schema-and-description-annotations) — `@Schema` and `@Description` usage
-- [Runtime Schema Generation](../README.md#runtime-schema-generation) — Alternative using Reflection (JVM only)
-- [Function Calling Schemas](../README.md#function-calling-schema-generation-for-llms) — Generate LLM function schemas
+- [Annotation Reference](generated.md#using-schema-and-description-annotations) — `@Schema` and `@Description` usage
+- [Runtime Schema Generation](reflection.md) — Alternative using Reflection (JVM only)
+- [Function Calling Schemas](function-calling.md) — Generate LLM function schemas
 - [JSON Schema DSL](../kt-schema-json/README.md) — Manual schema construction

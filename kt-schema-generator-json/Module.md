@@ -52,7 +52,7 @@ val schema = generator.generateSchema(User.serializer().descriptor)
 - Analyze third-party classes without source modification
 - Extract default values from data class properties
 - Recognize foreign annotations (Jackson, Koog, LangChain4j)
-- OpenAI/Anthropic function calling format
+- OpenAI, Anthropic and MCP function calling
 - Sealed class hierarchies with `oneOf`
 
 **Serialization Generators (Multiplatform):**

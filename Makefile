@@ -4,6 +4,10 @@ KOTLIN_TARGETS ?= full
 PAGEFIND_VERSION ?= 1.6.0
 MERMAID_VERSION ?= 12.2.0
 SITE_DIR ?= docs/public
+# Shown at the bottom of the site menu; Hugo reads HUGO_PARAMS_* as site.Params.
+VERSION := $(shell sed -n "s/^version=//p" gradle.properties)
+VERSION_SUFFIX := $(shell sed -n "s/^versionSuffix=//p" gradle.properties)
+HUGO := HUGO_PARAMS_VERSION=$(VERSION)$(if $(VERSION_SUFFIX),-$(VERSION_SUFFIX)) hugo
 
 .PHONY: all
 all:clean lint build publish examples-snapshot knit
@@ -55,12 +59,12 @@ knit:
 .PHONY: site-dev
 site-dev: site
 	@echo "🌐 Serving site at http://localhost:1313/kt-schema/ ..."
-	@hugo server --source docs --environment development --openBrowser
+	@$(HUGO) server --source docs --environment development --openBrowser
 
 .PHONY: site
 site:
 	@echo "📦 Building site bundle ($(SITE_DIR)) ..."
-	@hugo --source docs --environment production --gc --minify --panicOnWarning --destination $(abspath $(SITE_DIR))
+	@$(HUGO) --source docs --environment production --gc --minify --panicOnWarning --destination $(abspath $(SITE_DIR))
 	@echo "🔎 Indexing site for search ..."
 	@npx --yes pagefind@$(PAGEFIND_VERSION) --site $(SITE_DIR)
 	@echo "🧜 Bundling Mermaid ..."
