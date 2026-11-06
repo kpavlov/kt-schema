@@ -102,7 +102,7 @@ public record Person(
 ```
 
 `kt-schema-apt` recognizes `@JsonPropertyDescription`/`@JsonClassDescription` out of the box — see
-[Multi-Framework Annotation Support](../README.md#multi-framework-annotation-support) for the full list.
+[Multi-Framework Annotation Support](configuration.md#multi-framework-annotation-support) for the full list.
 
 ## Configuration options
 
@@ -111,7 +111,7 @@ public record Person(
 | `rootPackage` | `String` | `null`   | Scope discovery to types declared under this package (and sub-packages); absent means the whole module is scanned.                                |
 | `include`     | `String` | `null`   | Comma/semicolon-separated glob patterns; a type not annotated with `@Schema` is processed only when it matches at least one.                      |
 | `exclude`     | `String` | `null`   | Comma/semicolon-separated glob patterns; a type matching any of them is dropped, even when `@Schema`-annotated or include-matched.                |
-| `config`      | `String` | `strict` | Schema flavour: `strict`, `lenient`, `openapi` or a `JsonSchemaConfig` class name. See [Schema configuration](../README.md#schema-configuration). |
+| `config`      | `String` | `strict` | Schema flavour: `strict`, `lenient`, `openapi` or a `JsonSchemaConfig` class name. See [Schema configuration](configuration.md#schema-configuration). |
 
 Set them as javac `-A` compiler arguments:
 
@@ -370,7 +370,7 @@ always marks it required and never shows the `default` keyword for it, since Jav
 whether a value truly behaves as optional. Both are configurable via `kt-schema.properties`
 (`introspector.annotations.enumDefault.names`, `introspector.annotations.defaultValue.names`,
 `introspector.annotations.defaultValue.attributes`) — see
-[Multi-Framework Annotation Support](../README.md#multi-framework-annotation-support).
+[Multi-Framework Annotation Support](configuration.md#multi-framework-annotation-support).
 
 ### Marking a property nullable/optional
 
@@ -409,7 +409,7 @@ public record Person(String name, @Nullable String middleName) {
 ## See Also
 
 - [KSP Configuration Guide](ksp.md) — the Kotlin compile-time equivalent, with `KClass<T>.jsonSchemaString` extensions
-- [Annotation Reference](../README.md#using-schema-and-description-annotations) — `@Schema` and `@Description` usage
-- [Multi-Framework Annotation Support](../README.md#multi-framework-annotation-support) — Jackson, LangChain4j, Koog
+- [Annotation Reference](generated.md#using-schema-and-description-annotations) — `@Schema` and `@Description` usage
+- [Multi-Framework Annotation Support](configuration.md#multi-framework-annotation-support) — Jackson, LangChain4j, Koog
   recognition
 - [Project Architecture](architecture.md) — how the shared IR and transformer pipeline works

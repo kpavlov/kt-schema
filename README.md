@@ -1,5 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/me.kpavlov.kt.schema/kt-schema-generator-core.svg?label=Maven%20Central)](https://central.sonatype.com/search?q=me.kpavlov.kt.schema%2Fkt-schema-*)
 [![Build with Gradle](https://github.com/kpavlov/kt-schema/actions/workflows/build.yml/badge.svg)](https://github.com/kpavlov/kt-schema/actions/workflows/build.yml)
+[![Documentation](https://img.shields.io/badge/Documentation-blue?logo=github)](https://kpavlov.github.io/kt-schema/)
 [![API Docs](https://img.shields.io/badge/API%20Docs-blue?logo=github)](https://kpavlov.github.io/kt-schema/api/)
 [![Examples](https://img.shields.io/badge/Examples-blue?logo=github)](https://github.com/kpavlov/kt-schema/tree/main/examples)
 [![License](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](LICENSE)
@@ -19,7 +20,8 @@
 
 **Generate JSON schemas and LLM function calling schemas from Java and Kotlin code — including classes you don't own.**
 
-Quick Links:
+Full documentation lives at **[kpavlov.github.io/kt-schema](https://kpavlov.github.io/kt-schema/)**. This README
+is the short tour; each topic below links to its guide.
 
 - [Documentation Index](docs/README.md)
 - [KSP Configuration Guide](docs/ksp.md)
@@ -45,8 +47,8 @@ Quick Links:
 
 **LLM Integration:**
 
-- First-class support for OpenAI/Anthropic function calling format
-- Automatic strict mode and parameter validation
+- Tool definitions for OpenAI, Anthropic and MCP from Kotlin functions
+- Strict mode output: all parameters required, `additionalProperties: false`, `null` unions for optional values
 - Function name and description extraction
 
 **Flexible Annotation Support:**
@@ -105,8 +107,8 @@ Quick Links:
 
 This library solves three key challenges:
 
-1. **🤖 LLM Function Calling Integration**: Generate OpenAI/Anthropic-compatible function schemas directly from Kotlin
-   functions with proper type definitions and descriptions
+1. **🤖 LLM Function Calling Integration**: Generate tool definitions for OpenAI, Anthropic and MCP directly from
+   Kotlin functions, with proper type definitions and descriptions
 2. **📦 Third-Party Class Support**: Create schemas for library classes without modifying their source code (Spring
    entities, Ktor models, etc.)
 3. **🔄 Multi-Framework Compatibility**: Works with existing annotations from Jackson, LangChain4j, Koog, and more — no
@@ -114,7 +116,7 @@ This library solves three key challenges:
 
 ### When to Use
 
-* 🤖 Building LLM-powered applications with structured function calling (OpenAI, Anthropic, Claude, MCP)
+* 🤖 Building LLM-powered applications with structured function calling (OpenAI, Anthropic, MCP)
 * 👽 Need schemas for third-party library classes you cannot modify
 * ✅ Already using `@Description`-like annotations from other frameworks
 * 👌 Want zero runtime overhead with compile-time generation (multiplatform support)
@@ -135,11 +137,9 @@ This library solves three key challenges:
 
 ¹ with the `rootPackage` option — see [Java Annotation Processor Guide](docs/apt.md#triggering-schema-generation).
 
-² via Jackson's `@JsonEnumDefaultValue`, placed on an enum constant — shown as `default` on that enum's own schema
-in the generated output. `@JsonProperty(defaultValue = "...")` is also recognized and populates the property
-internally, but neither processor's standard generated resource surfaces it, since both mark every property
-required regardless of default presence (KSP/APT can't evaluate a real Kotlin/Java default-value expression at
-compile time, unlike reflection) — see [Multi-Framework Annotation Support](#multi-framework-annotation-support).
+² Jackson's `@JsonEnumDefaultValue` becomes the enum's `default`. Kotlin/Java default-value expressions can't be
+evaluated at compile time, so no property `default` is emitted — see
+[Multi-Framework Annotation Support](https://kpavlov.github.io/kt-schema/configuration/#multi-framework-annotation-support).
 
 - **[Pick KSP](docs/ksp.md)** when you own the classes, want zero runtime overhead, and target Multiplatform or need
   KDoc
@@ -278,9 +278,10 @@ Worked examples for data classes, enums, nested objects, generics and sealed cla
 
 ## Function calling schema generation for LLMs
 
-`ReflectionFunctionCallingSchemaGenerator` (runtime) and `@Schema` on functions (KSP, compile time) produce
-OpenAI/Anthropic function calling schemas with `strict: true`, parameter descriptions and `["string", "null"]`
-unions for nullable parameters. See the [Function Calling guide](docs/function-calling.md).
+`ReflectionFunctionCallingSchemaGenerator` (runtime) and `@Schema` on functions (KSP, compile time) produce tool
+definitions in the OpenAI Responses API shape, with `strict: true`, parameter descriptions and `["string", "null"]`
+unions for nullable parameters. The same `parameters` object serves as Anthropic's `input_schema` and MCP's
+`inputSchema`. See the [Function Calling guide](docs/function-calling.md).
 
 ## Multi-Framework Annotation Support
 

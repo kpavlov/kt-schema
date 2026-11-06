@@ -1,6 +1,6 @@
 ---
 title: Function Calling
-description: Generate OpenAI- and Anthropic-compatible function calling schemas from Kotlin functions, at runtime via reflection or at compile time via KSP.
+description: Generate tool definitions for OpenAI, Anthropic and MCP from Kotlin functions, at runtime via reflection or at compile time via KSP.
 menus:
   main:
     name: Function Calling
@@ -9,21 +9,29 @@ menus:
 
 # Function Calling
 
-Modern LLMs (OpenAI GPT-4, Anthropic Claude, etc.) use structured function calling to interact with your code.
-They require a specific JSON schema format that describes available functions, their parameters, and types.
+LLM APIs (OpenAI, Anthropic) and the Model Context Protocol (MCP) call your code through *tools*: each tool is a
+name, a description and a JSON Schema for its parameters. kt-schema builds that definition from a Kotlin function,
+so parameter names, types, nullability and `@Description` text stay in one place.
 
-## Why This Format?
+## Provider formats
 
-LLM APIs need to know:
+The generated `FunctionCallingSchema` serializes to the
+[OpenAI Responses API function tool](https://developers.openai.com/api/docs/guides/function-calling) shape:
+`type`, `name`, `description`, `strict` and `parameters` at the top level. Other APIs take the same `parameters`
+object under a different key:
 
-- What functions are available and what they do
-- Parameter names, types, and descriptions
-- Which parameters are required
-- Type constraints (enums, formats, ranges)
+| API                                                                                                       | Wrapper                                                   | Parameters key | `strict`                                |
+|:----------------------------------------------------------------------------------------------------------|:----------------------------------------------------------|:---------------|:----------------------------------------|
+| OpenAI Responses API                                                                                      | as generated                                              | `parameters`   | top-level `strict: true`                |
+| OpenAI Chat Completions                                                                                   | nest `name`/`description`/`parameters` under `function`   | `parameters`   | inside `function`                       |
+| [Anthropic Messages API](https://platform.claude.com/docs/en/agents-and-tools/tool-use/strict-tool-use) | `name`, `description`, `input_schema`                     | `input_schema` | top-level `strict: true`                |
+| [MCP tool](https://modelcontextprotocol.io/specification/latest/server/tools)                             | `name`, `title`, `description`, `inputSchema`             | `inputSchema`  | n/a                                     |
 
-This library automatically generates schemas that comply with
-the [OpenAI function calling specification](https://platform.openai.com/docs/guides/function-calling), making it easy to
-expose Kotlin functions to LLMs.
+The default `strict` output has the shape OpenAI strict mode and Anthropic strict tool use require: every property
+is in `required`, `additionalProperties` is `false`, and optional values are expressed as `["<type>", "null"]`.
+Anthropic strict tool use also rejects numeric and string-length keywords (`minimum`, `maxLength`, …). Those come from
+[validation constraints](constraints.md) and from the built-in ranges of `Byte`, `Short`, `Char` and the unsigned types,
+so in parameters you send there with `strict: true`, drop the constraints and use `Int`, `Long` or `String` instead.
 
 ## Basic Usage
 
@@ -89,16 +97,20 @@ The generated schema follows the LLM function calling format:
 ## Key Features
 
 - **Automatic extraction**: Function name and descriptions from `@Description` annotations
-- **Default values**: Property defaults in nested data classes are automatically extracted (e.g.,
-  `data class Config(val port: Int = 8080)`)
+- **Default values**: With a non-strict config such as `FunctionCallingSchemaConfig.Simple`, a property default in a
+  nested data class (e.g., `data class Config(val port: Int = 8080)`) becomes `default` and leaves the property
+  optional. Strict mode makes every property required and emits no `default`
 - **Strict mode**: `strict: true` enables
-  OpenAI's [strict mode](https://platform.openai.com/docs/guides/function-calling#strict-mode) for reliable parsing
+  OpenAI's [strict mode](https://developers.openai.com/api/docs/guides/function-calling#strict-mode) and
+  Anthropic's [strict tool use](https://platform.claude.com/docs/en/agents-and-tools/tool-use/strict-tool-use), so
+  the model's arguments are guaranteed to match the schema
 - **Union types**: Nullable parameters use `["string", "null"]` instead of `nullable: true`
-- **Required by default**: All parameters marked as required (OpenAI structured outputs requirement)
+- **Required by default**: All parameters marked as required, as strict mode demands; a `null` union marks the
+  optional ones
 - **Type safety**: Proper JSON Schema types from Kotlin types (Int → integer, String → string, etc.)
 
-> **Note:** Function parameter defaults (e.g., `unit: String = "celsius"`) cannot be extracted via reflection, but
-> nested data class property defaults are fully supported.
+> **Note:** Function parameter defaults (e.g., `unit: String = "celsius"`) cannot be extracted via reflection, unlike
+> nested data class property defaults.
 
 ## Working with Multiple Functions
 
@@ -138,8 +150,8 @@ val schemaObjects = schemas.map { it.encodeToJsonObject() }
 
 <!--- KNIT example-knit-function-calling-02.kt -->
 
-The generated schemas can be sent to any LLM API that supports function calling (OpenAI, Anthropic, etc.).
-Integration with specific LLM providers requires their respective client libraries.
+Send the result through your provider's client library; see [Provider formats](#provider-formats) for the key
+each API expects the parameters under.
 
 ## Nullable Parameters
 
@@ -348,7 +360,8 @@ For each annotated function, you get:
 
 ### Schema Format
 
-Generated schemas follow the [OpenAI function calling format](https://platform.openai.com/docs/guides/function-calling):
+Generated schemas use the [OpenAI Responses API function tool](https://developers.openai.com/api/docs/guides/function-calling)
+shape (see [Provider formats](#provider-formats)):
 
 ```json
 {
@@ -377,8 +390,8 @@ Generated schemas follow the [OpenAI function calling format](https://platform.o
 }
 ```
 
-**OpenAI Strict Mode**: All parameters are marked as required by default, even those with default values. This ensures
-compatibility with [OpenAI Structured Outputs](https://platform.openai.com/docs/guides/function-calling#strict-mode).
+**Strict mode**: All parameters are marked as required by default, even those with default values, as
+[OpenAI strict mode](https://developers.openai.com/api/docs/guides/function-calling#strict-mode) requires.
 With a non-strict config (`lenient`, `openapi`), parameters that have a Kotlin default value are omitted from
 `required`; KSP can't read the default's value, so no `default` is emitted.
 

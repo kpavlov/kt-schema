@@ -14,7 +14,7 @@ extension, a classpath resource or a runtime call.
 
 ## Why kt-schema?
 
-1. **🤖 LLM function calling**: generate OpenAI/Anthropic-compatible function schemas directly from Kotlin functions,
+1. **🤖 LLM function calling**: generate tool definitions for OpenAI, Anthropic and MCP directly from Kotlin functions,
    with proper type definitions and descriptions.
 2. **📦 Third-party classes**: create schemas for library classes without modifying their source (Spring entities,
    Ktor models, etc.).
@@ -36,11 +36,9 @@ extension, a classpath resource or a runtime call.
 
 ¹ with the `rootPackage` option — see [Java Annotation Processor Guide](apt.md#triggering-schema-generation).
 
-² via Jackson's `@JsonEnumDefaultValue`, placed on an enum constant — shown as `default` on that enum's own schema
-in the generated output. `@JsonProperty(defaultValue = "...")` is also recognized and populates the property
-internally, but neither processor's standard generated resource surfaces it, since both mark every property
-required regardless of default presence (KSP/APT can't evaluate a real Kotlin/Java default-value expression at
-compile time, unlike reflection) — see [Multi-Framework Annotation Support](configuration.md#multi-framework-annotation-support).
+² Jackson's `@JsonEnumDefaultValue` becomes the enum's `default`. Kotlin/Java default-value expressions can't be
+evaluated at compile time, so no property `default` is emitted — see
+[Multi-Framework Annotation Support](configuration.md#multi-framework-annotation-support).
 
 - **[Pick KSP](ksp.md)** when you own the classes, want zero runtime overhead, and target Multiplatform or need
   KDoc in your schema.
@@ -169,7 +167,7 @@ schema contains, see [Generated Schemas](generated.md).
   Schema keywords.
 - [Serialization-Based Schema Generation](serializable.md) — runtime schemas from Kotlin serialization descriptors.
 - [Runtime Reflection](reflection.md) — runtime schemas for any JVM class, including third-party types.
-- [Function Calling](function-calling.md) — OpenAI/Anthropic function schemas from Kotlin functions, at runtime or
+- [Function Calling](function-calling.md) — OpenAI, Anthropic and MCP function schemas from Kotlin functions, at runtime or
   compile time.
 - [Configuration](configuration.md) — `strict`/`lenient`/`openapi` flavours and annotation detection for Jackson,
   LangChain4j and Koog.

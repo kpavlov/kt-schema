@@ -3,7 +3,7 @@ title: JSON Schema DSL
 description: Build JSON Schema Draft 2020-12 documents by hand with the type-safe Kotlin DSL in the kt-schema-json module.
 menus:
   main:
-    name: DSL
+    name: JSON Schema DSL
     weight: 70
 ---
 

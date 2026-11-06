@@ -11,7 +11,7 @@ import kotlinx.serialization.json.jsonObject
 /**
  * FunctionCallingSchema describes a function/tool call in LLM function calling APIs.
  *
- * This follows the [OpenAI function calling format](https://platform.openai.com/docs/guides/function-calling)
+ * This follows the [OpenAI function calling format](https://developers.openai.com/api/docs/guides/function-calling)
  * where a tool is defined as:
  * - type: Always "function"
  * - name: The name of the function
@@ -31,7 +31,7 @@ public data class FunctionCallingSchema(
     public val title: String? = null,
     public val description: String? = null,
     /**
-     * See [Strict mode](https://platform.openai.com/docs/guides/function-calling?strict-mode=disabled#strict-mode)
+     * See [Strict mode](https://developers.openai.com/api/docs/guides/function-calling#strict-mode)
      */
     @EncodeDefault
     public val strict: Boolean? = true,

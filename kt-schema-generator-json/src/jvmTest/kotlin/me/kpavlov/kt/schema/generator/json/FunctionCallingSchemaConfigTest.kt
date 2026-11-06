@@ -1,6 +1,8 @@
 package me.kpavlov.kt.schema.generator.json
 
 import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.json.shouldContainJsonKeyValue
+import io.kotest.assertions.json.shouldNotContainJsonKey
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
@@ -13,6 +15,10 @@ class FunctionCallingSchemaConfigTest {
         val city: String,
     )
 
+    data class Server(
+        val port: Int = 8080,
+    )
+
     object Fixtures {
         @Suppress("UNUSED_PARAMETER", "FunctionOnlyReturningConstant")
         fun sample(
@@ -20,6 +26,39 @@ class FunctionCallingSchemaConfigTest {
             retries: Int = 3,
             address: Address,
         ): String = ""
+
+        @Suppress("UNUSED_PARAMETER", "FunctionOnlyReturningConstant")
+        fun start(server: Server): String = ""
+
+        @Suppress("UNUSED_PARAMETER", "FunctionOnlyReturningConstant")
+        fun setLevel(level: Byte): String = ""
+    }
+
+    @Test
+    fun `Strict should require nested properties and omit their defaults`() {
+        val schema = ReflectionFunctionCallingSchemaGenerator.Default.generateSchemaString(Fixtures::start)
+
+        schema.shouldContainJsonKeyValue("$.parameters.properties.server.required[0]", "port")
+        schema shouldNotContainJsonKey "$.parameters.properties.server.properties.port.default"
+    }
+
+    @Test
+    fun `Simple should emit nested property defaults and leave them optional`() {
+        val generator =
+            ReflectionFunctionCallingSchemaGenerator(Json { encodeDefaults = false }, FunctionCallingSchemaConfig.Simple)
+
+        val schema = generator.generateSchemaString(Fixtures::start)
+
+        schema.shouldContainJsonKeyValue("$.parameters.properties.server.properties.port.default", 8080)
+        schema.shouldContainJsonKeyValue("$.parameters.properties.server.required", emptyList<String>())
+    }
+
+    @Test
+    fun `Strict should keep the built-in range of Byte`() {
+        val schema = ReflectionFunctionCallingSchemaGenerator.Default.generateSchemaString(Fixtures::setLevel)
+
+        schema.shouldContainJsonKeyValue("$.parameters.properties.level.minimum", -128)
+        schema.shouldContainJsonKeyValue("$.parameters.properties.level.maximum", 127)
     }
 
     @Test

@@ -50,7 +50,7 @@ graph LR
 
     subgraph Transformers["⚙️ TRANSFORMERS"]
         JsonTransform["JsonSchemaTransformer<br/>Draft 2020-12"]
-        FuncTransform["FunctionCallingTransformer<br/>(OpenAI/Anthropic format)"]
+        FuncTransform["FunctionCallingTransformer<br/>(OpenAI, Anthropic and MCP)"]
     end
 
     subgraph Output["📄 SCHEMA OUTPUTS"]

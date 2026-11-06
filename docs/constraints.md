@@ -120,6 +120,6 @@ Kotlin types it has serializers for.
 
 - [KSP Configuration Guide](ksp.md) and [Java Annotation Processor Guide](apt.md) — the compile-time front ends
   that read these annotations
-- [Multi-Framework Annotation Support](../README.md#multi-framework-annotation-support) — how annotation names are
+- [Multi-Framework Annotation Support](configuration.md#multi-framework-annotation-support) — how annotation names are
   matched and configured
 - [JSON Schema DSL](../kt-schema-json/README.md) — set the same keywords by hand

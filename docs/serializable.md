@@ -392,7 +392,7 @@ This code prints:
 > The built-in `@Description` from `kt-schema-annotations` lacks `@SerialInfo` and is therefore **not** visible here.
 > Use [`@SerialDescription`](#serialdescription-support) from this module instead — it carries `@SerialInfo` and works with `Default` out of the box.
 > If you're describing classes you don't own, use the [KSP processor](ksp.md) or
-> the [reflection-based generator](../README.md#runtime-schema-generation).
+> the [reflection-based generator](reflection.md).
 
 ### Opaque JSON types
 
@@ -717,7 +717,7 @@ of subtypes to produce a schema limited to those types.
 ## See Also
 
 - [KSP Processor](ksp.md) — Compile-time schema generation with zero runtime overhead
-- [Annotation Reference](../README.md#using-schema-and-description-annotations) — `@Schema`, `@Description`, and `@SerialDescription` usage
-- [Multi-Framework Annotation Support](../README.md#multi-framework-annotation-support) — Recognize Jackson, LangChain4j, and other annotations
-- [Runtime Schema Generation](../README.md#runtime-schema-generation) — Reflection-based alternative for third-party classes
+- [Annotation Reference](generated.md#using-schema-and-description-annotations) — `@Schema`, `@Description`, and `@SerialDescription` usage
+- [Multi-Framework Annotation Support](configuration.md#multi-framework-annotation-support) — Recognize Jackson, LangChain4j, and other annotations
+- [Runtime Schema Generation](reflection.md) — Reflection-based alternative for third-party classes
 - [JSON Schema DSL](../kt-schema-json/README.md) — Manual schema construction
