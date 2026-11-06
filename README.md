@@ -280,8 +280,9 @@ Worked examples for data classes, enums, nested objects, generics and sealed cla
 
 `ReflectionFunctionCallingSchemaGenerator` (runtime) and `@Schema` on functions (KSP, compile time) produce tool
 definitions in the OpenAI Responses API shape, with `strict: true`, parameter descriptions and `["string", "null"]`
-unions for nullable parameters. The same `parameters` object serves as Anthropic's `input_schema` and MCP's
-`inputSchema`. See the [Function Calling guide](docs/function-calling.md).
+unions for nullable parameters. The same `parameters` object serves as MCP's `inputSchema` and as Anthropic's
+`input_schema`, except that Anthropic strict tool use rejects numeric and string-length constraints. See the
+[Function Calling guide](docs/function-calling.md).
 
 ## Multi-Framework Annotation Support
 

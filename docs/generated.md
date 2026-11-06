@@ -11,39 +11,45 @@ menus:
 
 ## What Gets Generated
 
-Schemas follow JSON Schema Draft 2020-12 format. Example (pretty-printed):
+Schemas follow JSON Schema Draft 2020-12 format. Here is what KSP emits with its default `strict` config for the
+`Address` model from the Quick Start (pretty-printed):
 
 ```json
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "com.example.Address",
+    "description": "A postal address for deliveries and billing.",
     "type": "object",
     "properties": {
         "street": {
             "type": "string",
-            "description": "Street address, including house number"
+            "description": "Street address, including house number",
+            "maxLength": 120
         },
         "city": {
             "type": "string",
-            "description": "City or town name"
+            "description": "City or town name",
+            "minLength": 1,
+            "maxLength": 80
         },
         "zipCode": {
             "type": "string",
-            "description": "Postal or ZIP code"
+            "description": "Postal or ZIP code",
+            "pattern": "[0-9]{5}"
         },
         "country": {
             "type": "string",
             "description": "Two-letter ISO country code; defaults to US",
-            "default": "US"
+            "pattern": "[A-Z]{2}"
         }
     },
+    "additionalProperties": false,
     "required": [
         "street",
         "city",
-        "zipCode"
-    ],
-    "additionalProperties": false,
-    "description": "A postal address for deliveries and billing."
+        "zipCode",
+        "country"
+    ]
 }
 ```
 
@@ -148,7 +154,9 @@ val schemaObject = Product::class.jsonSchema
         "id",
         "name",
         "description",
-        "price"
+        "price",
+        "inStock",
+        "tags"
     ],
     "additionalProperties": false,
     "description": "A purchasable product with pricing and inventory info."

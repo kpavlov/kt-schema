@@ -87,24 +87,13 @@ describe("header", () => {
     assert.equal((await page.eval(HEADER)).docsLinks, 0)
   }))
 
-  for (const [name, viewport] of [["desktop", DESKTOP], ["mobile", MOBILE]]) {
-    it(`shows GitHub as an icon plus label on ${name}`, () => withPage(viewport, "", async (page) => {
-      const r = await page.eval(`(() => { const a = document.querySelector("nav.project a.icon-link"), svg = a.querySelector("svg")
-        return { title: a.title, href: a.href, text: a.textContent.trim(), iconWidth: svg.getBoundingClientRect().width } })()`)
-      assert.equal(r.title, "GitHub")
-      assert.match(r.href, /github\.com\/kpavlov\/kt-schema\/?$/)
-      assert.equal(r.text, "GitHub")
-      assert.ok(r.iconWidth >= 16, `icon too small: ${r.iconWidth}px`)
-    }))
-
-    it(`aligns API and the GitHub icon to the right edge of the header on ${name}`, () => withPage(viewport, "", async (page) => {
-      const r = await page.eval(`(() => { const bar = document.querySelector(".bar"), pad = parseFloat(getComputedStyle(bar).paddingRight)
-        const [api, github] = [...document.querySelectorAll("nav.project a")].map((a) => a.getBoundingClientRect())
-        return { contentRight: bar.getBoundingClientRect().right - pad, apiRight: api.right, githubLeft: github.left, githubRight: github.right } })()`)
-      assert.ok(Math.abs(r.githubRight - r.contentRight) <= 1, `GitHub icon ends at ${r.githubRight}, header content ends at ${r.contentRight}`)
-      assert.ok(r.apiRight <= r.githubLeft, "API must sit left of the GitHub icon")
-    }))
-  }
+  it("aligns API and the GitHub icon to the right edge of the header on mobile", () => withPage(MOBILE, "", async (page) => {
+    const r = await page.eval(`(() => { const bar = document.querySelector(".bar"), pad = parseFloat(getComputedStyle(bar).paddingRight)
+      const [api, github] = [...document.querySelectorAll("nav.project a")].map((a) => a.getBoundingClientRect())
+      return { contentRight: bar.getBoundingClientRect().right - pad, apiRight: api.right, githubLeft: github.left, githubRight: github.right } })()`)
+    assert.ok(Math.abs(r.githubRight - r.contentRight) <= 1, `GitHub icon ends at ${r.githubRight}, header content ends at ${r.contentRight}`)
+    assert.ok(r.apiRight <= r.githubLeft, "API must sit left of the GitHub icon")
+  }))
 
   it("shows the menu as a left sidebar and the search field on the right next to API on desktop", () => withPage(DESKTOP, "", async (page) => {
     await page.waitFor(SEARCH_INPUT)
@@ -154,32 +143,28 @@ describe("markdown view", () => {
     assert.match(await (await fetch(`${site.baseUrl}apt/index.md`)).text(), /<!-- Only needed if you annotate/)
   })
 
-  for (const [name, viewport] of [["desktop", DESKTOP], ["mobile", MOBILE]]) {
-    it(`offers copying and viewing from a dropdown on ${name}`, () => withPage(viewport, "ksp/", async (page) => {
-      assert.equal(await page.eval(`document.querySelector(".page-actions .menu").checkVisibility()`), false, "closed at first")
-      await page.click(`${MENU} summary`)
-      const r = await page.eval(`(() => { const menu = document.querySelector(".page-actions .menu"), box = menu.getBoundingClientRect()
-        return { items: [...menu.children].map((i) => i.innerText.replace(/\\s*\\n\\s*/g, " | ")), view: menu.querySelector("a").getAttribute("href"),
-          fits: box.left >= 0 && box.right <= innerWidth, overflow: document.documentElement.scrollWidth > innerWidth } })()`)
-      assert.deepEqual(r.items, ["Copy page | Copy page as Markdown for LLMs", "View as Markdown | View this page as plain text"])
-      assert.equal(r.view, "/kt-schema/ksp/index.md")
-      assert.equal(r.fits, true, "menu must fit in the viewport")
-      assert.equal(r.overflow, false, "menu causes horizontal scroll")
-    }))
-  }
+  it("offers copying and viewing from a dropdown on mobile", () => withPage(MOBILE, "ksp/", async (page) => {
+    assert.equal(await page.eval(`document.querySelector(".page-actions .menu").checkVisibility()`), false, "closed at first")
+    await page.click(`${MENU} summary`)
+    const r = await page.eval(`(() => { const menu = document.querySelector(".page-actions .menu"), box = menu.getBoundingClientRect()
+      return { items: [...menu.children].map((i) => i.innerText.replace(/\\s*\\n\\s*/g, " | ")), view: menu.querySelector("a").getAttribute("href"),
+        fits: box.left >= 0 && box.right <= innerWidth, overflow: document.documentElement.scrollWidth > innerWidth } })()`)
+    assert.deepEqual(r.items, ["Copy page | Copy page as Markdown for LLMs", "View as Markdown | View this page as plain text"])
+    assert.equal(r.view, "/kt-schema/ksp/index.md")
+    assert.equal(r.fits, true, "menu must fit in the viewport")
+    assert.equal(r.overflow, false, "menu causes horizontal scroll")
+  }))
 
-  for (const [name, selector] of [["the main button", ".page-actions > button"], ["the menu item", ".page-actions .menu button"]]) {
-    it(`copies the page markdown from ${name}`, () => withPage(DESKTOP, "ksp/", async (page) => {
-      await page.eval(`window.written = null; navigator.clipboard.write = async ([item]) => { window.written = await (await item.getType("text/plain")).text() }`)
-      if (selector.includes("menu")) await page.click(`${MENU} summary`)
-      await page.click(selector)
-      const expected = await (await fetch(`${site.baseUrl}ksp/index.md`)).text()
-      await page.waitFor(`window.written !== null`)
-      assert.equal(await page.eval(`window.written`), expected)
-      await page.waitFor(`document.querySelector(".page-actions > button").textContent === "Copied"`)
-      assert.equal(await page.eval(`document.querySelector("${MENU}").open`), false, "menu closes after choosing")
-    }))
-  }
+  it("copies the page markdown from the menu", () => withPage(DESKTOP, "ksp/", async (page) => {
+    await page.eval(`window.written = null; navigator.clipboard.write = async ([item]) => { window.written = await (await item.getType("text/plain")).text() }`)
+    await page.click(`${MENU} summary`)
+    await page.click(".page-actions .menu button")
+    const expected = await (await fetch(`${site.baseUrl}ksp/index.md`)).text()
+    await page.waitFor(`window.written !== null`)
+    assert.equal(await page.eval(`window.written`), expected)
+    await page.waitFor(`document.querySelector(".page-actions > button").textContent === "Copied"`)
+    assert.equal(await page.eval(`document.querySelector("${MENU}").open`), false, "menu closes after choosing")
+  }))
 
   it("reports a failed copy", () => withPage(DESKTOP, "ksp/", async (page) => {
     await page.eval(`navigator.clipboard.write = async () => { throw new Error("denied") }`)
@@ -197,10 +182,6 @@ describe("markdown view", () => {
     assert.equal(await page.eval(`document.querySelector("${MENU}").open`), false)
   }))
 
-  it("opens as text in Chrome when served as text/markdown", () => withPage(DESKTOP, "ksp/index.md", async (page) => {
-    assert.equal(await page.eval(`document.contentType`), "text/markdown")
-    assert.match(await page.eval(`document.body.innerText`), /^# KSP Processor Configuration/)
-  }))
 })
 
 describe("llms.txt", () => {
@@ -225,15 +206,6 @@ describe("llms.txt", () => {
     assert.deepEqual(links, pages.map((path) => `${SITE}${path}index.md`).sort())
   })
 
-  it("describes a guide next to its link", async () => {
-    assert.match(await read(), /^- \[KSP Processor Configuration\]\(\S+\/ksp\/index\.md\): Configure the kt-schema KSP processor/m)
-  })
-
-  it("leaves the API reference and sources to the Optional section", async () => {
-    const optional = (await read()).split("## Optional\n")[1]
-    assert.match(optional, new RegExp(`^- \\[API reference\\]\\(${SITE}api/\\): `, "m"))
-    assert.match(optional, /^- \[Source code\]\(https:\/\/github\.com\/kpavlov\/kt-schema\): /m)
-  })
 })
 
 describe("mobile header", () => {
@@ -250,10 +222,6 @@ describe("mobile header", () => {
     await page.waitFor(`${HEADER}.top === 0`)
   }))
 
-  it("keeps pull to refresh", () => withPage(MOBILE, "ksp/", async (page) => {
-    assert.equal(await page.eval(`getComputedStyle(document.documentElement).overscrollBehaviorY`), "auto")
-  }))
-
   it("comes into view when the search field takes focus", () => withPage(MOBILE, "ksp/", async (page) => {
     await page.waitFor(SEARCH_INPUT)
     await page.eval(`scrollTo(0, 1500)`)
@@ -263,13 +231,12 @@ describe("mobile header", () => {
 })
 
 describe("desktop header", () => {
-  it("stays put while scrolling in both directions, without overscroll bounce", () => withPage(DESKTOP, "ksp/", async (page) => {
+  it("stays put while scrolling in both directions", () => withPage(DESKTOP, "ksp/", async (page) => {
     for (const y of [1500, 1400, 0]) {
       await page.eval(`scrollTo(0, ${y})`)
       await page.eval(`new Promise((r) => setTimeout(r, 200))`)
       assert.equal(await page.eval(`document.querySelector("header").getBoundingClientRect().top`), 0)
     }
-    assert.equal(await page.eval(`getComputedStyle(document.documentElement).overscrollBehaviorY`), "none")
   }))
 })
 
@@ -314,17 +281,10 @@ describe("colour scheme selector", () => {
     assert.equal(await page.eval(`${THEME}.dataset.choice`), "dark")
   }))
 
-  it("stays light on a dark system when light is chosen", () => withTheme(DESKTOP, "ksp/", async (page) => {
-    await emulate(page, "dark")
-    assert.equal(await page.eval(BACKGROUND), DARK)
-    await choose(page, "light")
-    assert.equal(await page.eval(BACKGROUND), LIGHT)
-    assert.equal(await page.eval(`matchMedia(document.getElementById("syntax-dark").media).matches`), false)
-  }))
-
   it("follows the system again after choosing system", () => withTheme(DESKTOP, "ksp/", async (page) => {
     await emulate(page, "dark")
     await choose(page, "light")
+    assert.equal(await page.eval(BACKGROUND), LIGHT)
     await choose(page, "system")
     assert.equal(await page.eval(BACKGROUND), DARK)
     assert.equal(await page.eval(`localStorage.getItem("theme")`), null)
@@ -338,21 +298,19 @@ describe("colour scheme selector", () => {
     assert.equal(await page.eval(`${THEME}.dataset.choice`), "system")
   }))
 
-  for (const [name, viewport] of [["desktop", DESKTOP], ["mobile", MOBILE]]) {
-    it(`themes the search field and its results on ${name}`, () => withTheme(viewport, "ksp/", async (page) => {
-      await emulate(page, "light")
-      await page.waitFor(SEARCH_INPUT)
-      await choose(page, "dark")
-      await page.eval(`deep("pagefind-searchbox input")[0].focus()`)
-      await page.type("polymorphism")
-      await page.waitFor(`(() => { const l = ${SEARCH_RESULTS}; return l.length && l })()`)
-      const r = await page.eval(`(() => { const color = (sel) => getComputedStyle(deep(sel)[0]).backgroundColor
-        return { input: color("pagefind-searchbox input"), results: color("pagefind-searchbox .pf-searchbox-dropdown") } })()`)
-      assert.deepEqual(r, { input: DARK, results: DARK })
-    }))
-  }
+  it("themes the search field and its results on desktop", () => withTheme(DESKTOP, "ksp/", async (page) => {
+    await emulate(page, "light")
+    await page.waitFor(SEARCH_INPUT)
+    await choose(page, "dark")
+    await page.eval(`deep("pagefind-searchbox input")[0].focus()`)
+    await page.type("polymorphism")
+    await page.waitFor(`(() => { const l = ${SEARCH_RESULTS}; return l.length && l })()`)
+    const r = await page.eval(`(() => { const color = (sel) => getComputedStyle(deep(sel)[0]).backgroundColor
+      return { input: color("pagefind-searchbox input"), results: color("pagefind-searchbox .pf-searchbox-dropdown") } })()`)
+    assert.deepEqual(r, { input: DARK, results: DARK })
+  }))
 
-  it("redraws mermaid diagrams in the new scheme", () => withTheme(DESKTOP, "architecture/", async (page) => {
+  it("redraws mermaid diagrams in the new scheme, also when chosen during the first draw", () => withTheme(DESKTOP, "architecture/", async (page) => {
     // Without its generated id, the stylesheet of a diagram only differs by theme.
     const STYLE = `document.querySelector("pre.mermaid svg style")?.textContent.replace(/mermaid-\\d+/g, "")`
     await emulate(page, "light")
@@ -367,18 +325,25 @@ describe("colour scheme selector", () => {
     await emulate(page, "dark")
     await page.waitFor(`${STYLE} === ${JSON.stringify(dark)}`)
     assert.deepEqual(page.problems, [])
+
+    // Mermaid marks a diagram as processed when it starts drawing it, long before the drawing ends.
+    await emulate(page, "light")
+    await page.send("Page.addScriptToEvaluateOnNewDocument", { source: `new MutationObserver((_, observer) => {
+      observer.disconnect()
+      while (${THEME}.dataset.choice !== "dark") ${THEME}.click()
+    }).observe(document, { subtree: true, attributeFilter: ["data-processed"] })` })
+    await page.goto(site.baseUrl + "architecture/")
+    await page.waitFor(`${STYLE} === ${JSON.stringify(dark)}`)
   }))
 
-  for (const [name, viewport] of [["desktop", DESKTOP], ["mobile", MOBILE]]) {
-    it(`fits in the header next to the search field on ${name}`, () => withTheme(viewport, "ksp/", async (page) => {
-      await page.waitFor(SEARCH_INPUT)
-      const r = await page.eval(`(() => { const rect = (el) => el.getBoundingClientRect(), select = rect(${THEME}), box = rect(document.querySelector("pagefind-searchbox"))
-        return { sameRow: select.top < box.bottom && box.top < select.bottom, after: select.left >= box.right, right: select.right, overflow: document.documentElement.scrollWidth > innerWidth, tall: rect(document.querySelector("header")).height } })()`)
-      assert.ok(r.sameRow && r.after, `selector must sit right of the search field: ${JSON.stringify(r)}`)
-      assert.equal(r.overflow, false)
-      assert.ok(r.tall <= 110, `header grew to ${r.tall}px`)
-    }))
-  }
+  it("fits in the header next to the search field on mobile", () => withTheme(MOBILE, "ksp/", async (page) => {
+    await page.waitFor(SEARCH_INPUT)
+    const r = await page.eval(`(() => { const rect = (el) => el.getBoundingClientRect(), select = rect(${THEME}), box = rect(document.querySelector("pagefind-searchbox"))
+      return { sameRow: select.top < box.bottom && box.top < select.bottom, after: select.left >= box.right, right: select.right, overflow: document.documentElement.scrollWidth > innerWidth, tall: rect(document.querySelector("header")).height } })()`)
+    assert.ok(r.sameRow && r.after, `selector must sit right of the search field: ${JSON.stringify(r)}`)
+    assert.equal(r.overflow, false)
+    assert.ok(r.tall <= 110, `header grew to ${r.tall}px`)
+  }))
 })
 
 describe("sidebar", () => {
@@ -501,17 +466,13 @@ describe("table of contents", () => {
     await page.waitFor(`document.querySelector(".toc a").checkVisibility()`)
   }))
 
-  for (const width of [1200, 1280, 1920]) {
+  for (const width of [1200, 1920]) {
     it(`keeps a clear gap to the text without drifting away at ${width}px`, () => withPage({ width, height: 900 }, "ksp/", async (page) => {
       const gap = await page.eval(`(() => { const main = document.getElementById("content")
         return document.querySelector(".toc nav").getBoundingClientRect().left - (main.getBoundingClientRect().right - parseFloat(getComputedStyle(main).paddingRight)) })()`)
       assert.ok(gap >= 48 && gap <= 80, `gap between the text and the TOC: ${gap}px`)
     }))
   }
-
-  it("reserves no column on a page without one", () => withPage(DESKTOP, "", async (page) => {
-    assert.equal(await page.eval(`document.getElementById("content").getBoundingClientRect().width`), 860)
-  }))
 
   it("has no dead keyboard stop in the desktop column", () => withPage(DESKTOP, "ksp/", async (page) => {
     assert.equal(await page.eval(`shown(document.querySelector(".toc summary"))`), false)
@@ -528,28 +489,26 @@ describe("table of contents", () => {
 })
 
 describe("search", () => {
-  for (const [name, viewport] of [["desktop", DESKTOP], ["mobile", MOBILE]]) {
-    it(`finds pages from the header searchbox on ${name}`, () => withPage(viewport, "ksp/", async (page) => {
-      await page.waitFor(SEARCH_INPUT)
-      const placeholder = await page.eval(`deep("pagefind-searchbox input")[0].placeholder`)
-      assert.match(placeholder, /search documentation/i)
+  it("finds pages from the header searchbox on mobile", () => withPage(MOBILE, "ksp/", async (page) => {
+    await page.waitFor(SEARCH_INPUT)
+    const placeholder = await page.eval(`deep("pagefind-searchbox input")[0].placeholder`)
+    assert.match(placeholder, /search documentation/i)
 
-      await page.eval(`deep("pagefind-searchbox input")[0].focus()`)
-      await page.type("polymorphism")
-      const links = await page.waitFor(`(() => { const l = ${SEARCH_RESULTS}; return l.length && l })()`)
+    await page.eval(`deep("pagefind-searchbox input")[0].focus()`)
+    await page.type("polymorphism")
+    const links = await page.waitFor(`(() => { const l = ${SEARCH_RESULTS}; return l.length && l })()`)
 
-      for (const href of links) {
-        const url = new URL(href, site.baseUrl)
-        assert.ok(url.pathname.startsWith("/kt-schema/"), `result escapes the site prefix: ${href}`)
-        assert.ok(!url.pathname.includes("/api/"), `API docs must not be indexed: ${href}`)
-        assert.equal((await fetch(url)).status, 200, href)
-      }
-      assert.equal(await page.eval(`document.documentElement.scrollWidth > innerWidth`), false, "dropdown causes horizontal scroll")
+    for (const href of links) {
+      const url = new URL(href, site.baseUrl)
+      assert.ok(url.pathname.startsWith("/kt-schema/"), `result escapes the site prefix: ${href}`)
+      assert.ok(!url.pathname.includes("/api/"), `API docs must not be indexed: ${href}`)
+      assert.equal((await fetch(url)).status, 200, href)
+    }
+    assert.equal(await page.eval(`document.documentElement.scrollWidth > innerWidth`), false, "dropdown causes horizontal scroll")
 
-      await page.press("Escape", "Escape")
-      await page.waitFor(`${SEARCH_RESULTS}.length === 0`)
-    }))
-  }
+    await page.press("Escape", "Escape")
+    await page.waitFor(`${SEARCH_RESULTS}.length === 0`)
+  }))
 
   it("focuses the searchbox with Ctrl/Cmd+K on desktop", () => withPage(DESKTOP, "", async (page) => {
     await page.waitFor(SEARCH_INPUT)

@@ -142,6 +142,7 @@ pre.chroma { background: var(--code-bg); }
 .code { position: relative; }
 .code pre { padding-right: 120px; }
 .copy { position: absolute; top: 6px; right: 6px; padding: 2px 8px; font: inherit; font-size: 0.75rem; color: var(--muted); background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+html:not(.js) .copy { display: none; }
 .lang { position: absolute; top: 8px; right: 70px; font-size: 0.75rem; color: var(--muted); }
 @media (hover: hover) { .copy { opacity: 0; } .code:hover .copy, .code:focus-within .copy { opacity: 1; } }
 /* The Kotlin lexer flags valid syntax such as $$"""; do not paint it as an error. */

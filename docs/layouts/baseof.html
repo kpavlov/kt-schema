@@ -179,9 +179,9 @@
       return mermaid.run({ nodes: diagrams })
     }
     const render = () => (drawing = drawing.catch(() => {}).then(draw))
-    await render()
     addEventListener("themechange", render)
     matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render)
+    await render()
     // Clicking a diagram (or pressing Enter on it) shows it large in a modal; click or Esc closes it.
     const dialog = document.body.appendChild(Object.assign(document.createElement("dialog"), { className: "zoom" }))
     dialog.addEventListener("click", () => dialog.close())
