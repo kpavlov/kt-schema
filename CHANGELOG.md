@@ -1,4 +1,6 @@
-## Unreleased 0.10.0
+## 0.10.0
+
+Published: 2026-11-06
 
 ### Added
 
@@ -32,7 +34,6 @@
   may not be the user's to fix.
   A constraint on a property emitted as a `$ref` (object or enum) is wrapped as `allOf: [{ "$ref": ... }, { ... }]`.
   A `@Pattern` with `flags` is skipped with a warning
-- Function-calling schemas omit `description` for an undocumented function instead of emitting `"description": ""`
 - **Validation constraints in the IR** ([#181](https://github.com/kpavlov/kt-schema/pull/181)), for anyone building
   on `kt-schema-generator-core`: `TypeRef.constraints` holds `Minimum`, `Maximum`, `Size`, `Pattern`, `Format` or
   `UniqueItems`, and both emitters turn them into the matching JSON Schema keywords. On nullable types the constraints
@@ -41,6 +42,7 @@
 ### Changed
 
 - Whole-number bounds are written as integers: `"minimum": 18` instead of `18.0`
+- Function-calling schemas omit `description` for an undocumented function instead of emitting `"description": ""`
 - **Breaking** for direct users of the IR: `Property.annotations` was removed. Nothing read or wrote it
   ([#181](https://github.com/kpavlov/kt-schema/pull/181))
 - **Breaking**: drop support for _watchosArm32_ and _iosX64_ multiplatform targets.
@@ -50,6 +52,21 @@
 - KSP function schemas: a parameter with a Kotlin default value is no longer listed in `required` under the `simple`,
   `lenient` and `openapi` configs. The `strict` config still requires every parameter
   ([#180](https://github.com/kpavlov/kt-schema/pull/180))
+
+### Docs
+
+- [Documentation site](https://kpavlov.github.io/kt-schema/) with guides for generated schemas, runtime reflection,
+  function calling, configuration, validation constraints and the JSON Schema DSL, plus search and `llms.txt`. It is
+  deployed together with the Dokka API docs ([#191](https://github.com/kpavlov/kt-schema/pull/191),
+  [#193](https://github.com/kpavlov/kt-schema/pull/193))
+
+### Dependencies
+
+- kotlin-logging 8.0.6, Gradle 9.8.2, Dokka 2.3.0, Kotest 6.2.6, Jackson BOM 3.2.4 (test-only), networknt
+  json-schema-validator 3.0.9 (test-only), json-unit-assertj 6.4.0 (test-only), Jakarta Validation API 3.1.1
+  (test-only), langchain4j 1.23.0 (test-only)
+
+---
 
 ## 0.9.0
 
