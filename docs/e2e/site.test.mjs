@@ -203,6 +203,39 @@ describe("markdown view", () => {
   }))
 })
 
+describe("llms.txt", () => {
+  const SITE = "https://kpavlov.github.io/kt-schema/"
+  const read = async () => (await fetch(`${site.baseUrl}llms.txt`)).text()
+
+  it("opens with the project title and summary", async () => {
+    assert.match(await read(), /^# kt-schema\n\n> Generate JSON schemas .+\n\n/)
+  })
+
+  it("includes the home page markdown under its own single title", async () => {
+    const home = await (await fetch(`${site.baseUrl}index.md`)).text()
+    const body = home.replace(/^# .*\n+/, "")
+    const llms = await read()
+    assert.ok(llms.includes(`\n\n${body}\n\n## Pages\n`), "the home page body must sit between the summary and the page list")
+    assert.equal(llms.match(/^# /gm).length, 1, "only one H1")
+  })
+
+  it("links the markdown of every page, once", async () => {
+    const section = (await read()).split("## Pages\n")[1].split("## Optional")[0]
+    const links = [...section.matchAll(/^- \[.+?\]\((.+?)\)/gm)].map((m) => m[1]).sort()
+    assert.deepEqual(links, pages.map((path) => `${SITE}${path}index.md`).sort())
+  })
+
+  it("describes a guide next to its link", async () => {
+    assert.match(await read(), /^- \[KSP Processor Configuration\]\(\S+\/ksp\/index\.md\): Configure the kt-schema KSP processor/m)
+  })
+
+  it("leaves the API reference and sources to the Optional section", async () => {
+    const optional = (await read()).split("## Optional\n")[1]
+    assert.match(optional, new RegExp(`^- \\[API reference\\]\\(${SITE}api/\\): `, "m"))
+    assert.match(optional, /^- \[Source code\]\(https:\/\/github\.com\/kpavlov\/kt-schema\): /m)
+  })
+})
+
 describe("mobile header", () => {
   const HEADER = `document.querySelector("header").getBoundingClientRect()`
 

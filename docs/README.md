@@ -155,21 +155,3 @@ val schema: String = Address::class.jsonSchemaString
 
 For JVM-only projects and all processor options, see the [KSP Configuration Guide](ksp.md). To see what the
 schema contains, see [Generated Schemas](generated.md).
-
-## Guides
-
-- [Generated Schemas](generated.md) — what is emitted for data classes, enums, nested objects, generics and sealed
-  hierarchies; `@Schema` and `@Description`.
-- [KSP Configuration Guide](ksp.md) — compile-time schemas for annotated Kotlin models.
-- [Java Annotation Processor Guide](apt.md) — compile-time schema resources for Java records, classes,
-  interfaces, and enums; includes Jackson enum-name support.
-- [Validation Constraints](constraints.md) — Jakarta Bean Validation annotations and built-in type ranges as JSON
-  Schema keywords.
-- [Serialization-Based Schema Generation](serializable.md) — runtime schemas from Kotlin serialization descriptors.
-- [Runtime Reflection](reflection.md) — runtime schemas for any JVM class, including third-party types.
-- [Function Calling](function-calling.md) — OpenAI, Anthropic and MCP function schemas from Kotlin functions, at runtime or
-  compile time.
-- [Configuration](configuration.md) — `strict`/`lenient`/`openapi` flavours and annotation detection for Jackson,
-  LangChain4j and Koog.
-- [JSON Schema DSL](dsl.md) — build schemas by hand with the type-safe Kotlin DSL.
-- [Project Architecture](architecture.md) — shared metadata, IR, and JSON Schema emission.

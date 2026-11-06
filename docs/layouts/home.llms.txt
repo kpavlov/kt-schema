@@ -1,0 +1,18 @@
+# {{ site.Title }}
+
+> {{ site.Params.description }}
+
+{{/* The title line goes: the file has one H1. */ -}}
+{{ partial "page-markdown.html" . | replaceRE `^# .*\n+` "" }}
+
+## Pages
+
+{{ range site.Menus.main -}}
+{{ with .Page -}}
+- [{{ .Title }}]({{ (.OutputFormats.Get "markdown").Permalink }}){{ with .Description }}: {{ . }}{{ end }}
+{{ end -}}
+{{ end }}
+## Optional
+
+- [API reference]({{ "api/" | absURL }}): Generated API documentation for every module
+- [Source code]({{ site.Params.repo }}): The kt-schema repository on GitHub

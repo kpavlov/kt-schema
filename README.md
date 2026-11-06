@@ -23,7 +23,7 @@
 Full documentation lives at **[kpavlov.github.io/kt-schema](https://kpavlov.github.io/kt-schema/)**. This README
 is the short tour; each topic below links to its guide.
 
-- [Documentation Index](docs/README.md)
+- [Documentation](https://kpavlov.github.io/kt-schema/)
 - [KSP Configuration Guide](docs/ksp.md)
 - [Java Annotation Processor Guide](docs/apt.md) — including Jackson-backed Java enum names
 - [Serialization-Based Schema Generation](docs/serializable.md)

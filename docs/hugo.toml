@@ -8,9 +8,16 @@ copyright = "© 2026 Konstantin Pavlov and Contributors. Portions copyright JetB
   description = "Generate JSON schemas and LLM function calling schemas from Java and Kotlin code — including classes you don't own."
   repo = "https://github.com/kpavlov/kt-schema"
 
+# llms.txt (layouts/home.llms.txt) lists the pages for LLMs; see https://llmstxt.org/.
+[outputFormats.llms]
+  baseName = "llms"
+  mediaType = "text/plain"
+  isPlainText = true
+  notAlternative = true
+
 # Every page also gets an index.md (layouts/all.md) for "Copy page" and "View as Markdown".
 [outputs]
-  home = ["html", "markdown"]
+  home = ["html", "markdown", "llms"]
   page = ["html", "markdown"]
 
 # Highlighting comes from generated styles; baseof.html switches the dark one on and off with its media attribute.

@@ -5,8 +5,8 @@ import io.kotest.assertions.json.shouldContainJsonKeyValue
 import io.kotest.assertions.json.shouldNotContainJsonKey
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 
@@ -45,7 +45,10 @@ class FunctionCallingSchemaConfigTest {
     @Test
     fun `Simple should emit nested property defaults and leave them optional`() {
         val generator =
-            ReflectionFunctionCallingSchemaGenerator(Json { encodeDefaults = false }, FunctionCallingSchemaConfig.Simple)
+            ReflectionFunctionCallingSchemaGenerator(
+                json = Json { encodeDefaults = false },
+                config = FunctionCallingSchemaConfig.Simple
+            )
 
         val schema = generator.generateSchemaString(Fixtures::start)
 
