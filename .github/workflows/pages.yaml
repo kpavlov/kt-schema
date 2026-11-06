@@ -45,7 +45,7 @@ jobs:
         with:
           hugo-version: ${{ env.HUGO_VERSION }}
 
-      - name: Set up Node.js (npx runs Pagefind to index the site for search)
+      - name: Set up Node.js (npm/npx fetch Pagefind for the search index and Mermaid for diagrams)
         uses: actions/setup-node@v7
         with:
           node-version: lts/*

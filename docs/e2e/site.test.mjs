@@ -68,7 +68,7 @@ describe("every page", () => {
 })
 
 describe("header", () => {
-  const menuLinks = readFileSync(join(import.meta.dirname, "..", "hugo.toml"), "utf8").match(/\[\[menus\.main\]\]/g).length
+  const menuLinks = pages.length // every page declares a `menus.main` entry in its front matter
   const HEADER = `(() => { const docs = document.getElementById("site-nav"), project = document.querySelector("nav.project"), toggle = document.querySelector(".menu-toggle")
     return { docsLinks: [...docs.querySelectorAll("a")].filter(shown).length,
              projectLinks: [...project.querySelectorAll("a")].filter(shown).map((a) => a.getAttribute("aria-label") ?? a.textContent.trim()),

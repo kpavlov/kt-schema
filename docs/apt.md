@@ -1,23 +1,13 @@
+---
+title: Java Annotation Processor
+description: Generate JSON Schema resources at compile time from plain Java records, classes, interfaces and enums with the kt-schema-apt annotation processor.
+menus:
+  main:
+    name: Java APT
+    weight: 20
+---
+
 # Java Annotation Processor
-
-**Table of contents**
-<!--- TOC -->
-
-* [Setup](#setup)
-  * [Maven](#maven)
-  * [Gradle (Java projects)](#gradle-java-projects)
-* [Triggering schema generation](#triggering-schema-generation)
-* [Configuration options](#configuration-options)
-* [Generated output](#generated-output)
-  * [Extended example](#extended-example)
-  * [Reading the resource at runtime](#reading-the-resource-at-runtime)
-* [Supported types](#supported-types)
-  * [Jackson enum names](#jackson-enum-names)
-  * [Default values](#default-values)
-  * [Marking a property nullable/optional](#marking-a-property-nullableoptional)
-* [See Also](#see-also)
-
-<!--- END -->
 
 Generate JSON Schema resources at compile time from plain Java records, classes, interfaces and enums using the
 `kt-schema-apt` JSR 269 (`javax.annotation.processing`) processor — no Kotlin required in your own code.

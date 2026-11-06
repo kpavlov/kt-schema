@@ -8,11 +8,20 @@ copyright = "© 2026 Konstantin Pavlov and Contributors. Portions copyright JetB
   description = "Generate JSON schemas and LLM function calling schemas from Java and Kotlin code — including classes you don't own."
   repo = "https://github.com/kpavlov/kt-schema"
 
+# Highlighting comes from assets/syntax.css, generated with
+#   hugo gen chromastyles --style=github      (light)
+#   hugo gen chromastyles --style=github-dark (dark, wrapped in a prefers-color-scheme media query)
 [markup.highlight]
-  style = "github"
+  noClasses = false
+
+# The guides no longer carry a knit-generated table of contents; the layout renders this one.
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 4
 
 # docs/ is also the Gradle `docs` module (Dokka writes to public/api), so mount only the pages.
-# README.md is the home page. Add new guides to the list below and to the menu.
+# README.md is the home page. Add new guides to the list below; each declares its own `menus.main` entry
+# (name and weight) in its front matter.
 [module]
   [module.hugoVersion]
     min = "0.158.0"
@@ -23,24 +32,3 @@ copyright = "© 2026 Konstantin Pavlov and Contributors. Portions copyright JetB
     source = "."
     target = "content"
     files = ["{apt,architecture,ksp,serializable}.md"]
-
-[[menus.main]]
-  name = "Home"
-  pageRef = "/"
-  weight = 10
-[[menus.main]]
-  name = "KSP"
-  pageRef = "/ksp"
-  weight = 20
-[[menus.main]]
-  name = "Java APT"
-  pageRef = "/apt"
-  weight = 30
-[[menus.main]]
-  name = "Serialization"
-  pageRef = "/serializable"
-  weight = 40
-[[menus.main]]
-  name = "Architecture"
-  pageRef = "/architecture"
-  weight = 50

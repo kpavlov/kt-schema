@@ -2,6 +2,7 @@
 
 KOTLIN_TARGETS ?= full
 PAGEFIND_VERSION ?= 1.6.0
+MERMAID_VERSION ?= 12.2.0
 SITE_DIR ?= docs/public
 
 .PHONY: all
@@ -43,6 +44,13 @@ apidocs:
 	@./gradlew :docs:dokkaGenerate
 	@echo "✅ API docs generated!"
 
+.PHONY: knit
+knit:
+	@echo "🪡🧶 Running Knit check ..."
+	@./gradlew knit knitCheck --no-configuration-cache
+	@./gradlew :docs:test --rerun-tasks
+	@echo "✅ Knit check completed!"
+
 # Depends on `site` so the search index exists; edits made while serving are not re-indexed until restart.
 .PHONY: site-dev
 site-dev: site
@@ -52,9 +60,15 @@ site-dev: site
 .PHONY: site
 site:
 	@echo "📦 Building site bundle ($(SITE_DIR)) ..."
-	@hugo --source docs --environment production --gc --minify --destination $(abspath $(SITE_DIR))
+	@hugo --source docs --environment production --gc --minify --panicOnWarning --destination $(abspath $(SITE_DIR))
 	@echo "🔎 Indexing site for search ..."
 	@npx --yes pagefind@$(PAGEFIND_VERSION) --site $(SITE_DIR)
+	@echo "🧜 Bundling Mermaid ..."
+	@rm -rf $(SITE_DIR)/mermaid && mkdir -p $(SITE_DIR)/mermaid
+	@npm pack mermaid@$(MERMAID_VERSION) --silent --pack-destination $(SITE_DIR)/mermaid > /dev/null
+	@tar -xzf $(SITE_DIR)/mermaid/mermaid-$(MERMAID_VERSION).tgz -C $(SITE_DIR)/mermaid --strip-components=2 --exclude='*.map' \
+		package/dist/mermaid.esm.min.mjs package/dist/chunks/mermaid.esm.min
+	@rm $(SITE_DIR)/mermaid/mermaid-$(MERMAID_VERSION).tgz
 	@echo "✅ Site bundle is ready in $(SITE_DIR)!"
 
 # Builds into its own directory, so it never fights `make site-dev` over docs/public.

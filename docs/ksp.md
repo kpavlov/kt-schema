@@ -1,21 +1,13 @@
+---
+title: KSP Processor Configuration
+description: Configure the kt-schema KSP processor to generate JSON schemas at compile time with zero runtime overhead.
+menus:
+  main:
+    name: KSP
+    weight: 30
+---
+
 # KSP Processor Configuration
-
-**Table of contents**
-<!--- TOC -->
-
-* [Setup](#setup)
-  * [Google KSP gradle plugin](#google-ksp-gradle-plugin)
-    * [Multiplatform projects](#multiplatform-projects)
-    * [JVM-only projects](#jvm-only-projects)
-* [Configuration options](#configuration-options)
-  * [Options reference](#options-reference)
-  * [Filtering by class/function name](#filtering-by-classfunction-name)
-    * [Google KSP plugin](#google-ksp-plugin)
-  * [Option priority](#option-priority)
-* [Generated Code](#generated-code)
-* [See Also](#see-also)
-
-<!--- END -->
 
 Generate JSON schemas at compile time with zero runtime overhead using the `kt-schema` KSP processor.
 

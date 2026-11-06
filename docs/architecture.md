@@ -1,3 +1,12 @@
+---
+title: Architecture
+description: How kt-schema turns Kotlin declarations and Java classes into JSON Schema through a shared internal representation, fed by compile-time (KSP) and runtime (reflection) analysis.
+menus:
+  main:
+    name: Architecture
+    weight: 15
+---
+
 # Architecture
 
 `kt-schema` is a layered library that generates schemas—primarily JSON Schema—from Kotlin declarations
@@ -104,34 +113,31 @@ graph LR
 ## Module Dependencies
 
 ```mermaid
-C4Context
-    title kt-schema
+graph LR
+    subgraph lib["kt-schema"]
+        kxsAnnotations["kt-schema-annotations"]
+        kxsGenCore["kt-schema-generator-core"]
+        kxsGenJson["kt-schema-generator-json"]
+        kxsJsn["kt-schema-json"]
+        kxsKsp["kt-schema-ksp"]
+        kxsApt["kt-schema-apt"]
+    end
 
-    Boundary(lib, "kt-schema") {
-        System(kxsKs, "kt-schema-ksp")
-        System(kxsAnnotations, "kt-schema-annotations")
-        System(kxsGenJson, "kt-schema-generator-json")
-        System(kxsJsn, "kt-schema-json")
-        System(kxsKsp, "kt-schema-ksp")
-        System(kxsApt, "kt-schema-apt")
-    }
+    subgraph userCode["User's Application Code"]
+        userModels["User Domain Models"]
+        userModelsExt["User Models Extensions"]
+    end
 
-    Rel(kxsGenJson, kxsGenCore, "uses")
-    Rel(kxsGenJson, kxsJsn, "uses")
-    Rel(kxsGenCore, kxsAnnotations, "knows")
-    Rel(kxsKsp, kxsGenJson, "uses")
-    Rel(kxsApt, kxsGenJson, "uses")
+    kxsGenJson -->|uses| kxsGenCore
+    kxsGenJson -->|uses| kxsJsn
+    kxsGenCore -->|knows| kxsAnnotations
+    kxsKsp -->|uses| kxsGenJson
+    kxsApt -->|uses| kxsGenJson
 
-    Boundary(userCode, "User's Application Code") {
-        System_Ext(userModels, "User Domain Models")
-        System_Ext(userModelsExt, "User Models Extensions")
-        Rel(userModelsExt, userModels, "uses")
-    }
-
-    Rel(userModels, kxsAnnotations, "uses")
-    Rel(kxsKsp, userModelsExt, "generates")
-    Rel(kxsApt, userModels, "generates schema resource for")
-
+    userModelsExt -->|uses| userModels
+    userModels -->|uses| kxsAnnotations
+    kxsKsp -->|generates| userModelsExt
+    kxsApt -->|generates schema resource for| userModels
 ```
 
 Top-level modules you might interact with:

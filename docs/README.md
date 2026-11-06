@@ -1,3 +1,11 @@
+---
+title: Documentation
+menus:
+  main:
+    name: Home
+    weight: 1
+---
+
 # Documentation
 
 kt-schema generates JSON Schema from Kotlin and Java models. Choose the generation path that matches how your
