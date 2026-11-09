@@ -488,7 +488,7 @@ This code generates:
 |:----------|:-----------------------------------------------------------------------------------------------|
 | `Default` | Respects default values; nullable fields use union types `["string", "null"]`.                 |
 | `Strict`  | All fields required (including nullable); union types. Use for OpenAI strict function calling. |
-| `OpenAPI` | Nullable fields use `"nullable": true`; includes `discriminator` for polymorphic types.        |
+| `OpenAPI` | OpenAPI 3.0 flavour: nullable fields use `"nullable": true`; includes `discriminator` for polymorphic types. Still emits `$defs`/`$ref` and `{"type": "null"}` for nullable named types, see [Configuration](configuration.md#schema-configuration). For 3.1+ use `Default` or `Strict`. |
 | `Lenient` | Compact and permissive: only non-nullable fields without defaults are required, no null markers, extra properties allowed. Short `$defs` names do not apply to this generator. |
 
 ### JsonSchemaConfig reference

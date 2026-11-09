@@ -354,7 +354,8 @@ public class TypeGraphToFunctionCallingSchemaTransformer
                     type = if (nullable && config.useUnionTypes) STRING_OR_NULL_TYPE else STRING_TYPE,
                     description = node.description,
                     nullable = config.nullableFlag(nullable),
-                    enum = node.entries,
+                    // "enum" must list null too, or it rejects the null that "type" or "nullable" allows.
+                    enum = if (nullable && !config.omitsNullMarker) node.entries + null else node.entries,
                 )
             // OpenAI structured-output strict mode disallows the "default" keyword entirely.
             return if (config.strictMode) {

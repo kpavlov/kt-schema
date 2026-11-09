@@ -9,6 +9,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.contentOrNull
 import kotlin.jvm.JvmName
 
 /**
@@ -97,16 +98,16 @@ public class ObjectEnumSerializer : KSerializer<List<JsonObject>?> by TypedEnumS
  * During deserialization:
  * - JsonPrimitive strings → content directly
  * - JsonPrimitive numbers/booleans → string representation
- * - JsonNull → "null"
+ * - JsonNull → `null`
  * - JsonObject/JsonArray → JSON string representation
  *
- * During serialization, converts List<String> back to JsonArray of JsonPrimitive strings.
+ * During serialization, converts List<String?> back to JsonArray of JsonPrimitive strings and JsonNull.
  */
-public class StringEnumSerializer : KSerializer<List<String>?> by TypedEnumSerializer(
+public class StringEnumSerializer : KSerializer<List<String?>?> by TypedEnumSerializer(
     descriptorName = "StringEnum",
     elementConverter = { element ->
         when (element) {
-            is JsonPrimitive -> element.content
+            is JsonPrimitive -> element.contentOrNull
             else -> element.toString()
         }
     },

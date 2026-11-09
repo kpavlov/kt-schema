@@ -10,6 +10,7 @@ import kotlinx.serialization.json.Json
 import me.kpavlov.kt.schema.generator.core.ExperimentalSchemaGeneratorApi
 import me.kpavlov.kt.schema.generator.core.ir.Constraint
 import me.kpavlov.kt.schema.generator.core.ir.Discriminator
+import me.kpavlov.kt.schema.generator.core.ir.EnumNode
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
 import me.kpavlov.kt.schema.generator.core.ir.Literal
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
@@ -26,6 +27,7 @@ import me.kpavlov.kt.schema.json.AnyOfPropertyDefinition
 import me.kpavlov.kt.schema.json.DenyAdditionalProperties
 import me.kpavlov.kt.schema.json.FunctionCallingSchema
 import me.kpavlov.kt.schema.json.NumericPropertyDefinition
+import me.kpavlov.kt.schema.json.PropertyDefinition
 import me.kpavlov.kt.schema.json.StringPropertyDefinition
 import kotlin.test.Test
 
@@ -85,6 +87,28 @@ class TypeGraphToFunctionCallingSchemaTransformerTest {
                         ),
                     otherId to otherNode,
                     innerId to innerNode,
+                ),
+        )
+
+    private val paintId = TypeId("paint")
+    private val colorId = TypeId("Color")
+
+    /** Function `paint(color: Color, accent: Color?)`. */
+    private val paintGraph =
+        TypeGraph(
+            root = TypeRef.Ref(paintId),
+            nodes =
+                mapOf(
+                    paintId to
+                        ObjectNode(
+                            name = "paint",
+                            properties =
+                                listOf(
+                                    Property("color", TypeRef.Ref(colorId)),
+                                    Property("accent", TypeRef.Ref(colorId, nullable = true)),
+                                ),
+                        ),
+                    colorId to EnumNode(name = "Color", entries = listOf("RED", "GREEN")),
                 ),
         )
 
@@ -269,6 +293,51 @@ class TypeGraphToFunctionCallingSchemaTransformerTest {
                 "additionalProperties": false
               }
             }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `Strict adds null to a nullable enum and leaves a non-null enum unchanged`() {
+        // Given
+        val transformer = TypeGraphToFunctionCallingSchemaTransformer(FunctionCallingSchemaConfig.Strict)
+
+        // When
+        val schema = transformer.transform(paintGraph, "paint")
+
+        // Then
+        schema.encode() shouldEqualJson
+            // language=json
+            """
+            {
+              "type": "function",
+              "name": "paint",
+              "strict": true,
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "color": { "type": "string", "enum": ["RED", "GREEN"] },
+                  "accent": { "type": ["string", "null"], "enum": ["RED", "GREEN", null] }
+                },
+                "required": ["color", "accent"],
+                "additionalProperties": false
+              }
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `OpenAPI adds null to a nullable enum`() {
+        // Given
+        val transformer = TypeGraphToFunctionCallingSchemaTransformer(FunctionCallingSchemaConfig.OpenAPI)
+
+        // When
+        val properties = transformer.transform(paintGraph, "paint").parameters.properties.shouldNotBeNull()
+
+        // Then
+        json.encodeToString(PropertyDefinition.serializer(), properties.getValue("accent")) shouldEqualJson
+            // language=json
+            """
+            { "type": "string", "nullable": true, "enum": ["RED", "GREEN", null] }
             """.trimIndent()
     }
 

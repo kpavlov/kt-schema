@@ -224,4 +224,32 @@ class TopLevelFunctionsTest {
             }
             """.trimIndent()
     }
+
+    @Test
+    fun `setLogLevel adds null to the enum of a nullable enum parameter`() {
+        val schema = setLogLevelJsonSchemaString()
+
+        // language=json
+        schema shouldEqualJson
+            """
+            {
+              "type": "function",
+              "name": "setLogLevel",
+              "description": "Sets the log level",
+              "strict": true,
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "level": {
+                    "type": ["string", "null"],
+                    "enum": ["DEBUG", "INFO", null],
+                    "description": "New level, or null to reset"
+                  }
+                },
+                "required": ["level"],
+                "additionalProperties": false
+              }
+            }
+            """.trimIndent()
+    }
 }

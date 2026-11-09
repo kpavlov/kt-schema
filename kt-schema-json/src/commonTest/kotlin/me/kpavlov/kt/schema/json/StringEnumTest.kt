@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 
@@ -125,7 +126,49 @@ class StringEnumTest {
         prop.enum.shouldContainExactly("active", "inactive", "pending")
     }
 
+    @Test
+    fun `deserialize and serialize enum with null value`() {
+        // language=json
+        val jsonString =
+            """
+            {
+                "type": ["string", "null"],
+                "enum": ["active", null]
+            }
+            """.trimIndent()
+
+        val decoded = deserializeAndSerialize<StringPropertyDefinition>(jsonString, json)
+
+        decoded.enum.shouldContainExactly("active", null)
+    }
+
     // DSL Tests
+
+    @Test
+    fun `DSL supports null in string enum`() {
+        val schema =
+            testSchemaWithProperty("status") {
+                string {
+                    enum = listOf("active", null)
+                }
+            }
+
+        val prop = schema.firstPropertyAs<StringPropertyDefinition>()
+        prop.enum.shouldContainExactly("active", null)
+    }
+
+    @Test
+    fun `DSL supports JsonNull in string enum`() {
+        val schema =
+            testSchemaWithProperty("status") {
+                string {
+                    enum = listOf(JsonPrimitive("active"), JsonNull)
+                }
+            }
+
+        val prop = schema.firstPropertyAs<StringPropertyDefinition>()
+        prop.enum.shouldContainExactly("active", null)
+    }
 
     @Test
     fun `DSL supports string enum`() {

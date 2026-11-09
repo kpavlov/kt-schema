@@ -158,7 +158,7 @@ class FunctionCallingSchemaTransformerTest {
         val nullableEnum = properties["nullableEnum"] as StringPropertyDefinition
         nullableEnum.type shouldBe listOf("string", "null")
         nullableEnum.nullable.shouldBeNull()
-        nullableEnum.enum shouldBe listOf("DEBUG", "INFO", "ERROR")
+        nullableEnum.enum shouldBe listOf("DEBUG", "INFO", "ERROR", null)
 
         val nullableList = properties["nullableList"] as ArrayPropertyDefinition
         nullableList.type shouldBe listOf("array", "null")

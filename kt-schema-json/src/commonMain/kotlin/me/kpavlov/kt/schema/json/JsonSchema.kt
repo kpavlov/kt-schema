@@ -617,7 +617,7 @@ public data class StringPropertyDefinition(
     override val contentMediaType: String? = null,
     override val contentSchema: PropertyDefinition? = null,
     @Serializable(with = StringEnumSerializer::class)
-    val enum: List<String>? = null,
+    val enum: List<String?>? = null,
     @Serializable(with = NumberToNullableIntSerializer::class) override val minLength: Int? = null,
     @Serializable(with = NumberToNullableIntSerializer::class) override val maxLength: Int? = null,
     override val pattern: String? = null,
