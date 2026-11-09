@@ -19,7 +19,16 @@ a case-insensitive shortcut:
 |:----------|:---------------------------------------------------------------------------------------------------------------------------|
 | `strict`  | All fields required, nullable types as `["string", "null"]`, `additionalProperties: false`.                                |
 | `lenient` | Compact and permissive: only non-nullable fields without defaults are required, no null markers, extra properties allowed. |
-| `openapi` | OpenAPI 3.x flavour: nullable types use `"nullable": true`.                                                                |
+| `openapi` | OpenAPI 3.0 flavour: nullable types use `"nullable": true`, `oneOf` schemas carry a `discriminator`.                       |
+
+`openapi` class schemas are not drop-in OpenAPI 3.0 Schema Objects: they keep `$schema`, `$id` and `$defs` with
+`#/$defs/...` references, and wrap a nullable named type in `oneOf: [{"type": "null"}, {"$ref": ...}]`. To embed
+one in a 3.0 document, drop `$schema` and `$id`, move `$defs` entries to `components.schemas`, rewrite the
+references to `#/components/schemas/...`, and replace the `oneOf` null wrapper with `nullable: true` on the
+referenced schema. Function schemas inline every type and need no such conversion.
+
+OpenAPI 3.1 and later use JSON Schema 2020-12 and have no `nullable` keyword. Use `strict` there: its
+`["string", "null"]` form is the one those versions expect.
 
 ```kotlin
 // KSP

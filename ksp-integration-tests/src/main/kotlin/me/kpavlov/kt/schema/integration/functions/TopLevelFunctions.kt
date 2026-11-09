@@ -102,3 +102,15 @@ suspend fun updateConfiguration(
     delay(1)
     return true
 }
+
+enum class LogLevel { DEBUG, INFO }
+
+/**
+ * Sets the log level.
+ */
+@Schema
+@Description("Sets the log level")
+fun setLogLevel(
+    @Description("New level, or null to reset")
+    level: LogLevel?,
+): Boolean = level != null

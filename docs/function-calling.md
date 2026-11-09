@@ -208,6 +208,17 @@ Generates:
 
 **Note**: Even nullable parameters are in `required` array. The `null` type in the union indicates optionality.
 
+A nullable enum parameter also lists `null` in its `enum`, because a value must satisfy both `type` and `enum`:
+
+```json
+{
+    "type": ["string", "null"],
+    "enum": ["DEBUG", "INFO", null]
+}
+```
+
+MCP Inspector reports the `["string", "null"]` form as a `type-union` warning. The form is valid JSON Schema 2020-12 and is the one OpenAI strict mode documents for nullable fields; Anthropic strict tool use accepts it too. For a client that maps tool schemas onto the OpenAPI 3.0 subset, use `FunctionCallingSchemaConfig.OpenAPI`, which emits `"nullable": true`.
+
 For more details on function calling schemas and OpenAI compatibility,
 see [kt-schema-json/README.md](../kt-schema-json/README.md#function-calling-schema-for-llm-apis).
 

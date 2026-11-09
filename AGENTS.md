@@ -51,7 +51,9 @@
 - Module boundaries: KSP = metadata only; IR = framework-agnostic; Emitters = JSON Schema only.
 - `@Description` → `description` field in emitted schema.
 - Nullable primitives: `type: ["<type>", "null"]`.
-- Nullable refs: `oneOf: [{ "$ref": "..." }, { "type": "null" }]`.
+- Nullable refs: `oneOf: [{ "type": "null" }, { "$ref": "..." }]`.
+- Nullable enums in function-calling schemas: `null` appended to `enum` (with `type: ["string", "null"]` or
+  `nullable: true`).
 - Root schema: `$id`, `$defs`, `$ref`.
 - Inconsistent user annotations (contradictory or invalid bounds) warn, never fail: the annotated source may not
   be the user's to fix, and a hard failure blocks schema generation entirely.
@@ -114,7 +116,7 @@ Minimalist, correct, descriptive — the bar is Google open-source libraries (Gu
 ```
 ./gradlew build          # build all
 ./gradlew test           # all tests
-make integration-test    # KSP integration tests
+./gradlew :ksp-integration-tests:test   # KSP integration tests
 make knit                # verify knit examples
 make apidump             # generate apidump
 ```

@@ -207,17 +207,24 @@ public open class JsonSchemaConfig(
             )
 
         /**
-         * Configuration for OpenAPI 3.x compatibility:
+         * OpenAPI 3.0 flavoured configuration:
          *  - `respectDefaultPresence = true` - respect default values when available
          *  - `requireNullableFields = false` - nullable fields are optional
          *  - `useUnionTypes = false` - use nullable field instead of union types
-         *  - `useNullableField = true` - emit "nullable": true for OpenAPI
-         *  - `includeDiscriminator = true` - include discriminator for polymorphic types
+         *  - `useNullableField = true` - emit `"nullable": true` (OpenAPI 3.0 keyword)
+         *  - `includeOpenAPIPolymorphicDiscriminator = true` - `oneOf` schemas carry a `discriminator`
          *
-         * Use this when generating schemas for OpenAPI 3.x specifications.
-         * OpenAPI 3.x uses a subset of JSON Schema with some extensions.
+         * The result is not a drop-in OpenAPI 3.0 Schema Object. Class schemas keep the root `$schema` and
+         * `$id`, register named types in `$defs` with `#/$defs/...` references, and wrap a nullable named
+         * type in `oneOf: [{"type": "null"}, {"$ref": ...}]`; OpenAPI 3.0 has none of these. To embed a
+         * schema in a 3.0 document, drop `$schema` and `$id`, move `$defs` entries to `components.schemas`
+         * and rewrite the references (including `discriminator.mapping`) to `#/components/schemas/...`,
+         * and replace the `oneOf` null wrapper with `nullable: true` on the referenced schema.
          *
-         * See [OpenAPI 3.1 Specification](https://spec.openapis.org/oas/v3.1.0)
+         * OpenAPI 3.1 and later use JSON Schema 2020-12 and have no `nullable` keyword: use [Default] or
+         * [Strict] there, which emit `["<type>", "null"]`.
+         *
+         * See [OpenAPI 3.0.4 Specification](https://spec.openapis.org/oas/v3.0.4.html)
          */
         public val OpenAPI: JsonSchemaConfig =
             JsonSchemaConfig(

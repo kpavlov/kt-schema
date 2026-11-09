@@ -117,11 +117,12 @@ public class FunctionCallingSchemaConfig(
             )
 
         /**
-         * OpenAPI 3.x flavoured configuration for function calling schemas.
+         * OpenAPI 3.0 flavoured configuration for function calling schemas.
          *
          * Mirrors [JsonSchemaConfig.OpenAPI] (nullable types use `"nullable": true`), except for the
          * OpenAPI polymorphic discriminator, which function calling schemas do not support.
-         * The strict flag is disabled.
+         * The strict flag is disabled. Function calling schemas inline every type, so unlike class
+         * schemas they contain no `$defs` or `$ref`.
          */
         public val OpenAPI: FunctionCallingSchemaConfig =
             FunctionCallingSchemaConfig(

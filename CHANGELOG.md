@@ -1,3 +1,19 @@
+## Unreleased
+
+### Fixed
+
+- **Nullable enum parameters in function-calling schemas accept `null`.** They were emitted as
+  `{"type": ["string", "null"], "enum": ["A", "B"]}`, where `enum` rejected `null`. The `enum` now lists it:
+  `{"type": ["string", "null"], "enum": ["A", "B", null]}`. The `OpenAPI` preset lists it too, next to
+  `"nullable": true`.
+- **A `null` in a string `enum` survives deserialization.** It was read as the string `"null"`.
+
+### Changed
+
+- `StringPropertyDefinition.enum` is now `List<String?>?` (was `List<String>?`) so a string enum can list `null`;
+  `StringEnumSerializer` changes accordingly. Code that reads the elements as non-null `String` needs a null
+  check. The `string { enum = ... }` DSL accepts `null` and `JsonNull` items.
+
 ## 0.10.0
 
 Published: 2026-11-06

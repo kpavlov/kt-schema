@@ -676,12 +676,12 @@ public class StringPropertyBuilder internal constructor() {
      */
     public var format: String? = null
 
-    private var _enum: List<String>? = null
+    private var _enum: List<String?>? = null
 
     /**
      * List of allowed string values (enumeration).
      *
-     * Accepts List<String> or null.
+     * Accepts a List of String or `null` items, or null.
      * Throws IllegalArgumentException for non-string types to prevent semantically invalid schemas.
      *
      * ## Example
@@ -703,6 +703,10 @@ public class StringPropertyBuilder internal constructor() {
                                     item
                                 }
 
+                                null, JsonNull -> {
+                                    null
+                                }
+
                                 is JsonPrimitive -> {
                                     // Validate that JsonPrimitive contains a string
                                     require(item.isString) {
@@ -710,13 +714,6 @@ public class StringPropertyBuilder internal constructor() {
                                             "but got JsonPrimitive with non-string content"
                                     }
                                     item.content
-                                }
-
-                                null -> {
-                                    throw IllegalArgumentException(
-                                        "String property enum must contain only String values, " +
-                                            "null values are not supported",
-                                    )
                                 }
 
                                 else -> {
