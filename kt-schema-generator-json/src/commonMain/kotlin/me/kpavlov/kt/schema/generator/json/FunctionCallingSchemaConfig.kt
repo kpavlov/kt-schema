@@ -13,11 +13,11 @@ package me.kpavlov.kt.schema.generator.json
  * @see [OpenAI Function Calling](https://developers.openai.com/api/docs/guides/function-calling)
  */
 public class FunctionCallingSchemaConfig(
-    respectDefaultPresence: Boolean = JsonSchemaConfig.Default.respectDefaultPresence,
-    requireNullableFields: Boolean = JsonSchemaConfig.Default.requireNullableFields,
-    useUnionTypes: Boolean = JsonSchemaConfig.Default.useUnionTypes,
-    useNullableField: Boolean = JsonSchemaConfig.Default.useNullableField,
-    includePolymorphicDiscriminator: Boolean = JsonSchemaConfig.Default.includePolymorphicDiscriminator,
+    respectDefaultPresence: Boolean = JsonSchemaConfig.Simple.respectDefaultPresence,
+    requireNullableFields: Boolean = JsonSchemaConfig.Simple.requireNullableFields,
+    useUnionTypes: Boolean = JsonSchemaConfig.Simple.useUnionTypes,
+    useNullableField: Boolean = JsonSchemaConfig.Simple.useNullableField,
+    includePolymorphicDiscriminator: Boolean = JsonSchemaConfig.Simple.includePolymorphicDiscriminator,
     /**
      * Whether to set the `strict: true` flag in function calling schema output.
      *

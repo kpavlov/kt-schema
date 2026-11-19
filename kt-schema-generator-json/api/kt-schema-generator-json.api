@@ -38,6 +38,7 @@ public final class me/kpavlov/kt/schema/generator/json/JsonSchemaConfig$Companio
 	public final fun getDefault ()Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;
 	public final fun getLenient ()Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;
 	public final fun getOpenAPI ()Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;
+	public final fun getSimple ()Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;
 	public final fun getStrict ()Lme/kpavlov/kt/schema/generator/json/JsonSchemaConfig;
 }
 

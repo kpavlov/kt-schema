@@ -172,7 +172,11 @@ public open class JsonSchemaConfig(
 
     public companion object {
         /**
-         * Default configuration for standard JSON Schema Draft 2020-12 generation.
+         * Configuration for standard JSON Schema Draft 2020-12 generation, selected by the `simple`
+         * shortcut of the `me.kpavlov.kt.schema.config` processor option.
+         *
+         * Suits tool and function arguments: a field with a default may be omitted, a nullable field
+         * accepts an explicit `null`, and undeclared properties are rejected.
          *
          * - Uses default presence detection (fields with defaults are optional)
          * - Uses union types for nullable fields: `["string", "null"]`
@@ -181,8 +185,18 @@ public open class JsonSchemaConfig(
          * **Note**: Works best with reflection-based introspection, which also emits default values.
          * KSP knows that a default exists but not its value, so such fields are optional without a `default`.
          */
-        public val Default: JsonSchemaConfig =
+        public val Simple: JsonSchemaConfig =
             JsonSchemaConfig()
+
+        /**
+         * Same as [Simple].
+         */
+        @Deprecated(
+            "Ambiguous; use JsonSchemaConfig.Simple",
+            ReplaceWith("JsonSchemaConfig.Simple"),
+            level = DeprecationLevel.WARNING,
+        )
+        public val Default: JsonSchemaConfig = Simple
 
         /**
          * Configuration where all fields are required regardless of Kotlin default values.
@@ -221,7 +235,7 @@ public open class JsonSchemaConfig(
          * and rewrite the references (including `discriminator.mapping`) to `#/components/schemas/...`,
          * and replace the `oneOf` null wrapper with `nullable: true` on the referenced schema.
          *
-         * OpenAPI 3.1 and later use JSON Schema 2020-12 and have no `nullable` keyword: use [Default] or
+         * OpenAPI 3.1 and later use JSON Schema 2020-12 and have no `nullable` keyword: use [Simple] or
          * [Strict] there, which emit `["<type>", "null"]`.
          *
          * See [OpenAPI 3.0.4 Specification](https://spec.openapis.org/oas/v3.0.4.html)
@@ -237,10 +251,12 @@ public open class JsonSchemaConfig(
             )
 
         /**
-         * Compact, permissive configuration: only non-nullable fields that are neither optional nor have a
-         * known default are required, nullable properties carry no null marker, and extra properties are
-         * allowed. Nullable collection elements and map values keep an `anyOf` null branch, since they
-         * cannot be omitted.
+         * Compact, permissive configuration where an explicit `null` fails validation and undeclared
+         * properties are allowed.
+         *
+         * Only non-nullable fields that are neither optional nor have a known default are required, and
+         * nullable properties carry no null marker. Nullable collection elements and map values keep an
+         * `anyOf` null branch, since they cannot be omitted.
          *
          * An absent field means `null`, so serialize payloads with `explicitNulls = false` (Jackson:
          * `NON_NULL`); an explicit `null` fails validation, since there is no null marker. A `null`

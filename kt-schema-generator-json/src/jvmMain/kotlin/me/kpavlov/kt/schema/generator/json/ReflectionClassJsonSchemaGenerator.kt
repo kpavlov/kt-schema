@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
  *
  * @constructor Creates an instance of `ReflectionClassJsonSchemaGenerator`.
  * @param config Configuration for generating JSON Schemas, such as formatting details
- * and handling of optional nullable properties. Defaults to [JsonSchemaConfig.Default].
+ * and handling of optional nullable properties. Defaults to [JsonSchemaConfig.Simple].
  */
 public class ReflectionClassJsonSchemaGenerator(
     private val json: Json,
@@ -49,7 +49,7 @@ public class ReflectionClassJsonSchemaGenerator(
     public companion object {
         /**
          * A default instance of the [ReflectionClassJsonSchemaGenerator] class, preconfigured
-         * with the default settings defined in [JsonSchemaConfig.Default].
+         * with [JsonSchemaConfig.Strict].
          *
          * This instance can be used to generate JSON schema representations of Kotlin
          * objects using reflection-based introspection. It simplifies the creation

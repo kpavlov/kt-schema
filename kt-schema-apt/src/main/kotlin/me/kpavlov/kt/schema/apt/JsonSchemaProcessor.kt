@@ -72,6 +72,9 @@ public class JsonSchemaProcessor : AbstractProcessor() {
         }
     }
 
+    /** Transformers for `@Schema(config = ...)` values, which take precedence over [CONFIG_OPTION]. */
+    private val annotationTransformers = mutableMapOf<String, TypeGraphToJsonSchemaTransformer>()
+
     private val json =
         Json {
             prettyPrint = true
@@ -161,10 +164,33 @@ public class JsonSchemaProcessor : AbstractProcessor() {
         @Suppress("TooGenericExceptionCaught")
         try {
             val graph = introspector.introspect(type)
-            val schema = transformer.transform(graph, type.qualifiedName.toString())
+            val schema = transformerFor(type, transformer).transform(graph, type.qualifiedName.toString())
             writeSchemaResource(type, json.encodeToString(JsonSchema.serializer(), schema))
         } catch (e: Exception) {
             reportError(type, "Failed to generate JSON Schema: ${e.message}")
+        }
+    }
+
+    private fun transformerFor(
+        type: TypeElement,
+        default: TypeGraphToJsonSchemaTransformer,
+    ): TypeGraphToJsonSchemaTransformer {
+        val config =
+            type
+                .getAnnotation(Schema::class.java)
+                ?.config
+                ?.trim()
+                .orEmpty()
+        if (config.isEmpty()) return default
+        return annotationTransformers.getOrPut(config) {
+            TypeGraphToJsonSchemaTransformer(
+                config =
+                    SchemaConfigResolver.resolveJsonSchemaConfig(
+                        config,
+                        JsonSchemaConfig.Strict,
+                        JsonSchemaProcessor::class.java.classLoader,
+                    ),
+            )
         }
     }
 
@@ -172,7 +198,12 @@ public class JsonSchemaProcessor : AbstractProcessor() {
         source: TypeElement,
         jsonString: String,
     ) {
-        val relativePath = source.qualifiedName.toString().replace('.', '/') + ".json"
+        // The binary name (`Outer$Inner`) is what a consumer derives from `Class.getName()`
+        val relativePath =
+            processingEnv.elementUtils
+                .getBinaryName(source)
+                .toString()
+                .replace('.', '/') + ".json"
         val path = "META-INF/kt-schema/schemas/$relativePath"
         try {
             val file =
@@ -226,8 +257,9 @@ public class JsonSchemaProcessor : AbstractProcessor() {
 
         /**
          * Processor option (`-A<name>=<value>`) selecting the schema configuration: a case-insensitive
-         * shortcut (`strict`, `lenient`, `openapi`) or the fully qualified name of a
+         * shortcut (`strict`, `simple`, `lenient`, `openapi`) or the fully qualified name of a
          * [JsonSchemaConfig] class on the processor path. Defaults to `strict`.
+         * The `config` parameter of `@Schema` takes precedence.
          */
         public const val CONFIG_OPTION: String = SchemaConfigResolver.OPTION
     }

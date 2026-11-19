@@ -206,7 +206,7 @@ schema shouldEqualJson $$"""
 |:---------------------|:----------------------------------------------|:---------------------------|:------------------------------------------------|
 | `json`               | `Json`                                        | `Json.Default`             | Controls JSON configuration.                    |
 | `introspectorConfig` | `SerializationClassSchemaIntrospector.Config` | `Config()`                 | Controls how descriptors are introspected.      |
-| `jsonSchemaConfig`   | `JsonSchemaConfig`                            | `JsonSchemaConfig.Default` | Controls schema output (nullability, required). |
+| `jsonSchemaConfig`   | `JsonSchemaConfig`                            | `JsonSchemaConfig.Simple`  | Controls schema output (nullability, required). |
 
 ### Introspector configuration
 

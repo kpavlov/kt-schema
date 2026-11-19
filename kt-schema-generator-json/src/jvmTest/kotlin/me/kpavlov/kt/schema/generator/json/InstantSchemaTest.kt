@@ -80,7 +80,7 @@ class InstantSchemaTest {
         val generator =
             ReflectionClassJsonSchemaGenerator(
                 json = Json { encodeDefaults = false },
-                config = JsonSchemaConfig.Default,
+                config = JsonSchemaConfig.Simple,
             )
 
         val schema = generator.generateSchemaString(Event::class)

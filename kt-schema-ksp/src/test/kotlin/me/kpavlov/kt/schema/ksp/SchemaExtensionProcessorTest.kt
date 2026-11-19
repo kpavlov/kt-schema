@@ -10,8 +10,10 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSValueArgument
 import com.google.devtools.ksp.symbol.KSValueParameter
 import com.google.devtools.ksp.symbol.Nullability
+import com.google.devtools.ksp.symbol.Origin
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.mockk.every
@@ -40,6 +42,8 @@ class SchemaExtensionProcessorTest {
     private lateinit var resolver: Resolver
 
     private lateinit var subject: SchemaExtensionProcessor
+
+    private val schemaResource = ByteArrayOutputStream()
 
     @BeforeEach
     fun beforeEach() {
@@ -381,13 +385,64 @@ class SchemaExtensionProcessorTest {
             """.trimIndent()
     }
 
+    @Test
+    fun `should prefer @Schema config over the config option`() {
+        // When
+        val schema =
+            generatedClassSchema(
+                options = mapOf(SchemaExtensionProcessor.OPTION_CONFIG to "strict"),
+                schemaConfig = "lenient",
+            )
+
+        // Then
+        schema shouldEqualJson
+            // language=json
+            $$"""
+            {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "$id": "Subject",
+              "type": "object"
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `should report invalid @Schema config at the offending class`() {
+        // Given
+        val classDeclaration = schemaClassDeclaration(emptyList(), schemaConfig = "no.such.Config")
+        every { resolver.getSymbolsWithAnnotation("me.kpavlov.kt.schema.Schema") } returns
+            sequenceOf(classDeclaration)
+
+        // When
+        subject.process(resolver)
+
+        // Then
+        verify {
+            logger.error(match { it.startsWith("Failed to generate schema extension") }, classDeclaration)
+            logger.exception(match { it.message.orEmpty().contains("no.such.Config") })
+        }
+        verify(exactly = 0) { codeGenerator.createNewFile(any(), any(), any()) }
+    }
+
+    @Test
+    fun `should write the class schema as a resource named after the class`() {
+        // When
+        val schema = generatedClassSchema(options = emptyMap())
+
+        // Then
+        verify { codeGenerator.createNewFileByPath(any(), "META-INF/kt-schema/schemas/test/Subject", "json") }
+        schemaResource.toString(Charsets.UTF_8) shouldEqualJson schema
+    }
+
     private fun generatedClassSchema(
         options: Map<String, String>,
         constructorParameters: List<KSValueParameter> = emptyList(),
+        schemaConfig: String? = null,
     ): String {
-        val classDeclaration = schemaClassDeclaration(constructorParameters)
+        val classDeclaration = schemaClassDeclaration(constructorParameters, schemaConfig)
         val generated = ByteArrayOutputStream()
         every { codeGenerator.createNewFile(any(), any(), any()) } returns generated
+        every { codeGenerator.createNewFileByPath(any(), any(), any()) } returns schemaResource
         every { resolver.getSymbolsWithAnnotation("me.kpavlov.kt.schema.Schema") } returns
             sequenceOf(classDeclaration)
 
@@ -402,7 +457,20 @@ class SchemaExtensionProcessorTest {
     }
 
     /** A `test.Subject` class annotated with `@Schema`, with the given primary-constructor parameters. */
-    private fun schemaClassDeclaration(constructorParameters: List<KSValueParameter>): KSClassDeclaration {
+    private fun schemaClassDeclaration(
+        constructorParameters: List<KSValueParameter>,
+        schemaConfig: String? = null,
+    ): KSClassDeclaration {
+        val schemaArguments =
+            listOfNotNull(
+                schemaConfig?.let { config ->
+                    mockk<KSValueArgument> {
+                        every { name } returns ksName("config")
+                        every { value } returns config
+                        every { origin } returns Origin.KOTLIN
+                    }
+                },
+            )
         val type = mockk<KSType>(relaxed = true)
         val declaration =
             mockk<KSClassDeclaration>(relaxed = true) {
@@ -410,7 +478,8 @@ class SchemaExtensionProcessorTest {
                 every { simpleName } returns ksName("Subject")
                 every { packageName } returns ksName("test")
                 every { classKind } returns ClassKind.CLASS
-                every { annotations } returns sequenceOf(annotationMock("me.kpavlov.kt.schema.Schema"))
+                every { annotations } returns
+                    sequenceOf(annotationMock("me.kpavlov.kt.schema.Schema", *schemaArguments.toTypedArray()))
                 every { accept<Any?, Boolean>(any(), any()) } returns true
                 every { containingFile } returns mockk<KSFile>(relaxed = true)
                 every { asStarProjectedType() } returns type

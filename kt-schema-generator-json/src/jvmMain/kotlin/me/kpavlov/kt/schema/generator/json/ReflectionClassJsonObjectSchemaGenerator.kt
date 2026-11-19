@@ -32,7 +32,7 @@ public class ReflectionClassJsonObjectSchemaGenerator(
     ) {
     public constructor() : this(
         json = Json { encodeDefaults = false },
-        config = JsonSchemaConfig.Default,
+        config = JsonSchemaConfig.Simple,
     )
 
     override fun getRootName(target: KClass<out Any>): String =
@@ -51,14 +51,14 @@ public class ReflectionClassJsonObjectSchemaGenerator(
         /**
          * A default instance of [ReflectionClassJsonObjectSchemaGenerator] with preconfigured settings.
          *
-         * This instance is initialized with the default [JsonSchemaConfig.Default] configuration
+         * This instance is initialized with the default [JsonSchemaConfig.Simple] configuration
          * and a `Json` instance where `encodeDefaults` is set to `false`. It provides a ready-to-use
          * setup for generating JSON object schemas using reflection-based class inspection.
          */
         public val Default: ReflectionClassJsonObjectSchemaGenerator =
             ReflectionClassJsonObjectSchemaGenerator(
                 json = Json { encodeDefaults = false },
-                config = JsonSchemaConfig.Default,
+                config = JsonSchemaConfig.Simple,
             )
     }
 }

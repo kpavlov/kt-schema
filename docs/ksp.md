@@ -79,7 +79,7 @@ Options can be set globally in your build configuration or overridden per-class 
 | `exclude`          | `String`  | `null`  | Comma- or semicolon-separated glob patterns. Matching symbols are always skipped.  |
 | `withSchemaObject` | `Boolean` | `false` | Generate `jsonSchema: JsonObject` property. Requires `kotlinx-serialization-json`. |
 | `visibility`       | `String`  | `""`    | Visibility modifier for generated extensions (`public`, `internal`, etc.).         |
-| `config`           | `String`  | `null`  | Schema flavour: `strict`, `lenient`, `openapi` or a `JsonSchemaConfig` class name. Unset: classes use `strict`, functions use the function-calling default. See [Schema configuration](configuration.md#schema-configuration). |
+| `config`           | `String`  | `null`  | Schema flavour: `strict`, `simple`, `lenient`, `openapi` or a `JsonSchemaConfig` class name. Unset: classes use `strict`, functions use the function-calling default. See [Schema configuration](configuration.md#schema-configuration). |
 
 ### Filtering by class/function name
 
@@ -116,7 +116,7 @@ ksp {
 
 ### Option priority
 
-1. **Annotation Parameter** (highest) — `@Schema(withSchemaObject = true)`
+1. **Annotation Parameter** (highest) — `@Schema(withSchemaObject = true)`, `@Schema(config = "simple")`
 2. **KSP Argument** — Global processor options passed through the Gradle `ksp { arg(...) }` block
 3. **Default Value** (lowest)
 
@@ -172,6 +172,12 @@ as OpenAI strict mode demands. KSP reports only that a default exists, not its v
 
 Jakarta Bean Validation annotations on properties and function parameters (`@Min(1) quantity: Int`) become JSON Schema
 keywords. See the [Validation Constraints guide](constraints.md).
+
+### Schema resources
+
+Each class schema is also written as a resource, `META-INF/kt-schema/schemas/<binary class name>.json`, e.g.
+`META-INF/kt-schema/schemas/com/example/Outer$Inner.json`. It holds the same JSON as `jsonSchemaString` and lets
+tools load the schema from a `Class` without the generated extension. Function schemas have no resource.
 
 ## See Also
 

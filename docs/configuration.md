@@ -1,6 +1,6 @@
 ---
 title: Configuration
-description: Choose a schema flavour (strict, lenient, openapi) and configure which annotations kt-schema recognizes from Jackson, LangChain4j, Koog and your own code.
+description: Choose a schema flavour (strict, simple, lenient, openapi) and configure which annotations kt-schema recognizes from Jackson, LangChain4j, Koog and your own code.
 menus:
   main:
     name: Configuration
@@ -18,8 +18,30 @@ a case-insensitive shortcut:
 | Value     | Schema                                                                                                                     |
 |:----------|:---------------------------------------------------------------------------------------------------------------------------|
 | `strict`  | All fields required, nullable types as `["string", "null"]`, `additionalProperties: false`.                                |
+| `simple`  | Fields with a default are optional, nullable types as `["string", "null"]`, `additionalProperties: false`.                 |
 | `lenient` | Compact and permissive: only non-nullable fields without defaults are required, no null markers, extra properties allowed. |
 | `openapi` | OpenAPI 3.0 flavour: nullable types use `"nullable": true`, `oneOf` schemas carry a `discriminator`.                       |
+
+Which one to pick:
+
+| Consumer                                            | Value     | Why                                                                                      |
+|:----------------------------------------------------|:----------|:-----------------------------------------------------------------------------------------|
+| MCP tool `inputSchema`, Anthropic tool `input_schema` | `simple`  | Arguments with a default can be omitted, an explicit `null` is valid, unknown keys are rejected. |
+| OpenAI strict function calling                      | `strict`  | The API requires every property in `required`.                                           |
+| Response and output schemas                         | `strict`  | Promises that every field is present.                                                    |
+| OpenAPI 3.0 documents                               | `openapi` | Nullable types use `nullable: true`.                                                     |
+| Compact documentation                               | `lenient` | Small, but an explicit `null` does not validate.                                         |
+
+`@Schema(config = "...")` selects the configuration for one class or function and takes precedence over the
+option, so a module can mix them, e.g. `simple` for tool arguments and `strict` for results:
+
+```kotlin
+@Schema(config = "simple")
+data class SearchRequest(val query: String, val limit: Int? = null)
+
+@Schema // uses the processor option, or `strict` when unset
+data class SearchResponse(val items: List<String>)
+```
 
 `openapi` class schemas are not drop-in OpenAPI 3.0 Schema Objects: they keep `$schema`, `$id` and `$defs` with
 `#/$defs/...` references, and wrap a nullable named type in `oneOf: [{"type": "null"}, {"$ref": ...}]`. To embed

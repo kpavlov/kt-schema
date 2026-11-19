@@ -98,12 +98,12 @@ class JsonSchemaGeneratorTest {
     private val generator =
         ReflectionClassJsonSchemaGenerator(
             json = Json { prettyPrint = true },
-            config = JsonSchemaConfig.Default,
+            config = JsonSchemaConfig.Simple,
         )
 
     @Test
     fun `Should generate JsonSchema for complex class`() {
-        println("Generating schema for TestClass with generator config: ${JsonSchemaConfig.Default}")
+        println("Generating schema for TestClass with generator config: ${JsonSchemaConfig.Simple}")
 
         val schema = generator.generateSchemaString(TestClass::class)
 

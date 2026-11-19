@@ -11,7 +11,7 @@ class JavaClassJsonSchemaGeneratorTest {
     private val generator =
         ReflectionClassJsonSchemaGenerator(
             json = Json { prettyPrint = true },
-            config = JsonSchemaConfig.Default,
+            config = JsonSchemaConfig.Simple,
         )
 
     @Test

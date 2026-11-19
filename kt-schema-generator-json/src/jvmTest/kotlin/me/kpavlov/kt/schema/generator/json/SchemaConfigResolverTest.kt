@@ -16,7 +16,7 @@ import kotlin.test.Test
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SchemaConfigResolverTest {
     private val classLoader: ClassLoader = SchemaConfigResolverTest::class.java.classLoader
-    private val fallbackJsonConfig = JsonSchemaConfig.Default
+    private val fallbackJsonConfig = JsonSchemaConfig.Simple
     private val fallbackFunctionConfig = FunctionCallingSchemaConfig.Simple
 
     //region Fixtures
@@ -49,6 +49,8 @@ class SchemaConfigResolverTest {
     @CsvSource(
         "strict,   Strict",
         "STRICT,   Strict",
+        "simple,   Simple",
+        "SIMPLE,   Simple",
         "lenient,  Lenient",
         "LeNiEnT,  Lenient",
         "openapi,  OpenAPI",
@@ -61,6 +63,7 @@ class SchemaConfigResolverTest {
         val expected =
             when (preset) {
                 "Strict" -> JsonSchemaConfig.Strict
+                "Simple" -> JsonSchemaConfig.Simple
                 "Lenient" -> JsonSchemaConfig.Lenient
                 else -> JsonSchemaConfig.OpenAPI
             }
@@ -74,6 +77,8 @@ class SchemaConfigResolverTest {
     @CsvSource(
         "strict,   Strict",
         "STRICT,   Strict",
+        "simple,   Simple",
+        "SIMPLE,   Simple",
         "lenient,  Lenient",
         "LeNiEnT,  Lenient",
         "openapi,  OpenAPI",
@@ -86,6 +91,7 @@ class SchemaConfigResolverTest {
         val expected =
             when (preset) {
                 "Strict" -> FunctionCallingSchemaConfig.Strict
+                "Simple" -> FunctionCallingSchemaConfig.Simple
                 "Lenient" -> FunctionCallingSchemaConfig.Lenient
                 else -> FunctionCallingSchemaConfig.OpenAPI
             }
@@ -196,7 +202,7 @@ class SchemaConfigResolverTest {
 
         assertSoftly(exception) {
             message shouldContain value
-            message shouldContain "strict, lenient, openapi"
+            message shouldContain "strict, simple, lenient, openapi"
         }
     }
 
@@ -211,7 +217,7 @@ class SchemaConfigResolverTest {
 
         assertSoftly(exception) {
             message shouldContain value
-            message shouldContain "strict, lenient, openapi"
+            message shouldContain "strict, simple, lenient, openapi"
         }
     }
 

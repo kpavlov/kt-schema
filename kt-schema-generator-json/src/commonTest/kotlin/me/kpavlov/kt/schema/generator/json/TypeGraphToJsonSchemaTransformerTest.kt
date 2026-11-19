@@ -23,7 +23,7 @@ import me.kpavlov.kt.schema.json.encodeToString
 import kotlin.test.Test
 
 class TypeGraphToJsonSchemaTransformerTest {
-    private val transformer = TypeGraphToJsonSchemaTransformer(config = JsonSchemaConfig.Default)
+    private val transformer = TypeGraphToJsonSchemaTransformer(config = JsonSchemaConfig.Simple)
 
     @Test
     fun `failed node conversion does not leave placeholder in definitions`() {

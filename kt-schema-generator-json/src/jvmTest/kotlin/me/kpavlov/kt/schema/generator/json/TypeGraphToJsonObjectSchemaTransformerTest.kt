@@ -14,7 +14,7 @@ class TypeGraphToJsonObjectSchemaTransformerTest {
     fun `should delegate to TypeGraphToJsonSchemaTransformer and return JsonObject`() {
         // Arrange
         val mockTransformer = mockk<TypeGraphToJsonSchemaTransformer>()
-        val config = JsonSchemaConfig.Default
+        val config = JsonSchemaConfig.Simple
         val transformer = TypeGraphToJsonObjectSchemaTransformer(config, jsonSchemaTransformer = mockTransformer)
 
         val mockGraph = mockk<TypeGraph>()

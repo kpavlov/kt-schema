@@ -106,7 +106,7 @@ class PropertyPresenceTest {
     @MethodSource("emitters")
     fun `default config derives requiredness and default from optional and value`(case: Pair<String, Emitter>) {
         // Act
-        val emitted = case.second.emit(JsonSchemaConfig.Default)
+        val emitted = case.second.emit(JsonSchemaConfig.Simple)
 
         // Assert
         emitted.presence() shouldEqualJson

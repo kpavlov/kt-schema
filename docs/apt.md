@@ -111,7 +111,7 @@ public record Person(
 | `rootPackage` | `String` | `null`   | Scope discovery to types declared under this package (and sub-packages); absent means the whole module is scanned.                                |
 | `include`     | `String` | `null`   | Comma/semicolon-separated glob patterns; a type not annotated with `@Schema` is processed only when it matches at least one.                      |
 | `exclude`     | `String` | `null`   | Comma/semicolon-separated glob patterns; a type matching any of them is dropped, even when `@Schema`-annotated or include-matched.                |
-| `config`      | `String` | `strict` | Schema flavour: `strict`, `lenient`, `openapi` or a `JsonSchemaConfig` class name. See [Schema configuration](configuration.md#schema-configuration). |
+| `config`      | `String` | `strict` | Schema flavour: `strict`, `simple`, `lenient`, `openapi` or a `JsonSchemaConfig` class name. `@Schema(config = "...")` overrides it per type. See [Schema configuration](configuration.md#schema-configuration). |
 
 Set them as javac `-A` compiler arguments:
 
@@ -138,6 +138,9 @@ resource per processed type:
 ```text
 META-INF/kt-schema/schemas/<package-as-directories>/<ClassName>.json
 ```
+
+A nested type uses its binary name, e.g. `com/example/Outer$Inner.json`, so the path can be derived from
+`Class.getName()`.
 
 For the `Person` record above, that's `META-INF/kt-schema/schemas/com/example/Person.json`:
 

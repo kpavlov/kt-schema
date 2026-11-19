@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException
 /**
  * Resolves the `me.kpavlov.kt.schema.config` annotation-processor option to a schema configuration.
  *
- * The option value is either a case-insensitive shortcut — `strict`, `lenient` or `openapi` —
+ * The option value is either a case-insensitive shortcut — `strict`, `simple`, `lenient` or `openapi` —
  * selecting the matching preset, or the fully qualified name of a [JsonSchemaConfig] class.
  * The class is a Kotlin `object` or has a public no-arg constructor, and must be visible to the
  * class loader passed to the resolver.
@@ -16,7 +16,7 @@ public object SchemaConfigResolver {
     /** Processor option (KSP `arg(...)`, APT `-A...`) holding the config shortcut or class name. */
     public const val OPTION: String = "me.kpavlov.kt.schema.config"
 
-    private const val SHORTCUTS = "strict, lenient, openapi"
+    private const val SHORTCUTS = "strict, simple, lenient, openapi"
 
     /**
      * Resolves [value] to a [JsonSchemaConfig].
@@ -35,6 +35,7 @@ public object SchemaConfigResolver {
         if (trimmed.isNullOrEmpty()) return default
         return when (trimmed.lowercase()) {
             "strict" -> JsonSchemaConfig.Strict
+            "simple" -> JsonSchemaConfig.Simple
             "lenient" -> JsonSchemaConfig.Lenient
             "openapi" -> JsonSchemaConfig.OpenAPI
             else -> instantiate(trimmed, classLoader)
@@ -63,6 +64,7 @@ public object SchemaConfigResolver {
         if (trimmed.isNullOrEmpty()) return default
         return when (trimmed.lowercase()) {
             "strict" -> FunctionCallingSchemaConfig.Strict
+            "simple" -> FunctionCallingSchemaConfig.Simple
             "lenient" -> FunctionCallingSchemaConfig.Lenient
             "openapi" -> FunctionCallingSchemaConfig.OpenAPI
             else ->

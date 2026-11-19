@@ -19,7 +19,7 @@ class UnconstrainedRootSchemaTest {
     @Test
     fun `should accept any JSON value for Any root with default config`() {
         // Arrange
-        val generator = ReflectionClassJsonSchemaGenerator(Json { encodeDefaults = false }, JsonSchemaConfig.Default)
+        val generator = ReflectionClassJsonSchemaGenerator(Json { encodeDefaults = false }, JsonSchemaConfig.Simple)
 
         // Act
         val schemaString = generator.generateSchemaString(Any::class)

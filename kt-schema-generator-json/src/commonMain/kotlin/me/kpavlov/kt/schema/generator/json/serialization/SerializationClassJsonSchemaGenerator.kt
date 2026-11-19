@@ -21,12 +21,12 @@ import kotlin.reflect.KClass
  * @param json The [Json] instance used for serializing schema objects.
  * @param introspectorConfig Configuration for introspecting serial descriptors.
  * @param jsonSchemaConfig Configuration for generating JSON Schemas, such as formatting details
- * and handling of optional nullable properties. Defaults to [JsonSchemaConfig.Default].
+ * and handling of optional nullable properties. Defaults to [JsonSchemaConfig.Simple].
  */
 public class SerializationClassJsonSchemaGenerator(
     private val json: Json = Json.Default,
     introspectorConfig: SerializationClassSchemaIntrospector.Config = SerializationClassSchemaIntrospector.Config(),
-    jsonSchemaConfig: JsonSchemaConfig = JsonSchemaConfig.Default,
+    jsonSchemaConfig: JsonSchemaConfig = JsonSchemaConfig.Simple,
 ) : AbstractSchemaGenerator<SerialDescriptor, JsonSchema, SerializationClassSchemaIntrospector.Config>(
         introspector = SerializationClassSchemaIntrospector(introspectorConfig, json),
         typeGraphTransformer =
@@ -47,7 +47,7 @@ public class SerializationClassJsonSchemaGenerator(
     public companion object {
         /**
          * A default instance of the [SerializationClassJsonSchemaGenerator] class, preconfigured
-         * with the default settings defined in [JsonSchemaConfig.Default].
+         * with the default settings defined in [JsonSchemaConfig.Simple].
          *
          * This instance can be used to generate JSON schema representations from
          * kotlinx.serialization descriptors. It simplifies the creation of schemas

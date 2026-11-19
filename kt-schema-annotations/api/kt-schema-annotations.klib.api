@@ -14,8 +14,10 @@ open annotation class me.kpavlov.kt.schema/Description : kotlin/Annotation { // 
 }
 
 open annotation class me.kpavlov.kt.schema/Schema : kotlin/Annotation { // me.kpavlov.kt.schema/Schema|null[0]
-    constructor <init>(kotlin/String = ..., kotlin/Boolean = ...) // me.kpavlov.kt.schema/Schema.<init>|<init>(kotlin.String;kotlin.Boolean){}[0]
+    constructor <init>(kotlin/String = ..., kotlin/Boolean = ..., kotlin/String = ...) // me.kpavlov.kt.schema/Schema.<init>|<init>(kotlin.String;kotlin.Boolean;kotlin.String){}[0]
 
+    final val config // me.kpavlov.kt.schema/Schema.config|{}config[0]
+        final fun <get-config>(): kotlin/String // me.kpavlov.kt.schema/Schema.config.<get-config>|<get-config>(){}[0]
     final val value // me.kpavlov.kt.schema/Schema.value|{}value[0]
         final fun <get-value>(): kotlin/String // me.kpavlov.kt.schema/Schema.value.<get-value>|<get-value>(){}[0]
     final val withSchemaObject // me.kpavlov.kt.schema/Schema.withSchemaObject|{}withSchemaObject[0]

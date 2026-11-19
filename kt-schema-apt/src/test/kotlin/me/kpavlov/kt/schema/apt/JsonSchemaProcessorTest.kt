@@ -1826,7 +1826,7 @@ class JsonSchemaProcessorTest {
 
         assertSoftly(exception) {
             message shouldContain "no.such.Config"
-            message shouldContain "strict, lenient, openapi"
+            message shouldContain "strict, simple, lenient, openapi"
         }
     }
 
@@ -1852,6 +1852,95 @@ class JsonSchemaProcessorTest {
             }
 
         exception.message shouldContain "no.such.Config"
+    }
+
+    @Test
+    fun `should prefer @Schema config over the config option`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source =
+            """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema(config = "lenient")
+            public record Person(String name) {}
+            """.trimIndent()
+
+        val outputDir =
+            compile(
+                source = source,
+                tempDir = tempDir,
+                options = listOf("-A${JsonSchemaProcessor.CONFIG_OPTION}=strict"),
+            )
+
+        // language=json
+        outputDir.readSchema("com.example.Person") shouldEqualJson
+            $$"""
+            {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "$id": "Person",
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string" }
+                },
+                "required": ["name"]
+            }
+            """.trimIndent()
+    }
+
+    @Test
+    fun `should fail the build when @Schema config is invalid`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source =
+            """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            @Schema(config = "no.such.Config")
+            public record Person(String name) {}
+            """.trimIndent()
+
+        val exception =
+            assertFailsWith<IllegalStateException> {
+                compile(source = source, tempDir = tempDir)
+            }
+
+        exception.message shouldContain "no.such.Config"
+    }
+
+    //endregion
+
+    //region Resource path
+
+    @Test
+    fun `should write nested type schema under its binary name`(
+        @TempDir tempDir: Path,
+    ) {
+        // language=java
+        val source =
+            """
+            package com.example;
+
+            import me.kpavlov.kt.schema.Schema;
+
+            public class Outer {
+                @Schema
+                public record Inner(String name) {}
+            }
+            """.trimIndent()
+
+        val outputDir = compile(source = source, tempDir = tempDir)
+
+        assertSoftly(outputDir) {
+            hasSchema("com.example.Outer\$Inner") shouldBe true
+            hasSchema("com.example.Outer.Inner") shouldBe false
+        }
     }
 
     //endregion

@@ -85,6 +85,8 @@ internal class ClassSchemaStrategy(
      * 1. Extension property for schema string (always)
      * 2. Extension property for schema object (conditional)
      *
+     * The schema is also written as the resource `META-INF/kt-schema/schemas/{binary class name}.json`.
+     *
      * @param declaration The class declaration to generate code for
      * @param schemaString The pre-generated schema JSON string
      * @param context Generation context with options and annotation parameters
@@ -124,6 +126,19 @@ internal class ClassSchemaStrategy(
 
         file.write(sourceCode.toByteArray())
         file.close()
+
+        // Same location the Java annotation processor writes to: the JVM binary name of the class
+        val binaryName =
+            listOf(
+                packageName.replace('.', '/'),
+                qualifiedName.removePrefix("$packageName.").replace('.', '$'),
+            ).filter { it.isNotEmpty() }.joinToString("/")
+        codeGenerator
+            .createNewFileByPath(
+                dependencies = Dependencies(aggregating = false, declaration.containingFile!!),
+                path = "META-INF/kt-schema/schemas/$binaryName",
+                extensionName = "json",
+            ).use { it.write(schemaString.toByteArray()) }
     }
 
     /**

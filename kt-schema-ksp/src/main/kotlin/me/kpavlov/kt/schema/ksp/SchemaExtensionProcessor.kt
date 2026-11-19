@@ -18,6 +18,7 @@ import me.kpavlov.kt.schema.ksp.functions.ObjectFunctionStrategy
 import me.kpavlov.kt.schema.ksp.functions.TopLevelFunctionStrategy
 import me.kpavlov.kt.schema.ksp.ir.isSchemaIgnored
 import me.kpavlov.kt.schema.ksp.strategy.CodeGenerationContext
+import me.kpavlov.kt.schema.ksp.strategy.SchemaGenerationStrategy
 import me.kpavlov.kt.schema.ksp.type.ClassSchemaStrategy
 
 /**
@@ -33,6 +34,8 @@ internal class SchemaExtensionProcessor(
         private const val KOTLINX_SCHEMA_ANNOTATION = "me.kpavlov.kt.schema.Schema"
 
         const val PARAM_WITH_SCHEMA_OBJECT = "withSchemaObject"
+
+        const val PARAM_CONFIG = "config"
 
         /**
          * Option key: also generate the schema as a Kotlin object (e.g. `JsonObject`); defaults to `false`.
@@ -62,9 +65,10 @@ internal class SchemaExtensionProcessor(
         const val OPTION_VISIBILITY = "me.kpavlov.kt.schema.visibility"
 
         /**
-         * Option key: schema configuration, either a shortcut (`strict`, `lenient`, `openapi`;
+         * Option key: schema configuration, either a shortcut (`strict`, `simple`, `lenient`, `openapi`;
          * case-insensitive) or the fully qualified name of a `JsonSchemaConfig` class on the processor classpath.
          * Defaults to `strict` for classes and to the function-calling default for functions.
+         * The `config` parameter of `@Schema` takes precedence.
          */
         const val OPTION_CONFIG = SchemaConfigResolver.OPTION
     }
@@ -72,26 +76,51 @@ internal class SchemaExtensionProcessor(
     /** Resolved once; `null` when [OPTION_CONFIG] is invalid, in which case the error has been logged. */
     private val configs: Pair<JsonSchemaConfig, FunctionCallingSchemaConfig>? by lazy {
         val value = options[OPTION_CONFIG]
-        val loader = SchemaExtensionProcessor::class.java.classLoader
         try {
-            SchemaConfigResolver.resolveJsonSchemaConfig(value, JsonSchemaConfig.Strict, loader) to
-                SchemaConfigResolver.resolveFunctionCallingConfig(value, FunctionCallingSchemaConfig.Strict, loader)
+            SchemaConfigResolver.resolveJsonSchemaConfig(value, JsonSchemaConfig.Strict, configLoader) to
+                SchemaConfigResolver.resolveFunctionCallingConfig(
+                    value,
+                    FunctionCallingSchemaConfig.Strict,
+                    configLoader,
+                )
         } catch (e: IllegalArgumentException) {
             logger.error(e.message.orEmpty())
             null
         }
     }
 
-    private val classStrategy by lazy { ClassSchemaStrategy(checkNotNull(configs).first) }
-    private val functionStrategies by lazy {
-        val config = checkNotNull(configs).second
-        listOf(
-            TopLevelFunctionStrategy(config),
-            InstanceFunctionStrategy(config),
-            CompanionFunctionStrategy(config),
-            ObjectFunctionStrategy(config),
-        )
-    }
+    private val configLoader = SchemaExtensionProcessor::class.java.classLoader
+
+    /** Strategies per config value, since `@Schema(config = ...)` can differ between declarations. */
+    private val classStrategies = mutableMapOf<String?, ClassSchemaStrategy>()
+    private val functionStrategies = mutableMapOf<String?, List<SchemaGenerationStrategy<KSFunctionDeclaration>>>()
+
+    /** Returns the `config` parameter of `@Schema` when set, and the [OPTION_CONFIG] value otherwise. */
+    private fun configValue(parameters: Map<String, Any?>): String? =
+        (parameters[PARAM_CONFIG] as? String)?.trim()?.takeIf { it.isNotEmpty() } ?: options[OPTION_CONFIG]
+
+    private fun classStrategy(config: String?): ClassSchemaStrategy =
+        classStrategies.getOrPut(config) {
+            ClassSchemaStrategy(
+                SchemaConfigResolver.resolveJsonSchemaConfig(config, JsonSchemaConfig.Strict, configLoader),
+            )
+        }
+
+    private fun functionStrategies(config: String?): List<SchemaGenerationStrategy<KSFunctionDeclaration>> =
+        functionStrategies.getOrPut(config) {
+            val resolved =
+                SchemaConfigResolver.resolveFunctionCallingConfig(
+                    config,
+                    FunctionCallingSchemaConfig.Strict,
+                    configLoader,
+                )
+            listOf(
+                TopLevelFunctionStrategy(resolved),
+                InstanceFunctionStrategy(resolved),
+                CompanionFunctionStrategy(resolved),
+                ObjectFunctionStrategy(resolved),
+            )
+        }
 
     override fun finish() {
         logger.info("[kt-schema] ✅ Done!")
@@ -212,6 +241,7 @@ internal class SchemaExtensionProcessor(
         val qualifiedName = classDeclaration.qualifiedName?.asString() ?: "$packageName.$className"
 
         val context = CodeGenerationContext(options, parameters, logger)
+        val classStrategy = classStrategy(configValue(parameters))
         val schemaString = classStrategy.generateSchema(classDeclaration, context)
         classStrategy.generateCode(classDeclaration, schemaString, context, codeGenerator)
 
@@ -228,6 +258,7 @@ internal class SchemaExtensionProcessor(
 
         val context = CodeGenerationContext(options, parameters, logger)
 
+        val functionStrategies = functionStrategies(configValue(parameters))
         val strategy =
             functionStrategies.firstOrNull { it.appliesTo(functionDeclaration) }
                 ?: run {

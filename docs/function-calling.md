@@ -450,4 +450,4 @@ val schema = fetchUserDataJsonSchemaString()
 
 - [KSP Configuration Guide](ksp.md) — processor setup and the `config` option
 - [Runtime Reflection](reflection.md) — the reflection generators for classes
-- [Configuration](configuration.md) — `strict`, `lenient` and `openapi` schema flavours
+- [Configuration](configuration.md) — `strict`, `simple`, `lenient` and `openapi` schema flavours

@@ -145,6 +145,8 @@ open class me.kpavlov.kt.schema.generator.json/JsonSchemaConfig { // me.kpavlov.
             final fun <get-Lenient>(): me.kpavlov.kt.schema.generator.json/JsonSchemaConfig // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.Lenient.<get-Lenient>|<get-Lenient>(){}[0]
         final val OpenAPI // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.OpenAPI|{}OpenAPI[0]
             final fun <get-OpenAPI>(): me.kpavlov.kt.schema.generator.json/JsonSchemaConfig // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.OpenAPI.<get-OpenAPI>|<get-OpenAPI>(){}[0]
+        final val Simple // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.Simple|{}Simple[0]
+            final fun <get-Simple>(): me.kpavlov.kt.schema.generator.json/JsonSchemaConfig // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.Simple.<get-Simple>|<get-Simple>(){}[0]
         final val Strict // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.Strict|{}Strict[0]
             final fun <get-Strict>(): me.kpavlov.kt.schema.generator.json/JsonSchemaConfig // me.kpavlov.kt.schema.generator.json/JsonSchemaConfig.Companion.Strict.<get-Strict>|<get-Strict>(){}[0]
     }

@@ -6,6 +6,7 @@ import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.equals.shouldNotBeEqual
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.kotest.matchers.shouldNotBe
 import me.kpavlov.kt.schema.generator.core.ir.ListNode
 import me.kpavlov.kt.schema.generator.core.ir.MapNode
@@ -99,7 +100,7 @@ class JsonSchemaConfigTest {
 
     @Test
     fun `equals and hashCode should work correctly`() {
-        val config1 = JsonSchemaConfig.Default
+        val config1 = JsonSchemaConfig.Simple
         val config1a = JsonSchemaConfig()
         val config2 = JsonSchemaConfig.Strict
 
@@ -115,7 +116,7 @@ class JsonSchemaConfigTest {
 
     @Test
     fun `toString should provide meaningful representation`() {
-        val config = JsonSchemaConfig.Default
+        val config = JsonSchemaConfig.Simple
         config.toString() shouldBe
             "JsonSchemaConfig(" +
             "respectDefaultPresence=${config.respectDefaultPresence}, " +
@@ -134,7 +135,7 @@ class JsonSchemaConfigTest {
         val denying = JsonSchemaConfig(allowAdditionalProperties = false)
         val allowing = JsonSchemaConfig(allowAdditionalProperties = true)
 
-        denying shouldBe JsonSchemaConfig.Default
+        denying shouldBe JsonSchemaConfig.Simple
         denying shouldNotBeEqual allowing
         denying.hashCode() shouldNotBe allowing.hashCode()
     }
@@ -144,14 +145,14 @@ class JsonSchemaConfigTest {
         val full = JsonSchemaConfig(shortDefinitionNames = false)
         val short = JsonSchemaConfig(shortDefinitionNames = true)
 
-        full shouldBe JsonSchemaConfig.Default
+        full shouldBe JsonSchemaConfig.Simple
         full shouldNotBeEqual short
         full.hashCode() shouldNotBe short.hashCode()
     }
 
     @Test
     fun `only Lenient should enable shortDefinitionNames`() {
-        listOf(JsonSchemaConfig.Default, JsonSchemaConfig.Strict, JsonSchemaConfig.OpenAPI, JsonSchemaConfig.Lenient)
+        listOf(JsonSchemaConfig.Simple, JsonSchemaConfig.Strict, JsonSchemaConfig.OpenAPI, JsonSchemaConfig.Lenient)
             .map { it.shortDefinitionNames } shouldBe listOf(false, false, false, true)
     }
 
@@ -186,8 +187,14 @@ class JsonSchemaConfigTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
+    fun `deprecated Default preset should be the Simple preset`() {
+        JsonSchemaConfig.Default shouldBeSameInstanceAs JsonSchemaConfig.Simple
+    }
+
+    @Test
     fun `existing presets should keep denying additional properties`() {
-        listOf(JsonSchemaConfig.Default, JsonSchemaConfig.Strict, JsonSchemaConfig.OpenAPI)
+        listOf(JsonSchemaConfig.Simple, JsonSchemaConfig.Strict, JsonSchemaConfig.OpenAPI)
             .map { it.allowAdditionalProperties } shouldBe listOf(false, false, false)
     }
 
@@ -237,7 +244,7 @@ class JsonSchemaConfigTest {
         graph: TypeGraph,
         expectedDescription: String,
     ) {
-        TypeGraphToJsonSchemaTransformer(JsonSchemaConfig.Default)
+        TypeGraphToJsonSchemaTransformer(JsonSchemaConfig.Simple)
             .transform(graph, "Root")
             .description shouldBe expectedDescription
     }
@@ -277,7 +284,7 @@ class JsonSchemaConfigTest {
                             ),
                     ),
             )
-        val schema = TypeGraphToJsonSchemaTransformer(JsonSchemaConfig.Default).transform(graph, "Root")
+        val schema = TypeGraphToJsonSchemaTransformer(JsonSchemaConfig.Simple).transform(graph, "Root")
         val properties = checkNotNull(schema.properties)
 
         (properties["count"] as NumericPropertyDefinition).description shouldBe "count description"
@@ -311,7 +318,7 @@ class JsonSchemaConfigTest {
                             ),
                     ),
             )
-        val schema = TypeGraphToJsonSchemaTransformer(JsonSchemaConfig.Default).transform(graph, "Root")
+        val schema = TypeGraphToJsonSchemaTransformer(JsonSchemaConfig.Simple).transform(graph, "Root")
         (schema.properties["items"] as ArrayPropertyDefinition).description shouldBe "property description"
     }
 

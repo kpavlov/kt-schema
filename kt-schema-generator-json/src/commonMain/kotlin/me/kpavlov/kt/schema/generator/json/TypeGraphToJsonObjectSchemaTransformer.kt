@@ -25,7 +25,7 @@ import kotlin.jvm.JvmOverloads
 public class TypeGraphToJsonObjectSchemaTransformer
     @JvmOverloads
     public constructor(
-        public override val config: JsonSchemaConfig = JsonSchemaConfig.Default,
+        public override val config: JsonSchemaConfig = JsonSchemaConfig.Simple,
         private val json: Json = Json { encodeDefaults = true },
         private val jsonSchemaTransformer: TypeGraphToJsonSchemaTransformer =
             TypeGraphToJsonSchemaTransformer(config, json),

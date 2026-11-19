@@ -259,7 +259,7 @@ For JVM-only projects and full configuration options, see the [KSP Configuration
 
 #### Schema configuration
 
-The `me.kpavlov.kt.schema.config` processor option selects the schema flavour (`strict`, `lenient`, `openapi` or your
+The `me.kpavlov.kt.schema.config` processor option selects the schema flavour (`strict`, `simple`, `lenient`, `openapi` or your
 own `JsonSchemaConfig`) for both KSP and the Java annotation processor. See
 [Configuration](docs/configuration.md#schema-configuration).
 

@@ -1,6 +1,26 @@
 ## Unreleased
 
+### Added
+
+- **`simple` schema configuration.** The `me.kpavlov.kt.schema.config` option accepts `simple`: fields with a
+  default are optional, a nullable field accepts an explicit `null`, unknown properties are rejected. It selects
+  the new `JsonSchemaConfig.Simple` for classes and
+  `FunctionCallingSchemaConfig.Simple` for functions. It suits MCP and Anthropic tool input schemas.
+- **`@Schema(config = "...")`** selects the configuration for one class or function (KSP and APT) and takes
+  precedence over the processor option.
+- **KSP writes each class schema as a resource**, `META-INF/kt-schema/schemas/<binary class name>.json`, the
+  location the Java annotation processor already uses. Consumers that load schemas by class, such as Tachyon MCP,
+  now get the schema generated with the configured preset instead of falling back to reflection.
+
+### Deprecated
+
+- `JsonSchemaConfig.Default`, in favour of the identical `JsonSchemaConfig.Simple`. "Default" was ambiguous: it is
+  not what the processors use when no configuration is set (that is `Strict`).
+
 ### Fixed
+
+- **APT writes the schema of a nested type under its binary name**, `Outer$Inner.json` (was `Outer/Inner.json`),
+  so the path matches `Class.getName()`. Top-level types are unaffected.
 
 - **Nullable enum parameters in function-calling schemas accept `null`.** They were emitted as
   `{"type": ["string", "null"], "enum": ["A", "B"]}`, where `enum` rejected `null`. The `enum` now lists it:

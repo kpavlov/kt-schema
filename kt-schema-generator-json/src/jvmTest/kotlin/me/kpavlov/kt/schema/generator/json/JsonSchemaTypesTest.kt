@@ -12,7 +12,7 @@ class JsonSchemaTypesTest {
     private val generator: SchemaGenerator<KClass<out Any>, JsonSchema> =
         ReflectionClassJsonSchemaGenerator(
             json = Json { encodeDefaults = false },
-            config = JsonSchemaConfig.Default,
+            config = JsonSchemaConfig.Simple,
         )
 
     // Primitive Types Tests
